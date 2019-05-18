@@ -26,7 +26,7 @@ function usePrevious(value): any {
   }
 
 
-export default function (props: UseQueryProps)  {
+const useQuery = function (props: UseQueryProps)  {
     const {environment, query, variables } = props
     const prev = usePrevious({environment, query, variables});
     const queryFetcher = prev.queryFetcher;
@@ -130,3 +130,5 @@ export default function (props: UseQueryProps)  {
     return hooksProps;
 
 }
+
+export default useQuery;

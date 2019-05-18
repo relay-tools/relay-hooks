@@ -5317,9 +5317,9 @@ relay-compiler@^4.0.0:
     signedsource "^1.0.0"
     yargs "^9.0.0"
 
-"relay-hooks@file:../../../relay-hooks-0.0.1-a1.tgz":
-  version "0.0.1-a1"
-  resolved "file:../../../relay-hooks-0.0.1-a1.tgz#1ef3915db73cb5de20d4a190918e2daa618a15ed"
+"relay-hooks@file:../../../relay-hooks-0.0.1-a2.tgz":
+  version "0.0.1-a2"
+  resolved "file:../../../relay-hooks-0.0.1-a2.tgz#e4a6c30bd307425bdaa2866b0908f4c409fef6d5"
 
 relay-runtime@4.0.0:
   version "4.0.0"

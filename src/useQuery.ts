@@ -8,7 +8,7 @@ import {
 } from 'relay-runtime/lib/RelayStoreTypes';
 
 import * as areEqual from 'fbjs/lib/areEqual';
-import { UseQueryProps, HooksProps, OperationContextProps } from './RelayHooksType';
+import { UseQueryProps, HooksProps, OperationContextProps, STORE_THEN_NETWORK } from './RelayHooksType';
 
 
 
@@ -76,7 +76,11 @@ const useQuery = function (props: UseQueryProps)  {
         }
         try {
             //const storeSnapshot = queryFetcher.lookupInStore(genericEnvironment, operation, props.dataFrom); //i need this
-            const storeSnapshot = queryFetcher.lookupInStore(genericEnvironment, operation);
+            const storeSnapshot =
+            props.dataFrom === STORE_THEN_NETWORK
+              ? queryFetcher.lookupInStore(genericEnvironment, operation)
+            : null;
+            queryFetcher.lookupInStore(genericEnvironment, operation);
             const querySnapshot = queryFetcher.fetch({
                     cacheConfig: props.cacheConfig,
                     dataFrom: props.dataFrom,

@@ -9,8 +9,8 @@ import {
 export const NETWORK_ONLY = 'NETWORK_ONLY';
 export const STORE_THEN_NETWORK = 'STORE_THEN_NETWORK';
 interface DataFromEnum {
-    NETWORK_ONLY: String,
-    STORE_THEN_NETWORK: String,
+    NETWORK_ONLY,
+    STORE_THEN_NETWORK,
 };
 export type DataFrom = keyof DataFromEnum;
 

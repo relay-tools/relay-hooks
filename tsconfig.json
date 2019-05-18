@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "outDir": "lib",
+        "rootDir": "src",
+        "module": "commonjs",
+        "target": "es5",
+        "moduleResolution": "node",
+        "noEmitOnError": true,
+        "declaration": true,
+        "lib": [
+            "dom",
+            "es6",
+            "esnext.asynciterable",
+            "es2017.object"
+        ],
+        "jsx": "react",
+        "skipLibCheck": true
+    },
+    "exclude": [
+        "lib",
+        "__tests__",
+        "examples"
+    ],
+    "compileOnSave": true
+}

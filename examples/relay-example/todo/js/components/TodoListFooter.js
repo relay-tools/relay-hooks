@@ -49,6 +49,8 @@ const TodoListFooter = ({
 
   const numRemainingTodos = totalCount - completedCount;
 
+  console.log("todo list footer")
+
   return (
     <footer className="footer">
       <span className="todo-count">

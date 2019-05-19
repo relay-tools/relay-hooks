@@ -4,6 +4,7 @@ import {
     IEnvironment,
     RelayContext,
     Variables,
+    FragmentSpecResolver
 } from 'relay-runtime/lib/RelayStoreTypes';
 
 export const NETWORK_ONLY = 'NETWORK_ONLY';
@@ -14,18 +15,21 @@ interface DataFromEnum {
 };
 export type DataFrom = keyof DataFromEnum;
 
+export type ContainerResult = {
+    data: {[key: string]: any},
+    resolver: FragmentSpecResolver,
+  };
 
 
-export type RenderProps = {
+export interface RenderProps  {
     error: Error,
     props: Object,
     retry: () => void,
     cached?: boolean
 };
 
-export type HooksProps = {
-    renderProps: RenderProps,
-    relayContext: RelayContext,
+export interface HooksProps extends RenderProps  {
+    relay: RelayContext,
 };
 
 export interface UseQueryProps {
@@ -38,5 +42,5 @@ export interface UseQueryProps {
 
 export type OperationContextProps = {
     operation: any,
-    relayContext: RelayContext,
+    relay: RelayContext,
 };

@@ -21,10 +21,10 @@ export interface Props extends UseQueryProps {
 
 const QueryRenderer = function (props: Props)  {
     const {render, ...others} = props;
-    const hooksProps = useQuery(others);
+    const {relay, ...renderProps} = useQuery(others);
 
-    return <ReactRelayContext.Provider value={hooksProps.relayContext}>
-        {render(hooksProps.renderProps)}
+    return <ReactRelayContext.Provider value={relay}>
+        {render(renderProps)}
     </ReactRelayContext.Provider>
 
 }

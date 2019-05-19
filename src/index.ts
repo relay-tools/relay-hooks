@@ -13,3 +13,4 @@ export {
 
 export {default as QueryRenderer} from "./QueryRenderer";
 export {default as useQuery} from './useQuery';
+export {default as useFragment} from './useFragment';

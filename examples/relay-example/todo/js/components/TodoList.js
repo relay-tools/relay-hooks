@@ -48,6 +48,7 @@ const TodoList = ({
           .filter(Boolean)
       : [];
 
+      console.log("todo list")
   return (
     <section className="main">
       <input

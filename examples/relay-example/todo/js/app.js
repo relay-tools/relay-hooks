@@ -16,7 +16,8 @@ import 'todomvc-common';
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 
-import {QueryRenderer, graphql} from 'relay-hooks';
+import {QueryRenderer, graphql} from 'react-relay';
+//import {QueryRenderer, graphql} from 'relay-hooks';
 import {
   Environment,
   Network,

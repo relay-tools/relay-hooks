@@ -53,6 +53,8 @@ const Todo = ({relay, todo, user}: Props) => {
   const removeTodo = () =>
     RemoveTodoMutation.commit(relay.environment, todo, user);
 
+    console.log("todo")
+
   return (
     <li
       className={classnames({

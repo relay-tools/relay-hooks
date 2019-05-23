@@ -1,6 +1,6 @@
 {
   "name": "relay-hooks",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "keywords": [
     "graphql",
     "relay",
@@ -21,8 +21,7 @@
   "scripts": {
     "prepare": "tsc"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "peerDependencies": {
     "react": ">=16.8.0",
     "react-relay": "^4.0.0"

@@ -28,6 +28,7 @@ import {
 } from 'relay-runtime';
 
 import TodoApp from './components/TodoApp';
+import QueryApp from './query/QueryApp';
 import type {appQueryResponse} from 'relay/appQuery.graphql';
 
 async function fetchQuery(
@@ -55,17 +56,14 @@ const modernEnvironment: Environment = new Environment({
 
 const rootElement = document.getElementById('root');
 
+
+
+
 if (rootElement) {
   ReactDOM.render(
     <QueryRenderer
       environment={modernEnvironment}
-      query={graphql`
-        query appQuery($userId: String) {
-          user(id: $userId) {
-            ...TodoApp_user
-          }
-        }
-      `}
+      query={QueryApp}
       variables={{
         // Mock authenticated ID that matches database
         userId: 'me',

@@ -1,36 +1,59 @@
 import { useEffect, useState, useRef } from "react";
 import * as mapObject from 'fbjs/lib/mapObject';
 import * as areEqual from 'fbjs/lib/areEqual';
+import { RelayFeatureFlags, getFragment } from 'relay-runtime';
 
 import { ContainerResult } from './RelayHooksType';
+import {
+    Disposable,
+    IEnvironment,
+    GraphQLTaggedNode,
+    Observable,
+    Observer,
+    Variables,
+    getFragmentOwners
+} from 'relay-runtime';
+import FragmentRefetch from "./FragmentRefetch";
 
+export type RefetchOptions = {
+    force?: boolean,
+    fetchPolicy?: 'store-or-network' | 'network-only',
+};
 
+export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
 
-
-function usePrevious(value): any {
+const usePrevious = function usePrevious(value): any {
     const ref = useRef();
+    if (ref.current === null || ref.current === undefined) {
+        const c:any = {fragmentRefetch: new FragmentRefetch()};
+        ref.current = c;
+    }
     useEffect(() => {
-        ref.current = value;
+      value.fragmentRefetch = (ref.current as any).fragmentRefetch;
+      ref.current = value;
     });
     return ref.current;
-}
+  }
+
 
 const useFragment = function (hooksProps: any, fragmentSpec) {
-    const { relay, ...others } = hooksProps;
-    const { environment, variables } = relay;
+    const { relay: relayHooks, ...others } = hooksProps;
+    const { environment, variables } = relayHooks;
     const prev = usePrevious({ environment, variables, others });
     const [fragments, setFragments] = useState<any>(() => {
+        RelayFeatureFlags.PREFER_FRAGMENT_OWNER_OVER_CONTEXT = true;
         const { getFragment: getFragmentFromTag } = environment.unstable_internal;
         return mapObject(fragmentSpec, getFragmentFromTag)
     });
+    
 
     const [result, setResult] = useState<ContainerResult>(() => {
-        return newResolver();
+        return newResolver(relayHooks);
     });
 
-    const { resolver } = result;
+    const { resolver, relay } = result;
 
-    function newResolver(){
+    function newResolver(relay) {
         const {
             createFragmentSpecResolver,
         } = environment.unstable_internal;
@@ -38,42 +61,77 @@ const useFragment = function (hooksProps: any, fragmentSpec) {
             relay,
             'useFragment',
             fragments,
-            {...others, ...others.props},
+            { ...others, ...others.props },
         )
         res.setCallback(() => {
-            const newData = res.resolve();
-            if(result.data!==newData) {
-                setResult({resolver: res, data: newData})
+            const newData = resolver.resolve();
+            if (result.data !== newData) {
+                setResult({ resolver: resolver, data: newData, relay: relay })
             }
         });
-        return {resolver: res, data: res.resolve()};
+        return { resolver: res, data: res.resolve(), relay: relay };
     }
 
     useEffect(() => {
         return () => {
-            resolver.dispose()
+            resolver.dispose();
+            prev && prev.fragmentRefetch.dispose();
         };
     }, []);
 
     useEffect(() => {
-        if(prev) {
+        if (prev && prev.others) {
             const { getDataIDsFromObject } = environment.unstable_internal;
             const prevIDs = getDataIDsFromObject(fragments, prev.others);
             const nextIDs = getDataIDsFromObject(fragments, others);
             if (prev.environment !== environment ||
-            !areEqual(prev.variables, variables) || 
-            !areEqual(prevIDs, nextIDs)) {
+                !areEqual(prev.variables, variables) ||
+                !areEqual(prevIDs, nextIDs)) {
                 resolver.dispose();
-                setResult(newResolver());
+                setResult(newResolver(relay));
             } /*else {
                 resolver.setProps(others);
                 setResult({resolver, data: resolver.resolve()})
             }*/
-            
+
         }
     }, [environment, variables, others]);
 
-    return {...result.data, relay};
+    function _getFragmentVariables(): Variables {
+        const {
+          getVariablesFromObject,
+        } = environment.unstable_internal;
+          return getVariablesFromObject(
+            // NOTE: We pass empty operationVariables because we want to prefer
+            // the variables from the fragment owner
+            {},
+            fragments,
+            { ...others, ...others.props },
+            getFragmentOwners(fragments, { ...others, ...others.props }),
+          );
+      }
+
+    function refetch(taggedNode: GraphQLTaggedNode,
+        refetchVariables:
+            | Variables
+            | ((fragmentVariables: Variables) => Variables),
+        renderVariables: Variables,
+        observerOrCallback: ObserverOrCallback,
+        options: RefetchOptions, ) {
+            return (prev.fragmentRefetch as FragmentRefetch).refetch(variables,
+                environment,
+                _getFragmentVariables(),
+                taggedNode,
+                refetchVariables,
+                renderVariables,
+                observerOrCallback,
+                options,
+                result,
+                setResult
+            );
+    }
+
+    return { ...result.data, relay: result.relay, refetch };
 }
 
 export default useFragment;

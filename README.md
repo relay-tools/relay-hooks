@@ -74,3 +74,56 @@ const TodoApp = (props) => {
 };
   
 ```
+
+* useFragment with refetch (refetchContainer)
+
+```ts
+import { useFragment, graphql } from 'relay-hooks';
+
+const fragmentSpec = {
+  user: graphql`
+    fragment TodoList_user on User {
+      todos(
+        first: 2147483647 # max GraphQLInt
+      ) @connection(key: "TodoList_todos") {
+        edges {
+          node {
+            id
+            complete
+            ...Todo_todo
+          }
+        }
+      }
+      id
+      userId
+      totalCount
+      completedCount
+      ...Todo_user
+    }
+  `,
+};
+
+const TodoApp = (props) => {
+    const { user, relay, refetch } = useFragment(props, fragmentSpec);
+    const handlerRefetch = () => {
+    const response = refetch(QueryApp,
+      {userId: 'me'},  
+      null,  
+      () => { console.log('Refetch done') },
+      {force: true},  
+    );
+    //response.dispose(); 
+
+  }
+
+    return (   
+        <div>
+            <p> {user.id} </p>
+            <p> {user.userId} </p>
+            <p> {user.totalCount} </p>
+            <button onClick={handlerRefetch}> Refetch </button>
+        </div>
+        );
+};
+  
+```

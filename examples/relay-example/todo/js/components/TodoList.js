@@ -13,9 +13,10 @@
 
 import MarkAllTodosMutation from '../mutations/MarkAllTodosMutation';
 import Todo from './Todo';
+import QueryApp from '../query/QueryApp';
 
 import React from 'react';
-import {createFragmentContainer, graphql, type RelayProp} from 'react-relay';
+import {createRefetchContainer, graphql, type RelayProp} from 'react-relay';
 import type {TodoList_user} from 'relay/TodoList_user.graphql';
 type Todos = $NonMaybeType<$ElementType<TodoList_user, 'todos'>>;
 type Edges = $NonMaybeType<$ElementType<Todos, 'edges'>>;
@@ -39,6 +40,17 @@ const TodoList = ({
       MarkAllTodosMutation.commit(relay.environment, complete, todos, user);
     }
   };
+
+  const handlerRefetch = () => {
+    const response = relay.refetch(
+      {userId: 'me'},  
+      null, 
+      () => { console.log('Refetch done') },
+      {force: true},  
+    );
+    //response.dispose();
+
+  }
 
   const nodes: $ReadOnlyArray<Node> =
     todos && todos.edges
@@ -65,11 +77,14 @@ const TodoList = ({
           <Todo key={node.id} todo={node} user={user} />
         ))}
       </ul>
+      <button onClick={handlerRefetch}  className="refetch">
+          Refetch
+          </button>
     </section>
   );
 };
 
-export default createFragmentContainer(TodoList, {
+export default createRefetchContainer(TodoList, {
   user: graphql`
     fragment TodoList_user on User {
       todos(
@@ -89,5 +104,6 @@ export default createFragmentContainer(TodoList, {
       completedCount
       ...Todo_user
     }
-  `,
-});
+  `},
+  QueryApp
+);

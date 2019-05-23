@@ -28,6 +28,7 @@ import {
 
 import TodoApp, {fragmentSpec} from './components/TodoApp';
 import type {appQueryResponse} from 'relay/appQuery.graphql';
+import QueryApp from './query/QueryApp';
 
 async function fetchQuery(
   operation: RequestNode,
@@ -56,13 +57,7 @@ const rootElement = document.getElementById('root');
 
 const AppTodo = function (appProps)  {
   const hooksProps = useQuery({environment: modernEnvironment,
-    query: graphql`
-      query appQuery($userId: String) {
-        user(id: $userId) {
-          ...TodoApp_user
-        }
-      }
-    `,
+    query: QueryApp,
     variables: {
       // Mock authenticated ID that matches database
       userId: 'me',

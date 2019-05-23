@@ -1,5 +1,5 @@
-import * as ReactRelayQueryFetcher from 'react-relay/lib/ReactRelayQueryFetcher';
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import usePrevious from "./usePrevious";
 
 import {
     IEnvironment,
@@ -9,21 +9,6 @@ import {
 
 import * as areEqual from 'fbjs/lib/areEqual';
 import { UseQueryProps, HooksProps, OperationContextProps, STORE_THEN_NETWORK } from './RelayHooksType';
-
-
-
-function usePrevious(value): any {
-    const ref = useRef();
-    if (ref.current === null || ref.current === undefined) {
-        const c:any = {queryFetcher: new ReactRelayQueryFetcher()};
-        ref.current = c;
-    }
-    useEffect(() => {
-      value.queryFetcher = (ref.current as any).queryFetcher;
-      ref.current = value;
-    });
-    return ref.current;
-  }
 
 
 const useQuery = function (props: UseQueryProps)  {

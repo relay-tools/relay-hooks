@@ -312,6 +312,13 @@ html .clear-completed:active {
   text-decoration: underline;
 }
 
+.refetch {
+  margin: auto;
+  padding: 10px;
+  cursor: pointer;
+  display:-webkit-box;
+}
+
 .info {
   margin: 65px auto 0;
   color: #bfbfbf;

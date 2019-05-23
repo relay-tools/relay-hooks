@@ -18,6 +18,7 @@ export type DataFrom = keyof DataFromEnum;
 export type ContainerResult = {
     data: {[key: string]: any},
     resolver: FragmentSpecResolver,
+    relay: RelayContext
   };
 
 

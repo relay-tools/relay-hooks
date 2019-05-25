@@ -200,7 +200,7 @@ const Feed = (props) => {
 
     return (   
         <div>
-        {this.props.user.feed.edges.map(
+        {user.feed.edges.map(
           edge => <Story story={edge.node} key={edge.node.id} />
         )}
         <button

@@ -187,16 +187,17 @@ const Feed = (props) => {
     const { isLoading, hasMore, loadMore, user } = useFragment(props, fragmentSpec);
     const _loadMore = () => {
       if (!hasMore() || isLoading()) {
-      return;
-    }
+        return;
+      }
 
-    loadMore(
-      connectionConfig,
-      10,  // Fetch the next 10 feed items
-      error => {
-        console.log(error);
-      },
-    );
+      loadMore(
+        connectionConfig,
+        10,  // Fetch the next 10 feed items
+        error => {
+          console.log(error);
+        },
+      );
+    }
 
     return (   
         <div>

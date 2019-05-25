@@ -198,8 +198,6 @@ const Feed = (props) => {
       },
     );
 
-  }
-
     return (   
         <div>
         {this.props.user.feed.edges.map(

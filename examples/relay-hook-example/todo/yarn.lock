@@ -5317,9 +5317,10 @@ relay-compiler@^4.0.0:
     signedsource "^1.0.0"
     yargs "^9.0.0"
 
-"relay-hooks@file:../../../relay-hooks-0.1.1-a15.tgz":
-  version "0.1.1-a15"
-  resolved "file:../../../relay-hooks-0.1.1-a15.tgz#f7ec3acb60b386656d99a8cf230c2a7d2771bd0c"
+relay-hooks@0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/relay-hooks/-/relay-hooks-0.2.0.tgz#5339c272e1df703e31a9515199ab0c70e0e30210"
+  integrity sha512-K5SDNYL3CZe2Mds4nkPi8LpmWwN3cYrsuCxdQ1pScCUPYONM+i1OqJi1hFZSUg9xSZgLsNxd9m0ByAQdmXWyHw==
 
 relay-runtime@4.0.0:
   version "4.0.0"

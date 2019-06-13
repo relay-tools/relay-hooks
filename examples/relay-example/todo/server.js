@@ -18,7 +18,7 @@ import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import {schema} from './data/schema';
 
-const APP_PORT: number = 3000;
+const APP_PORT: number = 4000;
 
 // Serve the Relay app
 // Calling webpack() without a callback as 2nd property returns a Compiler object.

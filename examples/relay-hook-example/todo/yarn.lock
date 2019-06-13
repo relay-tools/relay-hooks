@@ -885,6 +885,11 @@
     universal-user-agent "^2.0.0"
     url-template "^2.0.8"
 
+"@restart/hooks@^0.3.1":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@restart/hooks/-/hooks-0.3.1.tgz#bcc0ee82500bb2ac5849c3c3384d520a196cb7a0"
+  integrity sha512-kjGGlli8iTe5TFDw6qHZJ5QK1naITMveIO+o8yQJJqwX8VIkiQzLddK98Lduga2krJMzWlNqDR/4isGLiyBlUA==
+
 "@webassemblyjs/ast@1.8.5":
   version "1.8.5"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.8.5.tgz#51b1c5fe6576a34953bf4b253df9f0d490d9e359"
@@ -5317,10 +5322,11 @@ relay-compiler@^4.0.0:
     signedsource "^1.0.0"
     yargs "^9.0.0"
 
-relay-hooks@0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/relay-hooks/-/relay-hooks-0.2.0.tgz#5339c272e1df703e31a9515199ab0c70e0e30210"
-  integrity sha512-K5SDNYL3CZe2Mds4nkPi8LpmWwN3cYrsuCxdQ1pScCUPYONM+i1OqJi1hFZSUg9xSZgLsNxd9m0ByAQdmXWyHw==
+"relay-hooks@file:../../../relay-hooks-1.0.0-a14.tgz":
+  version "1.0.0-a14"
+  resolved "file:../../../relay-hooks-1.0.0-a14.tgz#42582f96df885278185d774282ddb0c7d0acfbc8"
+  dependencies:
+    "@restart/hooks" "^0.3.1"
 
 relay-runtime@4.0.0:
   version "4.0.0"

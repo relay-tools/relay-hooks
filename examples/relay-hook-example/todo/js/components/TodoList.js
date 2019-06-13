@@ -29,8 +29,7 @@ type Props = {|
   +user: TodoList_user,
 |};
 
-const fragmentSpec = {
-  user: graphql`
+const fragmentSpec = graphql`
     fragment TodoList_user on User {
       todos(
         first: 2147483647 # max GraphQLInt
@@ -49,14 +48,11 @@ const fragmentSpec = {
       completedCount
       ...Todo_user
     }
-  `,
-};
+  `;
 
 const TodoList = (props) => {
-  const { relay, refetch } = props;
-  const fragProps = useFragment(props, fragmentSpec);
-    const {  user,
-      user: { todos, completedCount, totalCount }, } = fragProps;
+  const { refetch } = props;
+  const {  user, user: { todos, completedCount, totalCount }, } = useFragment(fragmentSpec, props.user);
   const handleMarkAllChange = (e: SyntheticEvent<HTMLInputElement>) => {
     const complete = e.currentTarget.checked;
 
@@ -97,7 +93,7 @@ const TodoList = (props) => {
 
       <ul className="todo-list">
         {nodes.map((node: Node) => (
-          <Todo key={node.id} todo={node} {...fragProps} />
+          <Todo key={node.id} todo={node} user={user} />
         ))}
       </ul>
       <button onClick={handlerRefetch} 

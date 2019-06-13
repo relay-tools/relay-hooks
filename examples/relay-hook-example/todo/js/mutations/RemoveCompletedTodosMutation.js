@@ -12,12 +12,12 @@
  */
 
 import {
-  commitMutation,
   graphql,
   type Disposable,
   type Environment,
   type RecordSourceSelectorProxy,
 } from 'react-relay';
+import { useMutation } from 'relay-hooks'; 
 
 import {ConnectionHandler} from 'relay-runtime';
 import type {RemoveCompletedTodosInput} from 'relay/RemoveCompletedTodosMutation.graphql';
@@ -63,8 +63,7 @@ function commit(
     userId: user.userId,
   };
 
-  return commitMutation(environment, {
-    mutation,
+  return useMutation(mutation, {
     variables: {
       input,
     },

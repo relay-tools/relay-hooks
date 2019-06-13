@@ -17,6 +17,7 @@ import {
   type Disposable,
   type Environment,
 } from 'react-relay';
+import { useMutation } from 'relay-hooks'; 
 
 import type {
   MarkAllTodosInput,
@@ -84,7 +85,6 @@ function getOptimisticResponse(
 }
 
 function commit(
-  environment: Environment,
   complete: boolean,
   todos: Todos,
   user: TodoList_user,
@@ -94,8 +94,7 @@ function commit(
     userId: user.userId,
   };
 
-  return commitMutation(environment, {
-    mutation,
+  return useMutation(mutation, {
     variables: {
       input,
     },

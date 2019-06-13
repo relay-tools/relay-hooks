@@ -1,7 +1,9 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import * as mapObject from 'fbjs/lib/mapObject';
 import * as areEqual from 'fbjs/lib/areEqual';
 import { RelayFeatureFlags, getFragment } from 'relay-runtime';
+import { ReactRelayContext } from 'react-relay';
+import { RelayContext } from 'relay-runtime/lib/RelayStoreTypes';
 
 import { ContainerResult } from './RelayHooksType';
 import {
@@ -23,7 +25,6 @@ export type RefetchOptions = {
 
 interface FragmentResult {
   [key: string]: any,
-  relay: any;
   refetch: (taggedNode: any, refetchVariables: any, renderVariables: any, observerOrCallback: any, options: RefetchOptions) => {
       dispose(): void;
   };
@@ -52,40 +53,41 @@ const usePrevious = function usePrevious(value): any {
 }
 
 
-const useFragment = function (hooksProps: any, fragmentSpec):FragmentResult {
-  const { relay: relayHooks, ...others } = hooksProps;
-  const { environment, variables } = relayHooks;
-  const prev = usePrevious({ environment, variables, others });
+const useFragment = function (fragmentDef, fragmentRef: any, ):FragmentResult {
+  const { relay }: RelayContext = useContext(ReactRelayContext);
+  const { environment } = relay;
+  const prev = usePrevious({ environment, fragmentRef });
   const [fragments, setFragments] = useState<any>(() => {
     RelayFeatureFlags.PREFER_FRAGMENT_OWNER_OVER_CONTEXT = true;
     const { getFragment: getFragmentFromTag } = environment.unstable_internal;
-    return mapObject(fragmentSpec, getFragmentFromTag)
+    return getFragmentFromTag(fragmentDef);
   });
 
 
   const [result, setResult] = useState<ContainerResult>(() => {
-    return newResolver(relayHooks);
+    return newResolver(relay);
   });
 
-  const { resolver, relay } = result;
+  const { resolver } = result;
 
   function newResolver(relay) {
     const {
       createFragmentSpecResolver,
     } = environment.unstable_internal;
+    const resKey = fragments.name.split('_').pop();
     const res = createFragmentSpecResolver(
       relay,
       'useFragment',
-      fragments,
-      { ...others, ...others.props },
+      {[resKey]: fragments},
+      {[resKey]: fragmentRef},
     )
     res.setCallback(() => {
       const newData = resolver.resolve();
       if (result.data !== newData) {
-        setResult({ resolver: resolver, data: newData, relay: relay })
+        setResult({ resolver: resolver, data: newData })
       }
     });
-    return { resolver: res, data: res.resolve(), relay: relay };
+    return { resolver: res, data: res.resolve() };
   }
 
   useEffect(() => {
@@ -97,12 +99,11 @@ const useFragment = function (hooksProps: any, fragmentSpec):FragmentResult {
   }, []);
 
   useEffect(() => {
-    if (prev && prev.others) {
+    if (prev && prev.fragmentRef) {
       const { getDataIDsFromObject } = environment.unstable_internal;
-      const prevIDs = getDataIDsFromObject(fragments, prev.others);
-      const nextIDs = getDataIDsFromObject(fragments, others);
+      const prevIDs = getDataIDsFromObject(fragments, prev.fragmentRef);
+      const nextIDs = getDataIDsFromObject(fragments, fragmentRef);
       if (prev.environment !== environment ||
-        !areEqual(prev.variables, variables) ||
         !areEqual(prevIDs, nextIDs)) {
         resolver.dispose();
         setResult(newResolver(relay));
@@ -112,7 +113,7 @@ const useFragment = function (hooksProps: any, fragmentSpec):FragmentResult {
             }*/
 
     }
-  }, [environment, variables, others]);
+  }, [environment, fragmentRef]);
 
   function _getFragmentVariables(): Variables {
     const {
@@ -123,8 +124,8 @@ const useFragment = function (hooksProps: any, fragmentSpec):FragmentResult {
       // the variables from the fragment owner
       {},
       fragments,
-      { ...others, ...others.props },
-      getFragmentOwners(fragments, { ...others, ...others.props }),
+      fragmentRef,
+      getFragmentOwners(fragments, fragmentRef),
     );
   }
 
@@ -135,8 +136,7 @@ const useFragment = function (hooksProps: any, fragmentSpec):FragmentResult {
     renderVariables: Variables,
     observerOrCallback: ObserverOrCallback,
     options: RefetchOptions, ) {
-    return (prev.fragmentRefetch as FragmentRefetch).refetch(variables,
-      environment,
+    return (prev.fragmentRefetch as FragmentRefetch).refetch(environment,
       _getFragmentVariables(),
       taggedNode,
       refetchVariables,
@@ -152,12 +152,10 @@ const useFragment = function (hooksProps: any, fragmentSpec):FragmentResult {
     pageSize: number,
     observerOrCallback: ObserverOrCallback,
     options: RefetchOptions, ) {
-    const props = { ...others, ...others.props };
-    (prev.fragmentPagination as FragmentPagination).init(result, props);
-    return (prev.fragmentPagination as FragmentPagination).loadMore(variables,
-      environment,
+    (prev.fragmentPagination as FragmentPagination).init(result, fragmentRef);
+    return (prev.fragmentPagination as FragmentPagination).loadMore(environment,
       connectionConfig,
-      props,
+      fragmentRef,
       pageSize,
       observerOrCallback,
       options,
@@ -170,12 +168,10 @@ const useFragment = function (hooksProps: any, fragmentSpec):FragmentResult {
     totalCount: number,
     callback: ObserverOrCallback,
     refetchVariables: Variables, ) {
-    const props = { ...others, ...others.props };
-    (prev.fragmentPagination as FragmentPagination).init(result, props);
-    return (prev.fragmentPagination as FragmentPagination).refetchConnection(variables,
-      environment,
+    (prev.fragmentPagination as FragmentPagination).init(result, fragmentRef);
+    return (prev.fragmentPagination as FragmentPagination).refetchConnection(environment,
       connectionConfig,
-      props,
+      fragmentRef,
       result,
       setResult,
       totalCount,
@@ -185,18 +181,16 @@ const useFragment = function (hooksProps: any, fragmentSpec):FragmentResult {
   }
 
   function hasMore() {
-    const props = { ...others, ...others.props };
-    (prev.fragmentPagination as FragmentPagination).init(result, props);
-    return (prev.fragmentPagination as FragmentPagination).hasMore(result, props);
+    (prev.fragmentPagination as FragmentPagination).init(result, fragmentRef);
+    return (prev.fragmentPagination as FragmentPagination).hasMore(result, fragmentRef);
   }
 
   function isLoading() {
-    const props = { ...others, ...others.props };
-    (prev.fragmentPagination as FragmentPagination).init(result, props);
+    (prev.fragmentPagination as FragmentPagination).init(result, fragmentRef);
     return (prev.fragmentPagination as FragmentPagination).isLoading();
   }
 
-  return { ...result.data, relay: result.relay, refetch, loadMore, hasMore, isLoading, refetchConnection };
+  return { ...result.data, refetch, loadMore, hasMore, isLoading, refetchConnection };
 }
 
 export default useFragment;

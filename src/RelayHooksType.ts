@@ -9,16 +9,19 @@ import {
 
 export const NETWORK_ONLY = 'NETWORK_ONLY';
 export const STORE_THEN_NETWORK = 'STORE_THEN_NETWORK';
+export const STORE_OR_NETWORK = 'STORE_OR_NETWORK';
+export const STORE_ONLY = 'STORE_ONLY';
 interface DataFromEnum {
     NETWORK_ONLY,
     STORE_THEN_NETWORK,
+    STORE_OR_NETWORK,
+    STORE_ONLY
 };
 export type DataFrom = keyof DataFromEnum;
 
 export type ContainerResult = {
     data: { [key: string]: any },
     resolver: FragmentSpecResolver,
-    relay: RelayContext
 };
 
 
@@ -29,14 +32,8 @@ export interface RenderProps {
     cached?: boolean
 };
 
-export interface HooksProps extends RenderProps {
-    relay: RelayContext,
-};
-
 export interface UseQueryProps {
-    cacheConfig?: CacheConfig,
     dataFrom?: DataFrom,
-    environment: IEnvironment,
     query: GraphQLTaggedNode,
     variables: Variables,
 };

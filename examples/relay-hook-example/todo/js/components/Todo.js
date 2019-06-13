@@ -29,27 +29,25 @@ type Props = {|
   +user: Todo_user,
 |};
 
-const fragmentSpec = {
-  todo: graphql`
+const fragmentSpecTodo = graphql`
     fragment Todo_todo on Todo {
       complete
       id
       text
     }
-  `,
-  user: graphql`
+  `;
+  const fragmentSpecUser = graphql`
     fragment Todo_user on User {
       id
       userId
       totalCount
       completedCount
     }
-  `,
-};
+  `;
 
 const Todo = (props) => {
-  const { relay } = props;
-  const { todo, user } = useFragment(props, fragmentSpec);
+  const { user } = useFragment(fragmentSpecUser, props.user);
+  const { todo } = useFragment(fragmentSpecTodo, props.todo);
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   const handleCompleteChange = (e: SyntheticEvent<HTMLInputElement>) => {

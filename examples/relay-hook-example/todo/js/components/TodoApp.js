@@ -11,7 +11,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import AddTodoMutation from '../mutations/AddTodoMutation';
+import AddTodoMutation, {mutation} from '../mutations/AddTodoMutation';
 import TodoList from './TodoList';
 import TodoListFooter from './TodoListFooter';
 import TodoTextInput from './TodoTextInput';
@@ -27,8 +27,7 @@ type Props = {|
   +user: TodoApp_user,
 |};
 
-const fragmentSpec = {
-  user: graphql`
+const fragmentSpec = graphql`
     fragment TodoApp_user on User {
       id
       userId
@@ -36,14 +35,13 @@ const fragmentSpec = {
       ...TodoListFooter_user
       ...TodoList_user
     }
-  `,
-};
+  `;
 
 const TodoApp = (props) => {
-  const fragProps = useFragment(props, fragmentSpec);
-  const {user} = fragProps;
+  const { user } = useFragment(fragmentSpec, props.user);
+  const [mutate, { loading }] = useMutation(mutation);
   const handleTextInputSave = (text: string) => {
-    AddTodoMutation.commit(props.relay.environment, text, user);
+    AddTodoMutation.commit(mutate, text, user);
     return;
   };
 
@@ -62,8 +60,8 @@ const TodoApp = (props) => {
           />
         </header>
 
-        <TodoList {...fragProps} />
-        {hasTodos && <TodoListFooter {...fragProps} />}
+        <TodoList user={user} />
+        {hasTodos && <TodoListFooter user={user} />}
       </section>
 
       <footer className="info">

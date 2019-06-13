@@ -18,6 +18,7 @@ import {
   type Environment,
   type RecordSourceSelectorProxy,
 } from 'react-relay';
+import { useMutation } from 'relay-hooks'; 
 
 import {ConnectionHandler} from 'relay-runtime';
 import type {Todo_user} from 'relay/Todo_user.graphql';
@@ -47,7 +48,6 @@ function sharedUpdater(
 }
 
 function commit(
-  environment: Environment,
   todo: Todo_todo,
   user: Todo_user,
 ): Disposable {
@@ -56,8 +56,7 @@ function commit(
     userId: user.userId,
   };
 
-  return commitMutation(environment, {
-    mutation,
+  return useMutation(mutation, {
     variables: {
       input,
     },

@@ -12,7 +12,6 @@
  */
 
 import {
-  commitMutation,
   graphql,
   type Disposable,
   type Environment,
@@ -20,11 +19,13 @@ import {
   type RecordSourceSelectorProxy,
 } from 'react-relay';
 
+import { useMutation } from 'relay-hooks'; 
+
 import {ConnectionHandler} from 'relay-runtime';
 import type {TodoApp_user} from 'relay/TodoApp_user.graphql';
 import type {AddTodoInput} from 'relay/AddTodoMutation.graphql';
 
-const mutation = graphql`
+export const mutation = graphql`
   mutation AddTodoMutation($input: AddTodoInput!) {
     addTodo(input: $input) {
       todoEdge {
@@ -56,8 +57,7 @@ function sharedUpdater(
 
 let tempID = 0;
 
-function commit(
-  environment: Environment,
+function commit(mutate,
   text: string,
   user: TodoApp_user,
 ): Disposable {
@@ -67,8 +67,7 @@ function commit(
     clientMutationId: `${tempID++}`,
   };
 
-  return commitMutation(environment, {
-    mutation,
+  return mutate({
     variables: {
       input,
     },
@@ -106,5 +105,6 @@ function commit(
     },
   });
 }
+
 
 export default {commit};

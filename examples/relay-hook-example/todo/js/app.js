@@ -16,7 +16,7 @@ import 'todomvc-common';
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 
-import {QueryRenderer, graphql, useQuery} from 'relay-hooks';
+import {useQuery, RelayEnvironmentProvider} from 'relay-hooks';
 import {
   Environment,
   Network,
@@ -56,8 +56,7 @@ const modernEnvironment: Environment = new Environment({
 const rootElement = document.getElementById('root');
 
 const AppTodo = function (appProps)  {
-  const hooksProps = useQuery({environment: modernEnvironment,
-    query: QueryApp,
+  const hooksProps = useQuery({ query: QueryApp,
     variables: {
       // Mock authenticated ID that matches database
       userId: 'me',
@@ -65,7 +64,7 @@ const AppTodo = function (appProps)  {
 
   const {props, error, retry, cached} = hooksProps;
   if (props && props.user) {
-    return <TodoApp {...hooksProps} />;
+    return <TodoApp user={props.user} />;
   } else if (error) {
     return <div>{error.message}</div>;
   }
@@ -75,7 +74,9 @@ const AppTodo = function (appProps)  {
 
 if (rootElement) {
   ReactDOM.render(
-    <AppTodo/>,
+    <RelayEnvironmentProvider environment={modernEnvironment}>
+      <AppTodo/>
+    </RelayEnvironmentProvider>,
     rootElement,
   );
 }

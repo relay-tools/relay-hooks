@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import usePrevious from "./usePrevious";
+import { ReactRelayContext } from 'react-relay';
 
 import {
     IEnvironment,
@@ -8,14 +9,16 @@ import {
 } from 'relay-runtime/lib/RelayStoreTypes';
 
 import * as areEqual from 'fbjs/lib/areEqual';
-import { UseQueryProps, HooksProps, OperationContextProps, STORE_THEN_NETWORK } from './RelayHooksType';
+import { UseQueryProps, RenderProps, OperationContextProps, STORE_THEN_NETWORK, NETWORK_ONLY, STORE_OR_NETWORK } from './RelayHooksType';
 
 
 const useQuery = function (props: UseQueryProps)  {
-    const {environment, query, variables } = props
-    const prev = usePrevious({environment, query, variables});
+    const { relay: { environment } } = useContext(ReactRelayContext);
+    const { query, variables } = props;
+    const dataFrom = props.dataFrom || STORE_OR_NETWORK;
+    const prev = usePrevious({ environment, query, variables});
     const queryFetcher = prev.queryFetcher;
-    const [hooksProps, setHooksProps] = useState<HooksProps>( { relay: {environment: props.environment, variables: props.variables} , 
+    const [hooksProps, setHooksProps] = useState<RenderProps>( { 
         error: null,
         props: null, 
         retry: null,
@@ -37,13 +40,12 @@ const useQuery = function (props: UseQueryProps)  {
     }, [environment, query, variables]);
 
     function execute(environment, query, variables) {
-        const genericEnvironment: IEnvironment = (environment);
         if (!query) {
             queryFetcher.dispose();
             setOperationContext({ operation: null, relay: {environment, variables} });
         } else {
             queryFetcher.disposeRequest();
-            const { createOperationDescriptor, getRequest, } = genericEnvironment.unstable_internal;
+            const { createOperationDescriptor, getRequest, } = environment.unstable_internal;
             const request = getRequest(query);
             const operation = createOperationDescriptor(request, variables);
             setOperationContext({ operation: operation, relay: {environment, variables: operation.variables} });
@@ -51,45 +53,42 @@ const useQuery = function (props: UseQueryProps)  {
     }
 
     function setOperationContext(operationContext: OperationContextProps) {
-        const { environment } = props;
-        const genericEnvironment: IEnvironment = (environment);
         const operation = operationContext.operation;
         if (!operation) {
-            setResult({empty: true, relay: operationContext.relay});
+            setResult({empty: true});
             return;
         }
         try {
             //const storeSnapshot = queryFetcher.lookupInStore(genericEnvironment, operation, props.dataFrom); //i need this
-            const storeSnapshot =
-            props.dataFrom === STORE_THEN_NETWORK
-              ? queryFetcher.lookupInStore(genericEnvironment, operation)
-            : null;
-            queryFetcher.lookupInStore(genericEnvironment, operation);
-            const querySnapshot = queryFetcher.fetch({
-                    cacheConfig: props.cacheConfig,
-                    dataFrom: props.dataFrom,
-                    environment: genericEnvironment,
-                    onDataChange: !prev.environment || prev.environment === undefined ? (params: {
+            const storeSnapshot = dataFrom !== NETWORK_ONLY ? queryFetcher.lookupInStore(environment, operation) : null;
+
+            const querySnapshot = (dataFrom === NETWORK_ONLY || 
+                dataFrom === STORE_THEN_NETWORK ||
+                (dataFrom === STORE_OR_NETWORK && !storeSnapshot)) ? queryFetcher.fetch({
+                    cacheConfig: undefined,
+                    dataFrom,
+                    environment,
+                    onDataChange: !prev.environment || prev.environment === undefined ? (params: { //TODO BETTER
                         error?: Error,
                         snapshot?: Snapshot,
                     }): void => {
                         const error = params.error == null ? null : params.error;
                         const snapshot = params.snapshot == null ? null : params.snapshot;
             
-                        setResult({ error, snapshot, cached: false, relay: operationContext.relay });
+                        setResult({ error, snapshot, cached: false });
                     } : undefined,
                     operation,
-                });
+                }) : null;
 
             // Use network data first, since it may be fresher
             const snapshot = querySnapshot || storeSnapshot;
-            setResult({ error: null, snapshot, cached: !querySnapshot, relay: operationContext.relay }); //relay
+            setResult({ error: null, snapshot, cached: !!storeSnapshot }); //relay
         } catch (error) {
-            setResult({ error: error, snapshot: null, cached: false, relay: operationContext.relay }); //relay
+            setResult({ error: error, snapshot: null, cached: false }); //relay
         }
     }
 
-    function setResult(result: {relay: RelayContext, empty?: boolean, error?: Error, snapshot?: Snapshot, cached?: boolean}) {
+    function setResult(result: { empty?: boolean, error?: Error, snapshot?: Snapshot, cached?: boolean}) {
         if(!result) {
             return;
         }
@@ -104,12 +103,11 @@ const useQuery = function (props: UseQueryProps)  {
             renderProps.error = result.error ? result.error : null,
             renderProps.cached = result.cached || false,
             renderProps.retry = () => {
-                execute(props.environment, props.query, props.variables);
+                execute(environment, props.query, props.variables);
             }
         } 
-        const {relay, ...hooksRender} = hooksProps;
-        if(hooksRender!==renderProps)
-            setHooksProps({...renderProps, relay: result.relay});    
+        if(hooksProps!==renderProps)
+            setHooksProps(renderProps);    
     }
 
    /*useMemo(() => {

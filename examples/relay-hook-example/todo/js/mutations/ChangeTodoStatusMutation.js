@@ -12,12 +12,11 @@
  */
 
 import {
-  commitMutation,
   graphql,
   type Disposable,
   type Environment,
 } from 'react-relay';
-
+import { useMutation } from 'relay-hooks'; 
 import type {Todo_todo} from 'relay/Todo_todo.graphql';
 import type {Todo_user} from 'relay/Todo_user.graphql';
 import type {
@@ -62,7 +61,6 @@ function getOptimisticResponse(
 }
 
 function commit(
-  environment: Environment,
   complete: boolean,
   todo: Todo_todo,
   user: Todo_user,
@@ -73,8 +71,7 @@ function commit(
     id: todo.id,
   };
 
-  return commitMutation(environment, {
-    mutation,
+  return useMutation(mutation, {
     variables: {
       input,
     },

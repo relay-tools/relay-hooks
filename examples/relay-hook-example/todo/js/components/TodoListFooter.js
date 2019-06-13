@@ -26,8 +26,7 @@ type Props = {|
   +user: TodoListFooter_user,
 |};
 
-const fragmentSpec = {
-  user: graphql`
+const fragmentSpec = graphql`
     fragment TodoListFooter_user on User {
       id
       userId
@@ -44,13 +43,11 @@ const fragmentSpec = {
       }
       totalCount
     }
-  `,
-};
+  `;
 
 const TodoListFooter = (props) => {
-  const { relay } = props;
   const { user,
-    user: { todos, completedCount, totalCount }, } = useFragment(props, fragmentSpec)
+    user: { todos, completedCount, totalCount }, } = useFragment(fragmentSpec, props.user)
   const completedEdges: $ReadOnlyArray<?Edge> =
     todos && todos.edges
       ? todos.edges.filter(

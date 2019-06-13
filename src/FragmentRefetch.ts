@@ -31,8 +31,7 @@ class FragmentRefetch {
         this._refetchSubscription && this._refetchSubscription.unsubscribe();
     }
 
-    refetch(rootVariables: Variables,
-        environment: IEnvironment,
+    refetch(environment: IEnvironment,
         fragmentVariables: Variables,
         taggedNode: GraphQLTaggedNode,
         refetchVariables:
@@ -43,11 +42,10 @@ class FragmentRefetch {
         options: RefetchOptions,
         prevResult: ContainerResult,
         setResult: any) { //TODO Function
-        let fetchVariables =
+        const fetchVariables =
             typeof refetchVariables === 'function'
                 ? refetchVariables(fragmentVariables)
                 : refetchVariables;
-        fetchVariables = { ...rootVariables, ...fetchVariables };
         const newFragmentVariables = renderVariables
             ? { ...fetchVariables, ...renderVariables }
             : fetchVariables;

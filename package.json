@@ -1,6 +1,6 @@
 {
   "name": "relay-hooks",
-  "version": "1.0.0-a20",
+  "version": "1.0.0-rc.1",
   "keywords": [
     "graphql",
     "relay",

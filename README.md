@@ -213,3 +213,6 @@ const Feed = (props) => {
 };
   
 ```
+
+
+## useMutation has been integrated into relay-hooks thanks to the creators of the project [React Relay Mutation](https://github.com/relay-tools/react-relay-mutation)

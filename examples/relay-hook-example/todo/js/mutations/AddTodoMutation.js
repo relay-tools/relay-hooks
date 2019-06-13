@@ -19,7 +19,6 @@ import {
   type RecordSourceSelectorProxy,
 } from 'react-relay';
 
-import { useMutation } from 'relay-hooks'; 
 
 import {ConnectionHandler} from 'relay-runtime';
 import type {TodoApp_user} from 'relay/TodoApp_user.graphql';

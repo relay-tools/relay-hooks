@@ -36,7 +36,7 @@ type Edges = $NonMaybeType<$ElementType<Todos, 'edges'>>;
 type Edge = $NonMaybeType<$ElementType<Edges, number>>;
 type Node = $NonMaybeType<$ElementType<Edge, 'node'>>;
 
-const mutation = graphql`
+export const mutation = graphql`
   mutation MarkAllTodosMutation($input: MarkAllTodosInput!) {
     markAllTodos(input: $input) {
       changedTodos {
@@ -84,7 +84,7 @@ function getOptimisticResponse(
   };
 }
 
-function commit(
+function commit(mutate,
   complete: boolean,
   todos: Todos,
   user: TodoList_user,
@@ -94,7 +94,7 @@ function commit(
     userId: user.userId,
   };
 
-  return useMutation(mutation, {
+  return mutate({
     variables: {
       input,
     },

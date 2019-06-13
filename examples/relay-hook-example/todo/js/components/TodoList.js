@@ -11,14 +11,14 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import MarkAllTodosMutation from '../mutations/MarkAllTodosMutation';
+import MarkAllTodosMutation, {mutation} from '../mutations/MarkAllTodosMutation';
 import Todo from './Todo';
 
 import React from 'react';
 import {createFragmentContainer, graphql, type RelayProp} from 'react-relay';
 import QueryApp from '../query/QueryApp';
 import type {TodoList_user} from 'relay/TodoList_user.graphql';
-import { useFragment } from 'relay-hooks';
+import { useFragment, useMutation } from 'relay-hooks';
 type Todos = $NonMaybeType<$ElementType<TodoList_user, 'todos'>>;
 type Edges = $NonMaybeType<$ElementType<Todos, 'edges'>>;
 type Edge = $NonMaybeType<$ElementType<Edges, number>>;
@@ -52,12 +52,14 @@ const fragmentSpec = graphql`
 
 const TodoList = (props) => {
   const { refetch } = props;
-  const {  user, user: { todos, completedCount, totalCount }, } = useFragment(fragmentSpec, props.user);
+  const user = useFragment(fragmentSpec, props.user);
+  const  { todos, completedCount, totalCount } = user;
+  const [mutate] = useMutation(mutation);
   const handleMarkAllChange = (e: SyntheticEvent<HTMLInputElement>) => {
     const complete = e.currentTarget.checked;
 
     if (todos) {
-      MarkAllTodosMutation.commit(relay.environment, complete, todos, user);
+      MarkAllTodosMutation.commit(mutate, complete, todos, user);
     }
   };
 

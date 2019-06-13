@@ -25,7 +25,7 @@ import type {
   RenameTodoMutationResponse,
 } from 'relay/RenameTodoMutation.graphql';
 
-const mutation = graphql`
+export const mutation = graphql`
   mutation RenameTodoMutation($input: RenameTodoInput!) {
     renameTodo(input: $input) {
       todo {
@@ -50,7 +50,7 @@ function getOptimisticResponse(
   };
 }
 
-function commit(
+function commit(mutate,
   text: string,
   todo: Todo_todo,
 ): Disposable {
@@ -59,7 +59,7 @@ function commit(
     id: todo.id,
   };
 
-  return useMutation(mutation, {
+  return mutate({
     variables: {
       input,
     },

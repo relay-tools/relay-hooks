@@ -53,7 +53,7 @@ const usePrevious = function usePrevious(value): any {
 }
 
 
-const useFragment = function (fragmentDef, fragmentRef: any, ):FragmentResult {
+const useOssFragment = function (fragmentDef, fragmentRef: any, ):FragmentResult {
   const { environment }: RelayContext = useContext(ReactRelayContext);
   const prev = usePrevious({ environment, fragmentRef });
   const [fragments, setFragments] = useState<any>(() => {
@@ -63,7 +63,7 @@ const useFragment = function (fragmentDef, fragmentRef: any, ):FragmentResult {
   });
 
 
-  const [result, setResult] = useState<{ [key: string]: any }>(() => {
+  const [result, setResult] = useState<ContainerResult>(() => {
     return newResolver();
   });
 
@@ -73,11 +73,12 @@ const useFragment = function (fragmentDef, fragmentRef: any, ):FragmentResult {
     const {
       createFragmentSpecResolver,
     } = environment.unstable_internal;
+    const resKey = fragments.name.split('_').pop();
     const res = createFragmentSpecResolver(
       {environment},
       'useFragment',
-      {frag: fragments},
-      {frag: fragmentRef},
+      {[resKey]: fragments},
+      {[resKey]: fragmentRef},
     )
     res.setCallback(() => {
       const newData = resolver.resolve();
@@ -113,12 +114,85 @@ const useFragment = function (fragmentDef, fragmentRef: any, ):FragmentResult {
     }
   }, [environment, fragmentRef]);
 
+  function _getFragmentVariables(): Variables {
+    const {
+      getVariablesFromObject,
+    } = environment.unstable_internal;
+    return getVariablesFromObject(
+      // NOTE: We pass empty operationVariables because we want to prefer
+      // the variables from the fragment owner
+      {},
+      fragments,
+      fragmentRef,
+      getFragmentOwners(fragments, fragmentRef),
+    );
+  }
 
+  function refetch(taggedNode: GraphQLTaggedNode,
+    refetchVariables:
+      | Variables
+      | ((fragmentVariables: Variables) => Variables),
+    renderVariables: Variables,
+    observerOrCallback: ObserverOrCallback,
+    options: RefetchOptions, ) {
+    return (prev.fragmentRefetch as FragmentRefetch).refetch(environment,
+      _getFragmentVariables(),
+      taggedNode,
+      refetchVariables,
+      renderVariables,
+      observerOrCallback,
+      options,
+      result,
+      setResult
+    );
+  }
 
-  return result.data && result.data.frag ? {...result.data.frag} : {};
+  function loadMore(connectionConfig: ConnectionConfig,
+    pageSize: number,
+    observerOrCallback: ObserverOrCallback,
+    options: RefetchOptions, ) {
+    (prev.fragmentPagination as FragmentPagination).init(result, fragmentRef);
+    return (prev.fragmentPagination as FragmentPagination).loadMore(environment,
+      connectionConfig,
+      fragmentRef,
+      pageSize,
+      observerOrCallback,
+      options,
+      result,
+      setResult
+    );
+  }
+
+  function refetchConnection(connectionConfig: ConnectionConfig,
+    totalCount: number,
+    callback: ObserverOrCallback,
+    refetchVariables: Variables, ) {
+    (prev.fragmentPagination as FragmentPagination).init(result, fragmentRef);
+    return (prev.fragmentPagination as FragmentPagination).refetchConnection(environment,
+      connectionConfig,
+      fragmentRef,
+      result,
+      setResult,
+      totalCount,
+      callback,
+      refetchVariables
+    );
+  }
+
+  function hasMore() {
+    (prev.fragmentPagination as FragmentPagination).init(result, fragmentRef);
+    return (prev.fragmentPagination as FragmentPagination).hasMore(result, fragmentRef);
+  }
+
+  function isLoading() {
+    (prev.fragmentPagination as FragmentPagination).init(result, fragmentRef);
+    return (prev.fragmentPagination as FragmentPagination).isLoading();
+  }
+
+  return { ...result.data, refetch, loadMore, hasMore, isLoading, refetchConnection };
 }
 
-export default useFragment;
+export default useOssFragment;
 
 /**
  * use case?

@@ -24,7 +24,7 @@ import type {
   ChangeTodoStatusMutationResponse,
 } from 'relay/ChangeTodoStatusMutation.graphql';
 
-const mutation = graphql`
+export const mutation = graphql`
   mutation ChangeTodoStatusMutation($input: ChangeTodoStatusInput!) {
     changeTodoStatus(input: $input) {
       todo {
@@ -61,6 +61,7 @@ function getOptimisticResponse(
 }
 
 function commit(
+  mutate,
   complete: boolean,
   todo: Todo_todo,
   user: Todo_user,
@@ -71,7 +72,7 @@ function commit(
     id: todo.id,
   };
 
-  return useMutation(mutation, {
+  return mutate({
     variables: {
       input,
     },

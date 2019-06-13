@@ -11,14 +11,14 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ChangeTodoStatusMutation from '../mutations/ChangeTodoStatusMutation';
-import RemoveTodoMutation from '../mutations/RemoveTodoMutation';
-import RenameTodoMutation from '../mutations/RenameTodoMutation';
+import ChangeTodoStatusMutation, {mutation as mutationChange} from '../mutations/ChangeTodoStatusMutation';
+import RemoveTodoMutation, {mutation as mutationRemove} from '../mutations/RemoveTodoMutation';
+import RenameTodoMutation, {mutation as mutationRename} from '../mutations/RenameTodoMutation';
 import TodoTextInput from './TodoTextInput';
 
 import React, {useState} from 'react';
 import {createFragmentContainer, graphql, type RelayProp} from 'react-relay';
-import { useFragment } from 'relay-hooks';
+import { useFragment, useMutation } from 'relay-hooks';
 import classnames from 'classnames';
 import type {Todo_todo} from 'relay/Todo_todo.graphql';
 import type {Todo_user} from 'relay/Todo_user.graphql';
@@ -46,13 +46,17 @@ const fragmentSpecTodo = graphql`
   `;
 
 const Todo = (props) => {
-  const { user } = useFragment(fragmentSpecUser, props.user);
-  const { todo } = useFragment(fragmentSpecTodo, props.todo);
+  const user = useFragment(fragmentSpecUser, props.user);
+  const todo = useFragment(fragmentSpecTodo, props.todo);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const [mutateChange] = useMutation(mutationChange);
+  const [mutateRename] = useMutation(mutationRename);
+  const [mutateRemove] = useMutation(mutationRemove);
 
   const handleCompleteChange = (e: SyntheticEvent<HTMLInputElement>) => {
     const complete = e.currentTarget.checked;
-    ChangeTodoStatusMutation.commit(relay.environment, complete, todo, user);
+    ChangeTodoStatusMutation.commit(mutateChange, complete, todo, user);
   };
 
   const handleDestroyClick = () => removeTodo();
@@ -66,11 +70,11 @@ const Todo = (props) => {
 
   const handleTextInputSave = (text: string) => {
     setIsEditing(false);
-    RenameTodoMutation.commit(relay.environment, text, todo);
+    RenameTodoMutation.commit(mutateRename, text, todo);
   };
 
   const removeTodo = () =>
-    RemoveTodoMutation.commit(relay.environment, todo, user);
+    RemoveTodoMutation.commit(mutateRemove, todo, user);
 
   return (
     <li

@@ -7,7 +7,7 @@ import {
 
 const RelayEnvironmentProvider = function (props: {children: React.ReactNode, environment?: Environment})  {
 
-    return <ReactRelayContext.Provider value={ {relay: { environment: props.environment } }}>
+    return <ReactRelayContext.Provider value={ { environment: props.environment }}>
         {props.children}
     </ReactRelayContext.Provider>
 

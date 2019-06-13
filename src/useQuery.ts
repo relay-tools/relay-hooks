@@ -13,7 +13,7 @@ import { UseQueryProps, RenderProps, OperationContextProps, STORE_THEN_NETWORK, 
 
 
 const useQuery = function (props: UseQueryProps)  {
-    const { relay: { environment } } = useContext(ReactRelayContext);
+    const { environment } = useContext(ReactRelayContext);
     const { query, variables } = props;
     const dataFrom = props.dataFrom || STORE_OR_NETWORK;
     const prev = usePrevious({ environment, query, variables});

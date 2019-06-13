@@ -19,7 +19,7 @@ import TodoTextInput from './TodoTextInput';
 import React from 'react';
 import {graphql} from 'react-relay';
 import type {RelayProp} from 'react-relay';
-import { useFragment } from 'relay-hooks';
+import { useRefetch, useMutation } from 'relay-hooks';
 import type {TodoApp_user} from 'relay/TodoApp_user.graphql';
 
 type Props = {|
@@ -38,7 +38,7 @@ const fragmentSpec = graphql`
   `;
 
 const TodoApp = (props) => {
-  const { user } = useFragment(fragmentSpec, props.user);
+  const { user, refetch } = useRefetch(fragmentSpec, props.user);
   const [mutate, { loading }] = useMutation(mutation);
   const handleTextInputSave = (text: string) => {
     AddTodoMutation.commit(mutate, text, user);
@@ -60,7 +60,7 @@ const TodoApp = (props) => {
           />
         </header>
 
-        <TodoList user={user} />
+        <TodoList user={user} refetch={refetch} />
         {hasTodos && <TodoListFooter user={user} />}
       </section>
 

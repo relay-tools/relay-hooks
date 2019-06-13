@@ -25,7 +25,7 @@ import type {Todo_user} from 'relay/Todo_user.graphql';
 import type {Todo_todo} from 'relay/Todo_todo.graphql';
 import type {RemoveTodoInput} from 'relay/RemoveTodoMutation.graphql';
 
-const mutation = graphql`
+export const mutation = graphql`
   mutation RemoveTodoMutation($input: RemoveTodoInput!) {
     removeTodo(input: $input) {
       deletedTodoId
@@ -47,7 +47,7 @@ function sharedUpdater(
   ConnectionHandler.deleteNode(conn, deletedID);
 }
 
-function commit(
+function commit(mutate,
   todo: Todo_todo,
   user: Todo_user,
 ): Disposable {
@@ -56,7 +56,7 @@ function commit(
     userId: user.userId,
   };
 
-  return useMutation(mutation, {
+  return mutate({
     variables: {
       input,
     },

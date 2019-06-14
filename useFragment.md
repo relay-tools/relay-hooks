@@ -1,7 +1,5 @@
 # useFragment
 
-## useFragment
-
 ```ts
 import { useFragment, graphql } from 'relay-hooks';
 

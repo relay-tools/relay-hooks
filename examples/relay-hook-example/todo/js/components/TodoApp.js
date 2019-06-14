@@ -64,6 +64,11 @@ const TodoApp = (props) => {
         {hasTodos && <TodoListFooter user={user} />}
       </section>
 
+      <button onClick={props.retry} 
+      className="refetch" >
+          Retry
+          </button>
+
       <footer className="info">
         <p>Double-click to edit a todo</p>
 

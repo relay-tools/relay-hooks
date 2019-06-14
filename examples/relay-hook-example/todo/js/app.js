@@ -56,15 +56,14 @@ const modernEnvironment: Environment = new Environment({
 const rootElement = document.getElementById('root');
 
 const AppTodo = function (appProps)  {
-  const hooksProps = useQuery({ query: QueryApp,
+  const {props, error, retry, cached} = useQuery({ query: QueryApp,
     variables: {
       // Mock authenticated ID that matches database
       userId: 'me',
     }});
 
-  const {props, error, retry, cached} = hooksProps;
   if (props && props.user) {
-    return <TodoApp user={props.user} />;
+    return <TodoApp user={props.user} retry={retry}/>;
   } else if (error) {
     return <div>{error.message}</div>;
   }

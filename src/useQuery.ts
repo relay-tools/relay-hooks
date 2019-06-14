@@ -68,7 +68,7 @@ const useQuery = function (props: UseQueryProps)  {
                     cacheConfig: undefined,
                     dataFrom,
                     environment,
-                    onDataChange: !prev.environment || prev.environment === undefined ? (params: { //TODO BETTER
+                    onDataChange: !queryFetcher._fetchOptions ? (params: { //TODO BETTER
                         error?: Error,
                         snapshot?: Snapshot,
                     }): void => {

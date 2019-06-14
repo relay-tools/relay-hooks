@@ -1,10 +1,14 @@
-import useOssFragment from "./useOssFragment";
+import useOssFragment, { PaginationFunction } from "./useOssFragment";
 
-const usePagination = function (fragmentDef, fragmentRef: any, ):any {
+type PaginationResult = [
+    any,
+    PaginationFunction];
 
-    const {refetch, ...others} = useOssFragment(fragmentDef, fragmentRef);
+const usePagination = function (fragmentDef, fragmentRef: any, ):PaginationResult {
 
-    return others;
+    const [data, { loadMore, hasMore, isLoading, refetchConnection }] = useOssFragment(fragmentDef, fragmentRef);
+
+    return [data, { loadMore, hasMore, isLoading, refetchConnection }];
 }
 
 export default usePagination;

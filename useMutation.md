@@ -1,3 +1,7 @@
+## Credit useMutation 
+
+useMutation has been integrated into relay-hooks thanks to the creators of the project [React Relay Mutation](https://github.com/relay-tools/react-relay-mutation)
+
 Higher-level [React](https://facebook.github.io/react/) mutation API for [Relay](http://facebook.github.io/relay/).
 
 ## Usage

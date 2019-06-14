@@ -46,8 +46,8 @@ const fragmentSpec = graphql`
   `;
 
 const TodoListFooter = (props) => {
-  const { user,
-    user: { todos, completedCount, totalCount }, } = useOssFragment(fragmentSpec, props.user)
+  const [user, functions] = useOssFragment(fragmentSpec, props.user);
+  const  { todos, completedCount, totalCount } = user;
   const completedEdges: $ReadOnlyArray<?Edge> =
     todos && todos.edges
       ? todos.edges.filter(

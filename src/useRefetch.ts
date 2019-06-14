@@ -1,10 +1,14 @@
-import useOssFragment from "./useOssFragment";
+import useOssFragment, { RefetchFunction } from "./useOssFragment";
 
-const useRefetch = function (fragmentDef, fragmentRef: any, ):any {
+type RefetchResult = [
+    any,
+    RefetchFunction];
 
-    const {loadMore, hasMore, isLoading, refetchConnection, ...others} = useOssFragment(fragmentDef, fragmentRef);
+const useRefetch = function (fragmentDef, fragmentRef: any, ):RefetchResult {
 
-    return others;
+    const [data, { refetch }] = useOssFragment(fragmentDef, fragmentRef);
+
+    return [data , refetch ];
 }
 
 export default useRefetch;

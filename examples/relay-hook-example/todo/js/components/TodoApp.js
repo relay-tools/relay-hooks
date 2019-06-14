@@ -38,7 +38,7 @@ const fragmentSpec = graphql`
   `;
 
 const TodoApp = (props) => {
-  const { user, refetch } = useRefetch(fragmentSpec, props.user);
+  const [user, refetch ] = useRefetch(fragmentSpec, props.user);
   const [mutate, { loading }] = useMutation(mutation);
   const handleTextInputSave = (text: string) => {
     AddTodoMutation.commit(mutate, text, user);

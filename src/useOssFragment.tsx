@@ -23,16 +23,27 @@ export type RefetchOptions = {
   fetchPolicy?: 'store-or-network' | 'network-only',
 };
 
-interface FragmentResult {
-  [key: string]: any,
-  refetch: (taggedNode: any, refetchVariables: any, renderVariables: any, observerOrCallback: any, options: RefetchOptions) => {
-      dispose(): void;
-  };
-  loadMore: (connectionConfig: ConnectionConfig, pageSize: number, observerOrCallback: any, options: RefetchOptions) => any;
+export type PaginationFunction = {
+  loadMore: (connectionConfig: ConnectionConfig, pageSize: number,
+    observerOrCallback: any, options: RefetchOptions) => any;
   hasMore: () => boolean;
   isLoading: () => boolean;
-  refetchConnection: (connectionConfig: ConnectionConfig, totalCount: number, callback: any, refetchVariables: any) => any;
-}
+  refetchConnection: (connectionConfig: ConnectionConfig, totalCount: number,
+    callback: any, refetchVariables: any) => any;
+};
+
+export type RefetchFunction = (taggedNode: any, refetchVariables: any, renderVariables: any,
+    observerOrCallback: any, options: RefetchOptions) => {
+      dispose(): void;
+    };
+
+interface OssFragmentFunction extends PaginationFunction { 
+  refetch: RefetchFunction
+};
+
+type FragmentResult = [
+  any,
+  OssFragmentFunction];
 export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
 
 const usePrevious = function usePrevious(value): any {
@@ -53,7 +64,7 @@ const usePrevious = function usePrevious(value): any {
 }
 
 
-const useOssFragment = function (fragmentDef, fragmentRef: any, ):FragmentResult {
+const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResult {
   const { environment }: RelayContext = useContext(ReactRelayContext);
   const prev = usePrevious({ environment, fragmentRef });
   const [fragments, setFragments] = useState<any>(() => {
@@ -73,12 +84,12 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ):FragmentResult
     const {
       createFragmentSpecResolver,
     } = environment.unstable_internal;
-    const resKey = fragments.name.split('_').pop();
+    //const resKey = fragments.name.split('_').pop();
     const res = createFragmentSpecResolver(
-      {environment},
+      { environment },
       'useFragment',
-      {[resKey]: fragments},
-      {[resKey]: fragmentRef},
+      { frag: fragments },
+      { frag: fragmentRef },
     )
     res.setCallback(() => {
       const newData = resolver.resolve();
@@ -189,7 +200,7 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ):FragmentResult
     return (prev.fragmentPagination as FragmentPagination).isLoading();
   }
 
-  return { ...result.data, refetch, loadMore, hasMore, isLoading, refetchConnection };
+  return [result.data && result.data.frag ? { ...result.data.frag } : {}, { refetch, loadMore, hasMore, isLoading, refetchConnection }];
 }
 
 export default useOssFragment;

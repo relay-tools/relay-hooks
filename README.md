@@ -9,24 +9,36 @@ Install react-relay and relay-hooks using yarn or npm:
 yarn add react-relay relay-hooks
 ```
 
-## Usage QueryRenderer Backward Compatibility 
+## RelayEnvironmentProvider
 
-Change the renderer 
+Since queries with `useQuery` no longer set context, we will expose a new `RelayEnvironmentProvider` component that takes an `environment` and sets it in context; 
+variables will no longer be part of context. 
+A `RelayEnvironmentProvider` should be rendered once at the root of the app, and multiple useQuery's can be rendered under this environment provider.
 
 ```ts
-import {QueryRenderer} from 'relay-hooks'; 
+ReactDOM.render(
+    <RelayEnvironmentProvider environment={modernEnvironment}>
+      <AppTodo/>
+    </RelayEnvironmentProvider>,
+    rootElement,
+  );
 ```
 
-## Usage Hooks
+## useQuery
 
-* useQuery
+`useQuery` will no longer take environment as an argument. Instead it reads the environment set in context; this also implies that it no longer sets any React context. 
+
+- [ ] `useQuery` will now take a `fetchPolicy` as part of a 3rd configuration argument, to determine whether it should use data cached in the Relay store and whether to send a network request. The options are:
+  - [ ] `store-or-network` (default): Reuse data cached in the store; if the whole query is cached, skip the network request
+  - [ ] `store-and-network`: Reuse data cached in the store; always send a network request.
+  - [ ] `network-only`: Don't reuse data cached in the store; always send a network request. (This is the default behavior of Relay's existing `QueryRenderer`.
+  - [ ] `store-only`: Reuse data cached in the store; never send a network request.
 
 ```ts
 import {useQuery, graphql } from 'relay-hooks';
 
 const AppTodo = function (appProps)  {
-  const hooksProps = useQuery({environment: modernEnvironment,
-    query: graphql`
+  const {props, error, retry, cached} = useQuery({ query: graphql`
       query appQuery($userId: String) {
         user(id: $userId) {
           ...TodoApp_user
@@ -37,7 +49,6 @@ const AppTodo = function (appProps)  {
       userId: 'me',
     }});
 
-  const {props, error, retry, cached} = hooksProps;
   if (props && props.user) {
     return <TodoApp {...hooksProps} />;
   } else if (error) {
@@ -47,169 +58,26 @@ const AppTodo = function (appProps)  {
 
 }
 ```
-* useFragment
 
-```ts
-import { useFragment, graphql } from 'relay-hooks';
+## useFragment
 
-const fragmentSpec = {
-  user: graphql`
-    fragment TodoApp_user on User {
-      id
-      userId
-      totalCount
-    }
-  `,
-};
+[See useFragment.md](./useFragment.md)
 
-const TodoApp = (props) => {
-    const { user, relay } = useFragment(props, fragmentSpec);
-    return (   
-        <div>
-            <p> {user.id} </p>
-            <p> {user.userId} </p>
-            <p> {user.totalCount} </p>
-        </div>
-        );
-};
-  
-```
+## useRefetch
 
-* useFragment with refetch (refetchContainer)
+[See useRefetch.md](./useRefetch.md)
 
-```ts
-import { useFragment, graphql } from 'relay-hooks';
+## usePagination
 
-const fragmentSpec = {
-  user: graphql`
-    fragment TodoList_user on User {
-      todos(
-        first: 2147483647 # max GraphQLInt
-      ) @connection(key: "TodoList_todos") {
-        edges {
-          node {
-            id
-            complete
-            ...Todo_todo
-          }
-        }
-      }
-      id
-      userId
-      totalCount
-      completedCount
-      ...Todo_user
-    }
-  `,
-};
+[See usePagination.md](./usePagination.md)
 
-const TodoApp = (props) => {
-    const { user, relay, refetch } = useFragment(props, fragmentSpec);
-    const handlerRefetch = () => {
-    const response = refetch(QueryApp,
-      {userId: 'me'},  
-      null,  
-      () => { console.log('Refetch done') },
-      {force: true},  
-    );
-    //response.dispose(); 
+## useMutation
 
-  }
+[See useMutation.md](./useMutation.md)
 
-    return (   
-        <div>
-            <p> {user.id} </p>
-            <p> {user.userId} </p>
-            <p> {user.totalCount} </p>
-            <button onClick={handlerRefetch}> Refetch </button>
-        </div>
-        );
-};
-  
-```
+## useOssFragment
 
-* useFragment with refetch (paginationContainer)
+the useOssFragment is a hooks not provided in the official version of react-relay. Using it you can manage fragment, refetch and pagination containers.
+For reasons of cost of migration to the react-relay version it is recommended to use the other hooks.
 
-```ts
-import { useFragment, graphql } from 'relay-hooks';
-
-const fragmentSpec = {
-    user: graphql`
-      fragment Feed_user on User
-      @argumentDefinitions(
-        count: {type: "Int", defaultValue: 10}
-        cursor: {type: "ID"}
-        orderby: {type: "[FriendsOrdering]", defaultValue: [DATE_ADDED]}
-      ) {
-        feed(
-          first: $count
-          after: $cursor
-          orderby: $orderBy # Non-pagination variables
-        ) @connection(key: "Feed_feed") {
-          edges {
-            node {
-              id
-              ...Story_story
-            }
-          }
-        }
-      }
-    `,
-  };
-
-const connectionConfig = {
-    getVariables(props, {count, cursor}, fragmentVariables) {
-      return {
-        count,
-        cursor,
-        orderBy: fragmentVariables.orderBy,
-        // userID isn't specified as an @argument for the fragment, but it should be a variable available for the fragment under the query root.
-        userID: fragmentVariables.userID,
-      };
-    },
-    query: graphql`
-      # Pagination query to be fetched upon calling 'loadMore'.
-      # Notice that we re-use our fragment, and the shape of this query matches our fragment spec.
-      query FeedPaginationQuery(
-        $count: Int!
-        $cursor: ID
-        $orderBy: [FriendsOrdering]!
-        $userID: ID!
-      ) {
-        user: node(id: $userID) {
-          ...Feed_user @arguments(count: $count, cursor: $cursor, orderBy: $orderBy)
-        }
-      }
-    `
-};
-
-const Feed = (props) => {
-    const { isLoading, hasMore, loadMore, user } = useFragment(props, fragmentSpec);
-    const _loadMore = () => {
-      if (!hasMore() || isLoading()) {
-        return;
-      }
-
-      loadMore(
-        connectionConfig,
-        10,  // Fetch the next 10 feed items
-        error => {
-          console.log(error);
-        },
-      );
-    }
-
-    return (   
-        <div>
-        {user.feed.edges.map(
-          edge => <Story story={edge.node} key={edge.node.id} />
-        )}
-        <button
-          onPress={_loadMore}
-          title="Load More"
-        />
-      </div>
-        );
-};
-  
-```
+[See useOssFragment.md](./useOssFragment.md)

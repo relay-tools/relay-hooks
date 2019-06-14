@@ -18,13 +18,14 @@ import {
   type Environment,
   type RecordSourceSelectorProxy,
 } from 'react-relay';
+import { useMutation } from 'relay-hooks'; 
 
 import {ConnectionHandler} from 'relay-runtime';
 import type {Todo_user} from 'relay/Todo_user.graphql';
 import type {Todo_todo} from 'relay/Todo_todo.graphql';
 import type {RemoveTodoInput} from 'relay/RemoveTodoMutation.graphql';
 
-const mutation = graphql`
+export const mutation = graphql`
   mutation RemoveTodoMutation($input: RemoveTodoInput!) {
     removeTodo(input: $input) {
       deletedTodoId
@@ -46,8 +47,7 @@ function sharedUpdater(
   ConnectionHandler.deleteNode(conn, deletedID);
 }
 
-function commit(
-  environment: Environment,
+function commit(mutate,
   todo: Todo_todo,
   user: Todo_user,
 ): Disposable {
@@ -56,8 +56,7 @@ function commit(
     userId: user.userId,
   };
 
-  return commitMutation(environment, {
-    mutation,
+  return mutate({
     variables: {
       input,
     },

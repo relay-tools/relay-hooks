@@ -12,12 +12,12 @@
  */
 
 import {
-  commitMutation,
   graphql,
   type Disposable,
   type Environment,
   type RecordSourceSelectorProxy,
 } from 'react-relay';
+import { useMutation } from 'relay-hooks'; 
 
 import {ConnectionHandler} from 'relay-runtime';
 import type {RemoveCompletedTodosInput} from 'relay/RemoveCompletedTodosMutation.graphql';
@@ -28,7 +28,7 @@ type Edges = $NonMaybeType<$ElementType<Todos, 'edges'>>;
 type Edge = $NonMaybeType<$ElementType<Edges, number>>;
 type Node = $NonMaybeType<$ElementType<Edge, 'node'>>;
 
-const mutation = graphql`
+export const mutation = graphql`
   mutation RemoveCompletedTodosMutation($input: RemoveCompletedTodosInput!) {
     removeCompletedTodos(input: $input) {
       deletedTodoIds
@@ -54,8 +54,7 @@ function sharedUpdater(
   );
 }
 
-function commit(
-  environment: Environment,
+function commit(mutate,
   todos: Todos,
   user: TodoListFooter_user,
 ): Disposable {
@@ -63,8 +62,7 @@ function commit(
     userId: user.userId,
   };
 
-  return commitMutation(environment, {
-    mutation,
+  return mutate({
     variables: {
       input,
     },

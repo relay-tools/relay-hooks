@@ -291,7 +291,6 @@ class FragmentPagination {
     };
 
     refetchConnection = (
-        rootVariables: Variables,
         environment: IEnvironment,
         connectionConfig: ConnectionConfig,
         props: any,
@@ -307,7 +306,7 @@ class FragmentPagination {
             cursor: null,
             totalCount,
         };
-        const fetch = this._fetchPage(rootVariables, environment, prevResult, setResult, connectionConfig, props,
+        const fetch = this._fetchPage(environment, prevResult, setResult, connectionConfig, props,
             paginatingVariables,
             toObserver(observerOrCallback),
             { force: true },
@@ -321,8 +320,7 @@ class FragmentPagination {
 
 
 
-    loadMore(rootVariables: Variables,
-        environment: IEnvironment,
+    loadMore(environment: IEnvironment,
         connectionConfig: ConnectionConfig,
         props: any,
         pageSize: number,
@@ -339,8 +337,7 @@ class FragmentPagination {
         }
         const totalCount = connectionData.edgeCount + pageSize;
         if (options && options.force) {
-            return this.refetchConnection(rootVariables,
-                environment, connectionConfig, props, prevResult, setResult,
+            return this.refetchConnection(environment, connectionConfig, props, prevResult, setResult,
                 totalCount, observerOrCallback, undefined);
         }
         const { END_CURSOR, START_CURSOR } = ConnectionInterface.get();
@@ -356,12 +353,11 @@ class FragmentPagination {
             cursor: cursor,
             totalCount,
         };
-        const fetch = this._fetchPage(rootVariables, environment, prevResult, setResult, connectionConfig, props, paginatingVariables, observer, options);
+        const fetch = this._fetchPage(environment, prevResult, setResult, connectionConfig, props, paginatingVariables, observer, options);
         return { dispose: fetch.unsubscribe };
     };
 
     _fetchPage(
-        variables: Variables,
         environment: IEnvironment,
         prevResult: ContainerResult,
         setResult: any,
@@ -457,7 +453,6 @@ class FragmentPagination {
 
         const onNext = (payload, complete) => {
             const contextVariables = {
-                ...variables,
                 ...fragmentVariables,
             };
             const prevData = resolver.resolve();

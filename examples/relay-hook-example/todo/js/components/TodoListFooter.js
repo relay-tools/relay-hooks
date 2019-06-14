@@ -11,7 +11,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import RemoveCompletedTodosMutation from '../mutations/RemoveCompletedTodosMutation';
+import RemoveCompletedTodosMutation, {mutation} from '../mutations/RemoveCompletedTodosMutation';
 
 import React from 'react';
 import { graphql, createFragmentContainer, type RelayProp } from 'react-relay';
@@ -19,15 +19,14 @@ import type { TodoListFooter_user } from 'relay/TodoListFooter_user.graphql';
 type Todos = $NonMaybeType<$ElementType<TodoListFooter_user, 'todos'>>;
 type Edges = $NonMaybeType<$ElementType<Todos, 'edges'>>;
 type Edge = $NonMaybeType<$ElementType<Edges, number>>;
-import { useFragment } from 'relay-hooks';
+import { useOssFragment, useMutation } from 'relay-hooks';
 
 type Props = {|
   +relay: RelayProp,
   +user: TodoListFooter_user,
 |};
 
-const fragmentSpec = {
-  user: graphql`
+const fragmentSpec = graphql`
     fragment TodoListFooter_user on User {
       id
       userId
@@ -44,13 +43,11 @@ const fragmentSpec = {
       }
       totalCount
     }
-  `,
-};
+  `;
 
 const TodoListFooter = (props) => {
-  const { relay } = props;
-  const { user,
-    user: { todos, completedCount, totalCount }, } = useFragment(props, fragmentSpec)
+  const [user, functions] = useOssFragment(fragmentSpec, props.user);
+  const  { todos, completedCount, totalCount } = user;
   const completedEdges: $ReadOnlyArray<?Edge> =
     todos && todos.edges
       ? todos.edges.filter(
@@ -58,9 +55,10 @@ const TodoListFooter = (props) => {
       )
       : [];
 
+  const [mutate] = useMutation(mutation);
   const handleRemoveCompletedTodosClick = () => {
     RemoveCompletedTodosMutation.commit(
-      relay.environment,
+      mutate,
       {
         edges: completedEdges,
       },

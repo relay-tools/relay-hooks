@@ -11,7 +11,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import AddTodoMutation from '../mutations/AddTodoMutation';
+import AddTodoMutation, {mutation} from '../mutations/AddTodoMutation';
 import TodoList from './TodoList';
 import TodoListFooter from './TodoListFooter';
 import TodoTextInput from './TodoTextInput';
@@ -19,7 +19,7 @@ import TodoTextInput from './TodoTextInput';
 import React from 'react';
 import {graphql} from 'react-relay';
 import type {RelayProp} from 'react-relay';
-import { useFragment } from 'relay-hooks';
+import { useRefetch, useMutation } from 'relay-hooks';
 import type {TodoApp_user} from 'relay/TodoApp_user.graphql';
 
 type Props = {|
@@ -27,8 +27,7 @@ type Props = {|
   +user: TodoApp_user,
 |};
 
-const fragmentSpec = {
-  user: graphql`
+const fragmentSpec = graphql`
     fragment TodoApp_user on User {
       id
       userId
@@ -36,14 +35,13 @@ const fragmentSpec = {
       ...TodoListFooter_user
       ...TodoList_user
     }
-  `,
-};
+  `;
 
 const TodoApp = (props) => {
-  const fragProps = useFragment(props, fragmentSpec);
-  const {user} = fragProps;
+  const [user, refetch ] = useRefetch(fragmentSpec, props.user);
+  const [mutate, { loading }] = useMutation(mutation);
   const handleTextInputSave = (text: string) => {
-    AddTodoMutation.commit(props.relay.environment, text, user);
+    AddTodoMutation.commit(mutate, text, user);
     return;
   };
 
@@ -62,9 +60,14 @@ const TodoApp = (props) => {
           />
         </header>
 
-        <TodoList {...fragProps} />
-        {hasTodos && <TodoListFooter {...fragProps} />}
+        <TodoList user={user} refetch={refetch} />
+        {hasTodos && <TodoListFooter user={user} />}
       </section>
+
+      <button onClick={props.retry} 
+      className="refetch" >
+          Retry
+          </button>
 
       <footer className="info">
         <p>Double-click to edit a todo</p>

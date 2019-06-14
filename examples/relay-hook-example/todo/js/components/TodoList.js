@@ -11,14 +11,14 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import MarkAllTodosMutation from '../mutations/MarkAllTodosMutation';
+import MarkAllTodosMutation, {mutation} from '../mutations/MarkAllTodosMutation';
 import Todo from './Todo';
 
 import React from 'react';
 import {createFragmentContainer, graphql, type RelayProp} from 'react-relay';
 import QueryApp from '../query/QueryApp';
 import type {TodoList_user} from 'relay/TodoList_user.graphql';
-import { useFragment } from 'relay-hooks';
+import { useFragment, useMutation } from 'relay-hooks';
 type Todos = $NonMaybeType<$ElementType<TodoList_user, 'todos'>>;
 type Edges = $NonMaybeType<$ElementType<Todos, 'edges'>>;
 type Edge = $NonMaybeType<$ElementType<Edges, number>>;
@@ -29,8 +29,7 @@ type Props = {|
   +user: TodoList_user,
 |};
 
-const fragmentSpec = {
-  user: graphql`
+const fragmentSpec = graphql`
     fragment TodoList_user on User {
       todos(
         first: 2147483647 # max GraphQLInt
@@ -49,19 +48,18 @@ const fragmentSpec = {
       completedCount
       ...Todo_user
     }
-  `,
-};
+  `;
 
 const TodoList = (props) => {
-  const { relay, refetch } = props;
-  const fragProps = useFragment(props, fragmentSpec);
-    const {  user,
-      user: { todos, completedCount, totalCount }, } = fragProps;
+  const { refetch } = props;
+  const user = useFragment(fragmentSpec, props.user);
+  const  { todos, completedCount, totalCount } = user;
+  const [mutate] = useMutation(mutation);
   const handleMarkAllChange = (e: SyntheticEvent<HTMLInputElement>) => {
     const complete = e.currentTarget.checked;
 
     if (todos) {
-      MarkAllTodosMutation.commit(relay.environment, complete, todos, user);
+      MarkAllTodosMutation.commit(mutate, complete, todos, user);
     }
   };
 
@@ -97,7 +95,7 @@ const TodoList = (props) => {
 
       <ul className="todo-list">
         {nodes.map((node: Node) => (
-          <Todo key={node.id} todo={node} {...fragProps} />
+          <Todo key={node.id} todo={node} user={user} />
         ))}
       </ul>
       <button onClick={handlerRefetch} 

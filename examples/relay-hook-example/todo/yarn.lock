@@ -2396,6 +2396,11 @@ es-to-primitive@^1.2.0:
     is-date-object "^1.0.1"
     is-symbol "^1.0.2"
 
+es6-promise@4.2.8:
+  version "4.2.8"
+  resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-4.2.8.tgz#4eb21594c972bc40553d276e510539143db53e0a"
+  integrity sha512-HJDGx5daxeIvxdBxvG2cb9g4tEvwIk3i8+nhX0yGrYmZUzbkdg8QbDevheDB8gd0//uPj4c1EQua8Q+MViT0/w==
+
 es6-promise@^4.0.3:
   version "4.2.5"
   resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-4.2.5.tgz#da6d0d5692efb461e082c14817fe2427d8f5d054"
@@ -3766,7 +3771,7 @@ isobject@^3.0.0, isobject@^3.0.1:
   resolved "https://registry.yarnpkg.com/isobject/-/isobject-3.0.1.tgz#4e431e92b11a9731636aa1f9c8d1ccbcfdab78df"
   integrity sha1-TkMekrEalzFjaqH5yNHMvP2reN8=
 
-isomorphic-fetch@^2.1.1:
+isomorphic-fetch@2.2.1, isomorphic-fetch@^2.1.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/isomorphic-fetch/-/isomorphic-fetch-2.2.1.tgz#611ae1acf14f5e81f729507472819fe9733558a9"
   integrity sha1-YRrhrPFPXoH3KVB0coGf6XM1WKk=
@@ -5322,9 +5327,9 @@ relay-compiler@^4.0.0:
     signedsource "^1.0.0"
     yargs "^9.0.0"
 
-"relay-hooks@file:../../../relay-hooks-1.0.0-a28.tgz":
-  version "1.0.0-a28"
-  resolved "file:../../../relay-hooks-1.0.0-a28.tgz#f36f3d276e9872351dfe603bc1724d6ff54798c7"
+"relay-hooks@file:../../../relay-hooks-1.1.0-a3.tgz":
+  version "1.1.0-a3"
+  resolved "file:../../../relay-hooks-1.1.0-a3.tgz#38fbd78074343eefed8a1a787feaef40b27f3ce8"
   dependencies:
     "@restart/hooks" "^0.3.1"
 
@@ -6069,16 +6074,6 @@ to-regex@^3.0.1, to-regex@^3.0.2:
     extend-shallow "^3.0.2"
     regex-not "^1.0.2"
     safe-regex "^1.1.0"
-
-todomvc-app-css@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/todomvc-app-css/-/todomvc-app-css-2.2.0.tgz#6f84b15d9d4e0cf186679489fb236050c822de11"
-  integrity sha512-H03oc3QOxiGXv+MqnotcduZIwoGX8A8QbSx9J4U2Z5R96LrK+dvQmRDTgeCc0nlkPBhd3nUL4EbfS7l0TccM5g==
-
-todomvc-common@^1.0.3:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/todomvc-common/-/todomvc-common-1.0.5.tgz#8c3e799ac9f1fc1573e0c204f984510826914730"
-  integrity sha512-D8kEJmxVMQIWwztEdH+WeiAfXRbbSCpgXq4NkYi+gduJ2tr8CNq7sYLfJvjpQ10KD9QxJwig57rvMbV2QAESwQ==
 
 toidentifier@1.0.0:
   version "1.0.0"

@@ -17,10 +17,10 @@
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "react-relay": "^4.0.0",
-    "relay-hooks": "1.0.0",
-    "todomvc-app-css": "^2.2.0",
-    "todomvc-common": "^1.0.3",
-    "whatwg-fetch": "3.0.0"
+    "relay-hooks": "file:../../../relay-hooks-1.1.0-a3.tgz",
+    "whatwg-fetch": "3.0.0",
+    "isomorphic-fetch": "2.2.1",
+    "es6-promise": "4.2.8"
   },
   "devDependencies": {
     "@babel/core": "^7.3.4",

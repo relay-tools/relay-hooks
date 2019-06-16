@@ -11,10 +11,9 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import 'todomvc-common';
+//import 'todomvc-common';
 
 import * as React from 'react';
-import ReactDOM from 'react-dom';
 
 import {useQuery, RelayEnvironmentProvider} from 'relay-hooks';
 import {
@@ -29,12 +28,13 @@ import {
 import TodoApp, {fragmentSpec} from './components/TodoApp';
 import type {appQueryResponse} from 'relay/appQuery.graphql';
 import QueryApp from './query/QueryApp';
+import RelayNetworkLogger from 'relay-runtime/lib/RelayNetworkLogger'
 
 async function fetchQuery(
   operation: RequestNode,
   variables: Variables,
 ): Promise<{}> {
-  const response = await fetch('/graphql', {
+  const response = await fetch('http://localhost:3000/graphql', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -49,11 +49,10 @@ async function fetchQuery(
 }
 
 const modernEnvironment: Environment = new Environment({
-  network: Network.create(fetchQuery),
+  network: Network.create(RelayNetworkLogger.wrapFetch (fetchQuery, () => '')),
   store: new Store(new RecordSource()),
 });
 
-const rootElement = document.getElementById('root');
 
 const AppTodo = function (appProps)  {
   const {props, error, retry, cached} = useQuery({ query: QueryApp,
@@ -71,11 +70,11 @@ const AppTodo = function (appProps)  {
 
 }
 
-if (rootElement) {
-  ReactDOM.render(
-    <RelayEnvironmentProvider environment={modernEnvironment}>
-      <AppTodo/>
-    </RelayEnvironmentProvider>,
-    rootElement,
-  );
-}
+const App = <RelayEnvironmentProvider environment={modernEnvironment}>
+<AppTodo/>
+</RelayEnvironmentProvider>;
+
+export default App;
+
+
+

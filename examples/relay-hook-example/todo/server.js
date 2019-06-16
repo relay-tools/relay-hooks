@@ -10,13 +10,17 @@
  * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
 import express from 'express';
 import graphQLHTTP from 'express-graphql';
 import path from 'path';
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import {schema} from './data/schema';
+import { renderToString } from 'react-dom/server';
+import App from './js/app'
+import html from './html'
 
 const APP_PORT: number = 3000;
 
@@ -25,7 +29,7 @@ const APP_PORT: number = 3000;
 // The libdefs don't like it, but it's fine.  $FlowFixMe https://webpack.js.org/api/node/
 const compiler: webpack.Compiler = webpack({
   mode: 'development',
-  entry: ['whatwg-fetch', path.resolve(__dirname, 'js', 'app.js')],
+  entry: ['whatwg-fetch', path.resolve(__dirname, 'js', 'index.js')],
   module: {
     rules: [
       {
@@ -50,7 +54,7 @@ const app: WebpackDevServer = new WebpackDevServer(compiler, {
 });
 
 // Serve static resources
-app.use('/', express.static(path.resolve(__dirname, 'public')));
+app.use('/public', express.static(path.resolve(__dirname, 'public')));
 
 // Setup GraphQL endpoint
 app.use(
@@ -60,6 +64,17 @@ app.use(
     pretty: true,
   }),
 );
+
+app.use('/', async (req, res) => {
+  const appString = renderToString( App );
+
+  res.send(html({
+    body: appString,
+    title: 'Relay • TodoMVC SSR'
+  }));
+});
+
+
 
 app.listen(APP_PORT, () => {
   console.log(`App is now running on http://localhost:${APP_PORT}`);

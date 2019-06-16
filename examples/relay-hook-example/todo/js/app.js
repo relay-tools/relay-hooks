@@ -61,6 +61,7 @@ const AppTodo = function (appProps)  {
       userId: 'me',
     }});
 
+    console.log("renderer", props, cached)
   if (props && props.user) {
     return <TodoApp user={props.user} retry={retry}/>;
   } else if (error) {

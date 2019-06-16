@@ -110,6 +110,12 @@ const useQuery = function (props: UseQueryProps)  {
             setHooksProps(renderProps);    
     }
 
+    const isServer = typeof window === 'undefined';
+    if (isServer && prev && !prev.ssrExecute) {
+        prev.ssrExecute = true;
+        execute(environment, query, variables)
+    }
+
    /*useMemo(() => {
           render?
     }, [hooksProps]);*/

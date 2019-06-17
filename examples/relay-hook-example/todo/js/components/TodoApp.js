@@ -28,7 +28,7 @@ type Props = {|
 |};
 
 const fragmentSpec = graphql`
-    fragment TodoApp_data on User {
+    fragment TodoApp_user on User {
       id
       userId
       totalCount

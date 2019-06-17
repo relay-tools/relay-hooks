@@ -9,7 +9,7 @@
     "ssr"
   ],
   "main": "lib/index.js",
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "MIT",
   "description": "Relay Hooks",
   "author": {
     "name": "morrys"

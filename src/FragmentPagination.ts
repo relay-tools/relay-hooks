@@ -148,7 +148,6 @@ class FragmentPagination {
     _init: boolean;
     _direction: string;
     _refetchVariables: Variables;
-    _props: any;
 
     constructor() {
         this._queryFetcher = new ReactRelayQueryFetcher();
@@ -157,7 +156,7 @@ class FragmentPagination {
         this._hasFetched = false;
     }
 
-    init(prevResult: ContainerResult, props: any) {
+    init(prevResult: ContainerResult) {
         if (!this._init) {
             const metadata = findConnectionMetadata(prevResult.resolver._fragments);
             this._getConnectionFromProps =
@@ -170,8 +169,6 @@ class FragmentPagination {
             );
 
             this._getFragmentVariables = createGetFragmentVariables(metadata);
-
-            this._props = props;
 
             this._init = true;
         }
@@ -194,16 +191,13 @@ class FragmentPagination {
         }
     }
 
-    _getConnectionData(data: any, propsFragment: any): {
+    _getConnectionData(data: any): {
         cursor: string,
         edgeCount: number,
         hasMore: boolean,
     } {
         // Extract connection data and verify there are more edges to fetch
-        const props = {
-            ...propsFragment,
-            ...data,
-        };
+        const props = { ...data };
         const connectionData = this._getConnectionFromProps(props);
         if (connectionData == null) {
             return null;
@@ -277,8 +271,9 @@ class FragmentPagination {
         };
     }
 
-    hasMore = (prevResult: ContainerResult, props): boolean => {
-        const connectionData = this._getConnectionData(prevResult.data, props);
+    hasMore = (prevResult: ContainerResult): boolean => {
+        this.init(prevResult);
+        const connectionData = this._getConnectionData(prevResult.data);
         return !!(
             connectionData &&
             connectionData.hasMore &&
@@ -300,6 +295,7 @@ class FragmentPagination {
         observerOrCallback: ObserverOrCallback,
         refetchVariables: Variables,
     ): Disposable => {
+        this.init(prevResult);
         this._refetchVariables = refetchVariables;
         const paginatingVariables = {
             count: totalCount,
@@ -328,9 +324,10 @@ class FragmentPagination {
         options: RefetchOptions,
         prevResult: ContainerResult,
         setResult: any) { //TODO Function
+        this.init(prevResult);
 
         const observer = toObserver(observerOrCallback);
-        const connectionData = this._getConnectionData(prevResult.data, props);
+        const connectionData = this._getConnectionData(prevResult.data);
         if (!connectionData) {
             Observable.create(sink => sink.complete()).subscribe(observer);
             return null;
@@ -378,10 +375,7 @@ class FragmentPagination {
         } = environment.unstable_internal;
         //const { componentRef: _, __relayContext, ...restProps } = this.props;
         const resolver = prevResult.resolver;
-        const props = {
-            ...propsFragment,
-            ...prevResult.data,
-        };
+        const props = prevResult.data && prevResult.data.frag ? prevResult.data.frag : {};
         const fragments = prevResult.resolver._fragments;
         let rootVariables;
         let fragmentVariables;

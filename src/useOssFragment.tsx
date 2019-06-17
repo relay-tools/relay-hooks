@@ -46,7 +46,14 @@ type FragmentResult = [
   OssFragmentFunction];
 export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
 
-const usePrevious = function usePrevious(value): any {
+interface PrevState {
+  fragmentRefetch: FragmentRefetch,
+  fragmentPagination: FragmentPagination,
+  fragmentRef: any,
+  environment: IEnvironment
+}
+
+const usePrevious = function usePrevious(value): PrevState {
   const ref = useRef();
   if (ref.current === null || ref.current === undefined) {
     const c: any = {
@@ -66,7 +73,8 @@ const usePrevious = function usePrevious(value): any {
 
 const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResult {
   const { environment }: RelayContext = useContext(ReactRelayContext);
-  const prev = usePrevious({ environment, fragmentRef });
+  const prev:PrevState = usePrevious({ environment, fragmentRef });
+  const propsFragments = { frag: fragmentRef } ;
   const [fragments, setFragments] = useState<any>(() => {
     RelayFeatureFlags.PREFER_FRAGMENT_OWNER_OVER_CONTEXT = true;
     const { getFragment: getFragmentFromTag } = environment.unstable_internal;
@@ -84,12 +92,11 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
     const {
       createFragmentSpecResolver,
     } = environment.unstable_internal;
-    //const resKey = fragments.name.split('_').pop();
     const res = createFragmentSpecResolver(
       { environment },
       'useFragment',
       { frag: fragments },
-      { frag: fragmentRef },
+      propsFragments,
     )
     res.setCallback(() => {
       const newData = resolver.resolve();
@@ -146,7 +153,7 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
     renderVariables: Variables,
     observerOrCallback: ObserverOrCallback,
     options: RefetchOptions, ) {
-    return (prev.fragmentRefetch as FragmentRefetch).refetch(environment,
+    return prev.fragmentRefetch.refetch(environment,
       _getFragmentVariables(),
       taggedNode,
       refetchVariables,
@@ -162,10 +169,9 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
     pageSize: number,
     observerOrCallback: ObserverOrCallback,
     options: RefetchOptions, ) {
-    (prev.fragmentPagination as FragmentPagination).init(result, fragmentRef);
-    return (prev.fragmentPagination as FragmentPagination).loadMore(environment,
+    return prev.fragmentPagination.loadMore(environment,
       connectionConfig,
-      fragmentRef,
+      propsFragments,
       pageSize,
       observerOrCallback,
       options,
@@ -178,10 +184,9 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
     totalCount: number,
     callback: ObserverOrCallback,
     refetchVariables: Variables, ) {
-    (prev.fragmentPagination as FragmentPagination).init(result, fragmentRef);
-    return (prev.fragmentPagination as FragmentPagination).refetchConnection(environment,
+    return prev.fragmentPagination.refetchConnection(environment,
       connectionConfig,
-      fragmentRef,
+      propsFragments,
       result,
       setResult,
       totalCount,
@@ -191,13 +196,11 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
   }
 
   function hasMore() {
-    (prev.fragmentPagination as FragmentPagination).init(result, fragmentRef);
-    return (prev.fragmentPagination as FragmentPagination).hasMore(result, fragmentRef);
+    return prev.fragmentPagination.hasMore(result);
   }
 
   function isLoading() {
-    (prev.fragmentPagination as FragmentPagination).init(result, fragmentRef);
-    return (prev.fragmentPagination as FragmentPagination).isLoading();
+    return prev.fragmentPagination.isLoading();
   }
 
   return [result.data && result.data.frag ? { ...result.data.frag } : {}, { refetch, loadMore, hasMore, isLoading, refetchConnection }];

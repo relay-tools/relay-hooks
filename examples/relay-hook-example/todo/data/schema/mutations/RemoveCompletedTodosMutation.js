@@ -44,7 +44,7 @@ const RemoveCompletedTodosMutation = mutationWithClientMutationId({
     },
   },
   mutateAndGetPayload: ({userId}: Input): Payload => {
-    const deletedTodoLocalIds = removeCompletedTodos();
+    const deletedTodoLocalIds = removeCompletedTodos(userId);
 
     const deletedTodoIds = deletedTodoLocalIds.map(
       toGlobalId.bind(null, 'Todo'),

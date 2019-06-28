@@ -46,7 +46,7 @@ const RemoveTodoMutation = mutationWithClientMutationId({
   },
   mutateAndGetPayload: ({id, userId}: Input): Payload => {
     const localTodoId = fromGlobalId(id).id;
-    removeTodo(localTodoId);
+    removeTodo(userId, localTodoId);
 
     return {id, userId};
   },

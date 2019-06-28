@@ -79,6 +79,28 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+.apptodo {
+  display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    justify-items: center;
+    background: #fff;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 25px 50px 0 rgba(0, 0, 0, 0.1);
+}
+
+#radioGroup .wrap {
+  display: inline-block;
+  margin: 0 20px 10px 20px;
+}
+#radioGroup label {
+  text-align: center;
+  margin: 0 0.2em;
+}
+#radioGroup input[type="radio"] {
+  margin: 0.5em auto;
+}
+
 .new-todo,
 .edit {
   position: relative;

@@ -48,11 +48,11 @@ const AddTodoMutation = mutationWithClientMutationId({
   outputFields: {
     todoEdge: {
       type: new GraphQLNonNull(GraphQLTodoEdge),
-      resolve: ({todoId}: Payload) => {
+      resolve: ({userId, todoId}: Payload) => {
         const todo = getTodoOrThrow(todoId);
 
         return {
-          cursor: cursorForObjectInConnection([...getTodos()], todo),
+          cursor: cursorForObjectInConnection([...getTodos(userId)], todo),
           node: todo,
         };
       },
@@ -63,7 +63,7 @@ const AddTodoMutation = mutationWithClientMutationId({
     },
   },
   mutateAndGetPayload: ({text, userId}: Input): Payload => {
-    const todoId = addTodo(text, false);
+    const todoId = addTodo(userId, text, false);
 
     return {todoId, userId};
   },

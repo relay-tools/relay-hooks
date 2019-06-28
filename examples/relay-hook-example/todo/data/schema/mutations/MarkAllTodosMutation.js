@@ -53,7 +53,7 @@ const MarkAllTodosMutation = mutationWithClientMutationId({
     },
   },
   mutateAndGetPayload: ({complete, userId}: Input): Payload => {
-    const changedTodoIds = markAllTodos(complete);
+    const changedTodoIds = markAllTodos(userId, complete);
 
     return {changedTodoIds, userId};
   },

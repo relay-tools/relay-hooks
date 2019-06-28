@@ -14,7 +14,7 @@ const useQuery = function (props: UseQueryProps)  {
     const dataFrom = props.dataFrom || STORE_OR_NETWORK;
     const prev = usePrevious({ environment, query, variables});
     const queryFetcher = prev.queryFetcher;
-    const [hooksProps, setHooksProps] = useState<RenderProps>( () => {
+    let [hooksProps, setHooksProps] = useState<RenderProps>( () => {
         return execute(environment, query, variables);
     });
     
@@ -24,13 +24,11 @@ const useQuery = function (props: UseQueryProps)  {
         };
     }, []);
 
-    useEffect(() => {
-        if (prev.query !== query ||
-            prev.environment !== environment ||
-      !areEqual(prev.variables, variables) ) {
-        setHooksProps(execute(environment, query, variables));
-      }
-    }, [environment, query, variables]);
+    if (prev.query !== query ||
+        prev.environment !== environment ||
+        !areEqual(prev.variables, variables)) {
+            hooksProps = execute(environment, query, variables);
+    }
 
     function execute(environment, query, variables):RenderProps {
         if (!query) {
@@ -53,14 +51,17 @@ const useQuery = function (props: UseQueryProps)  {
         try {
             //const storeSnapshot = queryFetcher.lookupInStore(genericEnvironment, operation, props.dataFrom); //i need this
             const storeSnapshot = dataFrom !== NETWORK_ONLY ? queryFetcher.lookupInStore(environment, operation) : null;
-
-            const querySnapshot = (dataFrom === NETWORK_ONLY || 
+            const isNetwork = (dataFrom === NETWORK_ONLY || 
                 dataFrom === STORE_THEN_NETWORK ||
-                (dataFrom === STORE_OR_NETWORK && !storeSnapshot)) ? queryFetcher.fetch({
+                (dataFrom === STORE_OR_NETWORK && !storeSnapshot));
+            if ( isNetwork ) {
+                queryFetcher._fetchOptions = null;
+            }
+            const querySnapshot = isNetwork ? queryFetcher.fetch({
                     cacheConfig: undefined,
                     dataFrom,
                     environment,
-                    onDataChange: !queryFetcher._fetchOptions ? (params: { //TODO BETTER
+                    onDataChange: (params: { //TODO BETTER
                         error?: Error,
                         snapshot?: Snapshot,
                     }): void => {
@@ -68,7 +69,7 @@ const useQuery = function (props: UseQueryProps)  {
                         const snapshot = params.snapshot == null ? null : params.snapshot;
             
                         setHooksProps(getResult({ error, snapshot, cached: false }));
-                    } : undefined,
+                    },
                     operation,
                 }) : null;
 
@@ -91,9 +92,9 @@ const useQuery = function (props: UseQueryProps)  {
             cached: false
         }
         if (result.snapshot || result.error || result.cached) {
-            renderProps.props = result.snapshot ? result.snapshot.data : null,
-            renderProps.error = result.error ? result.error : null,
-            renderProps.cached = result.cached || false,
+            renderProps.props = result.snapshot ? result.snapshot.data : null;
+            renderProps.error = result.error ? result.error : null;
+            renderProps.cached = result.cached || false;
             renderProps.retry = () => {
                 setHooksProps(execute(environment, props.query, props.variables));
             }

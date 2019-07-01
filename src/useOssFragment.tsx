@@ -54,7 +54,7 @@ interface PrevState {
 }
 
 const usePrevious = function usePrevious(value): PrevState {
-  const ref = useRef();
+  const ref = useRef<PrevState>();
   if (ref.current === null || ref.current === undefined) {
     const c: any = {
       fragmentRefetch: new FragmentRefetch(),

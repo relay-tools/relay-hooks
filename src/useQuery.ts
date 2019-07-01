@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef, useCallback } from "react";
 import usePrevious from "./usePrevious";
 import { ReactRelayContext } from 'react-relay';
 
@@ -7,101 +7,47 @@ import { Snapshot } from 'relay-runtime/lib/RelayStoreTypes';
 import * as areEqual from 'fbjs/lib/areEqual';
 import { UseQueryProps, RenderProps, OperationContextProps, STORE_THEN_NETWORK, NETWORK_ONLY, STORE_OR_NETWORK } from './RelayHooksType';
 
+import * as ReactRelayQueryFetcher from 'react-relay/lib/ReactRelayQueryFetcher';
+
+import UseQueryFetcher from './UseQueryFetcher';
+
+type Reference = {
+    queryFetcher: UseQueryFetcher,
+}
+
+
 
 const useQuery = function (props: UseQueryProps)  {
     const { environment } = useContext(ReactRelayContext);
-    const { query, variables } = props;
-    const dataFrom = props.dataFrom || STORE_OR_NETWORK;
+    const [, forceUpdate] = useState();
+    //const {current: { queryFetcher } } = useRef<Reference>({queryFetcher: new ReactRelayQueryFetcher()});
+    const { query, variables, dataFrom } = props;
     const prev = usePrevious({ environment, query, variables});
-    const queryFetcher = prev.queryFetcher;
-    let [hooksProps, setHooksProps] = useState<RenderProps>( () => {
-        return execute(environment, query, variables);
-    });
-    
+    const ref = useRef<Reference>();
+    if (ref.current === null || ref.current === undefined) {
+        const qf = new UseQueryFetcher(forceUpdate);
+        ref.current = {
+            queryFetcher: qf,
+        };
+        qf.execute(environment, query, variables, dataFrom);
+    }
+    const { queryFetcher } = ref.current;
     useEffect(() => {
         return () => {
             queryFetcher.dispose()
         };
     }, []);
 
-    if (prev.query !== query ||
-        prev.environment !== environment ||
-        !areEqual(prev.variables, variables)) {
-            hooksProps = execute(environment, query, variables);
-    }
-
-    function execute(environment, query, variables):RenderProps {
-        if (!query) {
-            queryFetcher.dispose();
-            return getOperationContext({ operation: null, relay: {environment, variables} });
-        } else {
-            queryFetcher.disposeRequest();
-            const { createOperationDescriptor, getRequest, } = environment.unstable_internal;
-            const request = getRequest(query);
-            const operation = createOperationDescriptor(request, variables);
-            return getOperationContext({ operation: operation, relay: {environment, variables: operation.variables} });
-        }
-    }
-
-    function getOperationContext(operationContext: OperationContextProps) {
-        const operation = operationContext.operation;
-        if (!operation) {
-            return getResult({empty: true});
-        }
-        try {
-            //const storeSnapshot = queryFetcher.lookupInStore(genericEnvironment, operation, props.dataFrom); //i need this
-            const storeSnapshot = dataFrom !== NETWORK_ONLY ? queryFetcher.lookupInStore(environment, operation) : null;
-            const isNetwork = (dataFrom === NETWORK_ONLY || 
-                dataFrom === STORE_THEN_NETWORK ||
-                (dataFrom === STORE_OR_NETWORK && !storeSnapshot));
-            if ( isNetwork ) {
-                queryFetcher._fetchOptions = null;
-            }
-            const querySnapshot = isNetwork ? queryFetcher.fetch({
-                    cacheConfig: undefined,
-                    dataFrom,
-                    environment,
-                    onDataChange: (params: { //TODO BETTER
-                        error?: Error,
-                        snapshot?: Snapshot,
-                    }): void => {
-                        const error = params.error == null ? null : params.error;
-                        const snapshot = params.snapshot == null ? null : params.snapshot;
-            
-                        setHooksProps(getResult({ error, snapshot, cached: false }));
-                    },
-                    operation,
-                }) : null;
-
-            // Use network data first, since it may be fresher
-            const snapshot = querySnapshot || storeSnapshot;
-            return getResult({ error: null, snapshot, cached: !!storeSnapshot }); //relay
-        } catch (error) {
-            return getResult({ error: error, snapshot: null, cached: false }); //relay
-        }
-    }
-
-    function getResult(result: { empty?: boolean, error?: Error, snapshot?: Snapshot, cached?: boolean}):RenderProps {
-        if(!result) {
-            return;
-        }
-        const renderProps = {
-            error: null,
-            props: result.empty ? {} : null, 
-            retry: null,
-            cached: false
-        }
-        if (result.snapshot || result.error || result.cached) {
-            renderProps.props = result.snapshot ? result.snapshot.data : null;
-            renderProps.error = result.error ? result.error : null;
-            renderProps.cached = result.cached || false;
-            renderProps.retry = () => {
-                setHooksProps(execute(environment, props.query, props.variables));
-            }
+    const execute = useCallback(() => {
+        if (prev !== undefined && (prev.query !== query ||
+            prev.environment !== environment ||
+            !areEqual(prev.variables, variables))) {
+                queryFetcher.execute(environment, query, variables, dataFrom);
         } 
-        if(hooksProps!==renderProps)
-            return renderProps;    
-    }
+    }, [environment, query, variables]);
+    
+    execute();
+    
 
     /*const isServer = typeof window === 'undefined';
     if (isServer && prev && !prev.ssrExecute) {
@@ -113,8 +59,18 @@ const useQuery = function (props: UseQueryProps)  {
           render?
     }, [hooksProps]);*/
 
-    return hooksProps;
+    
 
+    return queryFetcher.getLastResult();
+/*
+    if (prev.query !== query ||
+        prev.environment !== environment ||
+        !areEqual(prev.variables, variables)) {
+            return execute(environment, query, variables);
+    } else {
+        return hooksProps;
+    }
+*/
 }
 
 export default useQuery;

@@ -108,7 +108,7 @@ const LayoutTodo = ({ userId }) => {
   } else if (error) {
     return <div>{error.message}</div>;
   }
-  return <div></div>;
+  return <div>loading</div>;
 }
 
 const App = <RelayEnvironmentProvider environment={modernEnvironment}>

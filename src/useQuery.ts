@@ -1,13 +1,10 @@
-import { useState, useEffect, useContext, useRef, useCallback } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import usePrevious from "./usePrevious";
 import { ReactRelayContext } from 'react-relay';
 
-import { Snapshot } from 'relay-runtime/lib/RelayStoreTypes';
-
 import * as areEqual from 'fbjs/lib/areEqual';
-import { UseQueryProps, RenderProps, OperationContextProps, STORE_THEN_NETWORK, NETWORK_ONLY, STORE_OR_NETWORK } from './RelayHooksType';
+import { UseQueryProps } from './RelayHooksType';
 
-import * as ReactRelayQueryFetcher from 'react-relay/lib/ReactRelayQueryFetcher';
 
 import UseQueryFetcher from './UseQueryFetcher';
 
@@ -15,21 +12,28 @@ type Reference = {
     queryFetcher: UseQueryFetcher,
 }
 
+function useDeepCompare<T>(value: T): T {
+    const latestValue = useRef(value);
+    if (!areEqual(latestValue.current, value)) {
+      latestValue.current = value;
+    }
+    return latestValue.current;
+  }
+
 
 
 const useQuery = function (props: UseQueryProps)  {
     const { environment } = useContext(ReactRelayContext);
-    const [, forceUpdate] = useState();
-    //const {current: { queryFetcher } } = useRef<Reference>({queryFetcher: new ReactRelayQueryFetcher()});
+    const [, forceUpdate] = useState(null);
     const { query, variables, dataFrom } = props;
-    const prev = usePrevious({ environment, query, variables});
+    const latestVariables = useDeepCompare(variables);
+    const prev = usePrevious({ environment, query, latestVariables});
+    
     const ref = useRef<Reference>();
     if (ref.current === null || ref.current === undefined) {
-        const qf = new UseQueryFetcher(forceUpdate);
         ref.current = {
-            queryFetcher: qf,
+            queryFetcher: new UseQueryFetcher(forceUpdate),
         };
-        qf.execute(environment, query, variables, dataFrom);
     }
     const { queryFetcher } = ref.current;
     useEffect(() => {
@@ -38,39 +42,15 @@ const useQuery = function (props: UseQueryProps)  {
         };
     }, []);
 
-    const execute = useCallback(() => {
-        if (prev !== undefined && (prev.query !== query ||
-            prev.environment !== environment ||
-            !areEqual(prev.variables, variables))) {
+    
+
+    if (!prev || prev.query !== query ||
+        prev.environment !== environment ||
+            prev.latestVariables!== latestVariables) {
                 queryFetcher.execute(environment, query, variables, dataFrom);
-        } 
-    }, [environment, query, variables]);
-    
-    execute();
-    
-
-    /*const isServer = typeof window === 'undefined';
-    if (isServer && prev && !prev.ssrExecute) {
-        prev.ssrExecute = true;
-        execute(environment, query, variables)
-    }*/
-
-   /*useMemo(() => {
-          render?
-    }, [hooksProps]);*/
-
-    
+    }
 
     return queryFetcher.getLastResult();
-/*
-    if (prev.query !== query ||
-        prev.environment !== environment ||
-        !areEqual(prev.variables, variables)) {
-            return execute(environment, query, variables);
-    } else {
-        return hooksProps;
-    }
-*/
 }
 
 export default useQuery;

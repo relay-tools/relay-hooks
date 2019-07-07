@@ -55,7 +55,7 @@ const TodoTextInput = ({
       onCancel();
     } else if (newText !== '') {
       onSave(newText);
-      if(keep) {
+      if(!keep) {
         setText('');
       }
     }

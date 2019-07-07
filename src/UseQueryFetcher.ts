@@ -51,9 +51,6 @@ class UseQueryFetcher {
             const { createOperationDescriptor, getRequest, } = environment.unstable_internal;
             const request = getRequest(query);
             const operation = createOperationDescriptor(request, variables);
-        if (!operation) {
-            return this.getResult(environment, query, variables, { empty: true });
-        }
         try {
             //const storeSnapshot = queryFetcher.lookupInStore(genericEnvironment, operation, props.dataFrom); //i need this
             const storeSnapshot = dataFrom !== NETWORK_ONLY ? this._queryFetcher.lookupInStore(environment, operation) : null;
@@ -67,7 +64,7 @@ class UseQueryFetcher {
                     cacheConfig: undefined,
                     dataFrom,
                     environment,
-                    onDataChange: !this._queryFetcher._fetchOptions ? (params: { //TODO BETTER
+                    onDataChange:  (params: { //TODO BETTER
                         error?: Error,
                         snapshot?: Snapshot,
                     }): void => {
@@ -79,7 +76,7 @@ class UseQueryFetcher {
                             this._lastResult = onDataChangeProps;
                             this._forceUpdate(onDataChangeProps);
                         }
-                    } : undefined,
+                    },
                     operation,
                 }) : null;
 

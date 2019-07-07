@@ -32,7 +32,6 @@ import {
 import {
   Todo,
   User,
-  USER_ID,
   getTodoOrThrow,
   getTodos,
   getUserOrThrow,
@@ -90,7 +89,7 @@ const GraphQLUser = new GraphQLObjectType({
     id: globalIdField('User'),
     userId: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: (): string => USER_ID,
+      resolve: ({id}): string => id,
     },
     todos: {
       type: TodosConnection,
@@ -102,8 +101,8 @@ const GraphQLUser = new GraphQLObjectType({
         ...connectionArgs,
       },
       // eslint-disable-next-line flowtype/require-parameter-type
-      resolve: (root: {}, {status, after, before, first, last}) =>
-        connectionFromArray([...getTodos(status)], {
+      resolve: ({id}, {status, after, before, first, last}) =>
+        connectionFromArray([...getTodos(id, status)], {
           after,
           before,
           first,
@@ -112,11 +111,11 @@ const GraphQLUser = new GraphQLObjectType({
     },
     totalCount: {
       type: new GraphQLNonNull(GraphQLInt),
-      resolve: (): number => getTodos().length,
+      resolve: ({id}): number => getTodos(id).length,
     },
     completedCount: {
       type: new GraphQLNonNull(GraphQLInt),
-      resolve: (): number => getTodos('completed').length,
+      resolve: ({id}): number => getTodos(id, 'completed').length,
     },
   },
   interfaces: [nodeInterface],

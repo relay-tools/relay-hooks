@@ -32,32 +32,36 @@ export class User {
 }
 
 // Mock authenticated ID
-export const USER_ID = 'me';
+const USER_ID = 'me';
+
+const USER_YOU_ID = 'you';
 
 // Mock user database table
 const usersById: Map<string, User> = new Map([[USER_ID, new User(USER_ID)]]);
+usersById.set(USER_YOU_ID, new User(USER_YOU_ID));
 
 // Mock todo database table
 const todosById: Map<string, Todo> = new Map();
 const todoIdsByUser: Map<string, $ReadOnlyArray<string>> = new Map([
   [USER_ID, []],
+  [USER_YOU_ID, []]
 ]);
 
 // Seed initial data
 let nextTodoId: number = 0;
-addTodo('Taste JavaScript', true);
-addTodo('Buy a unicorn', false);
+addTodo(USER_ID, 'Taste JavaScript', true);
+addTodo(USER_ID, 'Buy a unicorn', false);
 
 function getTodoIdsForUser(id: string): $ReadOnlyArray<string> {
   return todoIdsByUser.get(id) || [];
 }
 
-export function addTodo(text: string, complete: boolean): string {
+export function addTodo(idUser: string, text: string, complete: boolean): string {
   const todo = new Todo(`${nextTodoId++}`, text, complete);
   todosById.set(todo.id, todo);
 
-  const todoIdsForUser = getTodoIdsForUser(USER_ID);
-  todoIdsByUser.set(USER_ID, todoIdsForUser.concat(todo.id));
+  const todoIdsForUser = getTodoIdsForUser(idUser);
+  todoIdsByUser.set(idUser, todoIdsForUser.concat(todo.id));
 
   return todo.id;
 }
@@ -84,8 +88,8 @@ export function getTodoOrThrow(id: string): Todo {
   return todo;
 }
 
-export function getTodos(status: string = 'any'): $ReadOnlyArray<Todo> {
-  const todoIdsForUser = getTodoIdsForUser(USER_ID);
+export function getTodos(idUser, status: string = 'any'): $ReadOnlyArray<Todo> {
+  const todoIdsForUser = getTodoIdsForUser(idUser);
   const todosForUser = todoIdsForUser.map(getTodoOrThrow);
 
   if (status === 'any') {
@@ -106,14 +110,14 @@ export function getUserOrThrow(id: string): User {
   const user = getUser(id);
 
   if (!user) {
-    throw new Error(`Invariant exception, User ${id} not found`);
+    //throw new Error(`Invariant exception, User ${id} not found`);
   }
 
   return user;
 }
 
-export function markAllTodos(complete: boolean): $ReadOnlyArray<string> {
-  const todosToChange = getTodos().filter(
+export function markAllTodos(idUser: string, complete: boolean): $ReadOnlyArray<string> {
+  const todosToChange = getTodos(idUser).filter(
     (todo: Todo): boolean => todo.complete !== complete,
   );
 
@@ -124,12 +128,12 @@ export function markAllTodos(complete: boolean): $ReadOnlyArray<string> {
   return todosToChange.map((todo: Todo): string => todo.id);
 }
 
-export function removeTodo(id: string) {
-  const todoIdsForUser = getTodoIdsForUser(USER_ID);
+export function removeTodo(id: string, idUser: string) {
+  const todoIdsForUser = getTodoIdsForUser(idUser);
 
   // Remove from the users list
   todoIdsByUser.set(
-    USER_ID,
+    idUser,
     todoIdsForUser.filter((todoId: string): boolean => todoId !== id),
   );
 
@@ -137,16 +141,16 @@ export function removeTodo(id: string) {
   todosById.delete(id);
 }
 
-export function removeCompletedTodos(): $ReadOnlyArray<string> {
-  const todoIdsForUser = getTodoIdsForUser(USER_ID);
+export function removeCompletedTodos(idUser: string): $ReadOnlyArray<string> {
+  const todoIdsForUser = getTodoIdsForUser(idUser);
 
-  const todoIdsToRemove = getTodos()
+  const todoIdsToRemove = getTodos(idUser)
     .filter((todo: Todo): boolean => todo.complete)
     .map((todo: Todo): string => todo.id);
 
   // Remove from the users list
   todoIdsByUser.set(
-    USER_ID,
+    idUser,
     todoIdsForUser.filter(
       (todoId: string): boolean => !todoIdsToRemove.includes(todoId),
     ),

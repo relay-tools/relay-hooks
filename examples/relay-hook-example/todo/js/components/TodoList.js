@@ -53,7 +53,7 @@ const fragmentSpec = graphql`
 const TodoList = (props) => {
   const { refetch } = props;
   const user = useFragment(fragmentSpec, props.user);
-  const  { todos, completedCount, totalCount } = user;
+  const  { todos, completedCount, totalCount, userId } = user;
   const [mutate] = useMutation(mutation);
   const handleMarkAllChange = (e: SyntheticEvent<HTMLInputElement>) => {
     const complete = e.currentTarget.checked;
@@ -65,7 +65,7 @@ const TodoList = (props) => {
 
   const handlerRefetch = () => {
     const response = refetch(QueryApp,
-      {userId: 'me'},  
+      {userId},  
       null,  
       () => { console.log('Refetch done') },
       {force: true},  

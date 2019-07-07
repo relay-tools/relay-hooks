@@ -51,7 +51,7 @@ const TodoApp = (props) => {
     <div>
       <section className="todoapp">
         <header className="header">
-          <h1>todos</h1>
+          <h1>todos {props.userId}</h1>
 
           <TodoTextInput
             className="new-todo"
@@ -71,15 +71,6 @@ const TodoApp = (props) => {
 
       <footer className="info">
         <p>Double-click to edit a todo</p>
-
-        <p>
-          Created by the{' '}
-          <a href="https://facebook.github.io/relay/">Relay team</a>
-        </p>
-
-        <p>
-          Part of <a href="http://todomvc.com">TodoMVC</a>
-        </p>
       </footer>
     </div>
   );

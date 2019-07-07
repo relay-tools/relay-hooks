@@ -21,6 +21,7 @@ type Props = {|
   +onDelete?: () => void,
   +onSave: string => void,
   +placeholder?: string,
+  +keep?: boolean,
 |};
 
 const ENTER_KEY_CODE = 13;
@@ -34,6 +35,7 @@ const TodoTextInput = ({
   onDelete,
   onSave,
   placeholder,
+  keep
 }: Props) => {
   const [text, setText] = useState<string>(initialValue || '');
   const inputRef = useRef();
@@ -53,7 +55,9 @@ const TodoTextInput = ({
       onCancel();
     } else if (newText !== '') {
       onSave(newText);
-      setText('');
+      if(!keep) {
+        setText('');
+      }
     }
   };
 

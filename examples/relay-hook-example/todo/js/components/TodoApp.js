@@ -19,7 +19,7 @@ import TodoTextInput from './TodoTextInput';
 import React from 'react';
 import {graphql} from 'react-relay';
 import type {RelayProp} from 'react-relay';
-import { useRefetch, useMutation } from 'relay-hooks';
+import { useRefetch, useMutation, usePagination } from 'relay-hooks';
 import type {TodoApp_user} from 'relay/TodoApp_user.graphql';
 
 type Props = {|
@@ -28,17 +28,21 @@ type Props = {|
 |};
 
 const fragmentSpec = graphql`
-    fragment TodoApp_user on User {
+    fragment TodoApp_user on Query {
+      
+  user(id: $userId) {
       id
       userId
       totalCount
       ...TodoListFooter_user
       ...TodoList_user
     }
+  }
+      
   `;
 
 const TodoApp = (props) => {
-  const [user, refetch ] = useRefetch(fragmentSpec, props.user);
+  const [{user}, refetch ] = usePagination(fragmentSpec, props.query);
   const [mutate, { loading }] = useMutation(mutation);
   const handleTextInputSave = (text: string) => {
     AddTodoMutation.commit(mutate, text, user);

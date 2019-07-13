@@ -102,8 +102,8 @@ const LayoutTodo = ({ userId }) => {
   });
 
   console.log("renderer", props, cached)
-  if (props && props.user) {
-    return <TodoApp user={props.user} userId={userId} retry={retry} />;
+  if (props ) {
+    return <TodoApp query={props} userId={userId} retry={retry} />;
 
   } else if (error) {
     return <div>{error.message}</div>;

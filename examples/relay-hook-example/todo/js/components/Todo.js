@@ -46,35 +46,9 @@ const fragmentSpecTodo = graphql`
   `;
 
 const Todo = (props) => {
-  const user = useFragment(fragmentSpecUser, props.user);
-  const todo = useFragment(fragmentSpecTodo, props.todo);
+  //const user = useFragment(fragmentSpecUser, props.user);
+  const todo = props.todo;
   const [isEditing, setIsEditing] = useState<boolean>(false);
-
-  const [mutateChange] = useMutation(mutationChange);
-  const [mutateRename] = useMutation(mutationRename);
-  const [mutateRemove] = useMutation(mutationRemove);
-
-  const handleCompleteChange = (e: SyntheticEvent<HTMLInputElement>) => {
-    const complete = e.currentTarget.checked;
-    ChangeTodoStatusMutation.commit(mutateChange, complete, todo, user);
-  };
-
-  const handleDestroyClick = () => removeTodo();
-  const handleLabelDoubleClick = () => setIsEditing(true);
-  const handleTextInputCancel = () => setIsEditing(false);
-
-  const handleTextInputDelete = () => {
-    setIsEditing(false);
-    removeTodo();
-  };
-
-  const handleTextInputSave = (text: string) => {
-    setIsEditing(false);
-    RenameTodoMutation.commit(mutateRename, text, todo);
-  };
-
-  const removeTodo = () =>
-    RemoveTodoMutation.commit(mutateRemove, todo, user);
 
   return (
     <li
@@ -86,24 +60,12 @@ const Todo = (props) => {
         <input
           checked={todo.complete}
           className="toggle"
-          onChange={handleCompleteChange}
+          onChange={() => {}}
           type="checkbox"
         />
 
-        <label onDoubleClick={handleLabelDoubleClick}>{todo.text}</label>
-        <button className="destroy" onClick={handleDestroyClick} />
+        <label>{todo.text}</label>
       </div>
-
-      {isEditing && (
-        <TodoTextInput
-          className="edit"
-          commitOnBlur={true}
-          initialValue={todo.text}
-          onCancel={handleTextInputCancel}
-          onDelete={handleTextInputDelete}
-          onSave={handleTextInputSave}
-        />
-      )}
     </li>
   );
 };

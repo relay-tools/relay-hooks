@@ -12,8 +12,7 @@
  */
 
 import AddTodoMutation, {mutation} from '../mutations/AddTodoMutation';
-import TodoList from './TodoList';
-import TodoListFooter from './TodoListFooter';
+import TodoListPlural from './TodoListPlural';
 import TodoTextInput from './TodoTextInput';
 
 import React from 'react';
@@ -34,8 +33,11 @@ const fragmentSpec = graphql`
       id
       userId
       totalCount
-      ...TodoListFooter_user
-      ...TodoList_user
+      todos {
+        edges {
+          ...TodoListPlural_edges
+        }
+      }
     }
   }
       
@@ -48,6 +50,11 @@ const TodoApp = (props) => {
     AddTodoMutation.commit(mutate, text, user);
     return;
   };
+  if(!user) {
+    return <div />;
+  }
+
+  const { todos: {edges}} = user;
 
   const hasTodos = user.totalCount > 0;
 
@@ -63,9 +70,8 @@ const TodoApp = (props) => {
             placeholder="What needs to be done?"
           />
         </header>
+        <TodoListPlural edges={edges} refetch={refetch} />
 
-        <TodoList user={user} refetch={refetch} />
-        {hasTodos && <TodoListFooter user={user} />}
       </section>
 
       <button onClick={props.retry} 

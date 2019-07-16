@@ -203,7 +203,9 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
     return prev.fragmentPagination.isLoading();
   }
 
-  return [result.data && result.data.frag ? { ...result.data.frag } : {}, { refetch, loadMore, hasMore, isLoading, refetchConnection }];
+  return [
+    result.data && result.data.frag ? Array.isArray(result.data.frag) ? result.data.frag : { ...result.data.frag } : {}, 
+    { refetch, loadMore, hasMore, isLoading, refetchConnection }];
 }
 
 export default useOssFragment;

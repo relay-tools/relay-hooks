@@ -45,7 +45,7 @@ const TodoListPlural = (props) => {
 
   const nodes: $ReadOnlyArray<Node> =
   edges 
-      ? Object.values(edges).map((edge: Edge) => edge.node)
+      ? edges.map((edge: Edge) => edge.node)
       : [];
 
   return (

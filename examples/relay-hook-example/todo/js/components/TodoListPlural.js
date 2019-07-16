@@ -44,9 +44,7 @@ const TodoListPlural = (props) => {
   const edges = useFragment(fragmentSpec, props.edges);
 
   const nodes: $ReadOnlyArray<Node> =
-  edges 
-      ? edges.map((edge: Edge) => edge.node)
-      : [];
+  edges  ? edges.map((edge: Edge) => edge.node) : [];
 
   return (
     <section className="main">

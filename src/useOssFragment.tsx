@@ -124,10 +124,7 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
         !areEqual(prevIDs, nextIDs)) {
         resolver.dispose();
         setResult(newResolver());
-      } /*else {
-                resolver.setProps(others);
-                setResult({resolver, data: resolver.resolve()})
-            }*/
+      } 
 
     }
   }, [environment, fragmentRef]);

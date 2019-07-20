@@ -117,9 +117,9 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
 
   useEffect(() => {
     if (prev && prev.fragmentRef) {
-      const { getDataIDsFromObject } = environment.unstable_internal;
-      const prevIDs = getDataIDsFromObject(fragments, prev.fragmentRef);
-      const nextIDs = getDataIDsFromObject(fragments, fragmentRef);
+      const { getDataIDsFromFragment } = environment.unstable_internal;
+      const prevIDs = getDataIDsFromFragment(fragments, prev.fragmentRef);
+      const nextIDs = getDataIDsFromFragment(fragments, fragmentRef);
       if (prev.environment !== environment ||
         !areEqual(prevIDs, nextIDs)) {
         resolver.dispose();

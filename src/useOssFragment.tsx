@@ -13,7 +13,7 @@ import {
   Observable,
   Observer,
   Variables,
-  getFragmentOwners
+  getFragmentOwner
 } from 'relay-runtime';
 import FragmentRefetch from "./FragmentRefetch";
 import FragmentPagination, { ConnectionConfig } from "./FragmentPagination";
@@ -121,6 +121,7 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
       const prevIDs = getDataIDsFromFragment(fragments, prev.fragmentRef);
       const nextIDs = getDataIDsFromFragment(fragments, fragmentRef);
       if (prev.environment !== environment ||
+        _getFragmentVariables()!==_getFragmentVariables(prev.fragmentRef) ||
         !areEqual(prevIDs, nextIDs)) {
         resolver.dispose();
         setResult(newResolver());
@@ -129,17 +130,17 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
     }
   }, [environment, fragmentRef]);
 
-  function _getFragmentVariables(): Variables {
+  function _getFragmentVariables(fRef= fragmentRef): Variables {
     const {
-      getVariablesFromObject,
+      getVariablesFromFragment,
     } = environment.unstable_internal;
-    return getVariablesFromObject(
+    return getVariablesFromFragment(
       // NOTE: We pass empty operationVariables because we want to prefer
       // the variables from the fragment owner
       {},
       fragments,
-      fragmentRef,
-      getFragmentOwners(fragments, fragmentRef),
+      fRef,
+      getFragmentOwner(fragments, fRef),
     );
   }
 

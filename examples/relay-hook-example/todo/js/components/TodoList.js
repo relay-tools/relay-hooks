@@ -65,7 +65,7 @@ const TodoList = (props) => {
 
   const handlerRefetch = () => {
     const response = refetch(QueryApp,
-      {userId},  
+      {userId: "you"},  
       null,  
       () => { console.log('Refetch done') },
       {force: true},  

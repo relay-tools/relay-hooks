@@ -132,15 +132,15 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
 
   function _getFragmentVariables(fRef= fragmentRef): Variables {
     const {
-      getVariablesFromObject,
+      getVariablesFromFragment,
     } = environment.unstable_internal;
-    return getVariablesFromObject(
+    return getVariablesFromFragment(
       // NOTE: We pass empty operationVariables because we want to prefer
       // the variables from the fragment owner
       {},
-      { frag: fragments },
-      { frag: fRef },
-      { frag: getFragmentOwner(fragments, fRef) },
+      fragments,
+      fRef,
+      getFragmentOwner(fragments, fRef),
     );
   }
 

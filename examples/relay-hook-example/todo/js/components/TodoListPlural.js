@@ -46,6 +46,17 @@ const TodoListPlural = (props) => {
   const nodes: $ReadOnlyArray<Node> =
   edges  ? edges.map((edge: Edge) => edge.node) : [];
 
+  const handlerRefetch = () => {
+    const response = refetch(QueryApp,
+      {userId: "you"},  
+      null,  
+      () => { console.log('Refetch done') },
+      {force: true},  
+    );
+    //response.dispose();
+
+  }
+
   return (
     <section className="main">
 
@@ -56,6 +67,10 @@ const TodoListPlural = (props) => {
           <Todo key={node.id} todo={node} />
         ))}
       </ul>
+      <button onClick={handlerRefetch} 
+      className="refetch" >
+          Refetch
+          </button>
     </section>
   );
 };

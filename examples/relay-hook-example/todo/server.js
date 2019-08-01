@@ -22,7 +22,7 @@ import { renderToString } from 'react-dom/server';
 import App from './js/app'
 import html from './html'
 
-const APP_PORT: number = 3000;
+const APP_PORT: number = 4000;
 
 // Serve the Relay app
 // Calling webpack() without a callback as 2nd property returns a Compiler object.

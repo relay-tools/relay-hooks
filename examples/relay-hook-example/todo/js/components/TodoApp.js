@@ -44,7 +44,7 @@ const fragmentSpec = graphql`
   `;
 
 const TodoApp = (props) => {
-  const [{user}, refetch ] = usePagination(fragmentSpec, props.query);
+  const [{user}, refetch ] = useRefetch(fragmentSpec, props.query);
   const [mutate, { loading }] = useMutation(mutation);
   const handleTextInputSave = (text: string) => {
     AddTodoMutation.commit(mutate, text, user);

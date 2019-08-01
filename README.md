@@ -9,6 +9,16 @@ Install react-relay and relay-hooks using yarn or npm:
 yarn add react-relay relay-hooks
 ```
 
+## Contributing
+
+* **Give a star** to the repository and **share it**, you will **help** the **project** and the **people** who will find it useful
+
+* **Create issues**, your **questions** are a **valuable help**
+
+* **PRs are welcome**, but it is always **better to open the issue first** so as to **help** me and other people **evaluating it**
+
+* **Please sponsor me** and recommend me at [github sponsorship](https://docs.google.com/forms/d/e/1FAIpQLSdE8nL7U-d7CBTWp9X7XOoezQD06wCzCAS9VpoUW6lJ03KU7w/viewform), so that i can use it
+
 ## RelayEnvironmentProvider
 
 Since queries with `useQuery` no longer set context, we will expose a new `RelayEnvironmentProvider` component that takes an `environment` and sets it in context; 

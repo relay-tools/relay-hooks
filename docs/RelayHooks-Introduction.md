@@ -1,5 +1,5 @@
 ---
-id: getting-started
+id: relay-hooks
 title: Getting Started
 ---
 

@@ -1,7 +1,7 @@
 const siteConfig = {
   title: 'Morrys Website',
   tagline: 'Collection of libraries usable for the web, react and react-native.',
-  url: 'https://relay-hooks.github.io',
+  url: 'https://relay-tools.github.io',
   baseUrl: '/relay-hooks/',
   projectName: 'relay-hooks',
   organizationName: 'relay-tools',

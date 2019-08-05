@@ -1,0 +1,13 @@
+{
+    "repository": "morrys/wora",
+    "license": "MIT",
+    "private": true,
+    "scripts": {
+        "start": "docusaurus-start",
+        "build": "docusaurus-build",
+        "docpub": "docusaurus-publish"
+    },
+    "dependencies": {
+        "docusaurus": "1.12.0"
+    }
+}

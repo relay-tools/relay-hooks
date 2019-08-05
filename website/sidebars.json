@@ -1,0 +1,14 @@
+{
+    "docs": {
+        "Relay Hooks": [
+            "getting-started"
+        ],
+        "API Reference": [
+            "use-fragment",
+            "use-refetch",
+            "use-pagination",
+            "use-mutation",
+            "use-oss-fragment"
+        ]
+    }
+}

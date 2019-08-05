@@ -6,7 +6,7 @@ const siteConfig = {
   projectName: 'relay-hooks',
   organizationName: 'relay-tools',
   headerLinks: [
-    { doc: 'getting-started', label: 'Docs' },
+    { doc: 'relay-hooks', label: 'Docs' },
     {
       href: 'https://github.com/relay-tools/relay-hooks',
       label: 'GitHub',

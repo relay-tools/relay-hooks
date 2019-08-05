@@ -37,7 +37,7 @@ class Footer extends React.Component {
           </a>
           <div>
             <h5>Docs</h5>
-            <a href={this.docUrl('getting-started.html', this.props.language)}>
+            <a href={this.docUrl('relay-hooks.html', this.props.language)}>
               about relay-hooks
             </a>
           </div>

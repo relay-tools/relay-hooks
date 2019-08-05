@@ -5,7 +5,7 @@
     "previous": "Previous",
     "tagline": "Collection of libraries usable for the web, react and react-native.",
     "docs": {
-      "getting-started": {
+      "relay-hooks": {
         "title": "Getting Started"
       },
       "use-fragment": {

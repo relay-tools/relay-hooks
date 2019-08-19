@@ -51,8 +51,9 @@ const fragmentSpec = graphql`
   `;
 
 const TodoList = (props) => {
-  const { refetch } = props;
-  const user = useFragment(fragmentSpec, props.user);
+  const { refetch, user } = props;
+  //const { refetch } = props;
+  //const user = useFragment(fragmentSpec, props.user);
   const  { todos, completedCount, totalCount, userId } = user;
   const [mutate] = useMutation(mutation);
   const handleMarkAllChange = (e: SyntheticEvent<HTMLInputElement>) => {
@@ -105,5 +106,29 @@ const TodoList = (props) => {
     </section>
   );
 };
+//export default TodoList;
 
-export default TodoList;
+export default createFragmentContainer(TodoList, {
+  // This `list` fragment corresponds to the prop named `list` that is
+  // expected to be populated with server data by the `<TodoList>` component.
+  user: graphql`
+  fragment TodoList_user on User {
+    todos(
+      first: 2147483647 # max GraphQLInt
+    ) @connection(key: "TodoList_todos") {
+      edges {
+        node {
+          id
+          complete
+          ...Todo_todo
+        }
+      }
+    }
+    id
+    userId
+    totalCount
+    completedCount
+    ...Todo_user
+  }
+`,
+});

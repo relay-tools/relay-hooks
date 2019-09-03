@@ -1,5 +1,5 @@
 const siteConfig = {
-  title: 'Morrys Website',
+  title: 'Morrys Repositories',
   tagline: 'Collection of libraries usable for the web, react and react-native.',
   url: 'https://relay-tools.github.io',
   baseUrl: '/relay-hooks/',
@@ -23,6 +23,11 @@ const siteConfig = {
     secondaryColor: '#17afff',
   },
 
+  algolia: {
+    apiKey: '5713df2c9cd868e3e65975bd55f1698b',
+    indexName: 'relay-tools_relay-hooks',
+    placeholder: 'Search'
+  },
   /* Custom fonts for website */
   /*
   fonts: {

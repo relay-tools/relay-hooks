@@ -27,9 +27,9 @@ const siteConfig = {
     apiKey: '87a72e28932891cac536490e275e834e',
     indexName: 'morrys',
     placeholder: 'Search',
-    algoliaOptions: {
+    /*algoliaOptions: {
       facetFilters: [ ["tags: relay-hooks"] ]
-    }
+    }*/
   },
   /* Custom fonts for website */
   /*

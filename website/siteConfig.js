@@ -24,9 +24,12 @@ const siteConfig = {
   },
 
   algolia: {
-    apiKey: '5713df2c9cd868e3e65975bd55f1698b',
-    indexName: 'relay-tools_relay-hooks',
-    placeholder: 'Search'
+    apiKey: '87a72e28932891cac536490e275e834e',
+    indexName: 'morrys',
+    placeholder: 'Search',
+    algoliaOptions: {
+      facetFilters: [ ["tags: relay-hooks"] ]
+    }
   },
   /* Custom fonts for website */
   /*

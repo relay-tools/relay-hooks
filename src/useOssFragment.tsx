@@ -99,9 +99,9 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
       propsFragments,
     )
     res.setCallback(() => {
-      const newData = resolver.resolve();
+      const newData = res.resolve();
       if (result.data !== newData) {
-        setResult({ resolver: resolver, data: newData })
+        setResult({ resolver: res, data: newData })
       }
     });
     return { resolver: res, data: res.resolve() };

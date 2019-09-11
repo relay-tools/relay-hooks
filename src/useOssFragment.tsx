@@ -81,12 +81,14 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
     return getFragmentFromTag(fragmentDef);
   });
 
-
+  const ref = useRef<any>(null);
   const [result, setResult] = useState<ContainerResult>(() => {
     return newResolver();
   });
 
+
   const { resolver } = result;
+  ref.current = resolver;
 
   function newResolver() {
     const {
@@ -109,7 +111,7 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
 
   useEffect(() => {
     return () => {
-      resolver.dispose();
+      ref.current.dispose();
       prev && prev.fragmentRefetch.dispose();
       prev && prev.fragmentPagination.dispose();
     };

@@ -48,7 +48,7 @@ Relay store and whether to send a network request. The options are:
 import {useQuery, graphql } from 'relay-hooks';
 
 const AppTodo = function (appProps)  {
-  const {props, error, retry, cached} = useQuery({ query: graphql`
+  const {hooksProps, error, retry, cached} = useQuery({ query: graphql`
       query appQuery($userId: String) {
         user(id: $userId) {
           ...TodoApp_user

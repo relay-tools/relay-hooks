@@ -25,9 +25,9 @@ export type ContainerResult = {
 };
 
 
-export interface RenderProps {
+export interface RenderProps<T> {
     error: Error,
-    props: Object,
+    props: T,
     retry: () => void,
     cached?: boolean
 };

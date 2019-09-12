@@ -5,10 +5,10 @@ import * as areEqual from 'fbjs/lib/areEqual';
 import { UseQueryProps, RenderProps, OperationContextProps, STORE_THEN_NETWORK, NETWORK_ONLY, STORE_OR_NETWORK } from './RelayHooksType';
 
 
-class UseQueryFetcher {
+class UseQueryFetcher<T> {
     _queryFetcher: ReactRelayQueryFetcher;
     _forceUpdate: any;
-    _lastResult: RenderProps;
+    _lastResult: RenderProps<T>;
 
 
     constructor(forceUpdate) {
@@ -42,7 +42,7 @@ class UseQueryFetcher {
         this._lastResult = renderProps;
     }
 
-    _execute(environment, query, variables, dataFrom = STORE_OR_NETWORK): RenderProps {
+    _execute(environment, query, variables, dataFrom = STORE_OR_NETWORK): RenderProps<T> {
         if (!query) {
             this._queryFetcher.dispose();
             return this.getResult(environment, query, variables, { empty: true });
@@ -88,7 +88,7 @@ class UseQueryFetcher {
         }
     }
 
-    getResult(environment, query, variables, result: { empty?: boolean, error?: Error, snapshot?: Snapshot, cached?: boolean }): RenderProps {
+    getResult(environment, query, variables, result: { empty?: boolean, error?: Error, snapshot?: Snapshot, cached?: boolean }): RenderProps<T> {
         if (!result) {
             return;
         }
@@ -110,6 +110,7 @@ class UseQueryFetcher {
                 }
             }
         }
+        //@ts-ignore
         return renderProps;
     }
 

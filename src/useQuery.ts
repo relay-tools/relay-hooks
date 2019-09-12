@@ -8,8 +8,8 @@ import { UseQueryProps } from './RelayHooksType';
 
 import UseQueryFetcher from './UseQueryFetcher';
 
-type Reference = {
-    queryFetcher: UseQueryFetcher,
+type Reference<T> = {
+    queryFetcher: UseQueryFetcher<T>,
 }
 
 function useDeepCompare<T>(value: T): T {
@@ -22,17 +22,17 @@ function useDeepCompare<T>(value: T): T {
 
 
 
-const useQuery = function (props: UseQueryProps)  {
+const useQuery = function <T>(props: UseQueryProps)  {
     const { environment } = useContext(ReactRelayContext);
     const [, forceUpdate] = useState(null);
     const { query, variables, dataFrom } = props;
     const latestVariables = useDeepCompare(variables);
     const prev = usePrevious({ environment, query, latestVariables});
     
-    const ref = useRef<Reference>();
+    const ref = useRef<Reference<T>>();
     if (ref.current === null || ref.current === undefined) {
         ref.current = {
-            queryFetcher: new UseQueryFetcher(forceUpdate),
+            queryFetcher: new UseQueryFetcher<T>(forceUpdate),
         };
     }
     const { queryFetcher } = ref.current;

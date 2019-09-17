@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="CodeStream">
-    <option name="teamId" value="5d5a6c037e2cec0a75fce8a7" />
-    <option name="webViewContext" value="{&quot;chatProviderAccess&quot;:&quot;strict&quot;,&quot;currentTeamId&quot;:&quot;5d5a6c037e2cec0a75fce8a7&quot;,&quot;currentStreamId&quot;:&quot;&quot;,&quot;panelStack&quot;:[&quot;codemarks-for-file&quot;],&quot;hasFocus&quot;:true,&quot;channelFilter&quot;:&quot;all&quot;,&quot;channelsMuteAll&quot;:false,&quot;codemarkFileFilter&quot;:&quot;all&quot;,&quot;codemarkTypeFilter&quot;:&quot;all&quot;,&quot;codemarkTagFilter&quot;:&quot;all&quot;,&quot;codemarksFileViewStyle&quot;:&quot;inline&quot;,&quot;codemarksShowArchived&quot;:false,&quot;codemarksShowResolved&quot;:false,&quot;showFeedbackSmiley&quot;:true,&quot;route&quot;:{&quot;name&quot;:&quot;login&quot;,&quot;params&quot;:{}}}" />
-  </component>
-</project>

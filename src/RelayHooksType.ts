@@ -24,10 +24,14 @@ export type ContainerResult = {
     resolver: FragmentSpecResolver,
 };
 
+export type OperationType = {
+    readonly response: unknown;
+    readonly variables: Variables;
+};
 
-export interface RenderProps {
+export interface RenderProps<T extends OperationType> {
     error: Error,
-    props: Object,
+    props: T['response'],
     retry: () => void,
     cached?: boolean
 };

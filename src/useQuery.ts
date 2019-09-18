@@ -24,7 +24,7 @@ function useDeepCompare<T>(value: T): T {
 
 
 
-const useQuery = function <TOperationType extends OperationType>(props: UseQueryProps)  {
+const useQuery = function <TOperationType extends OperationType>(props: UseQueryProps<TOperationType>) {
     const { environment } = useContext(ReactRelayContext);
     const [, forceUpdate] = useState(null);
     const { query, variables, dataFrom } = props;

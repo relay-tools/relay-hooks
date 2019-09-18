@@ -1,9 +1,6 @@
 import {
-    CacheConfig,
     GraphQLTaggedNode,
-    IEnvironment,
     RelayContext,
-    Variables,
     FragmentSpecResolver,
 } from 'relay-runtime/lib/RelayStoreTypes';
 
@@ -18,6 +15,10 @@ interface DataFromEnum {
     STORE_ONLY
 };
 export type DataFrom = keyof DataFromEnum;
+
+export interface Variables {
+    [name: string]: any;
+}
 
 export type ContainerResult = {
     data: { [key: string]: any },
@@ -36,10 +37,10 @@ export interface RenderProps<T extends OperationType> {
     cached?: boolean
 };
 
-export interface UseQueryProps {
-    dataFrom?: DataFrom,
+export interface UseQueryProps<T extends OperationType> {
+    dataFrom ?: DataFrom,
     query: GraphQLTaggedNode,
-    variables: Variables,
+    variables: T ['variables'],
 };
 
 export type OperationContextProps = {

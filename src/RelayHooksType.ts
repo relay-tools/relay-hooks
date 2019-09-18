@@ -40,7 +40,7 @@ export interface RenderProps<T extends OperationType> {
 export interface UseQueryProps<T extends OperationType> {
     dataFrom ?: DataFrom,
     query: GraphQLTaggedNode,
-    variables: T ['variables'],
+    variables: T['variables'],
 };
 
 export type OperationContextProps = {

@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext, useRef } from "react";
 import usePrevious from "./usePrevious";
 import { ReactRelayContext } from 'react-relay';
-
+import { OperationType } from 'relay-runtime';
 import * as areEqual from 'fbjs/lib/areEqual';
-import {OperationType, UseQueryProps} from './RelayHooksType';
+import { UseQueryProps } from './RelayHooksType';
 
 
 import UseQueryFetcher from './UseQueryFetcher';

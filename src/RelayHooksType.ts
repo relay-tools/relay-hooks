@@ -3,6 +3,8 @@ import {
     RelayContext,
     FragmentSpecResolver,
 } from 'relay-runtime/lib/RelayStoreTypes';
+import { OperationType } from 'relay-runtime';
+
 
 export const NETWORK_ONLY = 'NETWORK_ONLY';
 export const STORE_THEN_NETWORK = 'STORE_THEN_NETWORK';
@@ -16,18 +18,9 @@ interface DataFromEnum {
 };
 export type DataFrom = keyof DataFromEnum;
 
-export interface Variables {
-    [name: string]: any;
-}
-
 export type ContainerResult = {
     data: { [key: string]: any },
     resolver: FragmentSpecResolver,
-};
-
-export type OperationType = {
-    readonly response: unknown;
-    readonly variables: Variables;
 };
 
 export interface RenderProps<T extends OperationType> {
@@ -38,7 +31,7 @@ export interface RenderProps<T extends OperationType> {
 };
 
 export interface UseQueryProps<T extends OperationType> {
-    dataFrom ?: DataFrom,
+    dataFrom?: DataFrom,
     query: GraphQLTaggedNode,
     variables: T['variables'],
 };

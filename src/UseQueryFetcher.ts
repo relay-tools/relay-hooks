@@ -1,17 +1,13 @@
 import * as ReactRelayQueryFetcher from 'react-relay/lib/ReactRelayQueryFetcher';
 import { Snapshot } from 'relay-runtime/lib/RelayStoreTypes';
-
-import * as areEqual from 'fbjs/lib/areEqual';
 import {
-    UseQueryProps,
     RenderProps,
-    OperationContextProps,
     STORE_THEN_NETWORK,
     NETWORK_ONLY,
-    STORE_OR_NETWORK,
-    OperationType
+    STORE_OR_NETWORK
 } from './RelayHooksType';
 
+import { OperationType } from 'relay-runtime';
 
 class UseQueryFetcher<TOperationType extends OperationType> {
     _queryFetcher: ReactRelayQueryFetcher;

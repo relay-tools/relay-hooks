@@ -1,7 +1,13 @@
 import { useEffect, useState, useRef, useContext } from "react";
 import * as mapObject from 'fbjs/lib/mapObject';
 import * as areEqual from 'fbjs/lib/areEqual';
-import { RelayFeatureFlags, getFragment } from 'relay-runtime';
+import {
+  RelayFeatureFlags,
+  getFragment,
+  getDataIDsFromFragment,
+  getVariablesFromFragment,
+  createFragmentSpecResolver
+} from 'relay-runtime';
 import { ReactRelayContext } from 'react-relay';
 import { RelayContext } from 'relay-runtime/lib/RelayStoreTypes';
 
@@ -77,8 +83,7 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
   const propsFragments = { frag: fragmentRef } ;
   const [fragments, setFragments] = useState<any>(() => {
     RelayFeatureFlags.PREFER_FRAGMENT_OWNER_OVER_CONTEXT = true;
-    const { getFragment: getFragmentFromTag } = environment.unstable_internal;
-    return getFragmentFromTag(fragmentDef);
+    return getFragment(fragmentDef);
   });
 
   const ref = useRef<any>(null);
@@ -91,9 +96,6 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
   ref.current = resolver;
 
   function newResolver() {
-    const {
-      createFragmentSpecResolver,
-    } = environment.unstable_internal;
     const res = createFragmentSpecResolver(
       { environment },
       'useFragment',
@@ -119,7 +121,6 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
 
   useEffect(() => {
     if (prev && prev.fragmentRef) {
-      const { getDataIDsFromFragment } = environment.unstable_internal;
       const prevIDs = getDataIDsFromFragment(fragments, prev.fragmentRef);
       const nextIDs = getDataIDsFromFragment(fragments, fragmentRef);
       if (prev.environment !== environment ||
@@ -133,9 +134,6 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
   }, [environment, fragmentRef]);
 
   function _getFragmentVariables(fRef= fragmentRef): Variables {
-    const {
-      getVariablesFromFragment,
-    } = environment.unstable_internal;
     return getVariablesFromFragment(
       // NOTE: We pass empty operationVariables because we want to prefer
       // the variables from the fragment owner

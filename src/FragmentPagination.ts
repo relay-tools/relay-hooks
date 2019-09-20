@@ -371,11 +371,6 @@ class FragmentPagination {
         observer: Observer<void>,
         options: RefetchOptions,
     ): Subscription {
-        const {
-            createOperationDescriptor,
-            getRequest,
-            getVariablesFromObject,
-        } = environment.unstable_internal;
         //const { componentRef: _, __relayContext, ...restProps } = this.props;
         const resolver = prevResult.resolver;
         const props = prevResult.data && prevResult.data.frag ? prevResult.data.frag : {};

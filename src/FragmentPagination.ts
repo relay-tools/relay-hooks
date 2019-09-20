@@ -12,6 +12,9 @@ import {
     ConnectionInterface,
     getFragmentOwners,
     CacheConfig,
+    createOperationDescriptor,
+    getRequest,
+    getVariablesFromObject
 } from 'relay-runtime';
 
 export type RefetchOptions = {

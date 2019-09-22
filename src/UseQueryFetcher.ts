@@ -1,5 +1,6 @@
 import * as ReactRelayQueryFetcher from 'react-relay/lib/ReactRelayQueryFetcher';
 import { Snapshot } from 'relay-runtime/lib/RelayStoreTypes';
+import { createOperationDescriptor, getRequest } from 'relay-runtime';
 
 import * as areEqual from 'fbjs/lib/areEqual';
 import { UseQueryProps, RenderProps, OperationContextProps, STORE_THEN_NETWORK, NETWORK_ONLY, STORE_OR_NETWORK } from './RelayHooksType';
@@ -48,7 +49,6 @@ class UseQueryFetcher {
             return this.getResult(environment, query, variables, { empty: true });
         }
         this._queryFetcher.disposeRequest();
-            const { createOperationDescriptor, getRequest, } = environment.unstable_internal;
             const request = getRequest(query);
             const operation = createOperationDescriptor(request, variables);
         try {

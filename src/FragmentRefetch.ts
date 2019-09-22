@@ -6,6 +6,8 @@ import {
     Observable,
     Observer,
     Variables,
+    createOperationDescriptor,
+    getRequest
 } from 'relay-runtime';
 
 export type RefetchOptions = {
@@ -62,10 +64,6 @@ class FragmentRefetch {
                 }
                 : observerOrCallback || ({} as any);
 
-        const {
-            createOperationDescriptor,
-            getRequest,
-        } = environment.unstable_internal;
         const query = getRequest(taggedNode);
         const operation = createOperationDescriptor(query, fetchVariables);
 

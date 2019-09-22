@@ -6,8 +6,7 @@ import {
     NETWORK_ONLY,
     STORE_OR_NETWORK
 } from './RelayHooksType';
-
-import { OperationType } from 'relay-runtime';
+import { createOperationDescriptor, getReques, OperationTypet } from 'relay-runtime';
 
 class UseQueryFetcher<TOperationType extends OperationType> {
     _queryFetcher: ReactRelayQueryFetcher;
@@ -52,7 +51,6 @@ class UseQueryFetcher<TOperationType extends OperationType> {
             return this.getResult(environment, query, variables, { empty: true });
         }
         this._queryFetcher.disposeRequest();
-            const { createOperationDescriptor, getRequest, } = environment.unstable_internal;
             const request = getRequest(query);
             const operation = createOperationDescriptor(request, variables);
         try {

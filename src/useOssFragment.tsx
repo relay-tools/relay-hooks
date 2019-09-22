@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef, useContext } from "react";
-import * as mapObject from 'fbjs/lib/mapObject';
 import * as areEqual from 'fbjs/lib/areEqual';
 import {
   RelayFeatureFlags,
@@ -13,10 +12,8 @@ import { RelayContext } from 'relay-runtime/lib/RelayStoreTypes';
 
 import { ContainerResult } from './RelayHooksType';
 import {
-  Disposable,
   IEnvironment,
   GraphQLTaggedNode,
-  Observable,
   Observer,
   Variables,
   getFragmentOwner

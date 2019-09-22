@@ -7,17 +7,13 @@ import {
     Variables,
     createOperationDescriptor,
     getRequest,
-    Snapshot
+    Snapshot,
+    CacheConfig
 } from 'relay-runtime';
-
-export type RefetchOptions = {
-    force?: boolean,
-    fetchPolicy?: FetchPolicy,
-};
 
 export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
 import * as ReactRelayQueryFetcher from 'react-relay/lib/ReactRelayQueryFetcher';
-import { ContainerResult, FetchPolicy } from './RelayHooksType';
+import { ContainerResult, RefetchOptions } from './RelayHooksType';
 import { isStorePolicy, isNetworkPolicy } from './Utils';
 
 
@@ -61,7 +57,10 @@ class FragmentRefetch {
             ? { ...fetchVariables, ...renderVariables }
             : fetchVariables;
 
-        const cacheConfig = options ? { force: !!options.force } : undefined;
+        const cacheConfig: CacheConfig = options ? { force: !!options.force } : undefined;
+        if (cacheConfig != null && options && options.metadata != null) {
+            cacheConfig.metadata = options.metadata;
+        }
 
         const observer =
             typeof observerOrCallback === 'function'

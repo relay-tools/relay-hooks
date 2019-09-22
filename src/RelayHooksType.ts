@@ -48,3 +48,8 @@ export type OperationContextProps = {
     relay: RelayContext,
 };
 
+export type RefetchOptions = {
+    force?: boolean,
+    fetchPolicy?: FetchPolicy,
+    metadata?: {[key: string]: any}
+};

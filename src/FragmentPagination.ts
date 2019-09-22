@@ -17,17 +17,14 @@ import {
     getVariablesFromObject
 } from 'relay-runtime';
 
-export type RefetchOptions = {
-    force?: boolean,
-    fetchPolicy?: 'store-or-network' | 'network-only',
-};
+
 
 export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
 import * as ReactRelayQueryFetcher from 'react-relay/lib/ReactRelayQueryFetcher';
 import * as invariant from 'fbjs/lib/invariant';
 import * as warning from 'fbjs/lib/warning';
 import * as areEqual from 'fbjs/lib/areEqual';
-import { ContainerResult } from './RelayHooksType';
+import { ContainerResult, RefetchOptions } from './RelayHooksType';
 
 
 
@@ -393,12 +390,12 @@ class FragmentPagination {
             };
         });
         // hack 6.0.0
-        if(getVariablesFromObject.length === 2) {
+        if (getVariablesFromObject.length === 2) {
             fragmentVariables = getVariablesFromObject(
-              fragments,
-              propsFragment
+                fragments,
+                propsFragment
             );
-          } else {
+        } else {
             fragmentVariables = getVariablesFromObject(
                 // NOTE: We pass empty operationVariables because we want to prefer
                 // the variables from the fragment owner
@@ -408,7 +405,7 @@ class FragmentPagination {
                 fragmentOwners,
             );
         }
-        
+
         fragmentVariables = {
             ...rootVariables,
             ...fragmentVariables,
@@ -441,6 +438,9 @@ class FragmentPagination {
         const cacheConfig: CacheConfig = options
             ? { force: !!options.force }
             : undefined;
+        if (cacheConfig != null && options && options.metadata != null) {
+            cacheConfig.metadata = options.metadata;
+        }
         const request = getRequest(connectionConfig.query);
         const operation = createOperationDescriptor(request, fetchVariables);
 

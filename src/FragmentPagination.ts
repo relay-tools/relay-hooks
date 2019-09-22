@@ -453,7 +453,7 @@ class FragmentPagination {
                     fragmentVariables,
                     paginatingVariables.totalCount,
                 ),
-                operation.node,
+                operation.node || operation.request.node,
             );
             const nextData = resolver.resolve();
 

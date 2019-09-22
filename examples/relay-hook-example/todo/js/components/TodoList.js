@@ -29,7 +29,7 @@ type Props = {|
   +user: TodoList_user,
 |};
 
-const fragmentSpec = graphql`
+/*const fragmentSpec = graphql`
     fragment TodoList_user on User {
       todos(
         first: 2147483647 # max GraphQLInt
@@ -49,7 +49,7 @@ const fragmentSpec = graphql`
       ...Todo_user
     }
   `;
-
+*/
 const TodoList = (props) => {
   const { refetch, user } = props;
   //const { refetch } = props;
@@ -69,7 +69,7 @@ const TodoList = (props) => {
       {userId: "you"},  
       null,  
       () => { console.log('Refetch done') },
-      {force: true},  
+      {force: true, fetchPolicy: "store-and-network"},  
     );
     //response.dispose();
 

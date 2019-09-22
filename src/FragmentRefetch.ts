@@ -1,4 +1,3 @@
-import { RelayFeatureFlags, getFragment } from 'relay-runtime';
 import {
     Subscription,
     IEnvironment,
@@ -7,17 +6,19 @@ import {
     Observer,
     Variables,
     createOperationDescriptor,
-    getRequest
+    getRequest,
+    Snapshot
 } from 'relay-runtime';
 
 export type RefetchOptions = {
     force?: boolean,
-    fetchPolicy?: 'store-or-network' | 'network-only',
+    fetchPolicy?: FetchPolicy,
 };
 
 export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
 import * as ReactRelayQueryFetcher from 'react-relay/lib/ReactRelayQueryFetcher';
-import { ContainerResult } from './RelayHooksType';
+import { ContainerResult, FetchPolicy } from './RelayHooksType';
+import { isStorePolicy, isNetworkPolicy } from './Utils';
 
 
 class FragmentRefetch {
@@ -31,6 +32,14 @@ class FragmentRefetch {
     dispose() {
         this._queryFetcher && this._queryFetcher.dispose();
         this._refetchSubscription && this._refetchSubscription.unsubscribe();
+    }
+
+    lookupInStore(environment: IEnvironment, operation, fetchPolicy): Snapshot {
+        if (isStorePolicy(fetchPolicy) && environment.check(operation.root)) {
+            this._queryFetcher._retainCachedOperation(environment, operation);
+            return environment.lookup(operation.fragment, operation);
+        }
+        return null;
     }
 
     refetch(environment: IEnvironment,
@@ -79,77 +88,82 @@ class FragmentRefetch {
         // synchronous completion may call callbacks .subscribe() returns.
         let refetchSubscription;
 
-        if (options && options.fetchPolicy === 'store-or-network') {
-            const storeSnapshot = this._queryFetcher.lookupInStore(
-                environment,
-                operation,
-                //options.fetchPolicy,
-            );
-            if (storeSnapshot != null) {
-                const res = prevResult.resolver;
-                res.setVariables(newFragmentVariables, operation.node);
-                setResult({
-                    resolver: res, data: res.resolve(), relay: {
-                        environment: environment,
-                        variables: newFragmentVariables,
+        const { fetchPolicy = "network-only"} = options;
+
+        const storeSnapshot = this.lookupInStore(
+            environment,
+            operation,
+            fetchPolicy,
+        );
+        if (storeSnapshot != null) {
+            const res = prevResult.resolver;
+            res.setVariables(newFragmentVariables, operation.node || operation.request.node);
+            setResult({
+                resolver: res, data: res.resolve(), relay: {
+                    environment: environment,
+                    variables: newFragmentVariables,
+                }
+            })
+            const complete = async () => {
+                observer.next && observer.next();
+                observer.complete && observer.complete();
+            }
+            complete();
+        }
+        const isNetworky = isNetworkPolicy(fetchPolicy, storeSnapshot);
+        if(!isNetworky) {
+            return {
+                dispose() { },
+            };
+        }
+        if (isNetworky) {
+            this._queryFetcher
+                .execute({
+                    environment,
+                    operation,
+                    cacheConfig,
+                    // TODO (T26430099): Cleanup old references
+                    preservePreviousReferences: true,
+                })
+                .mergeMap(response => {
+                    const res = prevResult.resolver;
+                    res.setVariables(newFragmentVariables, operation.node || operation.request.node);
+                    return Observable.create(sink => {
+                        setResult({
+                            resolver: res, data: res.resolve(), relay: {
+                                environment: environment,
+                                variables: newFragmentVariables,
+                            }
+                        })
+                        const complete = async () => {
+                            sink.next();
+                            sink.complete();
+                        }
+                        complete();
+                    }
+                    );
+                })
+                .finally(() => {
+                    // Finalizing a refetch should only clear this._refetchSubscription
+                    // if the finizing subscription is the most recent call.
+                    if (this._refetchSubscription === refetchSubscription) {
+                        this._refetchSubscription = null;
                     }
                 })
-                const complete = async () => {
-                    observer.next && observer.next();
-                    observer.complete && observer.complete();
-                }
-                complete();
-                return {
-                    dispose() { },
-                };
-            }
-        }
-        this._queryFetcher
-            .execute({
-                environment,
-                operation,
-                cacheConfig,
-                // TODO (T26430099): Cleanup old references
-                preservePreviousReferences: true,
-            })
-            .mergeMap(response => {
-                const res = prevResult.resolver;
-                res.setVariables(newFragmentVariables, operation.node);
-                return Observable.create(sink => {
-                    setResult({
-                        resolver: res, data: res.resolve(), relay: {
-                            environment: environment,
-                            variables: newFragmentVariables,
-                        }
-                    })
-                    const complete = async () => {
-                        sink.next();
-                        sink.complete();
-                    }
-                    complete();
-                }
-                );
-            })
-            .finally(() => {
-                // Finalizing a refetch should only clear this._refetchSubscription
-                // if the finizing subscription is the most recent call.
-                if (this._refetchSubscription === refetchSubscription) {
-                    this._refetchSubscription = null;
-                }
-            })
-            .subscribe({
-                ...observer,
-                start: subscription => {
-                    this._refetchSubscription = refetchSubscription = subscription;
-                    observer.start && observer.start(subscription);
-                },
-            });
+                .subscribe({
+                    ...observer,
+                    start: subscription => {
+                        this._refetchSubscription = refetchSubscription = subscription;
+                        observer.start && observer.start(subscription);
+                    },
+                });
 
-        return {
-            dispose() {
-                refetchSubscription && refetchSubscription.unsubscribe();
-            },
-        };
+            return {
+                dispose() {
+                    refetchSubscription && refetchSubscription.unsubscribe();
+                },
+            };
+        }
     }
 }
 

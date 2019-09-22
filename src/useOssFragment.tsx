@@ -134,6 +134,13 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
   }, [environment, fragmentRef]);
 
   function _getFragmentVariables(fRef= fragmentRef): Variables {
+    // hack v6.0.0
+    if(getVariablesFromFragment.length === 2) {
+      return getVariablesFromFragment(
+        fragments,
+        fRef
+      );
+    }
     return getVariablesFromFragment(
       // NOTE: We pass empty operationVariables because we want to prefer
       // the variables from the fragment owner

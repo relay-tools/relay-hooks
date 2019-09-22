@@ -1,12 +1,14 @@
 import { useState, useEffect, useContext, useRef } from "react";
 import usePrevious from "./usePrevious";
 import { ReactRelayContext } from 'react-relay';
-import { OperationType } from 'relay-runtime';
+import { OperationType, GraphQLTaggedNode } from 'relay-runtime';
 import * as areEqual from 'fbjs/lib/areEqual';
-import { UseQueryProps } from './RelayHooksType';
+import { UseQueryProps, DataFrom, FetchPolicy } from './RelayHooksType';
+import { CacheConfig } from 'relay-runtime';
 
 
 import UseQueryFetcher from './UseQueryFetcher';
+import { convertDataFrom } from "./Utils";
 
 
 
@@ -22,12 +24,31 @@ function useDeepCompare<T>(value: T): T {
     return latestValue.current;
   }
 
+const defaultPolicy = 'store-or-network';
 
+export const useQueryModern = function<TOperationType extends OperationType>(props: UseQueryProps<TOperationType>) {
+        
+    const { query, variables, dataFrom, cacheConfig } = props;
+        return useQueryExp(
+            query, 
+            variables, 
+            { 
+                fetchPolicy: convertDataFrom(dataFrom),
+                networkCacheConfig: cacheConfig
+            }
+        )
+    }
 
-const useQuery = function <TOperationType extends OperationType>(props: UseQueryProps<TOperationType>) {
+export const useQueryExp = function<TOperationType extends OperationType>(query: GraphQLTaggedNode,
+    variables: TOperationType['variables'],
+    options : {
+        fetchPolicy?: FetchPolicy,
+        networkCacheConfig?: CacheConfig,
+    } = {}
+    ) {
     const { environment } = useContext(ReactRelayContext);
     const [, forceUpdate] = useState(null);
-    const { query, variables, dataFrom } = props;
+    const { fetchPolicy = defaultPolicy, networkCacheConfig } = options;
     const latestVariables = useDeepCompare(variables);
     const prev = usePrevious({ environment, query, latestVariables});
     
@@ -49,10 +70,10 @@ const useQuery = function <TOperationType extends OperationType>(props: UseQuery
     if (!prev || prev.query !== query ||
         prev.environment !== environment ||
             prev.latestVariables!== latestVariables) {
-                queryFetcher.execute(environment, query, variables, dataFrom);
+                queryFetcher.execute(environment, query, variables, fetchPolicy, networkCacheConfig);
     }
 
     return queryFetcher.getLastResult();
 }
 
-export default useQuery;
+export default useQueryModern;

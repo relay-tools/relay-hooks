@@ -3,7 +3,7 @@ import {
     RelayContext,
     FragmentSpecResolver,
 } from 'relay-runtime/lib/RelayStoreTypes';
-import { OperationType } from 'relay-runtime';
+import { OperationType, CacheConfig } from 'relay-runtime';
 
 
 export const NETWORK_ONLY = 'NETWORK_ONLY';
@@ -16,6 +16,12 @@ interface DataFromEnum {
     STORE_OR_NETWORK,
     STORE_ONLY
 };
+export type FetchPolicy =
+| 'store-only'
+| 'store-or-network'
+| 'store-and-network'
+| 'network-only';
+
 export type DataFrom = keyof DataFromEnum;
 
 export type ContainerResult = {
@@ -31,6 +37,7 @@ export interface RenderProps<T extends OperationType> {
 };
 
 export interface UseQueryProps<T extends OperationType> {
+    cacheConfig?: CacheConfig,
     dataFrom?: DataFrom,
     query: GraphQLTaggedNode,
     variables: T['variables'],

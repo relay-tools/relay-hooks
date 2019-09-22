@@ -1,15 +1,17 @@
 import { useState, useEffect, useContext, useRef } from "react";
 import usePrevious from "./usePrevious";
 import { ReactRelayContext } from 'react-relay';
-
+import { OperationType } from 'relay-runtime';
 import * as areEqual from 'fbjs/lib/areEqual';
 import { UseQueryProps } from './RelayHooksType';
 
 
 import UseQueryFetcher from './UseQueryFetcher';
 
-type Reference = {
-    queryFetcher: UseQueryFetcher,
+
+
+type Reference<T extends OperationType> = {
+    queryFetcher: UseQueryFetcher<T>,
 }
 
 function useDeepCompare<T>(value: T): T {
@@ -22,17 +24,17 @@ function useDeepCompare<T>(value: T): T {
 
 
 
-const useQuery = function (props: UseQueryProps)  {
+const useQuery = function <TOperationType extends OperationType>(props: UseQueryProps<TOperationType>) {
     const { environment } = useContext(ReactRelayContext);
     const [, forceUpdate] = useState(null);
     const { query, variables, dataFrom } = props;
     const latestVariables = useDeepCompare(variables);
     const prev = usePrevious({ environment, query, latestVariables});
     
-    const ref = useRef<Reference>();
+    const ref = useRef<Reference<TOperationType>>();
     if (ref.current === null || ref.current === undefined) {
         ref.current = {
-            queryFetcher: new UseQueryFetcher(forceUpdate),
+            queryFetcher: new UseQueryFetcher<TOperationType>(forceUpdate),
         };
     }
     const { queryFetcher } = ref.current;

@@ -1,15 +1,17 @@
 import * as ReactRelayQueryFetcher from 'react-relay/lib/ReactRelayQueryFetcher';
 import { Snapshot } from 'relay-runtime/lib/RelayStoreTypes';
-import { createOperationDescriptor, getRequest } from 'relay-runtime';
+import {
+    RenderProps,
+    STORE_THEN_NETWORK,
+    NETWORK_ONLY,
+    STORE_OR_NETWORK
+} from './RelayHooksType';
+import { createOperationDescriptor, getReques, OperationTypet } from 'relay-runtime';
 
-import * as areEqual from 'fbjs/lib/areEqual';
-import { UseQueryProps, RenderProps, OperationContextProps, STORE_THEN_NETWORK, NETWORK_ONLY, STORE_OR_NETWORK } from './RelayHooksType';
-
-
-class UseQueryFetcher {
+class UseQueryFetcher<TOperationType extends OperationType> {
     _queryFetcher: ReactRelayQueryFetcher;
     _forceUpdate: any;
-    _lastResult: RenderProps;
+    _lastResult: RenderProps<TOperationType>;
 
 
     constructor(forceUpdate) {
@@ -43,7 +45,7 @@ class UseQueryFetcher {
         this._lastResult = renderProps;
     }
 
-    _execute(environment, query, variables, dataFrom = STORE_OR_NETWORK): RenderProps {
+    _execute(environment, query, variables, dataFrom = STORE_OR_NETWORK): RenderProps<TOperationType> {
         if (!query) {
             this._queryFetcher.dispose();
             return this.getResult(environment, query, variables, { empty: true });
@@ -88,7 +90,7 @@ class UseQueryFetcher {
         }
     }
 
-    getResult(environment, query, variables, result: { empty?: boolean, error?: Error, snapshot?: Snapshot, cached?: boolean }): RenderProps {
+    getResult(environment, query, variables, result: { empty?: boolean, error?: Error, snapshot?: Snapshot, cached?: boolean }): RenderProps<TOperationType> {
         if (!result) {
             return;
         }

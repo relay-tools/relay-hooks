@@ -1,11 +1,10 @@
 import {
-    CacheConfig,
     GraphQLTaggedNode,
-    IEnvironment,
     RelayContext,
-    Variables,
     FragmentSpecResolver,
 } from 'relay-runtime/lib/RelayStoreTypes';
+import { OperationType } from 'relay-runtime';
+
 
 export const NETWORK_ONLY = 'NETWORK_ONLY';
 export const STORE_THEN_NETWORK = 'STORE_THEN_NETWORK';
@@ -24,18 +23,17 @@ export type ContainerResult = {
     resolver: FragmentSpecResolver,
 };
 
-
-export interface RenderProps {
+export interface RenderProps<T extends OperationType> {
     error: Error,
-    props: Object,
+    props: T['response'],
     retry: () => void,
     cached?: boolean
 };
 
-export interface UseQueryProps {
+export interface UseQueryProps<T extends OperationType> {
     dataFrom?: DataFrom,
     query: GraphQLTaggedNode,
-    variables: Variables,
+    variables: T['variables'],
 };
 
 export type OperationContextProps = {

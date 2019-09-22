@@ -13,6 +13,7 @@ export {
 } from 'react-relay';
 
 export {default as useQuery} from './useQuery';
+export { useQueryExp } from './useQuery';
 export {default as useFragment} from './useFragment';
 export {useMutation} from './useMutation';
 export {default as useOssFragment} from './useOssFragment';

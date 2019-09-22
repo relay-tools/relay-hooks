@@ -17,7 +17,7 @@ import * as React from 'react';
 
 import { useState } from 'react';
 
-import { useQuery, RelayEnvironmentProvider } from 'relay-hooks';
+import { useQuery, RelayEnvironmentProvider, useQueryExp } from 'relay-hooks';
 import {
   Environment,
   Network,
@@ -28,6 +28,7 @@ import {
 } from 'relay-runtime';
 
 import TodoApp, { fragmentSpec } from './components/TodoApp';
+//import { useQuery, RelayEnvironmentProvider } from 'relay-hooks';
 
 import TodoTextInput from './components/TodoTextInput';
 import type { appQueryResponse } from 'relay/appQuery.graphql';
@@ -92,14 +93,23 @@ const AppTodo = function (appProps) {
 }
 const isServer = typeof window === 'undefined';
 const LayoutTodo = ({ userId }) => {
-  console.log("LayoutTodo", userId, isServer)
-  const { props, error, retry, cached } = useQuery({
+  console.log("LayoutTodo", userId, isServer);
+  useQueryExp
+  const { props, error, retry, cached } = useQueryExp(
+    QueryApp,
+    { userId },
+    {
+      fetchPolicy: "store-or-network"
+    }
+  );
+  /*const { props, error, retry, cached } = useQuery({
     query: QueryApp,
     variables: {
       // Mock authenticated ID that matches database
       userId,
-    }
-  });
+    },
+    dataFrom: "STORE_THEN_NETWORK"
+  });*/
 
   console.log("renderer", props, cached)
   if (props && props.user) {

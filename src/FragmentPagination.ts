@@ -17,18 +17,14 @@ import {
     getVariablesFromObject
 } from 'relay-runtime';
 
-export type RefetchOptions = {
-    force?: boolean,
-    fetchPolicy?: 'store-or-network' | 'network-only',
-};
+
 
 export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
 import * as ReactRelayQueryFetcher from 'react-relay/lib/ReactRelayQueryFetcher';
 import * as invariant from 'fbjs/lib/invariant';
 import * as warning from 'fbjs/lib/warning';
 import * as areEqual from 'fbjs/lib/areEqual';
-import * as forEachObject from 'fbjs/lib/forEachObject';
-import { ContainerResult } from './RelayHooksType';
+import { ContainerResult, RefetchOptions } from './RelayHooksType';
 
 
 
@@ -383,7 +379,7 @@ class FragmentPagination {
         // For extra safety, we make sure the rootVariables include the
         // variables from all owners in this fragmentSpec, even though they
         // should all point to the same owner
-        forEachObject(fragments, (__, key) => {
+        Object.keys(fragments).forEach(key => {
             const fragmentOwner = fragmentOwners[key];
             const fragmentOwnerVariables = Array.isArray(fragmentOwner)
                 ? fragmentOwner[0].variables || {}
@@ -393,14 +389,23 @@ class FragmentPagination {
                 ...fragmentOwnerVariables,
             };
         });
-        fragmentVariables = getVariablesFromObject(
-            // NOTE: We pass empty operationVariables because we want to prefer
-            // the variables from the fragment owner
-            {},
-            fragments,
-            propsFragment,
-            fragmentOwners,
-        );
+        // hack 6.0.0
+        if (getVariablesFromObject.length === 2) {
+            fragmentVariables = getVariablesFromObject(
+                fragments,
+                propsFragment
+            );
+        } else {
+            fragmentVariables = getVariablesFromObject(
+                // NOTE: We pass empty operationVariables because we want to prefer
+                // the variables from the fragment owner
+                {},
+                fragments,
+                propsFragment,
+                fragmentOwners,
+            );
+        }
+
         fragmentVariables = {
             ...rootVariables,
             ...fragmentVariables,
@@ -433,6 +438,9 @@ class FragmentPagination {
         const cacheConfig: CacheConfig = options
             ? { force: !!options.force }
             : undefined;
+        if (cacheConfig != null && options && options.metadata != null) {
+            cacheConfig.metadata = options.metadata;
+        }
         const request = getRequest(connectionConfig.query);
         const operation = createOperationDescriptor(request, fetchVariables);
 
@@ -453,7 +461,7 @@ class FragmentPagination {
                     fragmentVariables,
                     paginatingVariables.totalCount,
                 ),
-                operation.node,
+                operation.node || operation.request.node,
             );
             const nextData = resolver.resolve();
 

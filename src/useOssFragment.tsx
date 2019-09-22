@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef, useContext } from "react";
-import * as mapObject from 'fbjs/lib/mapObject';
 import * as areEqual from 'fbjs/lib/areEqual';
 import {
   RelayFeatureFlags,
@@ -13,10 +12,8 @@ import { RelayContext } from 'relay-runtime/lib/RelayStoreTypes';
 
 import { ContainerResult } from './RelayHooksType';
 import {
-  Disposable,
   IEnvironment,
   GraphQLTaggedNode,
-  Observable,
   Observer,
   Variables,
   getFragmentOwner
@@ -134,6 +131,13 @@ const useOssFragment = function (fragmentDef, fragmentRef: any, ): FragmentResul
   }, [environment, fragmentRef]);
 
   function _getFragmentVariables(fRef= fragmentRef): Variables {
+    // hack v6.0.0
+    if(getVariablesFromFragment.length === 2) {
+      return getVariablesFromFragment(
+        fragments,
+        fRef
+      );
+    }
     return getVariablesFromFragment(
       // NOTE: We pass empty operationVariables because we want to prefer
       // the variables from the fragment owner

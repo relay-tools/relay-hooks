@@ -2,9 +2,6 @@ import * as ReactRelayQueryFetcher from 'react-relay/lib/ReactRelayQueryFetcher'
 import { Snapshot } from 'relay-runtime/lib/RelayStoreTypes';
 import {
     RenderProps,
-    STORE_THEN_NETWORK,
-    NETWORK_ONLY,
-    STORE_OR_NETWORK,
     FetchPolicy
 } from './RelayHooksType';
 import { 
@@ -34,19 +31,6 @@ class UseQueryFetcher<TOperationType extends OperationType> {
     dispose() {
         this._queryFetcher.dispose();
     }
-
-    /*execute(environment, query, variables): RenderProps {
-        if (!query) {
-            this._queryFetcher.dispose();
-            return this.getOperationContext({ operation: null, relay: { environment, variables } });
-        } else {
-            this._queryFetcher.disposeRequest();
-            const { createOperationDescriptor, getRequest, } = environment.unstable_internal;
-            const request = getRequest(query);
-            const operation = createOperationDescriptor(request, variables);
-            return this.getOperationContext({ operation: operation, relay: { environment, variables: operation.variables } });
-        }
-    }*/
 
     lookupInStore(environment, operation, fetchPolicy): Snapshot {
         if (isStorePolicy(fetchPolicy) && environment.check(operation.root)) {
@@ -78,7 +62,7 @@ class UseQueryFetcher<TOperationType extends OperationType> {
             const querySnapshot = isNetwork ? this._queryFetcher.fetch({
                 cacheConfig,
                 environment,
-                onDataChange: (params: { //TODO BETTER
+                onDataChange: (params: {
                     error?: Error,
                     snapshot?: Snapshot,
                 }): void => {

@@ -95,21 +95,21 @@ const isServer = typeof window === 'undefined';
 const LayoutTodo = ({ userId }) => {
   console.log("LayoutTodo", userId, isServer);
   useQueryExp
-  /*const { props, error, retry, cached } = useQueryExp(
+  const { props, error, retry, cached } = useQueryExp(
     QueryApp,
     { userId },
     {
-      fetchPolicy: "store-and-network"
+      fetchPolicy: "store-or-network"
     }
-  );*/
-  const { props, error, retry, cached } = useQuery({
+  );
+  /*const { props, error, retry, cached } = useQuery({
     query: QueryApp,
     variables: {
       // Mock authenticated ID that matches database
       userId,
     },
     dataFrom: "STORE_THEN_NETWORK"
-  });
+  });*/
 
   console.log("renderer", props, cached)
   if (props && props.user) {

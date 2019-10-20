@@ -1,55 +1,40 @@
 import {
-    GraphQLTaggedNode,
-    RelayContext,
-    FragmentSpecResolver,
-} from 'relay-runtime/lib/RelayStoreTypes';
-import { OperationType, CacheConfig } from 'relay-runtime';
+  GraphQLTaggedNode,
+  RelayContext,
+  FragmentSpecResolver
+} from "relay-runtime/lib/RelayStoreTypes";
+import { OperationType, CacheConfig } from "relay-runtime";
 
+export const NETWORK_ONLY = "network-only";
+export const STORE_THEN_NETWORK = "store-and-network";
+export const STORE_OR_NETWORK = "store-or-network";
+export const STORE_ONLY = "store-only";
 
-export const NETWORK_ONLY = 'NETWORK_ONLY';
-export const STORE_THEN_NETWORK = 'STORE_THEN_NETWORK';
-export const STORE_OR_NETWORK = 'STORE_OR_NETWORK';
-export const STORE_ONLY = 'STORE_ONLY';
-interface DataFromEnum {
-    NETWORK_ONLY,
-    STORE_THEN_NETWORK,
-    STORE_OR_NETWORK,
-    STORE_ONLY
-};
 export type FetchPolicy =
-| 'store-only'
-| 'store-or-network'
-| 'store-and-network'
-| 'network-only';
-
-export type DataFrom = keyof DataFromEnum;
+  | "store-only"
+  | "store-or-network"
+  | "store-and-network"
+  | "network-only";
 
 export type ContainerResult = {
-    data: { [key: string]: any },
-    resolver: FragmentSpecResolver,
+  data: { [key: string]: any };
+  resolver: FragmentSpecResolver;
 };
 
 export interface RenderProps<T extends OperationType> {
-    error: Error,
-    props: T['response'],
-    retry: () => void,
-    cached?: boolean
-};
-
-export interface UseQueryProps<T extends OperationType> {
-    cacheConfig?: CacheConfig,
-    dataFrom?: DataFrom,
-    query: GraphQLTaggedNode,
-    variables: T['variables'],
-};
+  error: Error;
+  props: T["response"];
+  retry: (_cacheConfigOverride: CacheConfig) => void;
+  cached?: boolean;
+}
 
 export type OperationContextProps = {
-    operation: any,
-    relay: RelayContext,
+  operation: any;
+  relay: RelayContext;
 };
 
 export type RefetchOptions = {
-    force?: boolean,
-    fetchPolicy?: FetchPolicy,
-    metadata?: {[key: string]: any}
+  force?: boolean;
+  fetchPolicy?: FetchPolicy;
+  metadata?: { [key: string]: any };
 };

@@ -1,117 +1,77 @@
-import * as ReactRelayQueryFetcher from 'react-relay/lib/ReactRelayQueryFetcher';
-import { Snapshot } from 'relay-runtime/lib/RelayStoreTypes';
-import {
-    RenderProps,
-    FetchPolicy
-} from './RelayHooksType';
-import { 
-    createOperationDescriptor, 
-    getRequest, 
-    OperationType, 
-    CacheConfig,
-    IEnvironment 
-} from 'relay-runtime';
-import { isNetworkPolicy, isStorePolicy } from './Utils';
+import { Disposable, CacheConfig, IEnvironment } from "relay-runtime";
+import { isNetworkPolicy, isStorePolicy } from "./Utils";
 
-class UseQueryFetcher<TOperationType extends OperationType> {
-    _queryFetcher: ReactRelayQueryFetcher;
-    _forceUpdate: any;
-    _lastResult: RenderProps<TOperationType>;
+import { __internal } from "relay-runtime";
 
+const { fetchQuery } = __internal;
 
-    constructor(forceUpdate) {
-        this._queryFetcher = new ReactRelayQueryFetcher();
-        this._forceUpdate = forceUpdate;
+class UseQueryFetcher {
+  environment: IEnvironment;
+  query: any;
+  networkSubscription: Disposable;
+  error: Error;
+  result = {
+    retry: (_cacheConfigOverride: CacheConfig) => undefined,
+    cached: false,
+    error: null
+  };
+  forceUpdate: any;
+
+  constructor(forceUpdate) {
+    this.forceUpdate = forceUpdate;
+  }
+
+  execute(environment: IEnvironment, query, fetchPolicy, networkCacheConfig) {
+    let cached = false;
+    const retry = (cacheConfigOverride: CacheConfig = networkCacheConfig) => {
+      this.dispose();
+      this.fetch(cacheConfigOverride);
+    };
+    if (environment !== this.environment || query !== this.query) {
+      this.environment = environment;
+      this.query = query;
+      this.dispose();
+
+      const fullQuery = environment.check(query.root);
+      const isNetwork = isNetworkPolicy(fetchPolicy, fullQuery);
+      const isStore = isStorePolicy(fetchPolicy);
+      cached = fullQuery && isStore;
+      if (isNetwork) {
+        this.fetch(networkCacheConfig);
+      }
     }
+    this.result = {
+      cached,
+      retry,
+      error: this.error
+    };
+    return this.result;
+  }
 
-    getLastResult() {
-        return this._lastResult;
+  fetch(networkCacheConfig) {
+    fetchQuery(this.environment, this.query, {
+      networkCacheConfig
+    }).subscribe({
+      start: subscription => {
+        this.networkSubscription = subscription;
+      },
+      error: error => {
+        this.error = error;
+        this.networkSubscription = null;
+        this.forceUpdate(error);
+      },
+      complete: () => {
+        this.networkSubscription = null;
+      }
+    });
+  }
+
+  dispose() {
+    this.error = null;
+    if (this.networkSubscription) {
+      this.networkSubscription.dispose();
     }
-
-    dispose() {
-        this._queryFetcher.dispose();
-    }
-
-    lookupInStore(environment, operation, fetchPolicy): Snapshot {
-        if (isStorePolicy(fetchPolicy) && environment.check(operation.root)) {
-            this._queryFetcher._retainCachedOperation(environment, operation);
-            return environment.lookup(operation.fragment, operation);
-        }
-        return null;
-    }
-
-    execute(environment: IEnvironment, query, variables, fetchPolicy, cacheConfig): void {
-        const renderProps = this._execute(environment, query, variables, fetchPolicy, cacheConfig);
-        this._lastResult = renderProps;
-    }
-
-    _execute(environment: IEnvironment, query, variables, fetchPolicy, cacheConfig): RenderProps<TOperationType> {
-        if (!query) {
-            this._queryFetcher.dispose();
-            return this.getResult(environment, query, variables, fetchPolicy, cacheConfig, { empty: true });
-        }
-        this._queryFetcher.disposeRequest();
-        const request = getRequest(query);
-        const operation = createOperationDescriptor(request, variables);
-        try {
-            const storeSnapshot = this.lookupInStore(environment, operation, fetchPolicy);
-            const isNetwork = isNetworkPolicy(fetchPolicy, storeSnapshot);
-            if (isNetwork) {
-                this._queryFetcher._fetchOptions = null;
-            }
-            const querySnapshot = isNetwork ? this._queryFetcher.fetch({
-                cacheConfig,
-                environment,
-                onDataChange: (params: {
-                    error?: Error,
-                    snapshot?: Snapshot,
-                }): void => {
-                    const error = params.error == null ? null : params.error;
-                    const snapshot = params.snapshot == null ? null : params.snapshot;
-
-                    const onDataChangeProps = this.getResult(environment, query, variables, fetchPolicy, cacheConfig, { error, snapshot, cached: false });
-                    if (this._lastResult !== onDataChangeProps) {
-                        this._lastResult = onDataChangeProps;
-                        this._forceUpdate(onDataChangeProps);
-                    }
-                },
-                operation,
-            }) : null;
-
-            // Use network data first, since it may be fresher
-            const snapshot = querySnapshot || storeSnapshot;
-            return this.getResult(environment, query, variables, fetchPolicy, cacheConfig,{ error: null, snapshot, cached: !!storeSnapshot }); //relay
-        } catch (error) {
-            return this.getResult(environment, query, variables, fetchPolicy, cacheConfig, { error: error, snapshot: null, cached: false }); //relay
-        }
-    }
-
-    getResult(environment: IEnvironment, query, variables, fetchPolicy: FetchPolicy, cacheConfig: CacheConfig, result: { empty?: boolean, error?: Error, snapshot?: Snapshot, cached?: boolean }): RenderProps<TOperationType> {
-        if (!result) {
-            return;
-        }
-        const renderProps = {
-            error: null,
-            props: result.empty ? {} : null,
-            retry: null,
-            cached: false
-        }
-        if (result.snapshot || result.error || result.cached) {
-            renderProps.props = result.snapshot ? result.snapshot.data : null;
-            renderProps.error = result.error ? result.error : null;
-            renderProps.cached = result.cached || false;
-            renderProps.retry = (cacheConfigOverride: CacheConfig = cacheConfig) => {
-                const retryProps = this._execute(environment, query, variables, fetchPolicy, cacheConfigOverride);
-                if (this._lastResult !== retryProps) {
-                    this._lastResult = retryProps;
-                    this._forceUpdate(retryProps);
-                }
-            }
-        }
-        return renderProps;
-    }
-
-
+  }
 }
 
 export default UseQueryFetcher;

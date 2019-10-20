@@ -97,8 +97,9 @@ export const useQuery = function<TOperationType extends OperationType>(
 
   const data = useFragment(fragmentDef, rootFragmentRef);
 
+  const fullQuery = environment.check(query.root);
   return {
-    props: { ...data },
+    props: fullQuery ? { ...data } : null,
     ...extraData
   };
 };

@@ -62,6 +62,7 @@ class UseQueryFetcher {
       },
       complete: () => {
         this.networkSubscription = null;
+        this.forceUpdate({});
       }
     });
   }

@@ -34,16 +34,17 @@ function useMemoOperationDescriptor(
       getRequest(gqlQuery),
       memoVariables
     );
+    const __fragmentOwner = query.fragment || query.request; // v5.0.0 || v6.0.0
+    const node = query.node || query.request.node; // v5.0.0 || v6.0.0
     return [
       query,
-      query.node.fragment || query.request.node.fragment, // v5.0.0 || v6.0.0
+      node.fragment,
       {
         __id: query.fragment.dataID,
         __fragments: {
-          [query.fragment.node.name]:
-            query.fragment.variables || query.request.variables
+          [query.fragment.node.name]: __fragmentOwner.variables
         },
-        __fragmentOwner: query.fragment || query.request // v5.0.0 || v6.0.0
+        __fragmentOwner
       }
     ];
   }, [gqlQuery, memoVariables]);

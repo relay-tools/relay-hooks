@@ -91,8 +91,9 @@ const useOssFragment = function(fragmentDef, fragmentRef: any): FragmentResult {
     };
   }
 
+  // TODO resolve data
   const {
-    result: { resolver, data },
+    result: { resolver },
     fragmentRefetch,
     fragmentPagination
   } = ref.current;
@@ -109,7 +110,7 @@ const useOssFragment = function(fragmentDef, fragmentRef: any): FragmentResult {
     );
     res.setCallback(() => {
       const newData = res.resolve();
-      if (data !== newData) {
+      if (ref.current.result.data !== newData) {
         const result = { resolver: res, data: newData };
         ref.current.result = result;
         forceUpdate(result);
@@ -233,6 +234,10 @@ const useOssFragment = function(fragmentDef, fragmentRef: any): FragmentResult {
     () => fragmentPagination.hasMore(ref.current.result),
     [ref.current.result]
   );
+
+  const {
+    result: { data }
+  } = ref.current;
 
   return [
     data && data.frag

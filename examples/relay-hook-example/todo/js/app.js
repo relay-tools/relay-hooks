@@ -19,7 +19,7 @@ import {useState} from 'react';
 
 import {useLazyLoadQuery, RelayEnvironmentProvider} from 'react-relay/hooks';
 
-import {useQuery, useQueryExp} from 'relay-hooks';
+import {useQuery} from 'relay-hooks';
 import {
   Environment,
   Network,
@@ -108,8 +108,7 @@ const AppTodo = function(appProps) {
 const isServer = typeof window === 'undefined';
 const LayoutTodo = ({userId}) => {
   console.log('LayoutTodo', userId, isServer);
-  useQueryExp;
-  const {props, error, retry, cached} = useQueryExp(
+  const {props, error, retry, cached} = useQuery(
     QueryApp,
     {userId},
     {

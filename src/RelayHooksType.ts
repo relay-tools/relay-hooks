@@ -1,5 +1,4 @@
 import {
-  GraphQLTaggedNode,
   RelayContext,
   FragmentSpecResolver
 } from "relay-runtime/lib/RelayStoreTypes";

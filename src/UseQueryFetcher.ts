@@ -1,6 +1,5 @@
-import { Disposable, CacheConfig, IEnvironment } from "relay-runtime";
+import { Disposable, CacheConfig, IEnvironment, Snapshot } from "relay-runtime";
 import { isNetworkPolicy, isStorePolicy } from "./Utils";
-
 import { __internal } from "relay-runtime";
 
 const { fetchQuery } = __internal;
@@ -9,11 +8,14 @@ class UseQueryFetcher {
   environment: IEnvironment;
   query: any;
   networkSubscription: Disposable;
+  rootSubscription: Disposable;
   error: Error;
+  snapshot: Snapshot;
   result = {
     retry: (_cacheConfigOverride: CacheConfig) => undefined,
     cached: false,
-    error: null
+    error: null,
+    snapshot: null
   };
   forceUpdate: any;
 
@@ -21,8 +23,15 @@ class UseQueryFetcher {
     this.forceUpdate = forceUpdate;
   }
 
+  lookupInStore(environment: IEnvironment, operation, fetchPolicy): Snapshot {
+    if (isStorePolicy(fetchPolicy) && environment.check(operation.root)) {
+      return environment.lookup(operation.fragment, operation);
+    }
+    return null;
+  }
+
   execute(environment: IEnvironment, query, fetchPolicy, networkCacheConfig) {
-    let cached = false;
+    let storeSnapshot;
     const retry = (cacheConfigOverride: CacheConfig = networkCacheConfig) => {
       this.dispose();
       this.fetch(cacheConfigOverride);
@@ -32,45 +41,90 @@ class UseQueryFetcher {
       this.query = query;
       this.dispose();
 
-      const fullQuery = environment.check(query.root);
-      const isNetwork = isNetworkPolicy(fetchPolicy, fullQuery);
-      const isStore = isStorePolicy(fetchPolicy);
-      cached = fullQuery && isStore;
+      storeSnapshot = this.lookupInStore(environment, this.query, fetchPolicy);
+      const isNetwork = isNetworkPolicy(fetchPolicy, storeSnapshot);
       if (isNetwork) {
         this.fetch(networkCacheConfig);
+      } else if (!!storeSnapshot) {
+        this.snapshot = storeSnapshot;
+        this.error = null;
+        this.subscribe(this.snapshot);
       }
     }
     this.result = {
-      cached,
+      cached: !!storeSnapshot,
       retry,
-      error: this.error
+      error: this.error,
+      snapshot: storeSnapshot || this.snapshot
     };
     return this.result;
   }
 
+  subscribe(snapshot) {
+    this.rootSubscription = this.environment.subscribe(
+      this.snapshot,
+      snapshot => {
+        // Read from this._fetchOptions in case onDataChange() was lazily added.
+        this.snapshot = snapshot;
+        this.error = null;
+        this.forceUpdate(snapshot);
+      }
+    );
+  }
+
   fetch(networkCacheConfig) {
+    let fetchHasReturned = false;
     fetchQuery(this.environment, this.query, {
       networkCacheConfig
     }).subscribe({
       start: subscription => {
         this.networkSubscription = subscription;
       },
+      next: () => {
+        this._onQueryDataAvailable({ notifyFirstResult: fetchHasReturned });
+      },
       error: error => {
         this.error = error;
+        this.snapshot = null;
+        if (fetchHasReturned) {
+          this.forceUpdate(error);
+        }
+        this.error = error;
         this.networkSubscription = null;
-        this.forceUpdate(error);
       },
       complete: () => {
         this.networkSubscription = null;
-        this.forceUpdate({});
       }
     });
+    fetchHasReturned = true;
   }
 
   dispose() {
     this.error = null;
     if (this.networkSubscription) {
       this.networkSubscription.dispose();
+    }
+    if (this.rootSubscription) {
+      this.rootSubscription.dispose();
+    }
+  }
+
+  _onQueryDataAvailable({ notifyFirstResult }) {
+    // `_onQueryDataAvailable` can be called synchronously the first time and can be called
+    // multiple times by network layers that support data subscriptions.
+    // Wait until the first payload to call `onDataChange` and subscribe for data updates.
+    if (this.snapshot) {
+      return;
+    }
+
+    this.snapshot = this.environment.lookup(this.query.fragment);
+
+    // Subscribe to changes in the data of the root fragment
+    this.subscribe(this.snapshot);
+
+    if (this.snapshot && notifyFirstResult) {
+      this.error = null;
+      this.forceUpdate(this.snapshot);
     }
   }
 }

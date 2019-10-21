@@ -6,7 +6,6 @@ import { CacheConfig } from "relay-runtime";
 import { createOperationDescriptor, getRequest } from "relay-runtime";
 
 import UseQueryFetcher from "./UseQueryFetcher";
-import useFragment from "./useFragment";
 import { __internal } from "relay-runtime";
 import useRelayEnvironment from "./useRelayEnvironment";
 
@@ -29,25 +28,10 @@ function useMemoOperationDescriptor(
   variables: any
 ): any {
   const memoVariables = useDeepCompare(variables);
-  return useMemo(() => {
-    const query = createOperationDescriptor(
-      getRequest(gqlQuery),
-      memoVariables
-    );
-    const __fragmentOwner = query.fragment || query.request; // v5.0.0 || v6.0.0
-    const node = query.node || query.request.node; // v5.0.0 || v6.0.0
-    return [
-      query,
-      node.fragment,
-      {
-        __id: query.fragment.dataID,
-        __fragments: {
-          [query.fragment.node.name]: __fragmentOwner.variables
-        },
-        __fragmentOwner
-      }
-    ];
-  }, [gqlQuery, memoVariables]);
+  return useMemo(
+    () => createOperationDescriptor(getRequest(gqlQuery), memoVariables),
+    [gqlQuery, memoVariables]
+  );
 }
 
 export const useQuery = function<TOperationType extends OperationType>(
@@ -63,10 +47,7 @@ export const useQuery = function<TOperationType extends OperationType>(
   const { fetchPolicy = defaultPolicy, networkCacheConfig } = options;
   // const latestVariables = useDeepCompare(variables);
 
-  const [query, fragmentDef, rootFragmentRef] = useMemoOperationDescriptor(
-    gqlQuery,
-    variables
-  );
+  const query = useMemoOperationDescriptor(gqlQuery, variables);
 
   // const prev = usePrevious({ environment, query });
 
@@ -88,18 +69,15 @@ export const useQuery = function<TOperationType extends OperationType>(
     };
   }, [environment, query]);
 
-  const extraData = queryFetcher.execute(
+  const { snapshot, ...extraData } = queryFetcher.execute(
     environment,
     query,
     fetchPolicy,
     networkCacheConfig
   );
 
-  const data = useFragment(fragmentDef, rootFragmentRef);
-
-  const fullQuery = environment.check(query.root);
   return {
-    props: fullQuery ? { ...data } : null,
+    props: snapshot ? snapshot.data : null,
     ...extraData
   };
 };

@@ -91,7 +91,6 @@ const useOssFragment = function(fragmentDef, fragmentRef: any): FragmentResult {
     };
   }
 
-  // TODO resolve data
   const {
     result: { resolver },
     fragmentRefetch,

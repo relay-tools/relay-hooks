@@ -2,8 +2,11 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { OperationType, GraphQLTaggedNode } from "relay-runtime";
 import * as areEqual from "fbjs/lib/areEqual";
 import { FetchPolicy, RenderProps } from "./RelayHooksType";
-import { CacheConfig } from "relay-runtime";
-import { createOperationDescriptor, getRequest } from "relay-runtime";
+import {
+  CacheConfig,
+  createOperationDescriptor,
+  getRequest
+} from "relay-runtime";
 
 import UseQueryFetcher from "./UseQueryFetcher";
 import { __internal } from "relay-runtime";
@@ -45,11 +48,8 @@ export const useQuery = function<TOperationType extends OperationType>(
   const environment = useRelayEnvironment();
   const [, forceUpdate] = useState(null);
   const { fetchPolicy = defaultPolicy, networkCacheConfig } = options;
-  // const latestVariables = useDeepCompare(variables);
 
   const query = useMemoOperationDescriptor(gqlQuery, variables);
-
-  // const prev = usePrevious({ environment, query });
 
   const ref = useRef<Reference>();
   if (ref.current === null || ref.current === undefined) {

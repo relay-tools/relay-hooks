@@ -1,6 +1,7 @@
 import { Disposable, CacheConfig, IEnvironment, Snapshot } from "relay-runtime";
 import { isNetworkPolicy, isStorePolicy } from "./Utils";
 import { __internal } from "relay-runtime";
+import { FetchPolicy } from "./RelayHooksType";
 
 const { fetchQuery } = __internal;
 
@@ -11,6 +12,7 @@ class UseQueryFetcher {
   rootSubscription: Disposable;
   error: Error;
   snapshot: Snapshot;
+  fetchPolicy: FetchPolicy;
   result = {
     retry: (_cacheConfigOverride: CacheConfig) => undefined,
     cached: false,
@@ -23,7 +25,11 @@ class UseQueryFetcher {
     this.forceUpdate = forceUpdate;
   }
 
-  lookupInStore(environment: IEnvironment, operation, fetchPolicy): Snapshot {
+  lookupInStore(
+    environment: IEnvironment,
+    operation,
+    fetchPolicy: FetchPolicy
+  ): Snapshot {
     if (isStorePolicy(fetchPolicy) && environment.check(operation.root)) {
       return environment.lookup(operation.fragment, operation);
     }
@@ -36,9 +42,14 @@ class UseQueryFetcher {
       this.dispose();
       this.fetch(cacheConfigOverride);
     };
-    if (environment !== this.environment || query !== this.query) {
+    if (
+      environment !== this.environment ||
+      query !== this.query ||
+      fetchPolicy !== this.fetchPolicy
+    ) {
       this.environment = environment;
       this.query = query;
+      this.fetchPolicy = fetchPolicy;
       this.dispose();
 
       storeSnapshot = this.lookupInStore(environment, this.query, fetchPolicy);

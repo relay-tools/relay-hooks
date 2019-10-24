@@ -1,20 +1,10 @@
-import { useState, useEffect, useRef, useMemo } from "react";
-import { OperationType, GraphQLTaggedNode } from "relay-runtime";
+import { useEffect, useRef, useMemo } from "react";
+import { GraphQLTaggedNode } from "relay-runtime";
 import * as areEqual from "fbjs/lib/areEqual";
-import { FetchPolicy, RenderProps } from "./RelayHooksType";
-import {
-  CacheConfig,
-  createOperationDescriptor,
-  getRequest
-} from "relay-runtime";
-
-import UseQueryFetcher from "./UseQueryFetcher";
-import { __internal } from "relay-runtime";
+import { UseQueryType } from "./RelayHooksType";
+import { createOperationDescriptor, getRequest } from "relay-runtime";
 import useRelayEnvironment from "./useRelayEnvironment";
-
-type Reference = {
-  queryFetcher: UseQueryFetcher;
-};
+import useQueryFetcher from "./useQueryFetcher";
 
 function useDeepCompare<T>(value: T): T {
   const latestValue = useRef(value);
@@ -24,9 +14,7 @@ function useDeepCompare<T>(value: T): T {
   return latestValue.current;
 }
 
-const defaultPolicy = "store-or-network";
-
-function useMemoOperationDescriptor(
+export function useMemoOperationDescriptor(
   gqlQuery: GraphQLTaggedNode,
   variables: any
 ): any {
@@ -37,30 +25,12 @@ function useMemoOperationDescriptor(
   );
 }
 
-export const useQuery = function<TOperationType extends OperationType>(
-  gqlQuery: GraphQLTaggedNode,
-  variables: TOperationType["variables"],
-  options: {
-    fetchPolicy?: FetchPolicy;
-    networkCacheConfig?: CacheConfig;
-  } = {}
-): RenderProps<TOperationType> {
+export const useQuery: UseQueryType = (gqlQuery, variables, options = {}) => {
   const environment = useRelayEnvironment();
-  const [, forceUpdate] = useState(null);
-  const { fetchPolicy = defaultPolicy, networkCacheConfig } = options;
 
   const query = useMemoOperationDescriptor(gqlQuery, variables);
 
-  const ref = useRef<Reference>();
-  if (ref.current === null || ref.current === undefined) {
-    ref.current = {
-      queryFetcher: new UseQueryFetcher(forceUpdate)
-    };
-  }
-  const { queryFetcher } = ref.current;
-  useEffect(() => {
-    return () => queryFetcher.dispose();
-  }, []);
+  const queryFetcher = useQueryFetcher();
 
   useEffect(() => {
     const disposable = environment.retain(query.root);
@@ -69,17 +39,7 @@ export const useQuery = function<TOperationType extends OperationType>(
     };
   }, [environment, query]);
 
-  const { snapshot, ...extraData } = queryFetcher.execute(
-    environment,
-    query,
-    fetchPolicy,
-    networkCacheConfig
-  );
-
-  return {
-    props: snapshot ? snapshot.data : null,
-    ...extraData
-  };
+  return queryFetcher.execute(environment, query, options);
 };
 
 export default useQuery;

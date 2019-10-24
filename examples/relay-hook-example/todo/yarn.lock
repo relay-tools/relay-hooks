@@ -5333,9 +5333,9 @@ relay-hooks@2.0.0-rc.1:
     "@restart/hooks" "^0.3.1"
 
 relay-runtime@0.0.0-experimental-2489c65f:
-  version "0.0.0-master-e5f49bfa"
-  resolved "https://registry.yarnpkg.com/relay-runtime/-/relay-runtime-0.0.0-master-e5f49bfa.tgz#30fb055a26b4b3e231d5ce9e192fb4b616fac30e"
-  integrity sha512-9VyoZ5Zdpg967siSGQPHS7aOM0zgshfGITSYTFOjgoRhfuJ6m+fwPkHXkfyi80fcJUUgKOFT3Kadh6ouyyc0jw==
+  version "0.0.0-master-f1407e31"
+  resolved "https://registry.yarnpkg.com/relay-runtime/-/relay-runtime-0.0.0-master-f1407e31.tgz#5b9ab6b95d5c608ec96ad1b28b6ca45d1addc151"
+  integrity sha512-Yj4501yXoxQjjmy36/fkHFyPynVqrsQQgbMvvAVfr2cRAOW9bqwpu+x4kWI3UzFjYCruztVffjJKTBu5SEkaTw==
   dependencies:
     "@babel/runtime" "^7.0.0"
     fbjs "^1.0.0"

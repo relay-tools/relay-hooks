@@ -2,7 +2,8 @@ import {
   RelayContext,
   FragmentSpecResolver
 } from "relay-runtime/lib/RelayStoreTypes";
-import { OperationType, CacheConfig } from "relay-runtime";
+
+import { OperationType, CacheConfig, GraphQLTaggedNode } from "relay-runtime";
 
 export const NETWORK_ONLY = "network-only";
 export const STORE_THEN_NETWORK = "store-and-network";
@@ -37,3 +38,12 @@ export type RefetchOptions = {
   fetchPolicy?: FetchPolicy;
   metadata?: { [key: string]: any };
 };
+
+export type UseQueryType = <TOperationType extends OperationType>(
+  gqlQuery: GraphQLTaggedNode,
+  variables: TOperationType["variables"],
+  options: {
+    fetchPolicy?: FetchPolicy;
+    networkCacheConfig?: CacheConfig;
+  }
+) => RenderProps<TOperationType>;

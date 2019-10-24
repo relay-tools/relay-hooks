@@ -74,7 +74,7 @@ const TodoList = props => {
       () => {
         console.log('Refetch done');
       },
-      {force: true, fetchPolicy: 'store-or-network'},
+      {force: true, fetchPolicy: 'network-only'},
     );
     //response.dispose();
   };

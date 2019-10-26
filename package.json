@@ -34,6 +34,6 @@
     "react": "16.8.6",
     "@types/react": "16.8.14",
     "@types/react-dom": "16.8.4",
-    "react-relay": "^4.0.0"
+    "react-relay": "^5.0.0"
   }
 }

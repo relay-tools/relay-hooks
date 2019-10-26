@@ -91,14 +91,7 @@ const useOssFragment = function(fragmentDef, fragmentRef: any): FragmentResult {
     };
   }
 
-  const {
-    result: { resolver },
-    fragmentRefetch,
-    fragmentPagination
-  } = ref.current;
-
-  const cleanupRef = useRef<any>(null);
-  cleanupRef.current = resolver;
+  const { fragmentRefetch, fragmentPagination } = ref.current;
 
   function newResolver() {
     const res = createFragmentSpecResolver(
@@ -120,7 +113,7 @@ const useOssFragment = function(fragmentDef, fragmentRef: any): FragmentResult {
 
   useEffect(() => {
     return () => {
-      cleanupRef.current.dispose();
+      ref.current.result.resolver.dispose();
       fragmentRefetch.dispose();
       fragmentPagination.dispose();
     };
@@ -133,11 +126,11 @@ const useOssFragment = function(fragmentDef, fragmentRef: any): FragmentResult {
       _getFragmentVariables() !== _getFragmentVariables(prev.fragmentRef) ||
       !areEqual(prevIDs, nextIDs)
     ) {
-      resolver.dispose();
+      ref.current.result.resolver.dispose();
       ref.current.result = newResolver();
     }
   } else if (prev && prev.environment !== environment) {
-    resolver.dispose();
+    ref.current.result.resolver.dispose();
     ref.current.result = newResolver();
   }
 

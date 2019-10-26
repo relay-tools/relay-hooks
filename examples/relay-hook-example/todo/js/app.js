@@ -61,7 +61,7 @@ const modernEnvironment: Environment = new Environment({
 });
 
 const AppTodo = function(appProps) {
-  const [userId, setUserId] = useState('you');
+  const [userId, setUserId] = useState('me');
 
   console.log('renderer apptodo', userId);
 

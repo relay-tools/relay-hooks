@@ -31,32 +31,43 @@ type Props = {|
   +user: TodoList_user,
 |};
 
-/*const fragmentSpec = graphql`
-    fragment TodoList_user on User {
-      todos(
-        first: 2147483647 # max GraphQLInt
-      ) @connection(key: "TodoList_todos") {
-        edges {
-          node {
-            id
-            complete
-            ...Todo_todo
-          }
-        }
+const fragmentSpec = graphql`
+  fragment TodoList_user on User {
+    todos(
+      first: 2147483647 # max GraphQLInt
+    ) @connection(key: "TodoList_todos") {
+      edges {
+        ...TodoList_edges
       }
-      id
-      userId
-      totalCount
-      completedCount
-      ...Todo_user
     }
-  `;
-*/
+    id
+    userId
+    totalCount
+    completedCount
+    ...Todo_user
+  }
+`;
+
+const fragmentSpecList = graphql`
+  fragment TodoList_edges on TodoEdge @relay(plural: true) {
+    node {
+      complete
+      id
+      text
+    }
+  }
+`;
+
 const TodoList = props => {
-  const {refetch, user} = props;
+  const {refetch} = props;
   //const { refetch } = props;
-  //const user = useFragment(fragmentSpec, props.user);
+  const user = useFragment(fragmentSpec, props.user);
   const {todos, completedCount, totalCount, userId} = user;
+  console.log('todos', todos);
+
+  const edges = useFragment(fragmentSpecList, todos.edges);
+
+  console.log('edges', edges);
   const [mutate] = useMutation(mutation);
   const handleMarkAllChange = (e: SyntheticEvent<HTMLInputElement>) => {
     const complete = e.currentTarget.checked;
@@ -79,14 +90,20 @@ const TodoList = props => {
     //response.dispose();
   };
 
-  const nodes: $ReadOnlyArray<Node> =
+  /*const nodes: $ReadOnlyArray<Node> =
     todos && todos.edges
       ? todos.edges
           .filter(Boolean)
           .map((edge: Edge) => edge.node)
           .filter(Boolean)
       : [];
-
+*/
+  const nodes: $ReadOnlyArray<Node> = edges
+    ? edges
+        .filter(Boolean)
+        .map((edge: Edge) => edge.node)
+        .filter(Boolean)
+    : [];
   return (
     <section className="main">
       <input
@@ -109,9 +126,9 @@ const TodoList = props => {
     </section>
   );
 };
-//export default TodoList;
+export default TodoList;
 
-export default createFragmentContainer(TodoList, {
+/*export default createFragmentContainer(TodoList, {
   // This `list` fragment corresponds to the prop named `list` that is
   // expected to be populated with server data by the `<TodoList>` component.
   user: graphql`
@@ -135,3 +152,4 @@ export default createFragmentContainer(TodoList, {
     }
   `,
 });
+*/

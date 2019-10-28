@@ -11,17 +11,17 @@
     "classnames": "2.2.6",
     "express": "^4.16.4",
     "express-graphql": "^0.7.1",
-    "graphql": "^14.1.1",
+    "graphql": "^14.2.0",
     "graphql-relay": "^0.6.0",
     "prop-types": "^15.7.2",
     "react": "^16.9.0",
     "react-dom": "^16.8.4",
-    "relay-runtime": "master",
-    "relay-hooks": "file:../../../relay-hooks-2.0.0-c1.tgz",
+    "relay-runtime": "6.0.0",
+    "relay-hooks": "2.0.0-rc.3",
     "whatwg-fetch": "3.0.0",
     "isomorphic-fetch": "2.2.1",
     "es6-promise": "4.2.8",
-    "react-relay": "experimental"
+    "react-relay": "6.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.3.4",

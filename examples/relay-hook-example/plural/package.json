@@ -2,12 +2,11 @@
   "private": true,
   "scripts": {
     "start": "babel-node ./server.js",
-    "build": "relay-compiler --src ./js/ --schema ./data/schema.graphql --artifactDirectory ./__generated__/relay",
-    "flow-typed": "flow-typed install --flowVersion=0.94.0",
-    "update-schema": "babel-node ./scripts/updateSchema.js",
-    "lint": "eslint ./ --cache"
+    "start:gql": "node ./server/server.js",
+    "build": "relay-compiler --src ./js/ --schema ./schema.gql --artifactDirectory ./__generated__/relay"
   },
   "dependencies": {
+    "apollo-server-express": "2.9.6",
     "classnames": "2.2.6",
     "express": "^4.16.4",
     "express-graphql": "^0.7.1",
@@ -16,12 +15,12 @@
     "prop-types": "^15.7.2",
     "react": "^16.9.0",
     "react-dom": "^16.8.4",
-    "relay-runtime": "master",
-    "relay-hooks": "2.0.0-rc.3",
+    "relay-runtime": "6.0.0",
+    "relay-hooks": "2.0.0-rc.4",
     "whatwg-fetch": "3.0.0",
     "isomorphic-fetch": "2.2.1",
     "es6-promise": "4.2.8",
-    "react-relay": "experimental"
+    "react-relay": "6.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.3.4",
@@ -34,7 +33,7 @@
     "@babel/runtime": "^7.3.4",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.5",
-    "babel-plugin-relay": "^4.0.0",
+    "babel-plugin-relay": "6.0.0",
     "eslint": "^5.13.0",
     "eslint-config-fbjs": "^2.1.0",
     "eslint-config-prettier": "^4.0.0",

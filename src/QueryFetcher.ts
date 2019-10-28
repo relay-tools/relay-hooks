@@ -90,7 +90,9 @@ class QueryFetcher {
       networkCacheConfig
     }).subscribe({
       start: subscription => {
-        this.networkSubscription = subscription;
+        this.networkSubscription = {
+          dispose: () => subscription.unsubscribe()
+        };
       },
       next: () => {
         this._onQueryDataAvailable({ notifyFirstResult: fetchHasReturned });

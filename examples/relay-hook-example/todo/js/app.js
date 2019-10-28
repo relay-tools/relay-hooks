@@ -17,9 +17,9 @@ import * as React from 'react';
 
 import {useState} from 'react';
 
-import {useLazyLoadQuery, RelayEnvironmentProvider} from 'react-relay/hooks';
+//import {useLazyLoadQuery, RelayEnvironmentProvider} from 'react-relay/hooks';
 
-import {useQuery} from 'relay-hooks';
+import {useQuery, RelayEnvironmentProvider} from 'relay-hooks';
 import {
   Environment,
   Network,

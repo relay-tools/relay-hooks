@@ -3176,10 +3176,17 @@ graphql-relay@^0.6.0:
   dependencies:
     prettier "^1.16.0"
 
-graphql@^14.0.0, graphql@^14.1.1:
+graphql@^14.0.0:
   version "14.1.1"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-14.1.1.tgz#d5d77df4b19ef41538d7215d1e7a28834619fac0"
   integrity sha512-C5zDzLqvfPAgTtP8AUPIt9keDabrdRAqSWjj2OPRKrKxI9Fb65I36s1uCs1UUBFnSWTdO7hyHi7z1ZbwKMKF6Q==
+  dependencies:
+    iterall "^1.2.2"
+
+graphql@^14.2.0:
+  version "14.5.8"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-14.5.8.tgz#504f3d3114cb9a0a3f359bbbcf38d9e5bf6a6b3c"
+  integrity sha512-MMwmi0zlVLQKLdGiMfWkgQD7dY/TUKt4L+zgJ/aR0Howebod3aNgP5JkgvAULiR2HPVZaP2VEElqtdidHweLkg==
   dependencies:
     iterall "^1.2.2"
 
@@ -4483,7 +4490,7 @@ npmlog@^4.0.2:
     gauge "~2.7.3"
     set-blocking "~2.0.0"
 
-nullthrows@^1.1.0, nullthrows@^1.1.1:
+nullthrows@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/nullthrows/-/nullthrows-1.1.1.tgz#7818258843856ae971eae4208ad7d7eb19a431b1"
   integrity sha512-2vPPEi+Z7WqML2jZYddDIfy5Dqb0r2fze2zTxNNknZaFpVHU3mFB3R+DWeJWGVx0ecvttSGlJTI+WG+8Z4cDWw==
@@ -5132,15 +5139,15 @@ react-is@^16.8.1:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.8.4.tgz#90f336a68c3a29a096a3d648ab80e87ec61482a2"
   integrity sha512-PVadd+WaUDOAciICm/J1waJaSvgq+4rHE/K70j0PFqKhkTBsPv/82UGQJNXAngz1fOQLLxI6z1sEDmJDQhCTAA==
 
-react-relay@experimental:
-  version "0.0.0-experimental-2489c65f"
-  resolved "https://registry.yarnpkg.com/react-relay/-/react-relay-0.0.0-experimental-2489c65f.tgz#71235e587629e6baa47dd757f6d0761a3b4e2213"
-  integrity sha512-3FiOodkkfIyg2+zyF9vNl3Yzex0DSV0AS0mDj/R7v/yFYWf61iDLRGfHQgyWKf1vRBdcg4Y477dymJXfN9XWYQ==
+react-relay@6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/react-relay/-/react-relay-6.0.0.tgz#2a54274a471ef801a465704e58f1db91059ad1d3"
+  integrity sha512-F0UO50TNIyfkTaCnKgbniATIWPpaX0ukQ5QPdaRRwL1qxslx90Umi83XaaiHyy1etKVePMZ+DHCd1aV7yw1AKA==
   dependencies:
     "@babel/runtime" "^7.0.0"
     fbjs "^1.0.0"
-    nullthrows "^1.1.1"
-    relay-runtime "0.0.0-experimental-2489c65f"
+    nullthrows "^1.1.0"
+    relay-runtime "6.0.0"
 
 react@^16.9.0:
   version "16.10.2"
@@ -5332,26 +5339,10 @@ relay-hooks@2.0.0-rc.3:
   dependencies:
     "@restart/hooks" "^0.3.1"
 
-relay-runtime@0.0.0-experimental-2489c65f:
-  version "0.0.0-master-f1407e31"
-  resolved "https://registry.yarnpkg.com/relay-runtime/-/relay-runtime-0.0.0-master-f1407e31.tgz#5b9ab6b95d5c608ec96ad1b28b6ca45d1addc151"
-  integrity sha512-Yj4501yXoxQjjmy36/fkHFyPynVqrsQQgbMvvAVfr2cRAOW9bqwpu+x4kWI3UzFjYCruztVffjJKTBu5SEkaTw==
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-    fbjs "^1.0.0"
-
 relay-runtime@6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/relay-runtime/-/relay-runtime-6.0.0.tgz#073ec2408f41a28c3a7310d71dd5f42f8e4e4bf3"
   integrity sha512-zIXQqFfe0zBCVzKbMGEPMvKFxfbE3pY2RbZsKBvHAr/vMDj6OX9E+f4R4udE5xvMbI7g+baYFHi2I9NDEydGaQ==
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-    fbjs "^1.0.0"
-
-relay-runtime@master:
-  version "0.0.0-master-1b8d8fa1"
-  resolved "https://registry.yarnpkg.com/relay-runtime/-/relay-runtime-0.0.0-master-1b8d8fa1.tgz#d9da67d5c2f6629e153483c59428bc118a621a7c"
-  integrity sha512-Ru4Y6S+IrKDNZWKY6bhas+TdAU0s/ZQ+QQvRCKAjdRfSl6QAkPHID4Oyg6v53JDmf0GTupBkYnrHpke24IbUrw==
   dependencies:
     "@babel/runtime" "^7.0.0"
     fbjs "^1.0.0"

@@ -33,7 +33,14 @@ import TodoApp, { fragmentSpec } from './components/TodoApp';
 import TodoTextInput from './components/TodoTextInput';
 import type { appQueryResponse } from 'relay/appQuery.graphql';
 import QueryApp from './query/QueryApp';
-import RelayNetworkLogger from 'relay-runtime/lib/RelayNetworkLogger'
+import {
+  createRelayNetworkLogger,
+  RelayNetworkLoggerTransaction,
+} from 'relay-runtime';
+
+const RelayNetworkLogger = createRelayNetworkLogger(
+  RelayNetworkLoggerTransaction,
+);
 
 async function fetchQuery(
   operation: RequestNode,

@@ -1,7 +1,7 @@
 import {
   RelayContext,
   FragmentSpecResolver
-} from "relay-runtime/lib/RelayStoreTypes";
+} from "relay-runtime/lib/store/RelayStoreTypes";
 
 import { OperationType, CacheConfig, GraphQLTaggedNode } from "relay-runtime";
 

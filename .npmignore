@@ -4,3 +4,7 @@ tsconfig.json
 examples/
 website/
 docs/
+scripts
+coverage
+__tests__
+__mocks__

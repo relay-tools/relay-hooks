@@ -17,7 +17,6 @@ module.exports = function(options) {
     },
     options
   );
-  console.log("entroooo");
   const fbjsPreset = require("babel-preset-fbjs/configure")({
     autoImport: options.autoImport || false,
     objectAssign: false,

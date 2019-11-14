@@ -8,14 +8,13 @@ import {
     createOperationDescriptor,
     getRequest,
     Snapshot,
-    CacheConfig
+    CacheConfig,
 } from 'relay-runtime';
 
 export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
 import * as ReactRelayQueryFetcher from 'react-relay/lib/ReactRelayQueryFetcher';
 import { ContainerResult, RefetchOptions } from './RelayHooksType';
 import { isStorePolicy, isNetworkPolicy } from './Utils';
-
 
 class FragmentRefetch {
     _refetchSubscription: Subscription;
@@ -38,24 +37,20 @@ class FragmentRefetch {
         return null;
     }
 
-    refetch(environment: IEnvironment,
+    refetch(
+        environment: IEnvironment,
         fragmentVariables: Variables,
         taggedNode: GraphQLTaggedNode,
-        refetchVariables:
-            | Variables
-            | ((fragmentVariables: Variables) => Variables),
+        refetchVariables: Variables | ((fragmentVariables: Variables) => Variables),
         renderVariables: Variables,
         observerOrCallback: ObserverOrCallback,
         options: RefetchOptions,
         prevResult: ContainerResult,
-        setResult: any) { //TODO Function
-        const fetchVariables =
-            typeof refetchVariables === 'function'
-                ? refetchVariables(fragmentVariables)
-                : refetchVariables;
-        const newFragmentVariables = renderVariables
-            ? { ...fetchVariables, ...renderVariables }
-            : fetchVariables;
+        setResult: any,
+    ) {
+        //TODO Function
+        const fetchVariables = typeof refetchVariables === 'function' ? refetchVariables(fragmentVariables) : refetchVariables;
+        const newFragmentVariables = renderVariables ? { ...fetchVariables, ...renderVariables } : fetchVariables;
 
         const cacheConfig: CacheConfig = options ? { force: !!options.force } : undefined;
         if (cacheConfig != null && options && options.metadata != null) {
@@ -65,11 +60,9 @@ class FragmentRefetch {
         const observer =
             typeof observerOrCallback === 'function'
                 ? {
-                    // callback is not exectued on complete or unsubscribe
-                    // for backward compatibility
-                    next: observerOrCallback,
-                    error: observerOrCallback,
-                }
+                      next: observerOrCallback,
+                      error: observerOrCallback,
+                  }
                 : observerOrCallback || ({} as any);
 
         const query = getRequest(taggedNode);
@@ -87,32 +80,32 @@ class FragmentRefetch {
         // synchronous completion may call callbacks .subscribe() returns.
         let refetchSubscription;
 
-        const { fetchPolicy = "network-only"} = options;
+        const optionsFetch = options ? options : {};
 
-        const storeSnapshot = this.lookupInStore(
-            environment,
-            operation,
-            fetchPolicy,
-        );
+        const { fetchPolicy = 'network-only' } = optionsFetch;
+
+        const storeSnapshot = this.lookupInStore(environment, operation, fetchPolicy);
         if (storeSnapshot != null) {
             const res = prevResult.resolver;
             res.setVariables(newFragmentVariables, operation.node || operation.request.node);
             setResult({
-                resolver: res, data: res.resolve(), relay: {
+                resolver: res,
+                data: res.resolve(),
+                relay: {
                     environment: environment,
                     variables: newFragmentVariables,
-                }
-            })
+                },
+            });
             const complete = async () => {
                 observer.next && observer.next();
                 observer.complete && observer.complete();
-            }
+            };
             complete();
         }
         const isNetworky = isNetworkPolicy(fetchPolicy, storeSnapshot);
-        if(!isNetworky) {
+        if (!isNetworky) {
             return {
-                dispose() { },
+                dispose: () => {},
             };
         }
         if (isNetworky) {
@@ -124,23 +117,24 @@ class FragmentRefetch {
                     // TODO (T26430099): Cleanup old references
                     preservePreviousReferences: true,
                 })
-                .mergeMap(response => {
+                .mergeMap((response) => {
                     const res = prevResult.resolver;
                     res.setVariables(newFragmentVariables, operation.node || operation.request.node);
-                    return Observable.create(sink => {
+                    return Observable.create((sink) => {
                         setResult({
-                            resolver: res, data: res.resolve(), relay: {
+                            resolver: res,
+                            data: res.resolve(),
+                            relay: {
                                 environment: environment,
                                 variables: newFragmentVariables,
-                            }
-                        })
+                            },
+                        });
                         const complete = async () => {
                             sink.next();
                             sink.complete();
-                        }
+                        };
                         complete();
-                    }
-                    );
+                    });
                 })
                 .finally(() => {
                     // Finalizing a refetch should only clear this._refetchSubscription
@@ -151,14 +145,14 @@ class FragmentRefetch {
                 })
                 .subscribe({
                     ...observer,
-                    start: subscription => {
+                    start: (subscription) => {
                         this._refetchSubscription = refetchSubscription = subscription;
                         observer.start && observer.start(subscription);
                     },
                 });
 
             return {
-                dispose() {
+                dispose: () => {
                     refetchSubscription && refetchSubscription.unsubscribe();
                 },
             };

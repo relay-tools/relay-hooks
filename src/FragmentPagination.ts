@@ -14,10 +14,9 @@ import {
     CacheConfig,
     createOperationDescriptor,
     getRequest,
-    getVariablesFromObject
+    getVariablesFromObject,
+    getSelector,
 } from 'relay-runtime';
-
-
 
 export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
 import * as ReactRelayQueryFetcher from 'react-relay/lib/ReactRelayQueryFetcher';
@@ -26,28 +25,19 @@ import * as warning from 'fbjs/lib/warning';
 import * as areEqual from 'fbjs/lib/areEqual';
 import { ContainerResult, RefetchOptions } from './RelayHooksType';
 
-
-
 // Pagination
-type FragmentVariablesGetter = (
-    prevVars: Variables,
-    totalCount: number,
-) => Variables;
+type FragmentVariablesGetter = (prevVars: Variables, totalCount: number) => Variables;
 
 export type ConnectionConfig = {
-    direction?: 'backward' | 'forward',
-    getConnectionFromProps?: (props: Object) => ConnectionData,
-    getFragmentVariables?: FragmentVariablesGetter,
-    getVariables: (
-        props: Object,
-        paginationInfo: { count: number, cursor: string },
-        fragmentVariables: Variables,
-    ) => Variables,
-    query: GraphQLTaggedNode,
+    direction?: 'backward' | 'forward';
+    getConnectionFromProps?: (props: Object) => ConnectionData;
+    getFragmentVariables?: FragmentVariablesGetter;
+    getVariables: (props: Object, paginationInfo: { count: number; cursor: string }, fragmentVariables: Variables) => Variables;
+    query: GraphQLTaggedNode;
 };
 export type ConnectionData = {
-    edges?: ReadonlyArray<any>,
-    pageInfo?: PageInfo,
+    edges?: ReadonlyArray<any>;
+    pageInfo?: PageInfo;
 };
 
 const FORWARD = 'forward';
@@ -57,8 +47,7 @@ function findConnectionMetadata(fragments): ReactConnectionMetadata {
     let isRelayModern = false;
     for (const fragmentName in fragments) {
         const fragment = fragments[fragmentName];
-        const connectionMetadata: Array<ConnectionMetadata> = (fragment.metadata &&
-            fragment.metadata.connection as any);
+        const connectionMetadata: Array<ConnectionMetadata> = fragment.metadata && (fragment.metadata.connection as any);
         // HACK: metadata is always set to `undefined` in classic. In modern, even
         // if empty, it is set to null (never undefined). We use that knowlege to
         // check if we're dealing with classic or modern
@@ -68,15 +57,13 @@ function findConnectionMetadata(fragments): ReactConnectionMetadata {
         if (connectionMetadata) {
             invariant(
                 connectionMetadata.length === 1,
-                'ReactRelayPaginationContainer: Only a single @connection is ' +
-                'supported, `%s` has %s.',
+                'ReactRelayPaginationContainer: Only a single @connection is ' + 'supported, `%s` has %s.',
                 fragmentName,
                 connectionMetadata.length,
             );
             invariant(
                 !foundConnectionMetadata,
-                'ReactRelayPaginationContainer: Only a single fragment with ' +
-                '@connection is supported.',
+                'ReactRelayPaginationContainer: Only a single fragment with ' + '@connection is supported.',
             );
             foundConnectionMetadata = {
                 ...connectionMetadata[0],
@@ -93,12 +80,8 @@ function findConnectionMetadata(fragments): ReactConnectionMetadata {
 
 function createGetConnectionFromProps(metadata: ReactConnectionMetadata) {
     const path = metadata.path;
-    invariant(
-        path,
-        'ReactRelayPaginationContainer: Unable to synthesize a ' +
-        'getConnectionFromProps function.',
-    );
-    return props => {
+    invariant(path, 'ReactRelayPaginationContainer: Unable to synthesize a ' + 'getConnectionFromProps function.');
+    return (props) => {
         let data = props[metadata.fragmentName];
         for (let i = 0; i < path.length; i++) {
             if (!data || typeof data !== 'object') {
@@ -110,31 +93,24 @@ function createGetConnectionFromProps(metadata: ReactConnectionMetadata) {
     };
 }
 
-function createGetFragmentVariables(
-    metadata: ReactConnectionMetadata,
-): FragmentVariablesGetter {
+function createGetFragmentVariables(metadata: ReactConnectionMetadata): FragmentVariablesGetter {
     const countVariable = metadata.count;
-    invariant(
-        countVariable,
-        'ReactRelayPaginationContainer: Unable to synthesize a ' +
-        'getFragmentVariables function.',
-    );
+    invariant(countVariable, 'ReactRelayPaginationContainer: Unable to synthesize a ' + 'getFragmentVariables function.');
     return (prevVars: Variables, totalCount: number) => ({
         ...prevVars,
         [countVariable]: totalCount,
     });
 }
 
-
 function toObserver(observerOrCallback: ObserverOrCallback): Observer<void> {
     return typeof observerOrCallback === 'function'
         ? {
-            error: observerOrCallback,
-            complete: observerOrCallback,
-            unsubscribe: subscription => {
-                typeof observerOrCallback === 'function' && observerOrCallback();
-            },
-        }
+              error: observerOrCallback,
+              complete: observerOrCallback,
+              unsubscribe: (subscription) => {
+                  typeof observerOrCallback === 'function' && observerOrCallback();
+              },
+          }
         : observerOrCallback || ({} as any);
 }
 class FragmentPagination {
@@ -142,7 +118,7 @@ class FragmentPagination {
     _queryFetcher: ReactRelayQueryFetcher;
     _isARequestInFlight: boolean;
     _hasFetched: boolean;
-    _getConnectionFromProps: any
+    _getConnectionFromProps: any;
     _getFragmentVariables: any;
     _init: boolean;
     _direction: string;
@@ -158,20 +134,18 @@ class FragmentPagination {
     init(prevResult: ContainerResult) {
         if (!this._init) {
             const metadata = findConnectionMetadata(prevResult.resolver._fragments);
-            this._getConnectionFromProps =
-                createGetConnectionFromProps(metadata);
+            this._getConnectionFromProps = createGetConnectionFromProps(metadata);
             this._direction = metadata.direction;
             invariant(
                 this._direction,
                 'ReactRelayPaginationContainer: Unable to infer direction of the ' +
-                'connection, possibly because both first and last are provided.',
+                    'connection, possibly because both first and last are provided.',
             );
 
             this._getFragmentVariables = createGetFragmentVariables(metadata);
 
             this._init = true;
         }
-
     }
 
     dispose() {
@@ -190,10 +164,12 @@ class FragmentPagination {
         }
     }
 
-    _getConnectionData(data: any): {
-        cursor: string,
-        edgeCount: number,
-        hasMore: boolean,
+    _getConnectionData(
+        data: any,
+    ): {
+        cursor: string;
+        edgeCount: number;
+        hasMore: boolean;
     } {
         // Extract connection data and verify there are more edges to fetch
         const props = { ...data };
@@ -201,19 +177,12 @@ class FragmentPagination {
         if (connectionData == null) {
             return null;
         }
-        const {
-            EDGES,
-            PAGE_INFO,
-            HAS_NEXT_PAGE,
-            HAS_PREV_PAGE,
-            END_CURSOR,
-            START_CURSOR,
-        } = ConnectionInterface.get();
+        const { EDGES, PAGE_INFO, HAS_NEXT_PAGE, HAS_PREV_PAGE, END_CURSOR, START_CURSOR } = ConnectionInterface.get();
 
         invariant(
             typeof connectionData === 'object',
             'ReactRelayPaginationContainer: Expected `getConnectionFromProps()` in `%s`' +
-            'to return `null` or a plain object with %s and %s properties, got `%s`.',
+                'to return `null` or a plain object with %s and %s properties, got `%s`.',
             'useFragment pagination',
             EDGES,
             PAGE_INFO,
@@ -226,34 +195,25 @@ class FragmentPagination {
         }
         invariant(
             Array.isArray(edges),
-            'ReactRelayPaginationContainer: Expected `getConnectionFromProps()` in `%s`' +
-            'to return an object with %s: Array, got `%s`.',
+            'ReactRelayPaginationContainer: Expected `getConnectionFromProps()` in `%s`' + 'to return an object with %s: Array, got `%s`.',
             'useFragment pagination',
             EDGES,
             edges,
         );
         invariant(
             typeof pageInfo === 'object',
-            'ReactRelayPaginationContainer: Expected `getConnectionFromProps()` in `%s`' +
-            'to return an object with %s: Object, got `%s`.',
+            'ReactRelayPaginationContainer: Expected `getConnectionFromProps()` in `%s`' + 'to return an object with %s: Object, got `%s`.',
             'useFragment pagination',
             PAGE_INFO,
             pageInfo,
         );
-        const hasMore =
-            this._direction === FORWARD
-                ? pageInfo[HAS_NEXT_PAGE]
-                : pageInfo[HAS_PREV_PAGE];
-        const cursor =
-            this._direction === FORWARD ? pageInfo[END_CURSOR] : pageInfo[START_CURSOR];
-        if (
-            typeof hasMore !== 'boolean' ||
-            (edges.length !== 0 && typeof cursor === 'undefined')
-        ) {
+        const hasMore = this._direction === FORWARD ? pageInfo[HAS_NEXT_PAGE] : pageInfo[HAS_PREV_PAGE];
+        const cursor = this._direction === FORWARD ? pageInfo[END_CURSOR] : pageInfo[START_CURSOR];
+        if (typeof hasMore !== 'boolean' || (edges.length !== 0 && typeof cursor === 'undefined')) {
             warning(
                 false,
                 'ReactRelayPaginationContainer: Cannot paginate without %s fields in `%s`. ' +
-                'Be sure to fetch %s (got `%s`) and %s (got `%s`).',
+                    'Be sure to fetch %s (got `%s`) and %s (got `%s`).',
                 PAGE_INFO,
                 'useFragment pagination',
                 this._direction === FORWARD ? HAS_NEXT_PAGE : HAS_PREV_PAGE,
@@ -273,11 +233,7 @@ class FragmentPagination {
     hasMore = (prevResult: ContainerResult): boolean => {
         this.init(prevResult);
         const connectionData = this._getConnectionData(prevResult.data);
-        return !!(
-            connectionData &&
-            connectionData.hasMore &&
-            connectionData.cursor
-        );
+        return !!(connectionData && connectionData.hasMore && connectionData.cursor);
     };
 
     isLoading = (): boolean => {
@@ -301,7 +257,12 @@ class FragmentPagination {
             cursor: null,
             totalCount,
         };
-        const fetch = this._fetchPage(environment, prevResult, setResult, connectionConfig, props,
+        const fetch = this._fetchPage(
+            environment,
+            prevResult,
+            setResult,
+            connectionConfig,
+            props,
             paginatingVariables,
             toObserver(observerOrCallback),
             { force: true },
@@ -310,31 +271,37 @@ class FragmentPagination {
         return { dispose: fetch.unsubscribe };
     };
 
-
-
-
-
-
-    loadMore(environment: IEnvironment,
+    loadMore(
+        environment: IEnvironment,
         connectionConfig: ConnectionConfig,
         props: any,
         pageSize: number,
         observerOrCallback: ObserverOrCallback,
         options: RefetchOptions,
         prevResult: ContainerResult,
-        setResult: any) { //TODO Function
+        setResult: any,
+    ) {
+        //TODO Function
         this.init(prevResult);
 
         const observer = toObserver(observerOrCallback);
         const connectionData = this._getConnectionData(prevResult.data);
         if (!connectionData) {
-            Observable.create(sink => sink.complete()).subscribe(observer);
+            Observable.create((sink) => sink.complete()).subscribe(observer);
             return null;
         }
         const totalCount = connectionData.edgeCount + pageSize;
         if (options && options.force) {
-            return this.refetchConnection(environment, connectionConfig, props, prevResult, setResult,
-                totalCount, observerOrCallback, undefined);
+            return this.refetchConnection(
+                environment,
+                connectionConfig,
+                props,
+                prevResult,
+                setResult,
+                totalCount,
+                observerOrCallback,
+                undefined,
+            );
         }
         const { END_CURSOR, START_CURSOR } = ConnectionInterface.get();
         const cursor = connectionData.cursor;
@@ -351,7 +318,7 @@ class FragmentPagination {
         };
         const fetch = this._fetchPage(environment, prevResult, setResult, connectionConfig, props, paginatingVariables, observer, options);
         return { dispose: fetch.unsubscribe };
-    };
+    }
 
     _fetchPage(
         environment: IEnvironment,
@@ -360,9 +327,9 @@ class FragmentPagination {
         connectionConfig: ConnectionConfig,
         propsFragment: any,
         paginatingVariables: {
-            count: number,
-            cursor: string,
-            totalCount: number,
+            count: number;
+            cursor: string;
+            totalCount: number;
         },
         observer: Observer<void>,
         options: RefetchOptions,
@@ -373,28 +340,10 @@ class FragmentPagination {
         const fragments = prevResult.resolver._fragments;
         let rootVariables;
         let fragmentVariables;
-        const fragmentOwners = getFragmentOwners(fragments, propsFragment);
-        // NOTE: rootVariables are spread down below in a couple of places,
-        // so we compute them here from the fragment owners.
-        // For extra safety, we make sure the rootVariables include the
-        // variables from all owners in this fragmentSpec, even though they
-        // should all point to the same owner
-        Object.keys(fragments).forEach(key => {
-            const fragmentOwner = fragmentOwners[key];
-            const fragmentOwnerVariables = Array.isArray(fragmentOwner)
-                ? fragmentOwner[0].variables || {}
-                : fragmentOwner.variables || {};
-            rootVariables = {
-                ...rootVariables,
-                ...fragmentOwnerVariables,
-            };
-        });
+        const fragmentOwners = getRootVariablesForFragments(fragments, propsFragment);
         // hack 6.0.0
         if (getVariablesFromObject.length === 2) {
-            fragmentVariables = getVariablesFromObject(
-                fragments,
-                propsFragment
-            );
+            fragmentVariables = getVariablesFromObject(fragments, propsFragment);
         } else {
             fragmentVariables = getVariablesFromObject(
                 // NOTE: We pass empty operationVariables because we want to prefer
@@ -421,8 +370,7 @@ class FragmentPagination {
         );
         invariant(
             typeof fetchVariables === 'object' && fetchVariables !== null,
-            'ReactRelayPaginationContainer: Expected `getVariables()` to ' +
-            'return an object, got `%s` in `%s`.',
+            'ReactRelayPaginationContainer: Expected `getVariables()` to ' + 'return an object, got `%s` in `%s`.',
             fetchVariables,
             'useFragment pagination',
         );
@@ -435,9 +383,7 @@ class FragmentPagination {
             ...fragmentVariables,
         };
 
-        const cacheConfig: CacheConfig = options
-            ? { force: !!options.force }
-            : undefined;
+        const cacheConfig: CacheConfig = options ? { force: !!options.force } : undefined;
         if (cacheConfig != null && options && options.metadata != null) {
             cacheConfig.metadata = options.metadata;
         }
@@ -457,10 +403,7 @@ class FragmentPagination {
             };
             const prevData = resolver.resolve();
             resolver.setVariables(
-                this._getFragmentVariables(
-                    fragmentVariables,
-                    paginatingVariables.totalCount,
-                ),
+                this._getFragmentVariables(fragmentVariables, paginatingVariables.totalCount),
                 operation.node || operation.request.node,
             );
             const nextData = resolver.resolve();
@@ -475,17 +418,18 @@ class FragmentPagination {
             // resolved data.
             // TODO #14894725: remove PaginationContainer equal check
             if (!areEqual(prevData, nextData)) {
-
                 //res.setVariables(contextVariables, operation.node);
                 setResult({
-                    resolver: resolver, data: nextData, relay: {
+                    resolver: resolver,
+                    data: nextData,
+                    relay: {
                         environment: environment,
                         variables: contextVariables,
-                    }
-                })
+                    },
+                });
                 const callComplete = async () => {
                     complete();
-                }
+                };
                 callComplete();
                 /*this.setState(
                     {
@@ -517,8 +461,8 @@ class FragmentPagination {
                 cacheConfig,
                 preservePreviousReferences: true,
             })
-            .mergeMap(payload =>
-                Observable.create(sink => {
+            .mergeMap((payload) =>
+                Observable.create((sink) => {
                     onNext(payload, () => {
                         sink.next(); // pass void to public observer's `next`
                         sink.complete();
@@ -533,15 +477,39 @@ class FragmentPagination {
             })
             .subscribe(observer || {});
 
-        this._refetchSubscription = this._isARequestInFlight
-            ? refetchSubscription
-            : null;
+        this._refetchSubscription = this._isARequestInFlight ? refetchSubscription : null;
 
         return refetchSubscription;
     }
+}
 
+function getRootVariablesForFragments(fragments: any, props: any): Variables {
+    let rootVariables = {};
+    // NOTE: For extra safety, we make sure the rootVariables include the
+    // variables from all owners in this fragmentSpec, even though they
+    // should all point to the same owner
+    Object.keys(fragments).forEach((key) => {
+        const fragmentNode = fragments[key];
+        const fragmentRef = props[key];
+        const selector = getSelector(fragmentNode, fragmentRef);
+        const fragmentOwnerVariables =
+            selector != null && selector.kind === 'PluralReaderSelector'
+                ? selector.selectors[0]
+                    ? selector.selectors[0].owner.variables
+                    : {}
+                : selector
+                ? selector.owner.variables
+                : {};
+        rootVariables = {
+            ...rootVariables,
+            /* $FlowFixMe(>=0.111.0) This comment suppresses an error found when Flow
+             * v0.111.0 was deployed. To see the error, delete this comment and run
+             * Flow. */
+            ...fragmentOwnerVariables,
+        };
+    });
 
-
+    return rootVariables;
 }
 
 export default FragmentPagination;

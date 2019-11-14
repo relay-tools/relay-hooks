@@ -1,14 +1,11 @@
-import useOssFragment, { RefetchFunction } from "./useOssFragment";
+import useOssFragment, { RefetchFunction } from './useOssFragment';
 
-type RefetchResult = [
-    any,
-    RefetchFunction];
+type RefetchResult = [any, RefetchFunction];
 
-const useRefetch = function (fragmentDef, fragmentRef: any, ):RefetchResult {
-
+const useRefetch = function(fragmentDef, fragmentRef: any): RefetchResult {
     const [data, { refetch }] = useOssFragment(fragmentDef, fragmentRef);
 
-    return [data , refetch ];
-}
+    return [data, refetch];
+};
 
 export default useRefetch;

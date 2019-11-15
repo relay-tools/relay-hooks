@@ -98,7 +98,12 @@ const useOssFragment = function(fragmentDef, fragmentRef: any): FragmentResult {
         };
     }, []);
 
-    if (prev && prev.fragmentRef !== fragmentRef) {
+    if (prev && prev.environment !== environment) {
+        ref.current.result.resolver.dispose();
+        fragmentRefetch.dispose();
+        fragmentPagination.dispose();
+        ref.current.result = newResolver();
+    } else if (prev && prev.fragmentRef !== fragmentRef) {
         const prevIDs = getDataIDsFromFragment(fragments, prev.fragmentRef);
         const nextIDs = getDataIDsFromFragment(fragments, fragmentRef);
         if (!areEqual(_getFragmentVariables(), _getFragmentVariables(prev.fragmentRef)) || !areEqual(prevIDs, nextIDs)) {
@@ -107,11 +112,6 @@ const useOssFragment = function(fragmentDef, fragmentRef: any): FragmentResult {
             ref.current.result.resolver.dispose();
             ref.current.result = newResolver();
         }
-    } else if (prev && prev.environment !== environment) {
-        ref.current.result.resolver.dispose();
-        fragmentRefetch.dispose();
-        fragmentPagination.dispose();
-        ref.current.result = newResolver();
     }
 
     function _getFragmentVariables(fRef = fragmentRef): Variables {

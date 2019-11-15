@@ -190,7 +190,9 @@ const useOssFragment = function(fragmentDef, fragmentRef: any): FragmentResult {
         [environment, propsFragments, ref.current.result],
     );
 
-    const hasMore = useCallback(() => fragmentPagination.hasMore(ref.current.result), [ref.current.result]);
+    const hasMore = useCallback((connectionConfig?: ConnectionConfig) => fragmentPagination.hasMore(ref.current.result, connectionConfig), [
+        ref.current.result,
+    ]);
 
     const {
         result: { data },

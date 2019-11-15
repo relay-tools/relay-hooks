@@ -166,14 +166,20 @@ class FragmentPagination {
 
     _getConnectionData(
         data: any,
+        connectionConfig?: ConnectionConfig,
     ): {
         cursor: string;
         edgeCount: number;
         hasMore: boolean;
     } {
         // Extract connection data and verify there are more edges to fetch
-        const props = { ...data };
-        const connectionData = this._getConnectionFromProps(props);
+        const props = data && data.frag ? data.frag : {};
+
+        const getConnectionFromProps =
+            connectionConfig && connectionConfig.getConnectionFromProps
+                ? connectionConfig.getConnectionFromProps
+                : this._getConnectionFromProps;
+        const connectionData = getConnectionFromProps(props);
         if (connectionData == null) {
             return null;
         }
@@ -230,9 +236,9 @@ class FragmentPagination {
         };
     }
 
-    hasMore = (prevResult: ContainerResult): boolean => {
+    hasMore = (prevResult: ContainerResult, connectionConfig?: any): boolean => {
         this.init(prevResult);
-        const connectionData = this._getConnectionData(prevResult.data);
+        const connectionData = this._getConnectionData(prevResult.data, connectionConfig);
         return !!(connectionData && connectionData.hasMore && connectionData.cursor);
     };
 
@@ -285,7 +291,7 @@ class FragmentPagination {
         this.init(prevResult);
 
         const observer = toObserver(observerOrCallback);
-        const connectionData = this._getConnectionData(prevResult.data);
+        const connectionData = this._getConnectionData(prevResult.data, connectionConfig);
         if (!connectionData) {
             Observable.create((sink) => sink.complete()).subscribe(observer);
             return null;
@@ -338,26 +344,11 @@ class FragmentPagination {
         const resolver = prevResult.resolver;
         const props = prevResult.data && prevResult.data.frag ? prevResult.data.frag : {};
         const fragments = prevResult.resolver._fragments;
-        let rootVariables;
-        let fragmentVariables;
-        const fragmentOwners = getRootVariablesForFragments(fragments, propsFragment);
+        const rootVariables = getRootVariablesForFragments(fragments, propsFragment);
         // hack 6.0.0
-        if (getVariablesFromObject.length === 2) {
-            fragmentVariables = getVariablesFromObject(fragments, propsFragment);
-        } else {
-            fragmentVariables = getVariablesFromObject(
-                // NOTE: We pass empty operationVariables because we want to prefer
-                // the variables from the fragment owner
-                {},
-                fragments,
-                propsFragment,
-                fragmentOwners,
-            );
-        }
-
-        fragmentVariables = {
+        let fragmentVariables = {
             ...rootVariables,
-            ...fragmentVariables,
+            ...getVariablesFromObject(fragments, propsFragment),
             ...this._refetchVariables,
         };
         let fetchVariables = connectionConfig.getVariables(
@@ -402,10 +393,11 @@ class FragmentPagination {
                 ...fragmentVariables,
             };
             const prevData = resolver.resolve();
-            resolver.setVariables(
-                this._getFragmentVariables(fragmentVariables, paginatingVariables.totalCount),
-                operation.node || operation.request.node,
-            );
+
+            const getFragmentVariables = connectionConfig.getFragmentVariables || this._getFragmentVariables;
+
+            resolver.setVariables(getFragmentVariables(fragmentVariables, paginatingVariables.totalCount), operation.request.node);
+
             const nextData = resolver.resolve();
 
             // Workaround slightly different handling for connection in different
@@ -417,6 +409,7 @@ class FragmentPagination {
             // `setState` is only required if changing the variables would change the
             // resolved data.
             // TODO #14894725: remove PaginationContainer equal check
+
             if (!areEqual(prevData, nextData)) {
                 //res.setVariables(contextVariables, operation.node);
                 setResult({

@@ -1,6 +1,6 @@
 import { RelayContext, FragmentSpecResolver } from 'relay-runtime/lib/store/RelayStoreTypes';
 
-import { OperationType, CacheConfig, GraphQLTaggedNode } from 'relay-runtime';
+import { OperationType, CacheConfig, GraphQLTaggedNode, Variables, PageInfo, Observer } from 'relay-runtime';
 
 export const NETWORK_ONLY = 'network-only';
 export const STORE_THEN_NETWORK = 'store-and-network';
@@ -40,3 +40,51 @@ export type UseQueryType = <TOperationType extends OperationType>(
         networkCacheConfig?: CacheConfig;
     },
 ) => RenderProps<TOperationType>;
+
+export type PaginationFunction = {
+    loadMore: (connectionConfig: ConnectionConfig, pageSize: number, observerOrCallback: any, options: RefetchOptions) => any;
+    hasMore: () => boolean;
+    isLoading: () => boolean;
+    refetchConnection: (connectionConfig: ConnectionConfig, totalCount: number, callback: any, refetchVariables: any) => any;
+};
+
+export type RefetchFunction = (
+    taggedNode: any,
+    refetchVariables: any,
+    renderVariables: any,
+    observerOrCallback: any,
+    options: RefetchOptions,
+) => {
+    dispose(): void;
+};
+
+export interface OssFragmentFunction extends PaginationFunction {
+    refetch: RefetchFunction;
+}
+
+export type FragmentResult = [any, OssFragmentFunction];
+export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
+
+// pagination
+
+export const FORWARD = 'forward';
+
+export type FragmentVariablesGetter = (prevVars: Variables, totalCount: number) => Variables;
+
+export type ConnectionConfig = {
+    direction?: 'backward' | 'forward';
+    getConnectionFromProps?: (props: Object) => ConnectionData;
+    getFragmentVariables?: FragmentVariablesGetter;
+    getVariables: (props: Object, paginationInfo: { count: number; cursor: string }, fragmentVariables: Variables) => Variables;
+    query: GraphQLTaggedNode;
+};
+export type ConnectionData = {
+    edges?: ReadonlyArray<any>;
+    pageInfo?: PageInfo;
+};
+
+export type PaginationData = {
+    direction: string;
+    getConnectionFromProps: Function;
+    getFragmentVariables: Function;
+};

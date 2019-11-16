@@ -35,7 +35,6 @@ import TodoApp, {fragmentSpec} from './components/TodoApp';
 import TodoTextInput from './components/TodoTextInput';
 import type {appQueryResponse} from 'relay/appQuery.graphql';
 import QueryApp from './query/QueryApp';
-import RelayNetworkLogger from 'relay-runtime/lib/RelayNetworkLogger';
 
 async function fetchQuery(
   operation: RequestNode,
@@ -56,7 +55,7 @@ async function fetchQuery(
 }
 
 const modernEnvironment: Environment = new Environment({
-  network: Network.create(RelayNetworkLogger.wrapFetch(fetchQuery, () => '')),
+  network: Network.create(fetchQuery),
   store: new Store(new RecordSource()),
 });
 

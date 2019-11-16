@@ -1,4 +1,5 @@
-import useOssFragment, { PaginationFunction } from './useOssFragment';
+import useOssFragment from './useOssFragment';
+import { PaginationFunction } from './RelayHooksType';
 
 type PaginationResult = [any, PaginationFunction];
 

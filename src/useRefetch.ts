@@ -1,4 +1,5 @@
-import useOssFragment, { RefetchFunction } from './useOssFragment';
+import useOssFragment from './useOssFragment';
+import { RefetchFunction } from './RelayHooksType';
 
 type RefetchResult = [any, RefetchFunction];
 

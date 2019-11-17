@@ -74,13 +74,15 @@ class FragmentResolver {
     _isARequestInFlight = false;
     _selectionReferences: Array<Disposable> = [];
     _cacheSelectionReference: Disposable;
+    indexUpdate = 0;
 
     constructor(forceUpdate) {
         this._forceUpdate = forceUpdate;
     }
 
-    forceUpdate(): void {
-        this._forceUpdate();
+    refreshHooks(): void {
+        this.indexUpdate++;
+        this._forceUpdate(this.indexUpdate);
     }
 
     dispose(): void {
@@ -196,7 +198,7 @@ class FragmentResolver {
                     environment.subscribe(snapshot, (latestSnapshot) => {
                         this._result.snapshot[idx] = latestSnapshot;
                         this._result.data[idx] = latestSnapshot.data;
-                        this.forceUpdate();
+                        this.refreshHooks();
                     }),
                 );
             });
@@ -204,7 +206,7 @@ class FragmentResolver {
             dataSubscriptions.push(
                 environment.subscribe(currentSnapshot, (latestSnapshot) => {
                     this._result = getFragmentResult(latestSnapshot);
-                    this.forceUpdate();
+                    this.refreshHooks();
                 }),
             );
         }
@@ -264,7 +266,7 @@ class FragmentResolver {
         /*eslint-enable */
         const onNext = (operation, payload, complete): void => {
             this.changeVariables(newFragmentVariables, operation.request.node);
-            this.forceUpdate();
+            this.refreshHooks();
             complete();
         };
 
@@ -435,7 +437,7 @@ class FragmentResolver {
             // TODO #14894725: remove PaginationContainer equal check
 
             if (!areEqual(prevData, nextData)) {
-                this.forceUpdate();
+                this.refreshHooks();
                 const callComplete = async (): Promise<void> => {
                     complete();
                 };

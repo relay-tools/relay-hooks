@@ -111,7 +111,7 @@ const LayoutTodo = ({userId}) => {
     QueryApp,
     {userId},
     {
-      fetchPolicy: 'store-or-network',
+      fetchPolicy: 'network-only',
     },
   );
   /*const { props, error, retry, cached } = useQuery({

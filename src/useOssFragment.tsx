@@ -1,12 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
-import { RelayFeatureFlags } from 'relay-runtime';
+import { RelayFeatureFlags, GraphQLTaggedNode } from 'relay-runtime';
 
 import { ContainerResult, FragmentResult } from './RelayHooksType';
 
 import useRelayEnvironment from './useRelayEnvironment';
 import FragmentResolver from './FragmentResolver';
 
-const useOssFragment = function(fragmentNode, fragmentRef: any): FragmentResult {
+const useOssFragment = function(fragmentNode: GraphQLTaggedNode, fragmentRef: any): FragmentResult {
     RelayFeatureFlags.PREFER_FRAGMENT_OWNER_OVER_CONTEXT = true;
     const environment = useRelayEnvironment();
     const [, forceUpdate] = useState<ContainerResult>(null);
@@ -20,7 +20,7 @@ const useOssFragment = function(fragmentNode, fragmentRef: any): FragmentResult 
     const { resolver } = ref.current;
 
     useEffect(() => {
-        return () => {
+        return (): void => {
             resolver.dispose();
         };
     }, []);

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useMemo } from 'react';
-import { GraphQLTaggedNode } from 'relay-runtime';
+import { GraphQLTaggedNode, OperationType, OperationDescriptor, Variables } from 'relay-runtime';
 import * as areEqual from 'fbjs/lib/areEqual';
-import { UseQueryType } from './RelayHooksType';
+import { RenderProps, QueryOptions } from './RelayHooksType';
 import useRelayEnvironment from './useRelayEnvironment';
 import useQueryFetcher from './useQueryFetcher';
 import { createOperation } from './Utils';
@@ -14,19 +14,30 @@ function useDeepCompare<T>(value: T): T {
     return latestValue.current;
 }
 
-export function useMemoOperationDescriptor(gqlQuery: GraphQLTaggedNode, variables: any): any {
+export function useMemoOperationDescriptor(
+    gqlQuery: GraphQLTaggedNode,
+    variables: Variables,
+): OperationDescriptor {
     const memoVariables = useDeepCompare(variables);
     return useMemo(() => createOperation(gqlQuery, memoVariables), [gqlQuery, memoVariables]);
 }
 
-export const useQuery: UseQueryType = (gqlQuery, variables, options = {}) => {
+export const useQuery: <TOperationType extends OperationType>(
+    gqlQuery: GraphQLTaggedNode,
+    variables: TOperationType['variables'],
+    options: QueryOptions,
+) => RenderProps<TOperationType> = <TOperationType extends OperationType>(
+    gqlQuery,
+    variables,
+    options = {},
+) => {
     const environment = useRelayEnvironment();
     const query = useMemoOperationDescriptor(gqlQuery, variables);
-    const queryFetcher = useQueryFetcher();
+    const queryFetcher = useQueryFetcher<TOperationType>();
 
     useEffect(() => {
         const disposable = environment.retain(query.root);
-        return () => {
+        return (): void => {
             disposable.dispose();
         };
     }, [environment, query]);

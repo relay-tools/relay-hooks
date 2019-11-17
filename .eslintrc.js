@@ -37,7 +37,6 @@ module.exports = {
                 ignorePattern: '^import [^,]+ from |^export | implements',
             },
         ],
-        '@typescript-eslint/interface-name-prefix': [2, { prefixWithI: 'always' }],
         '@typescript-eslint/no-unused-vars': [2, { argsIgnorePattern: '^_' }],
         'object-curly-newline': ['error', { consistent: true }],
         '@typescript-eslint/no-explicit-any': [0],

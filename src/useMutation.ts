@@ -1,8 +1,14 @@
+/*eslint-disable */
 import * as invariant from 'fbjs/lib/invariant';
 import * as React from 'react';
 import { useCallback, useContext, useState } from 'react';
 import ReactRelayContext from './ReactRelayContext';
-import { MutationConfig as BaseMutationConfig, Environment, OperationBase, commitMutation } from 'relay-runtime';
+import {
+    MutationConfig as BaseMutationConfig,
+    Environment,
+    OperationBase,
+    commitMutation,
+} from 'relay-runtime';
 import useMounted from '@restart/hooks/useMounted';
 
 export type MutationState<T extends OperationBase> = {
@@ -13,11 +19,15 @@ export type MutationState<T extends OperationBase> = {
 
 export type MutationNode<T extends OperationBase> = BaseMutationConfig<T>['mutation'];
 
-export type MutationConfig<T extends OperationBase> = Partial<Omit<BaseMutationConfig<T>, 'mutation' | 'onCompleted'>> & {
+export type MutationConfig<T extends OperationBase> = Partial<
+    Omit<BaseMutationConfig<T>, 'mutation' | 'onCompleted'>
+> & {
     onCompleted?(response: T['response']): void;
 };
 
-export type Mutate<T extends OperationBase> = (config?: Partial<MutationConfig<T>>) => Promise<T['response']>;
+export type Mutate<T extends OperationBase> = (
+    config?: Partial<MutationConfig<T>>,
+) => Promise<T['response']>;
 
 export function useMutation<T extends OperationBase>(
     mutation: MutationNode<T>,
@@ -35,7 +45,16 @@ export function useMutation<T extends OperationBase>(
 
     const relayContext: any = useContext(ReactRelayContext);
     const resolvedEnvironment = environment || relayContext.environment;
-    const { configs, variables, uploadables, onCompleted, onError, optimisticUpdater, optimisticResponse, updater } = userConfig;
+    const {
+        configs,
+        variables,
+        uploadables,
+        onCompleted,
+        onError,
+        optimisticUpdater,
+        optimisticResponse,
+        updater,
+    } = userConfig;
 
     const mutate: Mutate<T> = useCallback(
         (config) => {
@@ -60,7 +79,7 @@ export function useMutation<T extends OperationBase>(
             });
 
             return new Promise((resolve, reject) => {
-                function handleError(error: any) {
+                function handleError(error: any): void {
                     if (isMounted()) {
                         setState({
                             loading: false,
@@ -130,7 +149,12 @@ export type MutationProps<T extends OperationBase> = MutationConfig<T> & {
     environment?: Environment;
 };
 
-export function Mutation<T extends OperationBase>({ children, mutation, environment, ...config }: MutationProps<T>) {
+export function Mutation<T extends OperationBase>({
+    children,
+    mutation,
+    environment,
+    ...config
+}: MutationProps<T>) {
     const [mutate, state] = useMutation(mutation, config, environment);
     return children(mutate, state) as React.ReactElement;
 }

@@ -26,7 +26,8 @@
     "eslint": "eslint ./src --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
-    "@restart/hooks": "^0.3.1"
+    "@restart/hooks": "^0.3.1",
+    "fbjs": "^1.0.0"
   },
   "peerDependencies": {
     "react": ">=16.8.0",
@@ -62,19 +63,19 @@
     "@babel/runtime": "^7.0.0",
     "@babel/traverse": "^7.0.0",
     "@babel/types": "^7.0.0",
-    "@typescript-eslint/eslint-plugin": "2.1.0",
-    "@typescript-eslint/parser": "2.1.0",
-    "eslint": "6.3.0",
+    "@typescript-eslint/eslint-plugin": "2.7.0",
+    "@typescript-eslint/parser": "2.7.0",
+    "eslint": "6.6.0",
     "eslint-config-airbnb": "18.0.1",
-    "eslint-config-prettier": "6.2.0",
-    "eslint-import-resolver-typescript": "1.1.1",
+    "eslint-config-prettier": "6.6.0",
+    "eslint-import-resolver-typescript": "2.0.0",
     "eslint-plugin-import": "2.18.2",
-    "eslint-plugin-json": "1.4.0",
+    "eslint-plugin-json": "2.0.1",
     "eslint-plugin-jsx-a11y": "6.2.3",
-    "eslint-plugin-prettier": "3.1.0",
-    "eslint-plugin-react": "7.14.3",
-    "eslint-plugin-react-hooks": "1.7.0",
+    "eslint-plugin-prettier": "3.1.1",
+    "eslint-plugin-react": "7.16.0",
+    "eslint-plugin-react-hooks": "2.3.0",
     "lerna": "^3.16.4",
-    "prettier": "1.18.2"
+    "prettier": "1.19.1"
   }
 }

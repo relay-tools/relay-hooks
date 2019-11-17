@@ -1,13 +1,13 @@
 import { Disposable, CacheConfig, IEnvironment, Snapshot } from 'relay-runtime';
 import { isNetworkPolicy, isStorePolicy } from './Utils';
-import { __internal } from 'relay-runtime';
-import { FetchPolicy } from './RelayHooksType';
+import { __internal, OperationType } from 'relay-runtime';
+import { FetchPolicy, RenderProps } from './RelayHooksType';
 
 const { fetchQuery } = __internal;
 
 const defaultPolicy = 'store-or-network';
 
-class QueryFetcher {
+class QueryFetcher<TOperationType extends OperationType> {
     environment: IEnvironment;
     query: any;
     networkSubscription: Disposable;
@@ -15,12 +15,13 @@ class QueryFetcher {
     error: Error;
     snapshot: Snapshot;
     fetchPolicy: FetchPolicy;
-    result = {
-        retry: (_cacheConfigOverride: CacheConfig) => undefined,
+    result: RenderProps<TOperationType> = {
+        retry: (_cacheConfigOverride: CacheConfig): void => undefined,
         cached: false,
         error: null,
         props: null,
     };
+
     forceUpdate: any;
 
     constructor(forceUpdate) {
@@ -34,14 +35,18 @@ class QueryFetcher {
         return null;
     }
 
-    execute(environment: IEnvironment, query, options) {
+    execute(environment: IEnvironment, query, options): RenderProps<TOperationType> {
         const { fetchPolicy = defaultPolicy, networkCacheConfig } = options;
         let storeSnapshot;
-        const retry = (cacheConfigOverride: CacheConfig = networkCacheConfig) => {
+        const retry = (cacheConfigOverride: CacheConfig = networkCacheConfig): void => {
             this.dispose();
             this.fetch(cacheConfigOverride);
         };
-        if (environment !== this.environment || query !== this.query || fetchPolicy !== this.fetchPolicy) {
+        if (
+            environment !== this.environment ||
+            query !== this.query ||
+            fetchPolicy !== this.fetchPolicy
+        ) {
             this.environment = environment;
             this.query = query;
             this.fetchPolicy = fetchPolicy;
@@ -67,7 +72,7 @@ class QueryFetcher {
         return this.result;
     }
 
-    subscribe(snapshot) {
+    subscribe(snapshot): void {
         this.rootSubscription = this.environment.subscribe(snapshot, (snapshot) => {
             // Read from this._fetchOptions in case onDataChange() was lazily added.
             this.snapshot = snapshot;
@@ -76,14 +81,14 @@ class QueryFetcher {
         });
     }
 
-    fetch(networkCacheConfig) {
+    fetch(networkCacheConfig): void {
         let fetchHasReturned = false;
         fetchQuery(this.environment, this.query, {
             networkCacheConfig,
         }).subscribe({
             start: (subscription) => {
                 this.networkSubscription = {
-                    dispose: () => subscription.unsubscribe(),
+                    dispose: (): void => subscription.unsubscribe(),
                 };
             },
             next: () => {
@@ -105,7 +110,7 @@ class QueryFetcher {
         fetchHasReturned = true;
     }
 
-    dispose() {
+    dispose(): void {
         this.error = null;
         this.snapshot = null;
         if (this.networkSubscription) {
@@ -116,7 +121,7 @@ class QueryFetcher {
         }
     }
 
-    _onQueryDataAvailable({ notifyFirstResult }) {
+    _onQueryDataAvailable({ notifyFirstResult }): void {
         // `_onQueryDataAvailable` can be called synchronously the first time and can be called
         // multiple times by network layers that support data subscriptions.
         // Wait until the first payload to call `onDataChange` and subscribe for data updates.

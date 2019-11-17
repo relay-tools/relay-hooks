@@ -40,7 +40,7 @@ type SingularOrPluralSnapshot = Snapshot | Array<Snapshot>;
 
 type SingularOrPluralSelectors = SingularReaderSelector | Array<SingularReaderSelector>;
 
-function lookupFragment(environment, selector) {
+function lookupFragment(environment, selector): SingularOrPluralSnapshot {
     return selector.kind === 'PluralReaderSelector'
         ? selector.selectors.map((s) => environment.lookup(s))
         : environment.lookup(selector);
@@ -79,11 +79,11 @@ class FragmentResolver {
         this._forceUpdate = forceUpdate;
     }
 
-    forceUpdate() {
+    forceUpdate(): void {
         this._forceUpdate();
     }
 
-    dispose() {
+    dispose(): void {
         this._disposable && this._disposable.dispose();
         this._refetchSubscription && this._refetchSubscription.unsubscribe();
         this._refetchSubscription = null;
@@ -92,18 +92,18 @@ class FragmentResolver {
         this._isARequestInFlight = false;
     }
 
-    disposeSelectionReferences() {
+    disposeSelectionReferences(): void {
         this._disposeCacheSelectionReference();
         this._selectionReferences.forEach((r) => r.dispose());
         this._selectionReferences = [];
     }
 
-    _retainCachedOperation(operation: OperationDescriptor) {
+    _retainCachedOperation(operation: OperationDescriptor): void {
         this._disposeCacheSelectionReference();
         this._cacheSelectionReference = this._environment.retain(operation.root);
     }
 
-    _disposeCacheSelectionReference() {
+    _disposeCacheSelectionReference(): void {
         this._cacheSelectionReference && this._cacheSelectionReference.dispose();
         this._cacheSelectionReference = null;
     }
@@ -112,7 +112,7 @@ class FragmentResolver {
         return getVariablesFromFragment(this._fragment, fRef);
     }
 
-    changedFragmentRef(fragmentRef) {
+    changedFragmentRef(fragmentRef): boolean {
         if (this._fragmentRef !== fragmentRef) {
             const prevIDs = getDataIDsFromFragment(this._fragment, this._fragmentRef);
             const nextIDs = getDataIDsFromFragment(this._fragment, fragmentRef);
@@ -130,7 +130,7 @@ class FragmentResolver {
         return false;
     }
 
-    resolve(environment: IEnvironment, fragmentNode, fragmentRef) {
+    resolve(environment: IEnvironment, fragmentNode, fragmentRef): void {
         if (this._fragmentNode !== fragmentNode) {
             this._fragment = getFragment(fragmentNode);
             this.paginationData = null;
@@ -168,7 +168,7 @@ class FragmentResolver {
         }
     }
 
-    lookup() {
+    lookup(): void {
         const snapshot = lookupFragment(this._environment, this._selector);
 
         // if (!isMissingData(snapshot)) { this for promises
@@ -176,15 +176,15 @@ class FragmentResolver {
         this.subscribe();
     }
 
-    getData() {
+    getData(): any | null {
         return this._result ? this._result.data : null;
     }
 
-    subscribe() {
+    subscribe(): void {
         const environment = this._environment;
         const renderedSnapshot = this._result.snapshot;
         if (!renderedSnapshot) {
-            this._disposable = { dispose: () => {} };
+            this._disposable = { dispose: (): void => {} };
         }
 
         const dataSubscriptions = [];
@@ -210,13 +210,13 @@ class FragmentResolver {
         }
 
         this._disposable = {
-            dispose: () => {
+            dispose: (): void => {
                 dataSubscriptions.map((s) => s.dispose());
             },
         };
     }
 
-    changeVariables(variables, request) {
+    changeVariables(variables, request): void {
         if (this._selector.kind === 'PluralReaderSelector') {
             this._selector.selectors = this._selector.selectors.map((s) =>
                 getNewSelector(request, s, variables),
@@ -227,7 +227,7 @@ class FragmentResolver {
         this.lookup();
     }
 
-    lookupInStore(environment: IEnvironment, operation, fetchPolicy): Snapshot {
+    lookupInStore(environment: IEnvironment, operation, fetchPolicy): Snapshot | null {
         if (isStorePolicy(fetchPolicy) && environment.check(operation.root)) {
             this._retainCachedOperation(operation);
             return environment.lookup(operation.fragment, operation);
@@ -241,7 +241,7 @@ class FragmentResolver {
         renderVariables: Variables,
         observerOrCallback: ObserverOrCallback,
         options: RefetchOptions,
-    ) => {
+    ): Disposable => {
         //TODO Function
         const fragmentVariables = this.getFragmentVariables();
         const fetchVariables =
@@ -252,6 +252,7 @@ class FragmentResolver {
             ? { ...fetchVariables, ...renderVariables }
             : fetchVariables;
 
+        /*eslint-disable */
         const observer =
             typeof observerOrCallback === 'function'
                 ? {
@@ -260,7 +261,8 @@ class FragmentResolver {
                   }
                 : observerOrCallback || ({} as any);
 
-        const onNext = (operation, payload, complete) => {
+        /*eslint-enable */
+        const onNext = (operation, payload, complete): void => {
             this.changeVariables(newFragmentVariables, operation.request.node);
             this.forceUpdate();
             complete();
@@ -275,7 +277,7 @@ class FragmentResolver {
         );
 
         return {
-            dispose: () => {
+            dispose: (): void => {
                 refetchSubscription && refetchSubscription.unsubscribe();
             },
         };
@@ -326,7 +328,7 @@ class FragmentResolver {
         pageSize: number,
         observerOrCallback: ObserverOrCallback,
         options: RefetchOptions,
-    ) => {
+    ): Disposable => {
         this.paginationData = getPaginationData(this.paginationData, this._fragment);
 
         const observer = toObserver(observerOrCallback);
@@ -410,7 +412,7 @@ class FragmentResolver {
             ...fragmentVariables,
         };
 
-        const onNext = (operation, payload, complete) => {
+        const onNext = (operation, payload, complete): void => {
             const prevData = this.getData();
 
             const getFragmentVariables =
@@ -434,7 +436,7 @@ class FragmentResolver {
 
             if (!areEqual(prevData, nextData)) {
                 this.forceUpdate();
-                const callComplete = async () => {
+                const callComplete = async (): Promise<void> => {
                     complete();
                 };
                 callComplete();
@@ -458,11 +460,13 @@ class FragmentResolver {
         options: RefetchOptions,
         observerOrCallback: ObserverOrCallback,
         onNext: (operation, payload, complete) => void,
-    ) {
+    ): Subscription {
         const cacheConfig: CacheConfig = options ? { force: !!options.force } : undefined;
         if (cacheConfig != null && options && options.metadata != null) {
             cacheConfig.metadata = options.metadata;
         }
+
+        /*eslint-disable */
         const observer =
             typeof observerOrCallback === 'function'
                 ? {
@@ -470,6 +474,8 @@ class FragmentResolver {
                       error: observerOrCallback,
                   }
                 : observerOrCallback || ({} as any);
+
+        /*eslint-enable */
 
         const operation = createOperation(taggedNode, fetchVariables);
 
@@ -484,12 +490,6 @@ class FragmentResolver {
                 observer.complete && observer.complete();
             });
         }
-
-        // TODO: T26288752 find a better way
-        /* eslint-disable lint/react-state-props-mutation */
-        //this.state.localVariables = fetchVariables;
-        /* eslint-enable lint/react-state-props-mutation */
-
         // Cancel any previously running refetch.
         this._refetchSubscription && this._refetchSubscription.unsubscribe();
 
@@ -500,18 +500,22 @@ class FragmentResolver {
         const isNetwork = isNetworkPolicy(fetchPolicy, storeSnapshot);
         if (!isNetwork) {
             return {
-                dispose: () => {},
+                dispose: (): void => {},
             };
         }
         if (isNetwork) {
             const reference = this._environment.retain(operation.root);
+
+            /*eslint-disable */
             const fetchQueryOptions =
                 cacheConfig != null
                     ? {
                           networkCacheConfig: cacheConfig,
                       }
                     : {};
-            const cleanup = () => {
+
+            /*eslint-enable */
+            const cleanup = (): void => {
                 this._selectionReferences = this._selectionReferences.concat(reference);
                 if (this._refetchSubscription === refetchSubscription) {
                     this._refetchSubscription = null;

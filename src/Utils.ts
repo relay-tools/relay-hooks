@@ -19,6 +19,8 @@ import {
     createOperationDescriptor,
     getRequest,
     GraphQLTaggedNode,
+    OperationDescriptor,
+    SingularReaderSelector,
 } from 'relay-runtime';
 
 export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
@@ -27,7 +29,11 @@ import * as warning from 'fbjs/lib/warning';
 import * as areEqual from 'fbjs/lib/areEqual';
 
 export const isNetworkPolicy = (policy: FetchPolicy, storeSnapshot): boolean => {
-    return policy === NETWORK_ONLY || policy === STORE_THEN_NETWORK || (policy === STORE_OR_NETWORK && !storeSnapshot);
+    return (
+        policy === NETWORK_ONLY ||
+        policy === STORE_THEN_NETWORK ||
+        (policy === STORE_OR_NETWORK && !storeSnapshot)
+    );
 };
 
 export const isStorePolicy = (policy: FetchPolicy): boolean => {
@@ -35,7 +41,10 @@ export const isStorePolicy = (policy: FetchPolicy): boolean => {
 };
 
 // Fetcher
-export function createOperation(gqlQuery: GraphQLTaggedNode, variables: Variables) {
+export function createOperation(
+    gqlQuery: GraphQLTaggedNode,
+    variables: Variables,
+): OperationDescriptor {
     return createOperationDescriptor(getRequest(gqlQuery), variables);
 }
 
@@ -46,7 +55,8 @@ export function findConnectionMetadata(fragment): ReactConnectionMetadata {
     let isRelayModern = false;
     // for (const fragmentName in fragments) {
     //   const fragment = fragments[fragmentName];
-    const connectionMetadata: Array<ConnectionMetadata> = fragment.metadata && (fragment.metadata.connection as any);
+    const connectionMetadata: Array<ConnectionMetadata> =
+        fragment.metadata && (fragment.metadata.connection as any);
     // HACK: metadata is always set to `undefined` in classic. In modern, even
     // if empty, it is set to null (never undefined). We use that knowlege to
     // check if we're dealing with classic or modern
@@ -56,11 +66,16 @@ export function findConnectionMetadata(fragment): ReactConnectionMetadata {
     if (connectionMetadata) {
         invariant(
             connectionMetadata.length === 1,
-            'ReactRelayPaginationContainer: Only a single @connection is ' + 'supported, `%s` has %s.',
+            'ReactRelayPaginationContainer: Only a single @connection is ' +
+                'supported, `%s` has %s.',
             fragment.name,
             connectionMetadata.length,
         );
-        invariant(!foundConnectionMetadata, 'ReactRelayPaginationContainer: Only a single fragment with ' + '@connection is supported.');
+        invariant(
+            !foundConnectionMetadata,
+            'ReactRelayPaginationContainer: Only a single fragment with ' +
+                '@connection is supported.',
+        );
         foundConnectionMetadata = {
             ...connectionMetadata[0],
             fragmentName: fragment.name,
@@ -74,11 +89,15 @@ export function findConnectionMetadata(fragment): ReactConnectionMetadata {
     return foundConnectionMetadata || ({} as any);
 }
 
-export function createGetConnectionFromProps(metadata: ReactConnectionMetadata) {
+export function createGetConnectionFromProps(metadata: ReactConnectionMetadata): any {
     const path = metadata.path;
-    invariant(path, 'ReactRelayPaginationContainer: Unable to synthesize a ' + 'getConnectionFromProps function.');
-    return (props) => {
-        var data = props;
+    invariant(
+        path,
+        'ReactRelayPaginationContainer: Unable to synthesize a ' +
+            'getConnectionFromProps function.',
+    );
+    return (props): any => {
+        let data = props;
         for (let i = 0; i < path.length; i++) {
             if (!data || typeof data !== 'object') {
                 return null;
@@ -89,27 +108,33 @@ export function createGetConnectionFromProps(metadata: ReactConnectionMetadata) 
     };
 }
 
-export function createGetFragmentVariables(metadata: ReactConnectionMetadata): FragmentVariablesGetter {
+export function createGetFragmentVariables(
+    metadata: ReactConnectionMetadata,
+): FragmentVariablesGetter {
     const countVariable = metadata.count;
-    invariant(countVariable, 'ReactRelayPaginationContainer: Unable to synthesize a ' + 'getFragmentVariables function.');
-    return (prevVars: Variables, totalCount: number) => ({
+    invariant(
+        countVariable,
+        'ReactRelayPaginationContainer: Unable to synthesize a ' + 'getFragmentVariables function.',
+    );
+    return (prevVars: Variables, totalCount: number): Variables => ({
         ...prevVars,
         [countVariable]: totalCount,
     });
 }
 
+/*eslint-disable */
 export function toObserver(observerOrCallback: ObserverOrCallback): Observer<void> {
     return typeof observerOrCallback === 'function'
         ? {
               error: observerOrCallback,
               complete: observerOrCallback,
-              unsubscribe: (subscription) => {
+              unsubscribe: (subscription): void => {
                   typeof observerOrCallback === 'function' && observerOrCallback();
               },
           }
         : observerOrCallback || ({} as any);
 }
-
+/*eslint-enable */
 export function getPaginationData(paginationData, fragment): PaginationData {
     if (!paginationData) {
         const metadata = findConnectionMetadata(fragment);
@@ -132,7 +157,7 @@ export function getPaginationData(paginationData, fragment): PaginationData {
     return paginationData;
 }
 
-export function getNewSelector(request, s, variables) {
+export function getNewSelector(request, s, variables): SingularReaderSelector {
     if (areEqual(variables, s.variables)) {
         // If we're not actually setting new variables, we don't actually want
         // to create a new fragment owner, since areEqualSelectors relies on
@@ -173,7 +198,14 @@ export function _getConnectionData(
     if (connectionData == null) {
         return null;
     }
-    const { EDGES, PAGE_INFO, HAS_NEXT_PAGE, HAS_PREV_PAGE, END_CURSOR, START_CURSOR } = ConnectionInterface.get();
+    const {
+        EDGES,
+        PAGE_INFO,
+        HAS_NEXT_PAGE,
+        HAS_PREV_PAGE,
+        END_CURSOR,
+        START_CURSOR,
+    } = ConnectionInterface.get();
 
     invariant(
         typeof connectionData === 'object',
@@ -191,14 +223,16 @@ export function _getConnectionData(
     }
     invariant(
         Array.isArray(edges),
-        'ReactRelayPaginationContainer: Expected `getConnectionFromProps()` in `%s`' + 'to return an object with %s: Array, got `%s`.',
+        'ReactRelayPaginationContainer: Expected `getConnectionFromProps()` in `%s`' +
+            'to return an object with %s: Array, got `%s`.',
         'useFragment pagination',
         EDGES,
         edges,
     );
     invariant(
         typeof pageInfo === 'object',
-        'ReactRelayPaginationContainer: Expected `getConnectionFromProps()` in `%s`' + 'to return an object with %s: Object, got `%s`.',
+        'ReactRelayPaginationContainer: Expected `getConnectionFromProps()` in `%s`' +
+            'to return an object with %s: Object, got `%s`.',
         'useFragment pagination',
         PAGE_INFO,
         pageInfo,
@@ -226,23 +260,13 @@ export function _getConnectionData(
     };
 }
 
+/*eslint-disable */
 export function getRootVariablesForSelector(selector): Variables {
-    let rootVariables = {};
-    const fragmentOwnerVariables =
-        selector != null && selector.kind === 'PluralReaderSelector'
-            ? selector.selectors[0]
-                ? selector.selectors[0].owner.variables
-                : {}
-            : selector
-            ? selector.owner.variables
-            : {};
-    rootVariables = {
-        ...rootVariables,
-        /* $FlowFixMe(>=0.111.0) This comment suppresses an error found when Flow
-         * v0.111.0 was deployed. To see the error, delete this comment and run
-         * Flow. */
-        ...fragmentOwnerVariables,
-    };
-
-    return rootVariables;
+    return selector != null && selector.kind === 'PluralReaderSelector'
+        ? selector.selectors[0]
+            ? selector.selectors[0].owner.variables
+            : {}
+        : selector
+        ? selector.owner.variables
+        : {};
 }

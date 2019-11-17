@@ -1,6 +1,13 @@
 import { RelayContext, FragmentSpecResolver } from 'relay-runtime/lib/store/RelayStoreTypes';
 
-import { OperationType, CacheConfig, GraphQLTaggedNode, Variables, PageInfo, Observer } from 'relay-runtime';
+import {
+    OperationType,
+    CacheConfig,
+    GraphQLTaggedNode,
+    Variables,
+    PageInfo,
+    Observer,
+} from 'relay-runtime';
 
 export const NETWORK_ONLY = 'network-only';
 export const STORE_THEN_NETWORK = 'store-and-network';
@@ -32,20 +39,26 @@ export type RefetchOptions = {
     metadata?: { [key: string]: any };
 };
 
-export type UseQueryType = <TOperationType extends OperationType>(
-    gqlQuery: GraphQLTaggedNode,
-    variables: TOperationType['variables'],
-    options: {
-        fetchPolicy?: FetchPolicy;
-        networkCacheConfig?: CacheConfig;
-    },
-) => RenderProps<TOperationType>;
+export type QueryOptions = {
+    fetchPolicy?: FetchPolicy;
+    networkCacheConfig?: CacheConfig;
+};
 
 export type PaginationFunction = {
-    loadMore: (connectionConfig: ConnectionConfig, pageSize: number, observerOrCallback: any, options: RefetchOptions) => any;
+    loadMore: (
+        connectionConfig: ConnectionConfig,
+        pageSize: number,
+        observerOrCallback: any,
+        options: RefetchOptions,
+    ) => any;
     hasMore: () => boolean;
     isLoading: () => boolean;
-    refetchConnection: (connectionConfig: ConnectionConfig, totalCount: number, callback: any, refetchVariables: any) => any;
+    refetchConnection: (
+        connectionConfig: ConnectionConfig,
+        totalCount: number,
+        callback: any,
+        refetchVariables: any,
+    ) => any;
 };
 
 export type RefetchFunction = (
@@ -73,9 +86,13 @@ export type FragmentVariablesGetter = (prevVars: Variables, totalCount: number) 
 
 export type ConnectionConfig = {
     direction?: 'backward' | 'forward';
-    getConnectionFromProps?: (props: Object) => ConnectionData;
+    getConnectionFromProps?: (props: object) => ConnectionData;
     getFragmentVariables?: FragmentVariablesGetter;
-    getVariables: (props: Object, paginationInfo: { count: number; cursor: string }, fragmentVariables: Variables) => Variables;
+    getVariables: (
+        props: object,
+        paginationInfo: { count: number; cursor: string },
+        fragmentVariables: Variables,
+    ) => Variables;
     query: GraphQLTaggedNode;
 };
 export type ConnectionData = {

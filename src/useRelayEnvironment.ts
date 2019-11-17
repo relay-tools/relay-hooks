@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ReactRelayContext } from 'react-relay';
+import ReactRelayContext from './ReactRelayContext';
 import { IEnvironment } from 'relay-runtime';
 
 function useRelayEnvironment(): IEnvironment {

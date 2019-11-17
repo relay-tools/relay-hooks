@@ -20,14 +20,20 @@ module.exports = {
     },
     rules: {
         'react/jsx-filename-extension': [2, { extensions: ['.js', '.jsx', '.ts', '.tsx'] }],
-        'import/no-extraneous-dependencies': [2, { devDependencies: ['**/test.tsx', '**/test.ts'] }],
+        'import/no-extraneous-dependencies': [
+            2,
+            { devDependencies: ['**/test.tsx', '**/test.ts'] },
+        ],
         indent: [2, 4, { SwitchCase: 1 }],
         'lines-between-class-members': ['error', 'always', { exceptAfterSingleLine: true }],
-        'space-before-function-paren': ['error', { anonymous: 'never', named: 'never', asyncArrow: 'ignore' }],
+        'space-before-function-paren': [
+            'error',
+            { anonymous: 'never', named: 'never', asyncArrow: 'ignore' },
+        ],
         'max-len': [
             2,
             {
-                code: 140,
+                code: 100,
                 ignorePattern: '^import [^,]+ from |^export | implements',
             },
         ],

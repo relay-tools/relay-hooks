@@ -16,6 +16,9 @@ import {
     ConnectionInterface,
     createRequestDescriptor,
     createReaderSelector,
+    createOperationDescriptor,
+    getRequest,
+    GraphQLTaggedNode,
 } from 'relay-runtime';
 
 export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
@@ -30,6 +33,11 @@ export const isNetworkPolicy = (policy: FetchPolicy, storeSnapshot): boolean => 
 export const isStorePolicy = (policy: FetchPolicy): boolean => {
     return policy !== NETWORK_ONLY;
 };
+
+// Fetcher
+export function createOperation(gqlQuery: GraphQLTaggedNode, variables: Variables) {
+    return createOperationDescriptor(getRequest(gqlQuery), variables);
+}
 
 // pagination utils
 

@@ -14,8 +14,7 @@
 const React = require("react");
 const { useMemo, useRef, useState } = React;
 const TestRenderer = require("react-test-renderer");
-import { useFragment as useFragmentNodeOriginal } from "../lib";
-const ReactRelayContext = require("react-relay/ReactRelayContext");
+import { useFragment as useFragmentNodeOriginal,ReactRelayContext } from "../lib";
 const {
   FRAGMENT_OWNER_KEY,
   FRAGMENTS_KEY,

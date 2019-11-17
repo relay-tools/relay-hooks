@@ -2,9 +2,9 @@ import { useEffect, useRef, useMemo } from 'react';
 import { GraphQLTaggedNode } from 'relay-runtime';
 import * as areEqual from 'fbjs/lib/areEqual';
 import { UseQueryType } from './RelayHooksType';
-import { createOperationDescriptor, getRequest } from 'relay-runtime';
 import useRelayEnvironment from './useRelayEnvironment';
 import useQueryFetcher from './useQueryFetcher';
+import { createOperation } from './Utils';
 
 function useDeepCompare<T>(value: T): T {
     const latestValue = useRef(value);
@@ -16,7 +16,7 @@ function useDeepCompare<T>(value: T): T {
 
 export function useMemoOperationDescriptor(gqlQuery: GraphQLTaggedNode, variables: any): any {
     const memoVariables = useDeepCompare(variables);
-    return useMemo(() => createOperationDescriptor(getRequest(gqlQuery), memoVariables), [gqlQuery, memoVariables]);
+    return useMemo(() => createOperation(gqlQuery, memoVariables), [gqlQuery, memoVariables]);
 }
 
 export const useQuery: UseQueryType = (gqlQuery, variables, options = {}) => {

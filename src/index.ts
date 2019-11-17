@@ -1,17 +1,12 @@
 export {
-    ReactRelayContext,
     applyOptimisticMutation,
     commitLocalUpdate,
     commitMutation,
-    createFragmentContainer,
-    createPaginationContainer,
-    createRefetchContainer,
     fetchQuery,
     graphql,
     requestSubscription,
-    QueryRenderer,
-} from 'react-relay';
-
+} from 'relay-runtime';
+export { default as ReactRelayContext } from './ReactRelayContext';
 export { default as useQuery } from './useQuery';
 export { default as useFragment } from './useFragment';
 export { useMutation } from './useMutation';

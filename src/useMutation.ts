@@ -1,8 +1,8 @@
 import * as invariant from 'fbjs/lib/invariant';
 import * as React from 'react';
 import { useCallback, useContext, useState } from 'react';
-import { ReactRelayContext, commitMutation } from 'react-relay';
-import { MutationConfig as BaseMutationConfig, Environment, OperationBase } from 'relay-runtime';
+import ReactRelayContext from './ReactRelayContext';
+import { MutationConfig as BaseMutationConfig, Environment, OperationBase, commitMutation } from 'relay-runtime';
 import useMounted from '@restart/hooks/useMounted';
 
 export type MutationState<T extends OperationBase> = {

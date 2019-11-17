@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ReactRelayContext } from 'react-relay';
+import ReactRelayContext from './ReactRelayContext';
 import { Environment, RelayFeatureFlags } from 'relay-runtime';
 
 const RelayEnvironmentProvider = function(props: { children: React.ReactNode; environment?: Environment }) {

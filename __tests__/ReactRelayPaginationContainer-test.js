@@ -12,7 +12,6 @@
 
 const React = require("react");
 const ReactTestRenderer = require("react-test-renderer");
-const ReactRelayContext = require("react-relay");
 import {
     usePagination,
   RelayEnvironmentProvider,

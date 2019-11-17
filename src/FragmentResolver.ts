@@ -11,8 +11,7 @@ import {
     GraphQLTaggedNode,
     Observable,
     Observer,
-    createOperationDescriptor,
-    getRequest,
+    OperationDescriptor,
     CacheConfig,
     Subscription,
     getDataIDsFromFragment,
@@ -21,7 +20,6 @@ import {
 export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
 import * as areEqual from 'fbjs/lib/areEqual';
 import * as invariant from 'fbjs/lib/invariant';
-import * as ReactRelayQueryFetcher from 'react-relay/lib/ReactRelayQueryFetcher';
 import {
     isNetworkPolicy,
     isStorePolicy,
@@ -30,15 +28,22 @@ import {
     toObserver,
     getRootVariablesForSelector,
     getNewSelector,
+    createOperation,
 } from './Utils';
 import { RefetchOptions, PaginationData } from './RelayHooksType';
+
+import { __internal } from 'relay-runtime';
+
+const { fetchQuery } = __internal;
 
 type SingularOrPluralSnapshot = Snapshot | Array<Snapshot>;
 
 type SingularOrPluralSelectors = SingularReaderSelector | Array<SingularReaderSelector>;
 
 function lookupFragment(environment, selector) {
-    return selector.kind === 'PluralReaderSelector' ? selector.selectors.map((s) => environment.lookup(s)) : environment.lookup(selector);
+    return selector.kind === 'PluralReaderSelector'
+        ? selector.selectors.map((s) => environment.lookup(s))
+        : environment.lookup(selector);
 }
 
 function getFragmentResult(snapshot: SingularOrPluralSnapshot): any {
@@ -63,11 +68,12 @@ class FragmentResolver {
     _selector: SingularOrPluralSelectors;
     _forceUpdate: any;
     _isPlural: boolean;
-    queryFetcher = new ReactRelayQueryFetcher();
     _refetchSubscription: Subscription;
     paginationData: PaginationData;
     _refetchVariables: Variables;
     _isARequestInFlight = false;
+    _selectionReferences: Array<Disposable> = [];
+    _cacheSelectionReference: Disposable;
 
     constructor(forceUpdate) {
         this._forceUpdate = forceUpdate;
@@ -79,11 +85,27 @@ class FragmentResolver {
 
     dispose() {
         this._disposable && this._disposable.dispose();
-        this.queryFetcher && this.queryFetcher.dispose();
         this._refetchSubscription && this._refetchSubscription.unsubscribe();
         this._refetchSubscription = null;
+        this.disposeSelectionReferences();
 
         this._isARequestInFlight = false;
+    }
+
+    disposeSelectionReferences() {
+        this._disposeCacheSelectionReference();
+        this._selectionReferences.forEach((r) => r.dispose());
+        this._selectionReferences = [];
+    }
+
+    _retainCachedOperation(operation: OperationDescriptor) {
+        this._disposeCacheSelectionReference();
+        this._cacheSelectionReference = this._environment.retain(operation.root);
+    }
+
+    _disposeCacheSelectionReference() {
+        this._cacheSelectionReference && this._cacheSelectionReference.dispose();
+        this._cacheSelectionReference = null;
     }
 
     getFragmentVariables(fRef = this._fragmentRef): Variables {
@@ -97,7 +119,10 @@ class FragmentResolver {
 
             if (
                 !areEqual(prevIDs, nextIDs) ||
-                !areEqual(this.getFragmentVariables(fragmentRef), this.getFragmentVariables(this._fragmentRef))
+                !areEqual(
+                    this.getFragmentVariables(fragmentRef),
+                    this.getFragmentVariables(this._fragmentRef),
+                )
             ) {
                 return true;
             }
@@ -110,7 +135,11 @@ class FragmentResolver {
             this._fragment = getFragment(fragmentNode);
             this.paginationData = null;
         }
-        if (this._environment !== environment || this._fragmentNode !== fragmentNode || this.changedFragmentRef(fragmentRef)) {
+        if (
+            this._environment !== environment ||
+            this._fragmentNode !== fragmentNode ||
+            this.changedFragmentRef(fragmentRef)
+        ) {
             this._environment = environment;
             this._fragmentNode = fragmentNode;
             this._fragmentRef = fragmentRef;
@@ -123,7 +152,9 @@ class FragmentResolver {
             // If fragmentRef is plural, ensure that it is an array.
             // If it's empty, return the empty array direclty before doing any more work.
             this._isPlural =
-            this._fragment.metadata && this._fragment.metadata.plural && this._fragment.metadata.plural === true;
+                this._fragment.metadata &&
+                this._fragment.metadata.plural &&
+                this._fragment.metadata.plural === true;
             if (this._isPlural) {
                 if (this._fragmentRef.length === 0) {
                     this._result = { data: [], snapshot: [] };
@@ -187,7 +218,9 @@ class FragmentResolver {
 
     changeVariables(variables, request) {
         if (this._selector.kind === 'PluralReaderSelector') {
-            this._selector.selectors = this._selector.selectors.map((s) => getNewSelector(request, s, variables));
+            this._selector.selectors = this._selector.selectors.map((s) =>
+                getNewSelector(request, s, variables),
+            );
         } else {
             this._selector = getNewSelector(request, this._selector, variables);
         }
@@ -196,7 +229,7 @@ class FragmentResolver {
 
     lookupInStore(environment: IEnvironment, operation, fetchPolicy): Snapshot {
         if (isStorePolicy(fetchPolicy) && environment.check(operation.root)) {
-            this.queryFetcher._retainCachedOperation(environment, operation);
+            this._retainCachedOperation(operation);
             return environment.lookup(operation.fragment, operation);
         }
         return null;
@@ -211,13 +244,13 @@ class FragmentResolver {
     ) => {
         //TODO Function
         const fragmentVariables = this.getFragmentVariables();
-        const fetchVariables = typeof refetchVariables === 'function' ? refetchVariables(fragmentVariables) : refetchVariables;
-        const newFragmentVariables = renderVariables ? { ...fetchVariables, ...renderVariables } : fetchVariables;
-
-        const cacheConfig: CacheConfig = options ? { force: !!options.force } : undefined;
-        if (cacheConfig != null && options && options.metadata != null) {
-            cacheConfig.metadata = options.metadata;
-        }
+        const fetchVariables =
+            typeof refetchVariables === 'function'
+                ? refetchVariables(fragmentVariables)
+                : refetchVariables;
+        const newFragmentVariables = renderVariables
+            ? { ...fetchVariables, ...renderVariables }
+            : fetchVariables;
 
         const observer =
             typeof observerOrCallback === 'function'
@@ -227,82 +260,25 @@ class FragmentResolver {
                   }
                 : observerOrCallback || ({} as any);
 
-        const query = getRequest(taggedNode);
-        const operation = createOperationDescriptor(query, fetchVariables);
-
-        // TODO: T26288752 find a better way
-        /* eslint-disable lint/react-state-props-mutation */
-        //this.state.localVariables = fetchVariables;
-        /* eslint-enable lint/react-state-props-mutation */
-
-        // Cancel any previously running refetch.
-        this._refetchSubscription && this._refetchSubscription.unsubscribe();
-
-        // Declare refetchSubscription before assigning it in .start(), since
-        // synchronous completion may call callbacks .subscribe() returns.
-        let refetchSubscription;
-
-        const optionsFetch = options ? options : {};
-
-        const { fetchPolicy = 'network-only' } = optionsFetch;
-
-        const storeSnapshot = this.lookupInStore(this._environment, operation, fetchPolicy);
-        if (storeSnapshot != null) {
+        const onNext = (operation, payload, complete) => {
             this.changeVariables(newFragmentVariables, operation.request.node);
             this.forceUpdate();
-            const complete = async () => {
-                observer.next && observer.next();
-                observer.complete && observer.complete();
-            };
             complete();
-        }
-        const isNetworky = isNetworkPolicy(fetchPolicy, storeSnapshot);
-        if (!isNetworky) {
-            return {
-                dispose: () => {},
-            };
-        }
-        if (isNetworky) {
-            this.queryFetcher
-                .execute({
-                    environment: this._environment,
-                    operation,
-                    cacheConfig,
-                    // TODO (T26430099): Cleanup old references
-                    preservePreviousReferences: true,
-                })
-                .mergeMap((response) => {
-                    this.changeVariables(newFragmentVariables, operation.node || operation.request.node);
-                    return Observable.create((sink) => {
-                        this.forceUpdate();
-                        const complete = async () => {
-                            sink.next();
-                            sink.complete();
-                        };
-                        complete();
-                    });
-                })
-                .finally(() => {
-                    // Finalizing a refetch should only clear this._refetchSubscription
-                    // if the finizing subscription is the most recent call.
-                    if (this._refetchSubscription === refetchSubscription) {
-                        this._refetchSubscription = null;
-                    }
-                })
-                .subscribe({
-                    ...observer,
-                    start: (subscription) => {
-                        this._refetchSubscription = refetchSubscription = subscription;
-                        observer.start && observer.start(subscription);
-                    },
-                });
+        };
 
-            return {
-                dispose: () => {
-                    refetchSubscription && refetchSubscription.unsubscribe();
-                },
-            };
-        }
+        const refetchSubscription = this.executeFetcher(
+            taggedNode,
+            fetchVariables,
+            options,
+            observer,
+            onNext,
+        );
+
+        return {
+            dispose: () => {
+                refetchSubscription && refetchSubscription.unsubscribe();
+            },
+        };
     };
 
     // pagination
@@ -313,7 +289,11 @@ class FragmentResolver {
 
     hasMore = (connectionConfig?: ConnectionConfig): boolean => {
         this.paginationData = getPaginationData(this.paginationData, this._fragment);
-        const connectionData = _getConnectionData(this.paginationData, this.getData(), connectionConfig);
+        const connectionData = _getConnectionData(
+            this.paginationData,
+            this.getData(),
+            connectionConfig,
+        );
         return !!(connectionData && connectionData.hasMore && connectionData.cursor);
     };
 
@@ -331,16 +311,30 @@ class FragmentResolver {
             cursor: null,
             totalCount,
         };
-        const fetch = this._fetchPage(connectionConfig, paginatingVariables, toObserver(observerOrCallback), { force: true });
+        const fetch = this._fetchPage(
+            connectionConfig,
+            paginatingVariables,
+            toObserver(observerOrCallback),
+            { force: true },
+        );
 
         return { dispose: fetch.unsubscribe };
     };
 
-    loadMore = (connectionConfig: ConnectionConfig, pageSize: number, observerOrCallback: ObserverOrCallback, options: RefetchOptions) => {
+    loadMore = (
+        connectionConfig: ConnectionConfig,
+        pageSize: number,
+        observerOrCallback: ObserverOrCallback,
+        options: RefetchOptions,
+    ) => {
         this.paginationData = getPaginationData(this.paginationData, this._fragment);
 
         const observer = toObserver(observerOrCallback);
-        const connectionData = _getConnectionData(this.paginationData, this.getData(), connectionConfig);
+        const connectionData = _getConnectionData(
+            this.paginationData,
+            this.getData(),
+            connectionConfig,
+        );
 
         if (!connectionData) {
             Observable.create((sink) => sink.complete()).subscribe(observer);
@@ -348,7 +342,12 @@ class FragmentResolver {
         }
         const totalCount = connectionData.edgeCount + pageSize;
         if (options && options.force) {
-            return this.refetchConnection(connectionConfig, totalCount, observerOrCallback, undefined);
+            return this.refetchConnection(
+                connectionConfig,
+                totalCount,
+                observerOrCallback,
+                undefined,
+            );
         }
         //const { END_CURSOR, START_CURSOR } = ConnectionInterface.get();
         const cursor = connectionData.cursor;
@@ -397,7 +396,8 @@ class FragmentResolver {
         );
         invariant(
             typeof fetchVariables === 'object' && fetchVariables !== null,
-            'ReactRelayPaginationContainer: Expected `getVariables()` to ' + 'return an object, got `%s` in `%s`.',
+            'ReactRelayPaginationContainer: Expected `getVariables()` to ' +
+                'return an object, got `%s` in `%s`.',
             fetchVariables,
             'useFragment pagination',
         );
@@ -410,24 +410,15 @@ class FragmentResolver {
             ...fragmentVariables,
         };
 
-        const cacheConfig: CacheConfig = options ? { force: !!options.force } : undefined;
-        if (cacheConfig != null && options && options.metadata != null) {
-            cacheConfig.metadata = options.metadata;
-        }
-        const request = getRequest(connectionConfig.query);
-        const operation = createOperationDescriptor(request, fetchVariables);
-
-        let refetchSubscription = null;
-
-        if (this._refetchSubscription) {
-            this._refetchSubscription.unsubscribe();
-        }
-
-        const onNext = (payload, complete) => {
+        const onNext = (operation, payload, complete) => {
             const prevData = this.getData();
 
-            const getFragmentVariables = connectionConfig.getFragmentVariables || this.paginationData.getFragmentVariables;
-            this.changeVariables(getFragmentVariables(fragmentVariables, paginatingVariables.totalCount), operation.request.node);
+            const getFragmentVariables =
+                connectionConfig.getFragmentVariables || this.paginationData.getFragmentVariables;
+            this.changeVariables(
+                getFragmentVariables(fragmentVariables, paginatingVariables.totalCount),
+                operation.request.node,
+            );
 
             const nextData = this.getData();
 
@@ -452,38 +443,109 @@ class FragmentResolver {
             }
         };
 
-        const cleanup = () => {
-            if (this._refetchSubscription === refetchSubscription) {
-                this._refetchSubscription = null;
-                this._isARequestInFlight = false;
-            }
-        };
+        return this.executeFetcher(
+            connectionConfig.query,
+            fetchVariables,
+            options,
+            observer,
+            onNext,
+        );
+    }
 
-        this._isARequestInFlight = true;
-        refetchSubscription = this.queryFetcher
-            .execute({
-                environment: this._environment,
-                operation,
-                cacheConfig,
-                preservePreviousReferences: true,
-            })
-            .mergeMap((payload) =>
-                Observable.create((sink) => {
-                    onNext(payload, () => {
-                        sink.next(); // pass void to public observer's `next`
-                        sink.complete();
+    executeFetcher(
+        taggedNode: GraphQLTaggedNode,
+        fetchVariables: Variables,
+        options: RefetchOptions,
+        observerOrCallback: ObserverOrCallback,
+        onNext: (operation, payload, complete) => void,
+    ) {
+        const cacheConfig: CacheConfig = options ? { force: !!options.force } : undefined;
+        if (cacheConfig != null && options && options.metadata != null) {
+            cacheConfig.metadata = options.metadata;
+        }
+        const observer =
+            typeof observerOrCallback === 'function'
+                ? {
+                      next: observerOrCallback,
+                      error: observerOrCallback,
+                  }
+                : observerOrCallback || ({} as any);
+
+        const operation = createOperation(taggedNode, fetchVariables);
+
+        const optionsFetch = options ? options : {};
+
+        const { fetchPolicy = 'network-only' } = optionsFetch;
+
+        const storeSnapshot = this.lookupInStore(this._environment, operation, fetchPolicy);
+        if (storeSnapshot != null) {
+            onNext(operation, null, () => {
+                observer.next && observer.next();
+                observer.complete && observer.complete();
+            });
+        }
+
+        // TODO: T26288752 find a better way
+        /* eslint-disable lint/react-state-props-mutation */
+        //this.state.localVariables = fetchVariables;
+        /* eslint-enable lint/react-state-props-mutation */
+
+        // Cancel any previously running refetch.
+        this._refetchSubscription && this._refetchSubscription.unsubscribe();
+
+        // Declare refetchSubscription before assigning it in .start(), since
+        // synchronous completion may call callbacks .subscribe() returns.
+        let refetchSubscription;
+
+        const isNetwork = isNetworkPolicy(fetchPolicy, storeSnapshot);
+        if (!isNetwork) {
+            return {
+                dispose: () => {},
+            };
+        }
+        if (isNetwork) {
+            const reference = this._environment.retain(operation.root);
+            const fetchQueryOptions =
+                cacheConfig != null
+                    ? {
+                          networkCacheConfig: cacheConfig,
+                      }
+                    : {};
+            const cleanup = () => {
+                this._selectionReferences = this._selectionReferences.concat(reference);
+                if (this._refetchSubscription === refetchSubscription) {
+                    this._refetchSubscription = null;
+                    this._isARequestInFlight = false;
+                }
+            };
+
+            this._isARequestInFlight = true;
+            fetchQuery(this._environment, operation, fetchQueryOptions)
+                .mergeMap((payload) => {
+                    return Observable.create((sink) => {
+                        onNext(operation, payload, () => {
+                            sink.next(); // pass void to public observer's `next`
+                            sink.complete();
+                        });
                     });
-                }),
-            )
-            // use do instead of finally so that observer's `complete` fires after cleanup
-            .do({
-                error: cleanup,
-                complete: cleanup,
-                unsubscribe: cleanup,
-            })
-            .subscribe(observer || {});
-
-        this._refetchSubscription = this._isARequestInFlight ? refetchSubscription : null;
+                })
+                // use do instead of finally so that observer's `complete` fires after cleanup
+                .do({
+                    error: cleanup,
+                    complete: cleanup,
+                    unsubscribe: cleanup,
+                })
+                .subscribe({
+                    ...observer,
+                    start: (subscription) => {
+                        refetchSubscription = subscription;
+                        this._refetchSubscription = this._isARequestInFlight
+                            ? refetchSubscription
+                            : null;
+                        observer.start && observer.start(subscription);
+                    },
+                });
+        }
 
         return refetchSubscription;
     }

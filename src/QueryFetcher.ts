@@ -21,11 +21,25 @@ class QueryFetcher<TOperationType extends OperationType> {
         error: null,
         props: null,
     };
+    disposableRetain: Disposable;
 
     forceUpdate: any;
 
     constructor(forceUpdate) {
         this.forceUpdate = forceUpdate;
+    }
+
+    dispose(): void {
+        this.disposeRequest();
+        this.disposeRetain();
+    }
+
+    disposeRetain(): void {
+        this.disposableRetain && this.disposableRetain.dispose();
+    }
+
+    isDiffEnvQuery(environment: IEnvironment, query): boolean {
+        return environment !== this.environment || query !== this.query;
     }
 
     lookupInStore(environment: IEnvironment, operation, fetchPolicy: FetchPolicy): Snapshot {
@@ -35,22 +49,29 @@ class QueryFetcher<TOperationType extends OperationType> {
         return null;
     }
 
-    execute(environment: IEnvironment, query, options): RenderProps<TOperationType> {
+    execute(
+        environment: IEnvironment,
+        query,
+        options,
+        retain: (environment, query) => Disposable = (environment, query) =>
+            environment.retain(query.root),
+    ): RenderProps<TOperationType> {
         const { fetchPolicy = defaultPolicy, networkCacheConfig } = options;
         let storeSnapshot;
         const retry = (cacheConfigOverride: CacheConfig = networkCacheConfig): void => {
-            this.dispose();
+            this.disposeRequest();
             this.fetch(cacheConfigOverride);
         };
-        if (
-            environment !== this.environment ||
-            query !== this.query ||
-            fetchPolicy !== this.fetchPolicy
-        ) {
+        const isDiffEnvQuery = this.isDiffEnvQuery(environment, query);
+        if (isDiffEnvQuery || fetchPolicy !== this.fetchPolicy) {
             this.environment = environment;
             this.query = query;
             this.fetchPolicy = fetchPolicy;
-            this.dispose();
+            if (isDiffEnvQuery) {
+                this.disposeRetain();
+                this.disposableRetain = retain(environment, query);
+            }
+            this.disposeRequest();
 
             storeSnapshot = this.lookupInStore(environment, this.query, fetchPolicy);
             const isNetwork = isNetworkPolicy(fetchPolicy, storeSnapshot);
@@ -110,7 +131,7 @@ class QueryFetcher<TOperationType extends OperationType> {
         fetchHasReturned = true;
     }
 
-    dispose(): void {
+    disposeRequest(): void {
         this.error = null;
         this.snapshot = null;
         if (this.networkSubscription) {

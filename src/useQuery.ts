@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useRef, useMemo } from 'react';
 import { GraphQLTaggedNode, OperationType, OperationDescriptor, Variables } from 'relay-runtime';
 import * as areEqual from 'fbjs/lib/areEqual';
 import { RenderProps, QueryOptions } from './RelayHooksType';
@@ -6,7 +6,7 @@ import useRelayEnvironment from './useRelayEnvironment';
 import useQueryFetcher from './useQueryFetcher';
 import { createOperation } from './Utils';
 
-function useDeepCompare<T>(value: T): T {
+export function useDeepCompare<T>(value: T): T {
     const latestValue = useRef(value);
     if (!areEqual(latestValue.current, value)) {
         latestValue.current = value;
@@ -34,13 +34,6 @@ export const useQuery: <TOperationType extends OperationType>(
     const environment = useRelayEnvironment();
     const query = useMemoOperationDescriptor(gqlQuery, variables);
     const queryFetcher = useQueryFetcher<TOperationType>();
-
-    useEffect(() => {
-        const disposable = environment.retain(query.root);
-        return (): void => {
-            disposable.dispose();
-        };
-    }, [environment, query]);
 
     return queryFetcher.execute(environment, query, options);
 };

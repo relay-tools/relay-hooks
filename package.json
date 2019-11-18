@@ -20,8 +20,10 @@
     "url": "https://github.com/relay-tools/relay-hooks"
   },
   "scripts": {
-    "prepare": "tsc",
-    "test": "npm run prepare && cross-env NODE_ENV=test jest --coverage",
+    "clean": "rimraf lib",
+    "prepare": "npm run build",
+    "build": "npm run clean && tsc",
+    "test": "npm run build && cross-env NODE_ENV=test jest --coverage",
     "format": "prettier --write \"src/**/*.{j,t}s*\"",
     "eslint": "eslint ./src --ext .js,.jsx,.ts,.tsx"
   },
@@ -76,6 +78,7 @@
     "eslint-plugin-react": "7.16.0",
     "eslint-plugin-react-hooks": "2.3.0",
     "lerna": "^3.16.4",
-    "prettier": "1.19.1"
+    "prettier": "1.19.1",
+    "rimraf": "^2.5.4"
   }
 }

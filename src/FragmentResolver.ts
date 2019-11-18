@@ -185,6 +185,8 @@ class FragmentResolver {
     subscribe(): void {
         const environment = this._environment;
         const renderedSnapshot = this._result.snapshot;
+
+        this._disposable && this._disposable.dispose();
         if (!renderedSnapshot) {
             this._disposable = { dispose: (): void => {} };
         }

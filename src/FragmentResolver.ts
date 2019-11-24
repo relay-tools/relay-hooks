@@ -81,7 +81,7 @@ class FragmentResolver {
     }
 
     refreshHooks(): void {
-        this.indexUpdate++;
+        this.indexUpdate += 1;
         this._forceUpdate(this.indexUpdate);
     }
 

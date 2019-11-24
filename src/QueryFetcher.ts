@@ -15,15 +15,14 @@ class QueryFetcher<TOperationType extends OperationType> {
     error: Error;
     snapshot: Snapshot;
     fetchPolicy: FetchPolicy;
+    disposableRetain: Disposable;
+    forceUpdate: (_o: any) => void;
     result: RenderProps<TOperationType> = {
         retry: (_cacheConfigOverride: CacheConfig): void => undefined,
         cached: false,
         error: null,
         props: null,
     };
-    disposableRetain: Disposable;
-
-    forceUpdate: any;
 
     constructor(forceUpdate) {
         this.forceUpdate = forceUpdate;
@@ -53,7 +52,7 @@ class QueryFetcher<TOperationType extends OperationType> {
         environment: IEnvironment,
         query,
         options,
-        retain: (environment, query) => Disposable = (environment, query) =>
+        retain: (environment, query) => Disposable = (environment, query): Disposable =>
             environment.retain(query.root),
     ): RenderProps<TOperationType> {
         const { fetchPolicy = defaultPolicy, networkCacheConfig } = options;
@@ -94,6 +93,9 @@ class QueryFetcher<TOperationType extends OperationType> {
     }
 
     subscribe(snapshot): void {
+        if (this.rootSubscription) {
+            this.rootSubscription.dispose();
+        }
         this.rootSubscription = this.environment.subscribe(snapshot, (snapshot) => {
             // Read from this._fetchOptions in case onDataChange() was lazily added.
             this.snapshot = snapshot;
@@ -136,9 +138,11 @@ class QueryFetcher<TOperationType extends OperationType> {
         this.snapshot = null;
         if (this.networkSubscription) {
             this.networkSubscription.dispose();
+            this.networkSubscription = null;
         }
         if (this.rootSubscription) {
             this.rootSubscription.dispose();
+            this.rootSubscription = null;
         }
     }
 

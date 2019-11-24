@@ -22,8 +22,8 @@
   "scripts": {
     "clean": "rimraf lib",
     "prepare": "npm run build",
-    "build": "npm run clean && tsc",
-    "test": "npm run build && cross-env NODE_ENV=test jest --coverage",
+    "build": "npm run clean && tsc && npm run test",
+    "test": "cross-env NODE_ENV=test jest --coverage",
     "format": "prettier --write \"src/**/*.{j,t}s*\"",
     "eslint": "eslint ./src --ext .js,.jsx,.ts,.tsx"
   },

@@ -42,30 +42,37 @@ ReactDOM.render(
 ## useQuery
 
 `useQuery` does not take an environment as an argument. Instead, it reads the environment set in the context; this also implies that it does not set any React context.
-In addition to `query` and `variables`, `useQuery` accepts a `dataFrom` argument as part of the configuration object to determine whether it should use data cached in the
-Relay store and whether to send a network request. The options are:
-  * `STORE_OR_NETWORK` (default): Reuse data cached in the store; if the whole query is cached, skip the network request
-  * `STORE_THEN_NETWORK`: Reuse data cached in the store; always send a network request.
-  * `NETWORK_ONLY`: Don't reuse data cached in the store; always send a network request. (This is the default behavior of Relay's existing `QueryRenderer`.)
-  * `STORE_ONLY`: Reuse data cached in the store; never send a network request.
+In addition to `query` (first argument) and `variables` (second argument), `useQuery` accepts a third argument `options`. `fetchPolicy` in `options` determine whether it should use data cached in the Relay store and whether to send a network request. The options are:
+  * `store-or-network` (default): Reuse data cached in the store; if the whole query is cached, skip the network request
+  * `store-and-network`: Reuse data cached in the store; always send a network request.
+  * `network-only`: Don't reuse data cached in the store; always send a network request. (This is the default behavior of Relay's existing `QueryRenderer`.)
+  * `store-only`: Reuse data cached in the store; never send a network request.
 
 ```ts
 import {useQuery, graphql } from 'relay-hooks';
 
+const query = graphql`
+  query appQuery($userId: String) {
+    user(id: $userId) {
+      ...TodoApp_user
+    }
+  }
+`;
+
+const variables = {
+  userId: 'me',
+}; 
+
+const options = {
+  fetchPolicy: 'store-or-network', //default
+  networkCacheConfig: undefined,
+}
+
 const AppTodo = function (appProps)  {
-  const {props, error, retry, cached} = useQuery({ query: graphql`
-      query appQuery($userId: String) {
-        user(id: $userId) {
-          ...TodoApp_user
-        }
-      }
-    `,
-    variables: {
-      userId: 'me',
-    }});
+  const {props, error, retry, cached} = useQuery(query, variables, options);
 
   if (props && props.user) {
-    return <TodoApp {...hooksProps} />;
+    return <TodoApp user={props.user} />;
   } else if (error) {
     return <div>{error.message}</div>;
   }

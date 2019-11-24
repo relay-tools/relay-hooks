@@ -1,79 +1,41 @@
-import { useState, useEffect, useContext, useRef } from "react";
-import usePrevious from "./usePrevious";
-import { ReactRelayContext } from 'react-relay';
-import { OperationType, GraphQLTaggedNode } from 'relay-runtime';
+import { useRef, useMemo } from 'react';
+import { GraphQLTaggedNode, OperationType, OperationDescriptor, Variables } from 'relay-runtime';
 import * as areEqual from 'fbjs/lib/areEqual';
-import { UseQueryProps, DataFrom, FetchPolicy } from './RelayHooksType';
-import { CacheConfig } from 'relay-runtime';
+import { RenderProps, QueryOptions } from './RelayHooksType';
+import useRelayEnvironment from './useRelayEnvironment';
+import useQueryFetcher from './useQueryFetcher';
+import { createOperation } from './Utils';
 
-
-import UseQueryFetcher from './UseQueryFetcher';
-import { convertDataFrom } from "./Utils";
-
-
-
-type Reference<T extends OperationType> = {
-    queryFetcher: UseQueryFetcher<T>,
-}
-
-function useDeepCompare<T>(value: T): T {
+export function useDeepCompare<T>(value: T): T {
     const latestValue = useRef(value);
     if (!areEqual(latestValue.current, value)) {
-      latestValue.current = value;
+        latestValue.current = value;
     }
     return latestValue.current;
-  }
-
-const defaultPolicy = 'store-or-network';
-
-export const useQueryModern = function<TOperationType extends OperationType>(props: UseQueryProps<TOperationType>) {
-        
-    const { query, variables, dataFrom, cacheConfig } = props;
-        return useQueryExp(
-            query, 
-            variables, 
-            { 
-                fetchPolicy: convertDataFrom(dataFrom),
-                networkCacheConfig: cacheConfig
-            }
-        )
-    }
-
-export const useQueryExp = function<TOperationType extends OperationType>(query: GraphQLTaggedNode,
-    variables: TOperationType['variables'],
-    options : {
-        fetchPolicy?: FetchPolicy,
-        networkCacheConfig?: CacheConfig,
-    } = {}
-    ) {
-    const { environment } = useContext(ReactRelayContext);
-    const [, forceUpdate] = useState(null);
-    const { fetchPolicy = defaultPolicy, networkCacheConfig } = options;
-    const latestVariables = useDeepCompare(variables);
-    const prev = usePrevious({ environment, query, latestVariables});
-    
-    const ref = useRef<Reference<TOperationType>>();
-    if (ref.current === null || ref.current === undefined) {
-        ref.current = {
-            queryFetcher: new UseQueryFetcher<TOperationType>(forceUpdate),
-        };
-    }
-    const { queryFetcher } = ref.current;
-    useEffect(() => {
-        return () => {
-            queryFetcher.dispose()
-        };
-    }, []);
-
-    
-
-    if (!prev || prev.query !== query ||
-        prev.environment !== environment ||
-            prev.latestVariables!== latestVariables) {
-                queryFetcher.execute(environment, query, variables, fetchPolicy, networkCacheConfig);
-    }
-
-    return queryFetcher.getLastResult();
 }
 
-export default useQueryModern;
+export function useMemoOperationDescriptor(
+    gqlQuery: GraphQLTaggedNode,
+    variables: Variables,
+): OperationDescriptor {
+    const memoVariables = useDeepCompare(variables);
+    return useMemo(() => createOperation(gqlQuery, memoVariables), [gqlQuery, memoVariables]);
+}
+
+export const useQuery: <TOperationType extends OperationType>(
+    gqlQuery: GraphQLTaggedNode,
+    variables: TOperationType['variables'],
+    options: QueryOptions,
+) => RenderProps<TOperationType> = <TOperationType extends OperationType>(
+    gqlQuery,
+    variables,
+    options = {},
+) => {
+    const environment = useRelayEnvironment();
+    const query = useMemoOperationDescriptor(gqlQuery, variables);
+    const queryFetcher = useQueryFetcher<TOperationType>();
+
+    return queryFetcher.execute(environment, query, options);
+};
+
+export default useQuery;

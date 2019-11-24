@@ -19,7 +19,7 @@ import TodoTextInput from './TodoTextInput';
 import React from 'react';
 import {graphql} from 'react-relay';
 import type {RelayProp} from 'react-relay';
-import { useRefetch, useMutation } from 'relay-hooks';
+import {useRefetch, useMutation} from 'relay-hooks';
 import type {TodoApp_user} from 'relay/TodoApp_user.graphql';
 
 type Props = {|
@@ -28,18 +28,18 @@ type Props = {|
 |};
 
 const fragmentSpec = graphql`
-    fragment TodoApp_user on User {
-      id
-      userId
-      totalCount
-      ...TodoListFooter_user
-      ...TodoList_user
-    }
-  `;
+  fragment TodoApp_user on User {
+    id
+    userId
+    totalCount
+    ...TodoListFooter_user
+    ...TodoList_user
+  }
+`;
 
-const TodoApp = (props) => {
-  const [user, refetch ] = useRefetch(fragmentSpec, props.user);
-  const [mutate, { loading }] = useMutation(mutation);
+const TodoApp = props => {
+  const [user, refetch] = useRefetch(fragmentSpec, props.user);
+  const [mutate, {loading}] = useMutation(mutation);
   const handleTextInputSave = (text: string) => {
     AddTodoMutation.commit(mutate, text, user);
     return;
@@ -61,13 +61,11 @@ const TodoApp = (props) => {
         </header>
 
         <TodoList user={user} refetch={refetch} />
-        {hasTodos && <TodoListFooter user={user} />}
       </section>
 
-      <button onClick={props.retry} 
-      className="refetch" >
-          Retry
-          </button>
+      <button onClick={props.retry} className="refetch">
+        Retry
+      </button>
 
       <footer className="info">
         <p>Double-click to edit a todo</p>

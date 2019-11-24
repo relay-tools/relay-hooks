@@ -4,3 +4,11 @@ tsconfig.json
 examples/
 website/
 docs/
+scripts
+coverage
+__tests__
+__mocks__
+.github
+.eslintrc.js
+.prettierrc
+jest.config.js

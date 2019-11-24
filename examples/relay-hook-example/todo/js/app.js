@@ -15,9 +15,11 @@
 
 import * as React from 'react';
 
-import { useState } from 'react';
+import {useState} from 'react';
 
-import { useQuery, RelayEnvironmentProvider, useQueryExp } from 'relay-hooks';
+//import {useLazyLoadQuery, RelayEnvironmentProvider} from 'react-relay/hooks';
+
+import {useQuery, RelayEnvironmentProvider} from 'relay-hooks';
 import {
   Environment,
   Network,
@@ -27,20 +29,12 @@ import {
   type Variables,
 } from 'relay-runtime';
 
-import TodoApp, { fragmentSpec } from './components/TodoApp';
+import TodoApp, {fragmentSpec} from './components/TodoApp';
 //import { useQuery, RelayEnvironmentProvider } from 'relay-hooks';
 
 import TodoTextInput from './components/TodoTextInput';
-import type { appQueryResponse } from 'relay/appQuery.graphql';
+import type {appQueryResponse} from 'relay/appQuery.graphql';
 import QueryApp from './query/QueryApp';
-import {
-  createRelayNetworkLogger,
-  RelayNetworkLoggerTransaction,
-} from 'relay-runtime';
-
-const RelayNetworkLogger = createRelayNetworkLogger(
-  RelayNetworkLoggerTransaction,
-);
 
 async function fetchQuery(
   operation: RequestNode,
@@ -61,53 +55,64 @@ async function fetchQuery(
 }
 
 const modernEnvironment: Environment = new Environment({
-  network: Network.create(RelayNetworkLogger.wrapFetch(fetchQuery, () => '')),
+  network: Network.create(fetchQuery),
   store: new Store(new RecordSource()),
 });
 
-
-const AppTodo = function (appProps) {
-
+const AppTodo = function(appProps) {
   const [userId, setUserId] = useState('me');
 
-  console.log("renderer apptodo", userId)
+  console.log('renderer apptodo', userId);
 
   const handleTextUser = (text: string) => {
-    console.log("change user", text)
+    console.log('change user', text);
     setUserId(text);
     return;
   };
 
-  return <div>
-    <div className="apptodo">
-      <h2>who is the user?</h2>
-      <div id="radioGroup">
-        <div className="wrap">
-          <input type="radio" name="user" id="userMe" value="me" checked={userId === 'me'} onChange={() => handleTextUser('me')} />
-          <label htmlFor="userMe">Me</label>
-        </div>
+  return (
+    <div>
+      <div className="apptodo">
+        <h2>who is the user?</h2>
+        <div id="radioGroup">
+          <div className="wrap">
+            <input
+              type="radio"
+              name="user"
+              id="userMe"
+              value="me"
+              checked={userId === 'me'}
+              onChange={() => handleTextUser('me')}
+            />
+            <label htmlFor="userMe">Me</label>
+          </div>
 
-        <div className="wrap">
-          <input type="radio" name="user" id="userYou" value="you" checked={userId === 'you'} onChange={() => handleTextUser('you')} />
-          <label htmlFor="userYou">You</label>
+          <div className="wrap">
+            <input
+              type="radio"
+              name="user"
+              id="userYou"
+              value="you"
+              checked={userId === 'you'}
+              onChange={() => handleTextUser('you')}
+            />
+            <label htmlFor="userYou">You</label>
+          </div>
         </div>
       </div>
+      <LayoutTodo userId={userId} />
     </div>
-    <LayoutTodo userId={userId} />
-  </div>
-
-
-}
+  );
+};
 const isServer = typeof window === 'undefined';
-const LayoutTodo = ({ userId }) => {
-  console.log("LayoutTodo", userId, isServer);
-  useQueryExp
-  const { props, error, retry, cached } = useQueryExp(
+const LayoutTodo = ({userId}) => {
+  console.log('LayoutTodo', userId, isServer);
+  const {props, error, retry, cached} = useQuery(
     QueryApp,
-    { userId },
+    {userId},
     {
-      fetchPolicy: "store-or-network"
-    }
+      fetchPolicy: 'store-and-network',
+    },
   );
   /*const { props, error, retry, cached } = useQuery({
     query: QueryApp,
@@ -118,21 +123,31 @@ const LayoutTodo = ({ userId }) => {
     dataFrom: "STORE_THEN_NETWORK"
   });*/
 
-  console.log("renderer", props, cached)
+  console.log('renderer', props, cached);
   if (props && props.user) {
     return <TodoApp user={props.user} userId={userId} retry={retry} />;
-
   } else if (error) {
-    return <div>{error.message}</div>;
+    return (
+      <div>
+        {error.message}
+        <button onClick={retry} className="refetch">
+          Retry
+        </button>
+      </div>
+    );
   }
+  console.log('loading');
   return <div>loading</div>;
-}
+};
 
-const App = <RelayEnvironmentProvider environment={modernEnvironment}>
-  <AppTodo />
-</RelayEnvironmentProvider>;
+const App = isServer ? (
+  <div />
+) : (
+  <RelayEnvironmentProvider environment={modernEnvironment}>
+    <React.Suspense fallback={<div />}>
+      <AppTodo />
+    </React.Suspense>
+  </RelayEnvironmentProvider>
+);
 
 export default App;
-
-
-

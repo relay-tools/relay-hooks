@@ -11,14 +11,20 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ChangeTodoStatusMutation, {mutation as mutationChange} from '../mutations/ChangeTodoStatusMutation';
-import RemoveTodoMutation, {mutation as mutationRemove} from '../mutations/RemoveTodoMutation';
-import RenameTodoMutation, {mutation as mutationRename} from '../mutations/RenameTodoMutation';
+import ChangeTodoStatusMutation, {
+  mutation as mutationChange,
+} from '../mutations/ChangeTodoStatusMutation';
+import RemoveTodoMutation, {
+  mutation as mutationRemove,
+} from '../mutations/RemoveTodoMutation';
+import RenameTodoMutation, {
+  mutation as mutationRename,
+} from '../mutations/RenameTodoMutation';
 import TodoTextInput from './TodoTextInput';
 
 import React, {useState} from 'react';
 import {createFragmentContainer, graphql, type RelayProp} from 'react-relay';
-import { useFragment, useMutation } from 'relay-hooks';
+import {useFragment, useMutation} from 'relay-hooks';
 import classnames from 'classnames';
 import type {Todo_todo} from 'relay/Todo_todo.graphql';
 import type {Todo_user} from 'relay/Todo_user.graphql';
@@ -30,24 +36,26 @@ type Props = {|
 |};
 
 const fragmentSpecTodo = graphql`
-    fragment Todo_todo on Todo {
-      complete
-      id
-      text
-    }
-  `;
-  const fragmentSpecUser = graphql`
-    fragment Todo_user on User {
-      id
-      userId
-      totalCount
-      completedCount
-    }
-  `;
+  fragment Todo_todo on Todo {
+    complete
+    id
+    text
+  }
+`;
+const fragmentSpecUser = graphql`
+  fragment Todo_user on User {
+    id
+    userId
+    totalCount
+    completedCount
+  }
+`;
 
-const Todo = (props) => {
+const Todo = props => {
   const user = useFragment(fragmentSpecUser, props.user);
-  const todo = useFragment(fragmentSpecTodo, props.todo);
+  console.log('props.todo', props.todo);
+  //const todo = useFragment(fragmentSpecTodo, props.todo);
+  const {todo} = props;
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   const [mutateChange] = useMutation(mutationChange);
@@ -73,8 +81,7 @@ const Todo = (props) => {
     RenameTodoMutation.commit(mutateRename, text, todo);
   };
 
-  const removeTodo = () =>
-    RemoveTodoMutation.commit(mutateRemove, todo, user);
+  const removeTodo = () => RemoveTodoMutation.commit(mutateRemove, todo, user);
 
   return (
     <li

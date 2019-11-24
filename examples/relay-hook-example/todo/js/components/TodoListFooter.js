@@ -11,15 +11,17 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import RemoveCompletedTodosMutation, {mutation} from '../mutations/RemoveCompletedTodosMutation';
+import RemoveCompletedTodosMutation, {
+  mutation,
+} from '../mutations/RemoveCompletedTodosMutation';
 
 import React from 'react';
-import { graphql, createFragmentContainer, type RelayProp } from 'react-relay';
-import type { TodoListFooter_user } from 'relay/TodoListFooter_user.graphql';
+import {graphql, createFragmentContainer, type RelayProp} from 'react-relay';
+import type {TodoListFooter_user} from 'relay/TodoListFooter_user.graphql';
 type Todos = $NonMaybeType<$ElementType<TodoListFooter_user, 'todos'>>;
 type Edges = $NonMaybeType<$ElementType<Todos, 'edges'>>;
 type Edge = $NonMaybeType<$ElementType<Edges, number>>;
-import { useOssFragment, useMutation } from 'relay-hooks';
+import {useOssFragment, useMutation} from 'relay-hooks';
 
 type Props = {|
   +relay: RelayProp,
@@ -27,32 +29,32 @@ type Props = {|
 |};
 
 const fragmentSpec = graphql`
-    fragment TodoListFooter_user on User {
-      id
-      userId
-      completedCount
-      todos(
-        first: 2147483647 # max GraphQLInt
-      ) @connection(key: "TodoList_todos") {
-        edges {
-          node {
-            id
-            complete
-          }
+  fragment TodoListFooter_user on User {
+    id
+    userId
+    completedCount
+    todos(
+      first: 2147483647 # max GraphQLInt
+    ) @connection(key: "TodoList_todos") {
+      edges {
+        node {
+          id
+          complete
         }
       }
-      totalCount
     }
-  `;
+    totalCount
+  }
+`;
 
-const TodoListFooter = (props) => {
+const TodoListFooter = props => {
   const [user, functions] = useOssFragment(fragmentSpec, props.user);
-  const  { todos, completedCount, totalCount } = user;
+  const {todos, completedCount, totalCount} = user;
   const completedEdges: $ReadOnlyArray<?Edge> =
     todos && todos.edges
       ? todos.edges.filter(
-        (edge: ?Edge) => edge && edge.node && edge.node.complete,
-      )
+          (edge: ?Edge) => edge && edge.node && edge.node.complete,
+        )
       : [];
 
   const [mutate] = useMutation(mutation);
@@ -67,6 +69,8 @@ const TodoListFooter = (props) => {
   };
 
   const numRemainingTodos = totalCount - completedCount;
+
+  console.log('completedCount', completedCount);
 
   return (
     <footer className="footer">

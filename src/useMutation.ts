@@ -6,30 +6,30 @@ import ReactRelayContext from './ReactRelayContext';
 import {
     MutationConfig as BaseMutationConfig,
     Environment,
-    OperationBase,
+    MutationParameters,
     commitMutation,
 } from 'relay-runtime';
 import useMounted from '@restart/hooks/useMounted';
 
-export type MutationState<T extends OperationBase> = {
+export type MutationState<T extends MutationParameters> = {
     loading: boolean;
     data: T['response'] | null;
     error?: Error | null;
 };
 
-export type MutationNode<T extends OperationBase> = BaseMutationConfig<T>['mutation'];
+export type MutationNode<T extends MutationParameters> = BaseMutationConfig<T>['mutation'];
 
-export type MutationConfig<T extends OperationBase> = Partial<
+export type MutationConfig<T extends MutationParameters> = Partial<
     Omit<BaseMutationConfig<T>, 'mutation' | 'onCompleted'>
 > & {
     onCompleted?(response: T['response']): void;
 };
 
-export type Mutate<T extends OperationBase> = (
+export type Mutate<T extends MutationParameters> = (
     config?: Partial<MutationConfig<T>>,
 ) => Promise<T['response']>;
 
-export function useMutation<T extends OperationBase>(
+export function useMutation<T extends MutationParameters>(
     mutation: MutationNode<T>,
     userConfig: MutationConfig<T> = {},
     /** if not provided, the context environment will be used. */
@@ -142,14 +142,14 @@ export function useMutation<T extends OperationBase>(
     return [mutate, state];
 }
 
-export type MutationProps<T extends OperationBase> = MutationConfig<T> & {
+export type MutationProps<T extends MutationParameters> = MutationConfig<T> & {
     children: (mutate: Mutate<T>, state: MutationState<T>) => React.ReactNode;
     mutation: MutationNode<T>;
     /** if not provided, the context environment will be used. */
     environment?: Environment;
 };
 
-export function Mutation<T extends OperationBase>({
+export function Mutation<T extends MutationParameters>({
     children,
     mutation,
     environment,

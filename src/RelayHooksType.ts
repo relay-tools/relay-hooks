@@ -41,6 +41,7 @@ export type RefetchOptions = {
 
 export type QueryOptions = {
     fetchPolicy?: FetchPolicy;
+    fetchKey?: string | number;
     networkCacheConfig?: CacheConfig;
 };
 

@@ -25,7 +25,7 @@ export type ContainerResult = {
 export interface RenderProps<T extends OperationType> {
     error: Error;
     props: T['response'];
-    retry: (_cacheConfigOverride: CacheConfig) => void;
+    retry: (_cacheConfigOverride?: CacheConfig) => void;
     cached?: boolean;
 }
 
@@ -80,9 +80,9 @@ export type PaginationFunction = {
 export type RefetchFunction = (
     taggedNode: GraphQLTaggedNode,
     refetchVariables: Variables | ((fragmentVariables: Variables) => Variables),
-    renderVariables: Variables,
-    observerOrCallback: ObserverOrCallback,
-    options: RefetchOptions,
+    renderVariables?: Variables,
+    observerOrCallback?: ObserverOrCallback,
+    options?: RefetchOptions,
 ) => Disposable;
 
 export interface OssFragmentFunction extends PaginationFunction {

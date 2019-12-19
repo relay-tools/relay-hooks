@@ -20,7 +20,6 @@ const Home = () => {
       fetchPolicy: STORE_OR_NETWORK,
     },
   );
-  console.log('props', props);
   if (props) {
     return <TodoApp query={props} retry={retry} />;
   } else if (error) {

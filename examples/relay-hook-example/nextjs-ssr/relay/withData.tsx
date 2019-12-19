@@ -1,12 +1,12 @@
 import React from 'react';
 import initEnvironment from './createRelayEnvironment';
 import {fetchQuery, RelayEnvironmentProvider} from 'relay-hooks';
-import {Variables} from 'relay-runtime';
+import {Variables, GraphQLTaggedNode} from 'relay-runtime';
 import {DocumentContext} from 'next/document';
 import {NextPage} from 'next';
 
 type OptionsWithData = {
-  query: any;
+  query: GraphQLTaggedNode;
   variables: Variables;
 };
 
@@ -38,13 +38,12 @@ export default (ComposedComponent: NextPage, options: OptionsWithData) => {
       };
     }
 
-    let queryProps = {};
     let queryRecords = {};
     const environment = initEnvironment();
 
     const {query, variables} = options;
     if (query) {
-      queryProps = await fetchQuery<any>(environment, query, variables);
+      await fetchQuery<any>(environment, query, variables);
       queryRecords = environment
         .getStore()
         .getSource()
@@ -52,7 +51,6 @@ export default (ComposedComponent: NextPage, options: OptionsWithData) => {
     }
     return {
       ...composedInitialProps,
-      ...queryProps,
       queryRecords,
       environment,
     };

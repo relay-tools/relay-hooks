@@ -7,7 +7,6 @@ let relayEnvironment: Environment;
 
 function fetchQuery(operation, variables, cacheConfig, uploadables) {
   const endpoint = 'http://localhost:3000/graphql';
-  console.log('fetch');
   return fetch(endpoint, {
     method: 'POST',
     headers: {

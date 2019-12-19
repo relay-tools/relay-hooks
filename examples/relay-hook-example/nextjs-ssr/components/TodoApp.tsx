@@ -86,8 +86,6 @@ const AppTodo = (props: Props) => {
   const environment = useRelayEnvironment();
   const [{user}, refetch] = useRefetch(fragmentSpec, props.query);
 
-  console.log('user', user);
-
   if (!user) {
     return <div />;
   }

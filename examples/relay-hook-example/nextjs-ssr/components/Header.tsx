@@ -34,7 +34,6 @@ const StyledDiv = styled.div`
 
 const Header = ({userId}) => {
   const selectedYou = userId === 'you';
-  console.log('header', userId);
   return (
     <StyledDiv>
       <Link href="/">

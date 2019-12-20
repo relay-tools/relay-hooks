@@ -1,8 +1,7 @@
 import React from 'react';
 import TodoApp, {QUERY_APP} from '../components/TodoApp';
 import {withData} from '../relay';
-import {useQuery} from 'relay-hooks';
-import {STORE_OR_NETWORK} from 'relay-hooks/lib/RelayHooksType';
+import {useQuery, STORE_OR_NETWORK} from 'relay-hooks';
 import {TodoAppQuery} from '../__generated__/relay/TodoAppQuery.graphql';
 
 const query = QUERY_APP;

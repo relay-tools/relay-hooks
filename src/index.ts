@@ -16,3 +16,4 @@ export { default as useRefetch } from './useRefetch';
 export { default as useQueryFetcher } from './useQueryFetcher';
 export { default as useRelayEnvironment } from './useRelayEnvironment';
 export { default as RelayEnvironmentProvider } from './RelayEnvironmentProvider';
+export * from './RelayHooksType';

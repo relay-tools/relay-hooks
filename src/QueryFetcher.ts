@@ -43,7 +43,7 @@ class QueryFetcher<TOperationType extends OperationType> {
     }
 
     lookupInStore(environment: IEnvironment, operation, fetchPolicy: FetchPolicy): Snapshot {
-        if (isStorePolicy(fetchPolicy) && environment.check(operation.root)) {
+        if (isStorePolicy(fetchPolicy) && environment.check(operation) === 'available') {
             return environment.lookup(operation.fragment, operation);
         }
         return null;
@@ -54,7 +54,7 @@ class QueryFetcher<TOperationType extends OperationType> {
         query,
         options,
         retain: (environment, query) => Disposable = (environment, query): Disposable =>
-            environment.retain(query.root),
+            environment.retain(query),
     ): RenderProps<TOperationType> {
         const { fetchPolicy = defaultPolicy, networkCacheConfig, fetchKey } = options;
         let storeSnapshot;

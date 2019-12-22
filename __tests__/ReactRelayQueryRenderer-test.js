@@ -55,11 +55,13 @@ const QueryRendererHook = props => {
     fetchPolicy = NETWORK_ONLY,
     query,
     variables,
-    cacheConfig
+    cacheConfig,
+    fetchKey
   } = props;
   const { cached, ...relays } = useQuery(query, variables, {
     networkCacheConfig: cacheConfig,
-    fetchPolicy
+    fetchPolicy,
+    fetchKey
   });
 
   return <React.Fragment>{render(relays)}</React.Fragment>;
@@ -1814,5 +1816,59 @@ describe("ReactRelayQueryRenderer", () => {
       ).toBe(true);
     });
   });
+  
+
+  describe("fetch key", () => {
+    let renderer;
+    const fetchKey = 'fetchKey';
+
+    beforeEach(() => {
+      renderer = ReactTestRenderer.create(
+        <PropsSetter>
+          <ReactRelayQueryRenderer
+            environment={environment}
+            query={TestQuery}
+            render={render}
+            variables={variables}
+            fetchKey={fetchKey}
+            fetchPolicy="network-only"
+          />
+        </PropsSetter>
+      );
+    });
+
+
+    it("does not refetches if the `fetchKey` prop not changes", () => {
+      expect.assertions(2);
+      expect(environment.execute.mock.calls.length).toBe(1);
+      render.mockClear();
+      environment.mockClear();
+      
+      renderer.getInstance().setProps({
+        environment,
+        query: TestQuery,
+        render,
+        variables,
+        fetchKey
+      });
+      expect(environment.execute.mock.calls.length).toBe(0);
+    });
+
+    it("refetches if the `fetchKey` prop changes", () => {
+      expect.assertions(2);
+      expect(environment.execute.mock.calls.length).toBe(1);
+      environment.mockClear();
+      render.mockClear();
+
+      renderer.getInstance().setProps({
+        environment,
+        query: TestQuery,
+        render,
+        variables,
+        fetchKey: "refetchKey"
+      });
+      expect(environment.execute.mock.calls.length).toBe(1);
+    });
+   });
 });
 

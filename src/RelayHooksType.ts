@@ -1,6 +1,7 @@
 import { RelayContext, FragmentSpecResolver } from 'relay-runtime/lib/store/RelayStoreTypes';
 
 import {
+    Disposable,
     OperationType,
     CacheConfig,
     GraphQLTaggedNode,
@@ -24,7 +25,7 @@ export type ContainerResult = {
 export interface RenderProps<T extends OperationType> {
     error: Error;
     props: T['response'];
-    retry: (_cacheConfigOverride: CacheConfig) => void;
+    retry: (_cacheConfigOverride?: CacheConfig) => void;
     cached?: boolean;
 }
 
@@ -41,35 +42,48 @@ export type RefetchOptions = {
 
 export type QueryOptions = {
     fetchPolicy?: FetchPolicy;
+    fetchKey?: string | number;
     networkCacheConfig?: CacheConfig;
 };
+
+export type $Call<Fn extends (...args: any[]) => any> = Fn extends (arg: any) => infer RT
+    ? RT
+    : never;
+
+export interface KeyType {
+    readonly ' $data'?: unknown;
+}
+export type ArrayKeyType = ReadonlyArray<{ readonly ' $data'?: ReadonlyArray<unknown> } | null>;
+
+export type KeyReturnType<T extends KeyType> = (arg: T) => NonNullable<T[' $data']>;
+export type ArrayKeyReturnType<T extends ArrayKeyType> = (
+    arg: T,
+) => NonNullable<NonNullable<T[0]>[' $data']>[0];
 
 export type PaginationFunction = {
     loadMore: (
         connectionConfig: ConnectionConfig,
         pageSize: number,
-        observerOrCallback: any,
+        observerOrCallback: ObserverOrCallback,
         options: RefetchOptions,
-    ) => any;
-    hasMore: () => boolean;
+    ) => Disposable;
+    hasMore: (connectionConfig?: ConnectionConfig) => boolean;
     isLoading: () => boolean;
     refetchConnection: (
         connectionConfig: ConnectionConfig,
         totalCount: number,
-        callback: any,
-        refetchVariables: any,
-    ) => any;
+        observerOrCallback: ObserverOrCallback,
+        refetchVariables: Variables,
+    ) => Disposable;
 };
 
 export type RefetchFunction = (
-    taggedNode: any,
-    refetchVariables: any,
-    renderVariables: any,
-    observerOrCallback: any,
-    options: RefetchOptions,
-) => {
-    dispose(): void;
-};
+    taggedNode: GraphQLTaggedNode,
+    refetchVariables: Variables | ((fragmentVariables: Variables) => Variables),
+    renderVariables?: Variables,
+    observerOrCallback?: ObserverOrCallback,
+    options?: RefetchOptions,
+) => Disposable;
 
 export interface OssFragmentFunction extends PaginationFunction {
     refetch: RefetchFunction;

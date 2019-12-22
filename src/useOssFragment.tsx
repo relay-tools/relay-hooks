@@ -1,12 +1,34 @@
 import { useEffect, useState, useRef } from 'react';
 import { RelayFeatureFlags, GraphQLTaggedNode } from 'relay-runtime';
 
-import { ContainerResult, FragmentResult } from './RelayHooksType';
-
 import useRelayEnvironment from './useRelayEnvironment';
 import FragmentResolver from './FragmentResolver';
+import {
+    ContainerResult,
+    KeyType,
+    OssFragmentFunction,
+    KeyReturnType,
+    $Call,
+    ArrayKeyType,
+    ArrayKeyReturnType,
+} from './RelayHooksType';
 
-const useOssFragment = function(fragmentNode: GraphQLTaggedNode, fragmentRef: any): FragmentResult {
+function useOssFragment<TKey extends KeyType>(
+    fragmentNode: GraphQLTaggedNode,
+    fragmentRef: TKey,
+): [$Call<KeyReturnType<TKey>>, OssFragmentFunction];
+function useOssFragment<TKey extends KeyType>(
+    fragmentNode: GraphQLTaggedNode,
+    fragmentRef: TKey | null,
+): [$Call<KeyReturnType<TKey>> | null, OssFragmentFunction];
+function useOssFragment<TKey extends ArrayKeyType>(
+    fragmentNode: GraphQLTaggedNode,
+    fragmentRef: TKey,
+): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>, OssFragmentFunction];
+function useOssFragment<TKey extends ArrayKeyType>(
+    fragmentNode: GraphQLTaggedNode,
+    fragmentRef: TKey | null,
+): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null, OssFragmentFunction] {
     RelayFeatureFlags.PREFER_FRAGMENT_OWNER_OVER_CONTEXT = true;
     const environment = useRelayEnvironment();
     const [, forceUpdate] = useState<ContainerResult>(null);
@@ -39,7 +61,7 @@ const useOssFragment = function(fragmentNode: GraphQLTaggedNode, fragmentRef: an
             refetchConnection: resolver.refetchConnection,
         },
     ];
-};
+}
 
 export default useOssFragment;
 

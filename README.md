@@ -37,11 +37,19 @@ ReactDOM.render(
 ## useQuery
 
 `useQuery` does not take an environment as an argument. Instead, it reads the environment set in the context; this also implies that it does not set any React context.
-In addition to `query` (first argument) and `variables` (second argument), `useQuery` accepts a third argument `options`. `fetchPolicy` in `options` determine whether it should use data cached in the Relay store and whether to send a network request. The options are:
+In addition to `query` (first argument) and `variables` (second argument), `useQuery` accepts a third argument `options`. 
+
+**options**
+
+`fetchPolicy`: determine whether it should use data cached in the Relay store and whether to send a network request. The options are:
   * `store-or-network` (default): Reuse data cached in the store; if the whole query is cached, skip the network request
   * `store-and-network`: Reuse data cached in the store; always send a network request.
   * `network-only`: Don't reuse data cached in the store; always send a network request. (This is the default behavior of Relay's existing `QueryRenderer`.)
   * `store-only`: Reuse data cached in the store; never send a network request.
+
+`fetchKey`: [Optional] A fetchKey can be passed to force a refetch of the current query and variables when the component re-renders, even if the variables didn't change, or even if the component isn't remounted (similarly to how passing a different key to a React component will cause it to remount). If the fetchKey is different from the one used in the previous render, the current query and variables will be refetched.
+
+`networkCacheConfig`: [Optional] Object containing cache config options for the network layer. Note the the network layer may contain an additional query response cache which will reuse network responses for identical queries. If you want to bypass this cache completely, pass {force: true} as the value for this option.
 
 ```ts
 import {useQuery, graphql } from 'relay-hooks';

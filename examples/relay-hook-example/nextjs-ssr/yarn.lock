@@ -6888,10 +6888,10 @@ relay-compiler@^7.1.0:
     signedsource "^1.0.0"
     yargs "^9.0.0"
 
-relay-hooks@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/relay-hooks/-/relay-hooks-2.0.0.tgz#432aa6dfee2c0106e15b33d7791e1b02f777ff8a"
-  integrity sha512-QEBJauHWdZs38ZOnQ37H/hQOhnyDAtb5DcdKF7TKxZPny6Onus1c/vyPhHQPOtIgtfF8Wd7PqyiENFGsapmZHw==
+relay-hooks@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/relay-hooks/-/relay-hooks-2.1.0.tgz#8849f31edfab4984d7df549e83c12dd48db4b6b6"
+  integrity sha512-s+ut/4V8ethjQCE/dsJ0O9JpM1esawNRcgIimRbRSrL89gIwShDeIQOoFIj5Gb6p6VwU7z3pQb1Jx0TweSoEWg==
   dependencies:
     "@restart/hooks" "^0.3.1"
     fbjs "^1.0.0"

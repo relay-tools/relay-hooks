@@ -15,7 +15,11 @@ export const STORE_THEN_NETWORK = 'store-and-network';
 export const STORE_OR_NETWORK = 'store-or-network';
 export const STORE_ONLY = 'store-only';
 
-export type FetchPolicy = 'store-only' | 'store-or-network' | 'store-and-network' | 'network-only';
+export type FetchPolicy =
+    | typeof STORE_ONLY
+    | typeof STORE_OR_NETWORK
+    | typeof STORE_THEN_NETWORK
+    | typeof NETWORK_ONLY;
 
 export type ContainerResult = {
     data: { [key: string]: any };

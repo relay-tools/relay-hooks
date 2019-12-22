@@ -86,30 +86,41 @@ A <code>RelayEnvironmentProvider</code> should be rendered once at the root of t
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="usequery"></a><a href="#usequery" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>useQuery</h2>
 <p><code>useQuery</code> does not take an environment as an argument. Instead, it reads the environment set in the context; this also implies that it does not set any React context.
-In addition to <code>query</code> and <code>variables</code>, <code>useQuery</code> accepts a <code>dataFrom</code> argument as part of the configuration object to determine whether it should use data cached in the
-Relay store and whether to send a network request. The options are:</p>
+In addition to <code>query</code> (first argument) and <code>variables</code> (second argument), <code>useQuery</code> accepts a third argument <code>options</code>.</p>
+<p><strong>options</strong></p>
+<p><code>fetchPolicy</code>: determine whether it should use data cached in the Relay store and whether to send a network request. The options are:</p>
 <ul>
-<li><code>STORE_OR_NETWORK</code> (default): Reuse data cached in the store; if the whole query is cached, skip the network request</li>
-<li><code>STORE_THEN_NETWORK</code>: Reuse data cached in the store; always send a network request.</li>
-<li><code>NETWORK_ONLY</code>: Don't reuse data cached in the store; always send a network request. (This is the default behavior of Relay's existing <code>QueryRenderer</code>.)</li>
-<li><code>STORE_ONLY</code>: Reuse data cached in the store; never send a network request.</li>
+<li><code>store-or-network</code> (default): Reuse data cached in the store; if the whole query is cached, skip the network request</li>
+<li><code>store-and-network</code>: Reuse data cached in the store; always send a network request.</li>
+<li><code>network-only</code>: Don't reuse data cached in the store; always send a network request. (This is the default behavior of Relay's existing <code>QueryRenderer</code>.)</li>
+<li><code>store-only</code>: Reuse data cached in the store; never send a network request.</li>
 </ul>
+<p><code>fetchKey</code>: [Optional] A fetchKey can be passed to force a refetch of the current query and variables when the component re-renders, even if the variables didn't change, or even if the component isn't remounted (similarly to how passing a different key to a React component will cause it to remount). If the fetchKey is different from the one used in the previous render, the current query and variables will be refetched.</p>
+<p><code>networkCacheConfig</code>: [Optional] Object containing cache config options for the network layer. Note the the network layer may contain an additional query response cache which will reuse network responses for identical queries. If you want to bypass this cache completely, pass {force: true} as the value for this option.</p>
 <pre><code class="hljs css language-ts">import {useQuery, graphql } from 'relay-hooks';
 
+const query = graphql`
+  query appQuery($userId: String) {
+    user(id: $userId) {
+      ...TodoApp_user
+    }
+  }
+`;
+
+const variables = {
+  userId: 'me',
+}; 
+
+const options = {
+  fetchPolicy: 'store-or-network', //default
+  networkCacheConfig: undefined,
+}
+
 const AppTodo = function (appProps)  {
-  const {props, error, retry, cached} = useQuery({ query: graphql`
-      query appQuery($userId: String) {
-        user(id: $userId) {
-          ...TodoApp_user
-        }
-      }
-    `,
-    variables: {
-      userId: 'me',
-    }});
+  const {props, error, retry, cached} = useQuery(query, variables, options);
 
   if (props &amp;&amp; props.user) {
-    return &lt;TodoApp {...hooksProps} /&gt;;
+    return &lt;TodoApp user={props.user} /&gt;;
   } else if (error) {
     return &lt;div&gt;{error.message}&lt;/div&gt;;
   }
@@ -117,7 +128,7 @@ const AppTodo = function (appProps)  {
 
 }
 </code></pre>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2019-8-18 by Dmitry Minkovsky</em></div><div class="docs-prevnext"><a class="docs-next button" href="/relay-hooks/docs/use-fragment"><span class="function-name-prevnext">useFragment</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#installation">Installation</a></li><li><a href="#contributing">Contributing</a></li><li><a href="#relayenvironmentprovider">RelayEnvironmentProvider</a></li><li><a href="#usequery">useQuery</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/relay-hooks/" class="nav-home"><img src="/relay-hooks/img/favicon.ico" alt="Morrys Repositories" width="66" height="58"/></a><div><h5>Docs</h5><a href="/relay-hooks/docs/en/relay-hooks.html">about relay-hooks</a></div><div><h5>Community</h5><a href="/relay-hooks/en/users.html">User Showcase</a></div><div><h5>More</h5><a href="https://github.com/morrys/wora">GitHub</a><a class="github-button" href="https://github.com/relay-tools/relay-hooks" data-icon="octicon-star" data-count-href="https://github.com/morrys/wora/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="https://twitter.com/m0rrys" class="twitter-follow-button">Follow @m0rrys</a></div></div></section><a href="https://opensource.facebook.com/" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="/relay-hooks/img/oss_logo.png" alt="Facebook Open Source" width="170" height="45"/></a><section class="copyright">Copyright © 2019 Lorenzo Di Giacomo</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2019-12-22 by morrys</em></div><div class="docs-prevnext"><a class="docs-next button" href="/relay-hooks/docs/use-fragment"><span class="function-name-prevnext">useFragment</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#installation">Installation</a></li><li><a href="#contributing">Contributing</a></li><li><a href="#relayenvironmentprovider">RelayEnvironmentProvider</a></li><li><a href="#usequery">useQuery</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/relay-hooks/" class="nav-home"><img src="/relay-hooks/img/favicon.ico" alt="Morrys Repositories" width="66" height="58"/></a><div><h5>Docs</h5><a href="/relay-hooks/docs/en/relay-hooks.html">about relay-hooks</a></div><div><h5>Community</h5><a href="/relay-hooks/en/users.html">User Showcase</a></div><div><h5>More</h5><a href="https://github.com/morrys/wora">GitHub</a><a class="github-button" href="https://github.com/relay-tools/relay-hooks" data-icon="octicon-star" data-count-href="https://github.com/morrys/wora/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="https://twitter.com/m0rrys" class="twitter-follow-button">Follow @m0rrys</a></div></div></section><a href="https://opensource.facebook.com/" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="/relay-hooks/img/oss_logo.png" alt="Facebook Open Source" width="170" height="45"/></a><section class="copyright">Copyright © 2019 Lorenzo Di Giacomo</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;

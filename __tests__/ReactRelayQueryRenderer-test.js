@@ -1003,16 +1003,24 @@ describe("ReactRelayQueryRenderer", () => {
       render.mockClear();
 
       // Update with a different query
-      TestQuery = { ...TestQuery };
+      const { NextQuery } = generateAndCompile(`
+      query NextQuery($id: ID!) {
+        node(id: $id) {
+          ... on User {
+            name
+          }
+        }
+      }
+    `);
       renderer.getInstance().setProps({
         cacheConfig,
         environment,
-        query: TestQuery,
+        query: NextQuery,
         render,
         variables
       });
       expect(
-        environment.mock.isLoading(TestQuery, variables, cacheConfig)
+        environment.mock.isLoading(NextQuery, variables, cacheConfig)
       ).toBe(true);
       expect({
         error: null,

@@ -23,6 +23,8 @@ export function getOrCreateQueryFetcher(query: OperationDescriptor | null, force
     return new QueryFetcher(forceUpdate);
 }
 
+const DATA_RETENTION_TIMEOUT = 30 * 1000;
+
 class QueryFetcher<TOperationType extends OperationType> {
     environment: IEnvironment;
     query: any;
@@ -35,6 +37,7 @@ class QueryFetcher<TOperationType extends OperationType> {
     disposableRetain: Disposable;
     forceUpdate: (_o: any) => void;
     suspense: boolean;
+    releaseQueryTimeout;
     result: RenderProps<TOperationType> = {
         retry: (_cacheConfigOverride: CacheConfig): void => undefined,
         cached: false,
@@ -57,8 +60,21 @@ class QueryFetcher<TOperationType extends OperationType> {
     }
 
     disposeRetain(): void {
+        this.clearTemporaryRetain();
         this.disposableRetain && this.disposableRetain.dispose();
         this.query && cache.delete(this.query.request.identifier);
+    }
+
+    clearTemporaryRetain() {
+        clearTimeout(this.releaseQueryTimeout);
+        this.releaseQueryTimeout = null;
+    }
+
+    temporaryRetain() {
+        const localReleaseTemporaryRetain = () => {
+            this.dispose();
+        };
+        this.releaseQueryTimeout = setTimeout(localReleaseTemporaryRetain, DATA_RETENTION_TIMEOUT);
     }
 
     isDiffEnvQuery(environment: IEnvironment, query): boolean {
@@ -88,6 +104,7 @@ class QueryFetcher<TOperationType extends OperationType> {
             this.disposeRequest();
             this.fetch(cacheConfigOverride, false);
         };
+        this.clearTemporaryRetain();
         const isDiffEnvQuery = this.isDiffEnvQuery(environment, query);
         if (isDiffEnvQuery || fetchPolicy !== this.fetchPolicy || fetchKey !== this.fetchKey) {
             if (isDiffEnvQuery) {
@@ -164,10 +181,16 @@ class QueryFetcher<TOperationType extends OperationType> {
             complete: () => {
                 this.networkSubscription = null;
             },
+            unsubscribe: () => {
+                if (suspense && !this.rootSubscription && this.releaseQueryTimeout) {
+                    this.dispose();
+                }
+            },
         });
         fetchHasReturned = true;
         if (suspense) {
             this.setForceUpdate(() => undefined);
+            this.temporaryRetain();
             throw promiseResult;
         }
     }

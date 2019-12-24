@@ -200,7 +200,7 @@ describe('useLazyLoadQueryNode', () => {
         const data = environment.lookup(query.fragment).data;
         expectToBeRendered(renderFn, data);
     });
-    /* removed, useLazyLoadQuery in relay-hooks have not temporary retain
+
     it('fetches and renders correctly if component unmounts before it can commit', () => {
         const payload = {
             data: {
@@ -258,7 +258,7 @@ describe('useLazyLoadQueryNode', () => {
         const data = environment.lookup(query.fragment).data;
         expectToBeRendered(renderFn, data);
     });
-    */
+
     it('fetches and renders correctly if the same query was unsubscribed before', () => {
         // Render the component
         const initialQuery = createOperationDescriptor(gqlQuery, {
@@ -374,7 +374,7 @@ describe('useLazyLoadQueryNode', () => {
         });
 
         // Assert data is released
-        expect(release).toBeCalledTimes(1); // changed why 2??
+        expect(release).toBeCalledTimes(2);
         // Assert request in flight is cancelled
         expect(environment.mock.isLoading(query.request.node, variables)).toEqual(false);
     });

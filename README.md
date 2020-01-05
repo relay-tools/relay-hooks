@@ -85,6 +85,65 @@ const AppTodo = function (appProps)  {
 }
 ```
 
+## useLazyLoadQuery
+
+same to useQuery
+
+```ts
+import * as React from 'react';
+import {useQuery, graphql, RelayEnvironmentProvider } from 'relay-hooks';
+
+const query = graphql`
+  query appQuery($userId: String) {
+    user(id: $userId) {
+      ...TodoApp_user
+    }
+  }
+`;
+
+class ErrorBoundary extends React.Component {
+    state = { error: null };
+    componentDidCatch(error) {
+        this.setState({ error });
+    }
+    render() {
+        const { children, fallback } = this.props;
+        const { error } = this.state;
+        if (error) {
+            return React.createElement(fallback, { error });
+        }
+        return children;
+    }
+}
+
+const variables = {
+  userId: 'me',
+}; 
+
+const options = {
+  fetchPolicy: 'store-or-network', //default
+  networkCacheConfig: undefined,
+}
+
+
+const AppTodo = function (appProps)  {
+  const {props, cached} = useLazyLoadQuery(query, variables, options);
+  return <TodoApp user={props.user} />;
+
+}
+
+
+const App = (
+  <RelayEnvironmentProvider environment={modernEnvironment}>
+    <ErrorBoundary fallback={({ error }) => `Error: ${error.message + ': ' + error.stack}`}>
+      <React.Suspense fallback={<div>loading suspense</div>}>
+        <AppTodo />
+      </React.Suspense>
+    </ErrorBoundary>
+  </RelayEnvironmentProvider>
+);
+```
+
 ## useFragment
 
 [See useFragment.md](./useFragment.md)

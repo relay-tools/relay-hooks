@@ -52,6 +52,7 @@ function expectToHaveFetched(environment, query) {
 describe('useLazyLoadQueryNode', () => {
     let environment;
     let gqlQuery;
+    let gqlNoNameQuery;
     let renderFn;
     let render;
     let release;
@@ -88,7 +89,7 @@ describe('useLazyLoadQueryNode', () => {
 
         const Renderer = (renderProps) => {
             const { props } = useLazyLoadQueryNode(
-                gqlQuery,
+                renderProps.gqlQuery || gqlQuery,
                 renderProps.variables,
                 /* $FlowFixMe(>=0.111.0) This comment suppresses an error found when
                  * Flow v0.111.0 was deployed. To see the error, delete this comment
@@ -142,8 +143,16 @@ describe('useLazyLoadQueryNode', () => {
           ...UserFragment
         }
       }
+
+      query UserNoNameQuery($id: ID) {
+        node(id: $id) {
+          id
+          ...UserFragment
+        }
+      }
     `);
         gqlQuery = generated.UserQuery;
+        gqlNoNameQuery = generated.UserNoNameQuery;
         variables = { id: '1' };
         query = createOperationDescriptor(gqlQuery, variables);
         renderFn = jest.fn((result) => result?.node?.name ?? 'Empty');
@@ -410,5 +419,53 @@ describe('useLazyLoadQueryNode', () => {
         expect(release).toBeCalledTimes(1);
         // Assert request in flight is cancelled
         expect(environment.mock.isLoading(query.request.node, variables)).toEqual(false);
+    });
+
+    it('fetches and renders correctly when change query parameter', () => {
+        const instance = render(environment, <Container variables={variables} />);
+
+        expect(instance.toJSON()).toEqual('Fallback');
+        expectToHaveFetched(environment, query);
+        expect(renderFn).not.toBeCalled();
+        expect(environment.retain).toHaveBeenCalledTimes(1);
+
+        environment.mock.resolve(gqlQuery, {
+            data: {
+                node: {
+                    __typename: 'User',
+                    id: variables.id,
+                    name: 'Alice',
+                },
+            },
+        });
+
+        let data = environment.lookup(query.fragment).data;
+        expectToBeRendered(renderFn, data);
+
+        renderFn.mockClear();
+        environment.retain.mockClear();
+        environment.execute.mockClear();
+
+        ReactTestRenderer.act(() => {
+            setProps({ gqlQuery: gqlNoNameQuery, variables });
+        });
+
+        const queryNoNameQuery = createOperationDescriptor(gqlNoNameQuery, variables);
+        expect(instance.toJSON()).toEqual('Fallback');
+        expectToHaveFetched(environment, queryNoNameQuery);
+        expect(renderFn).not.toBeCalled();
+        expect(environment.retain).toHaveBeenCalledTimes(1);
+
+        environment.mock.resolve(gqlNoNameQuery, {
+            data: {
+                node: {
+                    __typename: 'User',
+                    id: variables.id,
+                },
+            },
+        });
+
+        data = environment.lookup(queryNoNameQuery.fragment).data;
+        expectToBeRendered(renderFn, data);
     });
 });

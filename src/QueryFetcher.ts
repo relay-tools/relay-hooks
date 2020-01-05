@@ -10,17 +10,12 @@ const defaultPolicy = 'store-or-network';
 const cache: Map<string, QueryFetcher<any>> = new Map();
 
 export function getOrCreateQueryFetcher(query: OperationDescriptor | null, forceUpdate: any) {
-    if (query) {
-        if (cache.has(query.request.identifier)) {
-            const queryFetcher = cache.get(query.request.identifier);
-            queryFetcher.setForceUpdate(forceUpdate);
-            return queryFetcher;
-        }
-        const queryFetcher = new QueryFetcher(forceUpdate, true);
-        cache.set(query.request.identifier, queryFetcher);
+    if (query && cache.has(query.request.identifier)) {
+        const queryFetcher = cache.get(query.request.identifier);
+        queryFetcher.setForceUpdate(forceUpdate);
         return queryFetcher;
     }
-    return new QueryFetcher(forceUpdate);
+    return new QueryFetcher(forceUpdate, !!query);
 }
 
 const DATA_RETENTION_TIMEOUT = 30 * 1000;
@@ -109,6 +104,7 @@ class QueryFetcher<TOperationType extends OperationType> {
         if (isDiffEnvQuery || fetchPolicy !== this.fetchPolicy || fetchKey !== this.fetchKey) {
             if (isDiffEnvQuery) {
                 this.disposeRetain();
+                this.suspense && cache.set(query.request.identifier, this);
                 this.disposableRetain = retain(environment, query);
             }
             this.environment = environment;
@@ -152,9 +148,6 @@ class QueryFetcher<TOperationType extends OperationType> {
     fetch(networkCacheConfig, suspense: boolean): void {
         let fetchHasReturned = false;
         let resolveNetworkPromise = () => {};
-        const promiseResult = new Promise((resolve) => {
-            resolveNetworkPromise = resolve;
-        });
         fetchQuery(this.environment, this.query, {
             networkCacheConfig:
                 suspense && !networkCacheConfig ? { force: true } : networkCacheConfig,
@@ -191,7 +184,9 @@ class QueryFetcher<TOperationType extends OperationType> {
         if (suspense) {
             this.setForceUpdate(() => undefined);
             this.temporaryRetain();
-            throw promiseResult;
+            throw new Promise((resolve) => {
+                resolveNetworkPromise = resolve;
+            });
         }
     }
 

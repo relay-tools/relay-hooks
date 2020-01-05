@@ -111,22 +111,13 @@ const AppTodo = function(appProps) {
 const isServer = typeof window === 'undefined';
 const LayoutTodo = ({userId}) => {
   console.log('LayoutTodo', userId, isServer);
-  const {props, retry, error} = useLazyLoadQuery(
+  const {props, retry, error} = useQuery(
     QueryApp,
     {userId},
     {
       fetchPolicy: 'store-or-network',
     },
   );
-  //const retry = () => undefined;
-  /*const { props, error, retry, cached } = useQuery({
-    query: QueryApp,
-    variables: {
-      // Mock authenticated ID that matches database
-      userId,
-    },
-    dataFrom: "STORE_THEN_NETWORK"
-  });*/
 
   console.log('renderer', props);
   if (props && props.user) {

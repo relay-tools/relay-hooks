@@ -33,12 +33,6 @@ class QueryFetcher<TOperationType extends OperationType> {
     forceUpdate: (_o: any) => void;
     suspense: boolean;
     releaseQueryTimeout;
-    result: RenderProps<TOperationType> = {
-        retry: (_cacheConfigOverride: CacheConfig): void => undefined,
-        cached: false,
-        error: null,
-        props: null,
-    };
 
     constructor(forceUpdate, suspense: boolean = false) {
         this.suspense = suspense;
@@ -124,13 +118,12 @@ class QueryFetcher<TOperationType extends OperationType> {
             }
         }
         const resultSnapshot = storeSnapshot || this.snapshot;
-        this.result = {
+        return {
             cached: !!storeSnapshot,
             retry,
             error: this.error,
             props: resultSnapshot ? resultSnapshot.data : null,
         };
-        return this.result;
     }
 
     subscribe(snapshot): void {

@@ -6,6 +6,7 @@
         "API Reference": [
             "use-fragment",
             "use-refetch",
+            "use-refetchable",
             "use-pagination",
             "use-mutation",
             "use-oss-fragment"

@@ -5,7 +5,12 @@ import TodoListFooter from './TodoListFooter';
 import TodoTextInput from './TodoTextInput';
 import styled from 'styled-components';
 import Header from './Header';
-import {useRefetch, useRelayEnvironment, graphql} from 'relay-hooks';
+import {
+  useRefetch,
+  useRefetchable,
+  useRelayEnvironment,
+  graphql,
+} from 'relay-hooks';
 import {TodoApp_user$key} from '../__generated__/relay/TodoApp_user.graphql';
 //import {TodoApp_user$key} from 'relay/TodoApp_user.graphql';
 //import TodoApp, { fragmentSpec } from './components/TodoApp';
@@ -64,9 +69,13 @@ type Props = {
   query: TodoApp_user$key;
   retry: () => void;
 };
-
+/*
+fragment TodoApp_user on Query
+    @refetchable(queryName: "UserFragmentRefetchQuery") {
+*/
 const fragmentSpec = graphql`
-  fragment TodoApp_user on Query {
+  fragment TodoApp_user on Query
+    @refetchable(queryName: "UserFragmentRefetchQuery") {
     user(id: $userId) {
       id
       userId
@@ -84,7 +93,7 @@ export function isNotNull<T>(it: T): it is NonNullable<T> {
 
 const AppTodo = (props: Props) => {
   const environment = useRelayEnvironment();
-  const [{user}, refetch] = useRefetch(fragmentSpec, props.query);
+  const [{user}, refetch] = useRefetchable(fragmentSpec, props.query);
 
   if (!user) {
     return <div />;
@@ -119,7 +128,7 @@ const AppTodo = (props: Props) => {
         <StyledDivButton>
           <StyledButton
             onClick={() => {
-              refetch(QUERY_APP, {
+              refetch({
                 userId: user.userId === 'me' ? 'you' : 'me',
               });
             }}>

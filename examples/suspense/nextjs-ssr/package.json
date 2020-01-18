@@ -4,7 +4,7 @@
     "dev": "babel-node server.js",
     "build": "next build",
     "start": "cross-env NODE_ENV=production babel-node server.js",
-    "compile": "relay-compiler --src ./ --includes '**pages**' '**components**' --schema ./data/schema.graphql --language typescript --artifactDirectory ./__generated__/relay",
+    "compile": "relay-compiler --src ./ --include '**/pages/**' '**/components/**' '**/mutations/**' --schema ./data/schema.graphql --language typescript --artifactDirectory ./__generated__/relay",
     "update-schema": "babel-node ./scripts/updateSchema.js",
     "lint": "eslint ./ --cache"
   },

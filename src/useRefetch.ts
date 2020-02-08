@@ -1,6 +1,6 @@
 import useOssFragment from './useOssFragment';
 import { RefetchFunction } from './RelayHooksType';
-import { GraphQLTaggedNode, OperationType } from 'relay-runtime';
+import { GraphQLTaggedNode } from 'relay-runtime';
 
 import { KeyType, KeyReturnType, $Call, ArrayKeyType, ArrayKeyReturnType } from './RelayHooksType';
 

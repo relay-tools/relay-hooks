@@ -9,7 +9,10 @@ const defaultPolicy = 'store-or-network';
 
 const cache: Map<string, QueryFetcher<any>> = new Map();
 
-export function getOrCreateQueryFetcher(query: OperationDescriptor | null, forceUpdate: any) {
+export function getOrCreateQueryFetcher<TOperationType extends OperationType>(
+    query: OperationDescriptor | null,
+    forceUpdate: any,
+): QueryFetcher<TOperationType> {
     if (query && cache.has(query.request.identifier)) {
         const queryFetcher = cache.get(query.request.identifier);
         queryFetcher.setForceUpdate(forceUpdate);
@@ -34,12 +37,12 @@ class QueryFetcher<TOperationType extends OperationType> {
     suspense: boolean;
     releaseQueryTimeout;
 
-    constructor(forceUpdate, suspense: boolean = false) {
+    constructor(forceUpdate, suspense = false) {
         this.suspense = suspense;
         this.setForceUpdate(forceUpdate);
     }
 
-    setForceUpdate(forceUpdate) {
+    setForceUpdate(forceUpdate): void {
         this.forceUpdate = forceUpdate;
     }
 
@@ -54,13 +57,13 @@ class QueryFetcher<TOperationType extends OperationType> {
         this.query && cache.delete(this.query.request.identifier);
     }
 
-    clearTemporaryRetain() {
+    clearTemporaryRetain(): void {
         clearTimeout(this.releaseQueryTimeout);
         this.releaseQueryTimeout = null;
     }
 
-    temporaryRetain() {
-        const localReleaseTemporaryRetain = () => {
+    temporaryRetain(): void {
+        const localReleaseTemporaryRetain = (): void => {
             this.dispose();
         };
         this.releaseQueryTimeout = setTimeout(localReleaseTemporaryRetain, DATA_RETENTION_TIMEOUT);
@@ -140,7 +143,7 @@ class QueryFetcher<TOperationType extends OperationType> {
 
     fetch(networkCacheConfig, suspense: boolean): void {
         let fetchHasReturned = false;
-        let resolveNetworkPromise = () => {};
+        let resolveNetworkPromise = (): void => {};
         fetchQuery(this.environment, this.query, {
             networkCacheConfig:
                 suspense && !networkCacheConfig ? { force: true } : networkCacheConfig,

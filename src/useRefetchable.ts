@@ -1,13 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import useOssFragment from './useOssFragment';
 import { RefetchableFunction, RefetchOptions } from './RelayHooksType';
-import {
-    GraphQLTaggedNode,
-    getFragment,
-    Variables,
-    ObserverOrCallback,
-    createOperationDescriptor,
-} from 'relay-runtime';
+import { GraphQLTaggedNode, getFragment, Variables, ObserverOrCallback } from 'relay-runtime';
 
 import * as invariant from 'fbjs/lib/invariant';
 

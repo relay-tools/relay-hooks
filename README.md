@@ -17,7 +17,7 @@ yarn add react-relay relay-hooks
 
 * **PRs are welcome**, but it is always **better to open the issue first** so as to **help** me and other people **evaluating it**
 
-* **Please sponsor me** and recommend me at [github sponsorship](https://docs.google.com/forms/d/e/1FAIpQLSdE8nL7U-d7CBTWp9X7XOoezQD06wCzCAS9VpoUW6lJ03KU7w/viewform), so that i can use it
+* **Please sponsor me**
 
 ## RelayEnvironmentProvider
 
@@ -151,6 +151,10 @@ const App = (
 ## useRefetch
 
 [See useRefetch.md](./useRefetch.md)
+
+## useRefetchable
+
+[See useRefetchable.md](./useRefetch.md)
 
 ## usePagination
 

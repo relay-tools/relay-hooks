@@ -14,7 +14,7 @@
   "author": {
     "name": "morrys"
   },
-  "homepage": "https://github.com/relay-tools/relay-hooks",
+  "homepage": "https://relay-tools.github.io/relay-hooks/docs/relay-hooks.html",
   "repository": {
     "type": "git",
     "url": "https://github.com/relay-tools/relay-hooks"
@@ -33,7 +33,7 @@
   },
   "peerDependencies": {
     "react": ">=16.8.0",
-    "relay-runtime": ">=6.0.0"
+    "relay-runtime": ">=8.0.0"
   },
   "devDependencies": {
     "cross-env": "6.0.3",

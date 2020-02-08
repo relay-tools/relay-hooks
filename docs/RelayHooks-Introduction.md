@@ -22,7 +22,7 @@ yarn add react-relay relay-hooks
 
 * **PRs are welcome**, but it is always **better to open the issue first** so as to **help** me and other people **evaluating it**
 
-* **Please sponsor me** and recommend me at [github sponsorship](https://docs.google.com/forms/d/e/1FAIpQLSdE8nL7U-d7CBTWp9X7XOoezQD06wCzCAS9VpoUW6lJ03KU7w/viewform), so that i can use it
+* **Please sponsor me**
 
 ## RelayEnvironmentProvider
 
@@ -87,4 +87,63 @@ const AppTodo = function (appProps)  {
   return <div>loading</div>;
 
 }
+```
+
+## useLazyLoadQuery
+
+same to useQuery
+
+```ts
+import * as React from 'react';
+import {useQuery, graphql, RelayEnvironmentProvider } from 'relay-hooks';
+
+const query = graphql`
+  query appQuery($userId: String) {
+    user(id: $userId) {
+      ...TodoApp_user
+    }
+  }
+`;
+
+class ErrorBoundary extends React.Component {
+    state = { error: null };
+    componentDidCatch(error) {
+        this.setState({ error });
+    }
+    render() {
+        const { children, fallback } = this.props;
+        const { error } = this.state;
+        if (error) {
+            return React.createElement(fallback, { error });
+        }
+        return children;
+    }
+}
+
+const variables = {
+  userId: 'me',
+}; 
+
+const options = {
+  fetchPolicy: 'store-or-network', //default
+  networkCacheConfig: undefined,
+}
+
+
+const AppTodo = function (appProps)  {
+  const {props, cached} = useLazyLoadQuery(query, variables, options);
+  return <TodoApp user={props.user} />;
+
+}
+
+
+const App = (
+  <RelayEnvironmentProvider environment={modernEnvironment}>
+    <ErrorBoundary fallback={({ error }) => `Error: ${error.message + ': ' + error.stack}`}>
+      <React.Suspense fallback={<div>loading suspense</div>}>
+        <AppTodo />
+      </React.Suspense>
+    </ErrorBoundary>
+  </RelayEnvironmentProvider>
+);
 ```

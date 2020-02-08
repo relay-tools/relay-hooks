@@ -19,7 +19,11 @@ import {useState} from 'react';
 
 //import {useLazyLoadQuery, RelayEnvironmentProvider} from 'react-relay/hooks';
 
-import {useQuery, RelayEnvironmentProvider} from 'relay-hooks';
+import {
+  useQuery,
+  useLazyLoadQuery,
+  RelayEnvironmentProvider,
+} from 'relay-hooks';
 import {
   Environment,
   Network,
@@ -107,23 +111,15 @@ const AppTodo = function(appProps) {
 const isServer = typeof window === 'undefined';
 const LayoutTodo = ({userId}) => {
   console.log('LayoutTodo', userId, isServer);
-  const {props, error, retry, cached} = useQuery(
+  const {props, retry, error} = useQuery(
     QueryApp,
     {userId},
     {
-      fetchPolicy: 'store-and-network',
+      fetchPolicy: 'store-or-network',
     },
   );
-  /*const { props, error, retry, cached } = useQuery({
-    query: QueryApp,
-    variables: {
-      // Mock authenticated ID that matches database
-      userId,
-    },
-    dataFrom: "STORE_THEN_NETWORK"
-  });*/
 
-  console.log('renderer', props, cached);
+  console.log('renderer', props);
   if (props && props.user) {
     return <TodoApp user={props.user} userId={userId} retry={retry} />;
   } else if (error) {
@@ -144,7 +140,7 @@ const App = isServer ? (
   <div />
 ) : (
   <RelayEnvironmentProvider environment={modernEnvironment}>
-    <React.Suspense fallback={<div />}>
+    <React.Suspense fallback={<div>loading suspense</div>}>
       <AppTodo />
     </React.Suspense>
   </RelayEnvironmentProvider>

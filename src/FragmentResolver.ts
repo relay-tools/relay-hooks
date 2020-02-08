@@ -102,7 +102,7 @@ class FragmentResolver {
 
     _retainCachedOperation(operation: OperationDescriptor): void {
         this._disposeCacheSelectionReference();
-        this._cacheSelectionReference = this._environment.retain(operation.root);
+        this._cacheSelectionReference = this._environment.retain(operation);
     }
 
     _disposeCacheSelectionReference(): void {
@@ -232,7 +232,7 @@ class FragmentResolver {
     }
 
     lookupInStore(environment: IEnvironment, operation, fetchPolicy): Snapshot | null {
-        if (isStorePolicy(fetchPolicy) && environment.check(operation.root)) {
+        if (isStorePolicy(fetchPolicy) && environment.check(operation) === 'available') {
             this._retainCachedOperation(operation);
             return environment.lookup(operation.fragment, operation);
         }
@@ -508,7 +508,7 @@ class FragmentResolver {
             };
         }
         if (isNetwork) {
-            const reference = this._environment.retain(operation.root);
+            const reference = this._environment.retain(operation);
 
             /*eslint-disable */
             const fetchQueryOptions =

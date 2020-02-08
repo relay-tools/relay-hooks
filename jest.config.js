@@ -17,10 +17,26 @@ module.exports = {
 
     testMatch: ['<rootDir>/__tests__/**/*-test.js'],
 
-    modulePathIgnorePatterns: ['<rootDir>/lib/', '<rootDir>/node_modules/(?!(fbjs/lib/|react/lib/|fbjs-scripts/jest))'],
-    testPathIgnorePatterns: ['/node_modules/', '/lib/', '<rootDir>/lib/', '<rootDir>/node_modules/'],
-    roots: ['<rootDir>/', '<rootDir>/node_modules/fbjs/lib/', '<rootDir>/node_modules/fbjs-scripts/jest'],
-    setupFiles: ['<rootDir>/node_modules/fbjs-scripts/jest/environment.js', '<rootDir>/scripts/jest/environment.js'],
+    transformIgnorePatterns: ['<rootDir>/node_modules/(?!(relay-runtime))'],
+    modulePathIgnorePatterns: [
+        '<rootDir>/lib/',
+        '<rootDir>/node_modules/(?!(fbjs/lib/|react/lib/|fbjs-scripts/jest))',
+    ],
+    testPathIgnorePatterns: [
+        '/node_modules/',
+        '/lib/',
+        '<rootDir>/lib/',
+        '<rootDir>/node_modules/',
+    ],
+    roots: [
+        '<rootDir>/',
+        '<rootDir>/node_modules/fbjs/lib/',
+        '<rootDir>/node_modules/fbjs-scripts/jest',
+    ],
+    setupFiles: [
+        '<rootDir>/node_modules/fbjs-scripts/jest/environment.js',
+        '<rootDir>/scripts/jest/environment.js',
+    ],
     coverageThreshold: {
         global: {
             branches: 0,

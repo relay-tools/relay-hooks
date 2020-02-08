@@ -1,27 +1,28 @@
 import { useState, useEffect, useRef } from 'react';
-import QueryFetcher from './QueryFetcher';
-import { OperationType } from 'relay-runtime';
+import QueryFetcher, { getOrCreateQueryFetcher } from './QueryFetcher';
+import { OperationType, OperationDescriptor } from 'relay-runtime';
 
 export type Reference<TOperationType extends OperationType> = {
     queryFetcher: QueryFetcher<TOperationType>;
 };
 
-export const useQueryFetcher = <
-    TOperationType extends OperationType
->(): QueryFetcher<TOperationType> => {
+// set query when you want suspends
+export const useQueryFetcher = <TOperationType extends OperationType>(
+    query?: OperationDescriptor,
+): QueryFetcher<TOperationType> => {
     const [, forceUpdate] = useState(null);
     const ref = useRef<Reference<TOperationType>>();
     if (ref.current === null || ref.current === undefined) {
         ref.current = {
-            queryFetcher: new QueryFetcher(forceUpdate),
+            queryFetcher: getOrCreateQueryFetcher(query, forceUpdate),
         };
     }
-    const { queryFetcher } = ref.current;
+    //const { queryFetcher } = ref.current;
 
     useEffect(() => {
-        return (): void => queryFetcher.dispose();
+        return (): void => ref.current.queryFetcher.dispose();
     }, []);
-    return queryFetcher;
+    return ref.current.queryFetcher;
 };
 
 export default useQueryFetcher;

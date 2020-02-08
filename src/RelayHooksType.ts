@@ -81,6 +81,15 @@ export type PaginationFunction = {
     ) => Disposable;
 };
 
+export type RefetchableFunction = (
+    refetchVariables: Variables | ((fragmentVariables: Variables) => Variables),
+    options?: {
+        renderVariables?: Variables;
+        observerOrCallback?: ObserverOrCallback;
+        refetchOptions?: RefetchOptions;
+    },
+) => Disposable;
+
 export type RefetchFunction = (
     taggedNode: GraphQLTaggedNode,
     refetchVariables: Variables | ((fragmentVariables: Variables) => Variables),

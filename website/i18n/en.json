@@ -22,6 +22,9 @@
       },
       "use-refetch": {
         "title": "useRefetch"
+      },
+      "use-refetchable": {
+        "title": "useRefetchable"
       }
     },
     "links": {

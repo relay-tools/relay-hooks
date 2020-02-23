@@ -77,7 +77,11 @@ class QueryFetcher<TOperationType extends OperationType> {
     }
 
     lookupInStore(environment: IEnvironment, operation, fetchPolicy: FetchPolicy): Snapshot {
-        if (isStorePolicy(fetchPolicy) && environment.check(operation) === 'available') {
+        if (
+            isStorePolicy(fetchPolicy) &&
+            (environment.check(operation) === 'available' ||
+                environment.check(operation).status === 'available')
+        ) {
             return environment.lookup(operation.fragment, operation);
         }
         return null;

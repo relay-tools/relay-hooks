@@ -15,7 +15,7 @@ This package provides a `useMutation` Hook and a `<Mutation>` component. These w
 
 ```js
 import React from 'react';
-import { Mutation, useMutation } from 'react-relay-mutation';
+import { Mutation, useMutation } from 'relay-hooks';
 
 /* ... */
 

@@ -232,7 +232,11 @@ class FragmentResolver {
     }
 
     lookupInStore(environment: IEnvironment, operation, fetchPolicy): Snapshot | null {
-        if (isStorePolicy(fetchPolicy) && environment.check(operation) === 'available') {
+        if (
+            isStorePolicy(fetchPolicy) &&
+            (environment.check(operation) === 'available' ||
+                environment.check(operation).status === 'available')
+        ) {
             this._retainCachedOperation(operation);
             return environment.lookup(operation.fragment, operation);
         }

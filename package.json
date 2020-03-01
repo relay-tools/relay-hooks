@@ -1,6 +1,6 @@
 {
   "name": "relay-hooks",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "keywords": [
     "graphql",
     "relay",
@@ -42,10 +42,10 @@
     "graphql": "^14.2.0",
     "@types/react": "16.9.11",
     "@types/react-dom": "16.9.4",
-    "relay-runtime": "^8.0.0",
+    "relay-runtime": "^9.0.0",
     "react-test-renderer": "16.11.0",
-    "relay-test-utils": "8.0.0",
-    "relay-test-utils-internal": "8.0.0",
+    "relay-test-utils": "9.0.0",
+    "relay-test-utils-internal": "9.0.0",
     "@types/jest": "24.0.18",
     "ts-jest": "24.1.0",
     "jest": "24.9.0",

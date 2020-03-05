@@ -90,7 +90,7 @@ export type RefetchableFunction = (
     },
 ) => Disposable;
 
-export type RefetchFunction<TVariables extends Variables> = (
+export type RefetchFunction<TVariables extends Variables = Variables> = (
     taggedNode: GraphQLTaggedNode,
     refetchVariables: TVariables | ((fragmentVariables: Variables) => TVariables),
     renderVariables?: TVariables,

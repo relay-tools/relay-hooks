@@ -64,7 +64,7 @@ export type ArrayKeyReturnType<T extends ArrayKeyType> = (
     arg: T,
 ) => NonNullable<NonNullable<T[0]>[' $data']>[0];
 
-export type PaginationFunction = {
+export type PaginationFunction<TVariables extends Variables = Variables> = {
     loadMore: (
         connectionConfig: ConnectionConfig,
         pageSize: number,
@@ -77,14 +77,14 @@ export type PaginationFunction = {
         connectionConfig: ConnectionConfig,
         totalCount: number,
         observerOrCallback: ObserverOrCallback,
-        refetchVariables: Variables,
+        refetchVariables: TVariables,
     ) => Disposable;
 };
 
-export type RefetchableFunction = (
-    refetchVariables: Variables | ((fragmentVariables: Variables) => Variables),
+export type RefetchableFunction<TVariables extends Variables = Variables> = (
+    refetchVariables: TVariables | ((fragmentVariables: TVariables) => TVariables),
     options?: {
-        renderVariables?: Variables;
+        renderVariables?: TVariables;
         observerOrCallback?: ObserverOrCallback;
         refetchOptions?: RefetchOptions;
     },
@@ -92,7 +92,7 @@ export type RefetchableFunction = (
 
 export type RefetchFunction<TVariables extends Variables = Variables> = (
     taggedNode: GraphQLTaggedNode,
-    refetchVariables: TVariables | ((fragmentVariables: Variables) => TVariables),
+    refetchVariables: TVariables | ((fragmentVariables: TVariables) => TVariables),
     renderVariables?: TVariables,
     observerOrCallback?: ObserverOrCallback,
     options?: RefetchOptions,

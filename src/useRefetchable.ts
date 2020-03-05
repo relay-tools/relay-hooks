@@ -1,28 +1,40 @@
 import { useCallback, useMemo } from 'react';
 import useOssFragment from './useOssFragment';
 import { RefetchableFunction, RefetchOptions } from './RelayHooksType';
-import { GraphQLTaggedNode, getFragment, Variables, ObserverOrCallback } from 'relay-runtime';
+import { GraphQLTaggedNode, getFragment, ObserverOrCallback, OperationType } from 'relay-runtime';
 
 import * as invariant from 'fbjs/lib/invariant';
 
 import { KeyType, KeyReturnType, $Call, ArrayKeyType, ArrayKeyReturnType } from './RelayHooksType';
 
-function useRefetchable<TKey extends KeyType>(
+function useRefetchable<TKey extends KeyType, TOperationType extends OperationType = OperationType>(
     fragmentInput: GraphQLTaggedNode,
     fragmentRef: TKey,
-): [$Call<KeyReturnType<TKey>>, RefetchableFunction];
-function useRefetchable<TKey extends KeyType>(
+): [$Call<KeyReturnType<TKey>>, RefetchableFunction<TOperationType['variables']>];
+function useRefetchable<TKey extends KeyType, TOperationType extends OperationType = OperationType>(
     fragmentInput: GraphQLTaggedNode,
     fragmentRef: TKey | null,
-): [$Call<KeyReturnType<TKey>> | null, RefetchableFunction];
-function useRefetchable<TKey extends ArrayKeyType>(
+): [$Call<KeyReturnType<TKey>> | null, RefetchableFunction<TOperationType['variables']>];
+function useRefetchable<
+    TKey extends ArrayKeyType,
+    TOperationType extends OperationType = OperationType
+>(
     fragmentInput: GraphQLTaggedNode,
     fragmentRef: TKey,
-): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>, RefetchableFunction];
-function useRefetchable<TKey extends ArrayKeyType>(
+): [
+    ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>,
+    RefetchableFunction<TOperationType['variables']>,
+];
+function useRefetchable<
+    TKey extends ArrayKeyType,
+    TOperationType extends OperationType = OperationType
+>(
     fragmentInput: GraphQLTaggedNode,
     fragmentRef: TKey | null,
-): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null, RefetchableFunction] {
+): [
+    ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null,
+    RefetchableFunction<TOperationType['variables']>,
+] {
     const fragmentNode = getFragment(fragmentInput);
 
     const [data, { refetch }] = useOssFragment(fragmentInput, fragmentRef);
@@ -61,9 +73,11 @@ function useRefetchable<TKey extends ArrayKeyType>(
 
     const refetchable = useCallback(
         (
-            refetchVariables: Variables | ((fragmentVariables: Variables) => Variables),
+            refetchVariables:
+                | TOperationType['variables']
+                | ((fragmentVariables: TOperationType['variables']) => TOperationType['variables']),
             options: {
-                renderVariables?: Variables;
+                renderVariables?: TOperationType['variables'];
                 observerOrCallback?: ObserverOrCallback;
                 refetchOptions?: RefetchOptions;
             } = {},

@@ -154,7 +154,7 @@ const App = (
 
 ## useRefetchable
 
-[See useRefetchable.md](./useRefetch.md)
+[See useRefetchable.md](./useRefetchable.md)
 
 ## usePagination
 

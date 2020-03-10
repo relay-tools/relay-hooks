@@ -4,15 +4,11 @@ import useRelayEnvironment from './useRelayEnvironment';
 import useQueryFetcher from './useQueryFetcher';
 import { useMemoOperationDescriptor } from './useQuery';
 
-export const useLazyLoadQuery: <TOperationType extends OperationType>(
+export const useLazyLoadQuery = <TOperationType extends OperationType>(
     gqlQuery: GraphQLTaggedNode,
-    variables: TOperationType['variables'],
-    options?: QueryOptions,
-) => RenderProps<TOperationType> = <TOperationType extends OperationType>(
-    gqlQuery,
-    variables,
-    options = {} as QueryOptions,
-) => {
+    variables: TOperationType['variables'] = {},
+    options: QueryOptions = {},
+): RenderProps<TOperationType> => {
     const environment = useRelayEnvironment();
     const query = useMemoOperationDescriptor(gqlQuery, variables);
     const queryFetcher = useQueryFetcher<TOperationType>(query);

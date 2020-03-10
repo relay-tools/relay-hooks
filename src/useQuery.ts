@@ -22,15 +22,11 @@ export function useMemoOperationDescriptor(
     return useMemo(() => createOperation(gqlQuery, memoVariables), [gqlQuery, memoVariables]);
 }
 
-export const useQuery: <TOperationType extends OperationType>(
+export const useQuery = <TOperationType extends OperationType>(
     gqlQuery: GraphQLTaggedNode,
-    variables: TOperationType['variables'],
-    options?: QueryOptions,
-) => RenderProps<TOperationType> = <TOperationType extends OperationType>(
-    gqlQuery,
-    variables,
-    options = {},
-) => {
+    variables: TOperationType['variables'] = {},
+    options: QueryOptions = {},
+): RenderProps<TOperationType> => {
     const environment = useRelayEnvironment();
     const query = useMemoOperationDescriptor(gqlQuery, variables);
     const queryFetcher = useQueryFetcher<TOperationType>();

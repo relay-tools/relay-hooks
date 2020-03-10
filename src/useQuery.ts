@@ -25,7 +25,7 @@ export function useMemoOperationDescriptor(
 export const useQuery: <TOperationType extends OperationType>(
     gqlQuery: GraphQLTaggedNode,
     variables: TOperationType['variables'],
-    options: QueryOptions,
+    options?: QueryOptions,
 ) => RenderProps<TOperationType> = <TOperationType extends OperationType>(
     gqlQuery,
     variables,

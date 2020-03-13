@@ -48,6 +48,7 @@ export type QueryOptions = {
     fetchPolicy?: FetchPolicy;
     fetchKey?: string | number;
     networkCacheConfig?: CacheConfig;
+    skip?: boolean;
 };
 
 export type $Call<Fn extends (...args: any[]) => any> = Fn extends (arg: any) => infer RT

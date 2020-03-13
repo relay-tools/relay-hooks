@@ -94,12 +94,20 @@ class QueryFetcher<TOperationType extends OperationType> {
         retain: (environment, query) => Disposable = (environment, query): Disposable =>
             environment.retain(query),
     ): RenderProps<TOperationType> {
-        const { fetchPolicy = defaultPolicy, networkCacheConfig, fetchKey } = options;
+        const { fetchPolicy = defaultPolicy, networkCacheConfig, fetchKey, skip } = options;
         let storeSnapshot;
         const retry = (cacheConfigOverride: CacheConfig = networkCacheConfig): void => {
             this.disposeRequest();
             this.fetch(cacheConfigOverride, false);
         };
+        if(skip) {
+            return {
+                cached: false,
+                retry,
+                error: null,
+                props: {},
+            }
+        }
         this.clearTemporaryRetain();
         const isDiffEnvQuery = this.isDiffEnvQuery(environment, query);
         if (isDiffEnvQuery || fetchPolicy !== this.fetchPolicy || fetchKey !== this.fetchKey) {

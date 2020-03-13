@@ -56,12 +56,14 @@ const QueryRendererHook = props => {
     query,
     variables,
     cacheConfig,
-    fetchKey
+    fetchKey,
+    skip
   } = props;
   const { cached, ...relays } = useQuery(query, variables, {
     networkCacheConfig: cacheConfig,
     fetchPolicy,
-    fetchKey
+    fetchKey,
+    skip
   });
 
   return <React.Fragment>{render(relays)}</React.Fragment>;
@@ -147,6 +149,57 @@ describe("ReactRelayQueryRenderer", () => {
   });
 
   describe("when initialized", () => {
+
+    
+
+    it("skip", () => {
+      const renderer = ReactTestRenderer.create(
+        <PropsSetter>
+        <ReactRelayQueryRenderer
+          query={TestQuery}
+          cacheConfig={cacheConfig}
+          environment={environment}
+          render={render}
+          variables={variables}
+          skip={true}
+        />
+        </PropsSetter>
+      );
+      expect(environment.execute.mock.calls.length).toBe(0);
+      environment.mockClear();
+      render.mockClear();
+
+      renderer.getInstance().setProps({
+        environment,
+        query: TestQuery,
+        render,
+        variables,
+        skip: false
+      });
+
+      expect(environment.execute.mock.calls.length).toBe(1);
+      render.mockClear();
+      environment.mock.resolve(TestQuery, response);
+      const owner = createOperationDescriptor(TestQuery, variables);
+      expect({
+        error: null,
+        props: {
+          node: {
+            id: '4',
+
+            __fragments: {
+              TestFragment: {},
+            },
+
+            __fragmentOwner: owner.request,
+            __id: '4',
+          },
+        },
+        retry: expect.any(Function),
+      }).toBeRendered();
+
+    });
+
     it("fetches the query", () => {
       ReactTestRenderer.create(
         <ReactRelayQueryRenderer

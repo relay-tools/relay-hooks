@@ -94,7 +94,7 @@ describe('useLazyLoadQueryNode', () => {
                 /* $FlowFixMe(>=0.111.0) This comment suppresses an error found when
                  * Flow v0.111.0 was deployed. To see the error, delete this comment
                  * and run Flow. */
-                { fetchPolicy: renderProps.fetchPolicy || defaultFetchPolicy },
+                { fetchPolicy: renderProps.fetchPolicy || defaultFetchPolicy, skip: renderProps.skip },
             );
             return renderFn(props);
         };
@@ -170,6 +170,46 @@ describe('useLazyLoadQueryNode', () => {
         expectToHaveFetched(environment, query);
         expect(renderFn).not.toBeCalled();
         expect(environment.retain).toHaveBeenCalledTimes(1);
+
+        environment.mock.resolve(gqlQuery, {
+            data: {
+                node: {
+                    __typename: 'User',
+                    id: variables.id,
+                    name: 'Alice',
+                },
+            },
+        });
+
+        const data = environment.lookup(query.fragment).data;
+        expectToBeRendered(renderFn, data);
+    });
+
+    it('skip', () => {
+        const instance = render(environment, <Container variables={variables} skip={true} />);
+
+        
+        expect(instance.toJSON()).toEqual('Empty');
+        expect(environment.execute).toBeCalledTimes(0);
+        expect(renderFn).toBeCalled();
+        expect(environment.retain).toHaveBeenCalledTimes(0);
+
+        
+        renderFn.mockClear();
+        environment.retain.mockClear();
+        environment.execute.mockClear();
+
+        // Suspend on the first query
+        ReactTestRenderer.act(() => {
+            setProps({ variables, skip: false });
+        });
+
+        expect(instance.toJSON()).toEqual('Fallback');
+        expectToHaveFetched(environment, query);
+        expect(renderFn).not.toBeCalled();
+        expect(environment.retain).toHaveBeenCalledTimes(1);
+
+
 
         environment.mock.resolve(gqlQuery, {
             data: {

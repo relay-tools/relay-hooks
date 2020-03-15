@@ -56,6 +56,8 @@ In addition to `query` (first argument) and `variables` (second argument), `useQ
 
 `networkCacheConfig`: [Optional] Object containing cache config options for the network layer. Note the the network layer may contain an additional query response cache which will reuse network responses for identical queries. If you want to bypass this cache completely, pass {force: true} as the value for this option.
 
+`skip`: [Optional] If skip is true, the query will be skipped entirely.
+
 ```ts
 import {useQuery, graphql } from 'relay-hooks';
 

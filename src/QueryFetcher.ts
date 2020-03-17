@@ -100,13 +100,13 @@ class QueryFetcher<TOperationType extends OperationType> {
             this.disposeRequest();
             this.fetch(cacheConfigOverride, false);
         };
-        if(skip) {
+        if (skip) {
             return {
                 cached: false,
                 retry,
                 error: null,
                 props: {},
-            }
+            };
         }
         this.clearTemporaryRetain();
         const isDiffEnvQuery = this.isDiffEnvQuery(environment, query);

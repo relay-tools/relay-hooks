@@ -1,0 +1,29 @@
+name: Build
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: install dependencies
+        run: npm ci
+      - name: build
+        run: npm run build
+      - name: format
+        run: npm run format:ci
+      - name: lint
+        run: npm run eslint
+      - name: test
+        run: npm run test
+        env:
+          CI: true

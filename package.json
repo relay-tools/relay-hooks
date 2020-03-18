@@ -21,12 +21,14 @@
   },
   "scripts": {
     "clean": "rimraf lib",
-    "prepare": "npm run build",
-    "build": "npm run clean && tsc && npm run test",
+    "compile": "npm run clean && tsc",
+    "build": "npm run compile && npm run test",
     "test": "cross-env NODE_ENV=test jest --coverage",
     "format": "prettier --write \"src/**/*.{j,t}s*\"",
-    "eslint": "eslint ./src --ext .js,.jsx,.ts,.tsx"
-  },
+    "format:ci": "prettier --list-different \"src/**/*.{j,t}s*\"",
+    "eslint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
+    "prepublishOnly": "npm run build"
+ },
   "dependencies": {
     "@restart/hooks": "^0.3.1",
     "fbjs": "^1.0.0"

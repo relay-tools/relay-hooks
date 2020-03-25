@@ -105,7 +105,7 @@ class QueryFetcher<TOperationType extends OperationType> {
                 cached: false,
                 retry,
                 error: null,
-                props: {},
+                props: undefined,
             };
         }
         this.clearTemporaryRetain();

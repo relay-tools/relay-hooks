@@ -11,6 +11,7 @@ export { default as useQuery } from './useQuery';
 export { default as useLazyLoadQuery } from './useLazyLoadQuery';
 export { default as useFragment } from './useFragment';
 export { useMutation } from './useMutation';
+export { default as useSubscription } from './useSubscription';
 export { default as useOssFragment } from './useOssFragment';
 export { default as usePagination } from './usePagination';
 export { default as useRefetch } from './useRefetch';

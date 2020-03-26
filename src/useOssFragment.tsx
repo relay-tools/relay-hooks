@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 import { RelayFeatureFlags, GraphQLTaggedNode } from 'relay-runtime';
-
 import useRelayEnvironment from './useRelayEnvironment';
 import FragmentResolver from './FragmentResolver';
 import {

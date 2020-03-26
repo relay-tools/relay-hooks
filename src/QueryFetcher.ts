@@ -1,6 +1,13 @@
-import { Disposable, CacheConfig, IEnvironment, Snapshot } from 'relay-runtime';
+import {
+    Disposable,
+    CacheConfig,
+    IEnvironment,
+    Snapshot,
+    __internal,
+    OperationType,
+    OperationDescriptor,
+} from 'relay-runtime';
 import { isNetworkPolicy, isStorePolicy } from './Utils';
-import { __internal, OperationType, OperationDescriptor } from 'relay-runtime';
 import { FetchPolicy, RenderProps } from './RelayHooksType';
 
 const { fetchQuery } = __internal;

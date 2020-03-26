@@ -1,13 +1,4 @@
 import {
-    STORE_OR_NETWORK,
-    STORE_THEN_NETWORK,
-    NETWORK_ONLY,
-    FetchPolicy,
-    FragmentVariablesGetter,
-    FORWARD,
-    PaginationData,
-} from './RelayHooksType';
-import {
     ConnectionConfig,
     Observer,
     Variables,
@@ -22,11 +13,20 @@ import {
     OperationDescriptor,
     SingularReaderSelector,
 } from 'relay-runtime';
-
-export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
 import * as invariant from 'fbjs/lib/invariant';
 import * as warning from 'fbjs/lib/warning';
 import * as areEqual from 'fbjs/lib/areEqual';
+import {
+    STORE_OR_NETWORK,
+    STORE_THEN_NETWORK,
+    NETWORK_ONLY,
+    FetchPolicy,
+    FragmentVariablesGetter,
+    FORWARD,
+    PaginationData,
+} from './RelayHooksType';
+
+export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
 
 export const isNetworkPolicy = (policy: FetchPolicy, storeSnapshot): boolean => {
     return (

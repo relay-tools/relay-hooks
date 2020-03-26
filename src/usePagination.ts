@@ -1,6 +1,6 @@
+import { GraphQLTaggedNode, OperationType } from 'relay-runtime';
 import useOssFragment from './useOssFragment';
 import { PaginationFunction } from './RelayHooksType';
-import { GraphQLTaggedNode, OperationType } from 'relay-runtime';
 import { KeyType, KeyReturnType, $Call, ArrayKeyType, ArrayKeyReturnType } from './RelayHooksType';
 
 function usePagination<TKey extends KeyType, TOperationType extends OperationType = OperationType>(

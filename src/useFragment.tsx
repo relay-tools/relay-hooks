@@ -1,5 +1,5 @@
-import useOssFragment from './useOssFragment';
 import { GraphQLTaggedNode } from 'relay-runtime';
+import useOssFragment from './useOssFragment';
 import { KeyType, KeyReturnType, $Call, ArrayKeyType, ArrayKeyReturnType } from './RelayHooksType';
 
 function useFragment<TKey extends KeyType>(

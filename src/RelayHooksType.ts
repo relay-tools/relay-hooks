@@ -28,7 +28,7 @@ export type ContainerResult = {
 
 export interface RenderProps<T extends OperationType> {
     error: Error;
-    props: T['response'];
+    props: T['response'] | null | undefined;
     retry: (_cacheConfigOverride?: CacheConfig) => void;
     cached?: boolean;
 }

@@ -159,4 +159,4 @@ export function Mutation<T extends MutationParameters>({
     return children(mutate, state) as React.ReactElement;
 }
 
-export default useMutation
+export default useMutation;

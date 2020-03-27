@@ -7,8 +7,8 @@ import {
     OperationType,
     OperationDescriptor,
 } from 'relay-runtime';
-import { isNetworkPolicy, isStorePolicy } from './Utils';
 import { FetchPolicy, RenderProps } from './RelayHooksType';
+import { isNetworkPolicy, isStorePolicy } from './Utils';
 
 const { fetchQuery } = __internal;
 

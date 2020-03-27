@@ -1,5 +1,4 @@
 import { GraphQLTaggedNode, OperationType } from 'relay-runtime';
-import useOssFragment from './useOssFragment';
 import {
     RefetchFunction,
     KeyType,
@@ -8,6 +7,7 @@ import {
     ArrayKeyType,
     ArrayKeyReturnType,
 } from './RelayHooksType';
+import useOssFragment from './useOssFragment';
 
 function useRefetch<TKey extends KeyType, TOperationType extends OperationType = OperationType>(
     fragmentNode: GraphQLTaggedNode,

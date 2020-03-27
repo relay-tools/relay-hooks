@@ -1,8 +1,8 @@
 import { GraphQLTaggedNode, OperationType } from 'relay-runtime';
 import { RenderProps, QueryOptions } from './RelayHooksType';
-import useRelayEnvironment from './useRelayEnvironment';
-import useQueryFetcher from './useQueryFetcher';
 import { useMemoOperationDescriptor } from './useQuery';
+import useQueryFetcher from './useQueryFetcher';
+import useRelayEnvironment from './useRelayEnvironment';
 
 export const useLazyLoadQuery = <TOperationType extends OperationType>(
     gqlQuery: GraphQLTaggedNode,

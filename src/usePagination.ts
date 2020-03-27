@@ -1,7 +1,13 @@
-import useOssFragment from './useOssFragment';
-import { PaginationFunction } from './RelayHooksType';
 import { GraphQLTaggedNode, OperationType } from 'relay-runtime';
-import { KeyType, KeyReturnType, $Call, ArrayKeyType, ArrayKeyReturnType } from './RelayHooksType';
+import {
+    PaginationFunction,
+    KeyType,
+    KeyReturnType,
+    $Call,
+    ArrayKeyType,
+    ArrayKeyReturnType,
+} from './RelayHooksType';
+import useOssFragment from './useOssFragment';
 
 function usePagination<TKey extends KeyType, TOperationType extends OperationType = OperationType>(
     fragmentNode: GraphQLTaggedNode,

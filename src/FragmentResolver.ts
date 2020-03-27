@@ -1,3 +1,5 @@
+import * as areEqual from 'fbjs/lib/areEqual';
+import * as invariant from 'fbjs/lib/invariant';
 import {
     getSelector,
     IEnvironment,
@@ -15,11 +17,9 @@ import {
     CacheConfig,
     Subscription,
     getDataIDsFromFragment,
+    __internal,
 } from 'relay-runtime';
-
-export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
-import * as areEqual from 'fbjs/lib/areEqual';
-import * as invariant from 'fbjs/lib/invariant';
+import { RefetchOptions, PaginationData } from './RelayHooksType';
 import {
     isNetworkPolicy,
     isStorePolicy,
@@ -30,9 +30,8 @@ import {
     getNewSelector,
     createOperation,
 } from './Utils';
-import { RefetchOptions, PaginationData } from './RelayHooksType';
 
-import { __internal } from 'relay-runtime';
+export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
 
 const { fetchQuery } = __internal;
 

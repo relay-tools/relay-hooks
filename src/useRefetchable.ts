@@ -1,11 +1,16 @@
-import { useCallback, useMemo } from 'react';
-import useOssFragment from './useOssFragment';
-import { RefetchableFunction, RefetchOptions } from './RelayHooksType';
-import { GraphQLTaggedNode, getFragment, ObserverOrCallback, OperationType } from 'relay-runtime';
-
 import * as invariant from 'fbjs/lib/invariant';
-
-import { KeyType, KeyReturnType, $Call, ArrayKeyType, ArrayKeyReturnType } from './RelayHooksType';
+import { useCallback, useMemo } from 'react';
+import { GraphQLTaggedNode, getFragment, ObserverOrCallback, OperationType } from 'relay-runtime';
+import {
+    RefetchableFunction,
+    RefetchOptions,
+    KeyType,
+    KeyReturnType,
+    $Call,
+    ArrayKeyType,
+    ArrayKeyReturnType,
+} from './RelayHooksType';
+import useOssFragment from './useOssFragment';
 
 function useRefetchable<TKey extends KeyType, TOperationType extends OperationType = OperationType>(
     fragmentInput: GraphQLTaggedNode,

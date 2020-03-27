@@ -1,9 +1,9 @@
+import * as areEqual from 'fbjs/lib/areEqual';
 import { useRef, useMemo } from 'react';
 import { GraphQLTaggedNode, OperationType, OperationDescriptor, Variables } from 'relay-runtime';
-import * as areEqual from 'fbjs/lib/areEqual';
 import { RenderProps, QueryOptions } from './RelayHooksType';
-import useRelayEnvironment from './useRelayEnvironment';
 import useQueryFetcher from './useQueryFetcher';
+import useRelayEnvironment from './useRelayEnvironment';
 import { createOperation } from './Utils';
 
 export function useDeepCompare<T>(value: T): T {

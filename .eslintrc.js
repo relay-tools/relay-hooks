@@ -3,6 +3,7 @@ module.exports = {
         'plugin:@typescript-eslint/recommended', // Uses the recommended rules from the @typescript-eslint/eslint-plugin
         'prettier/@typescript-eslint', // Uses eslint-config-prettier to disable ESLint rules from @typescript-eslint/eslint-plugin that would conflict with prettier
         'plugin:prettier/recommended', // Enables eslint-plugin-prettier and displays prettier errors as ESLint errors. Make sure this is always the last configuration in the extends array.
+        //'plugin:react-hooks/recommended', TODO add in next release
     ],
     parserOptions: {
         ecmaVersion: 2018, // Allows for the parsing of modern ECMAScript features
@@ -43,5 +44,19 @@ module.exports = {
         'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
         'linebreak-style': [0],
         '@typescript-eslint/no-use-before-define': [0],
+        'no-duplicate-imports': ['error'],
+        semi: 'off',
+        '@typescript-eslint/semi': [2, 'always'],
+        '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions'] }],
+        'import/order': [
+            'error',
+            {
+                groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+                alphabetize: {
+                    order: 'asc',
+                    caseInsensitive: true,
+                },
+            },
+        ],
     },
 };

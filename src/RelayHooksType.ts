@@ -1,5 +1,3 @@
-import { RelayContext, FragmentSpecResolver } from 'relay-runtime/lib/store/RelayStoreTypes';
-
 import {
     Disposable,
     OperationType,
@@ -9,6 +7,7 @@ import {
     PageInfo,
     Observer,
 } from 'relay-runtime';
+import { RelayContext, FragmentSpecResolver } from 'relay-runtime/lib/store/RelayStoreTypes';
 
 export const NETWORK_ONLY = 'network-only';
 export const STORE_THEN_NETWORK = 'store-and-network';

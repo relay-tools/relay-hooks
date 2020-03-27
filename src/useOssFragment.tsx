@@ -1,7 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 import { RelayFeatureFlags, GraphQLTaggedNode } from 'relay-runtime';
-
-import useRelayEnvironment from './useRelayEnvironment';
 import FragmentResolver from './FragmentResolver';
 import {
     ContainerResult,
@@ -12,6 +10,7 @@ import {
     ArrayKeyType,
     ArrayKeyReturnType,
 } from './RelayHooksType';
+import useRelayEnvironment from './useRelayEnvironment';
 
 function useOssFragment<TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,

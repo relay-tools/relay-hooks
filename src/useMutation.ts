@@ -1,7 +1,6 @@
 /*eslint-disable */
 import * as invariant from 'fbjs/lib/invariant';
 import * as React from 'react';
-import { useCallback, useContext, useState } from 'react';
 import ReactRelayContext from './ReactRelayContext';
 import {
     MutationConfig as BaseMutationConfig,
@@ -10,6 +9,7 @@ import {
     commitMutation,
 } from 'relay-runtime';
 import useMounted from '@restart/hooks/useMounted';
+const { useCallback, useContext, useState } = React;
 
 export type MutationState<T extends MutationParameters> = {
     loading: boolean;
@@ -158,3 +158,5 @@ export function Mutation<T extends MutationParameters>({
     const [mutate, state] = useMutation(mutation, config, environment);
     return children(mutate, state) as React.ReactElement;
 }
+
+export default useMutation;

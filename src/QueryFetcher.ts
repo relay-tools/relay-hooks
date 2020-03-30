@@ -1,7 +1,14 @@
-import { Disposable, CacheConfig, IEnvironment, Snapshot } from 'relay-runtime';
-import { isNetworkPolicy, isStorePolicy } from './Utils';
-import { __internal, OperationType, OperationDescriptor } from 'relay-runtime';
+import {
+    Disposable,
+    CacheConfig,
+    IEnvironment,
+    Snapshot,
+    __internal,
+    OperationType,
+    OperationDescriptor,
+} from 'relay-runtime';
 import { FetchPolicy, RenderProps } from './RelayHooksType';
+import { isNetworkPolicy, isStorePolicy } from './Utils';
 
 const { fetchQuery } = __internal;
 
@@ -100,13 +107,13 @@ class QueryFetcher<TOperationType extends OperationType> {
             this.disposeRequest();
             this.fetch(cacheConfigOverride, false);
         };
-        if(skip) {
+        if (skip) {
             return {
                 cached: false,
                 retry,
                 error: null,
-                props: {},
-            }
+                props: undefined,
+            };
         }
         this.clearTemporaryRetain();
         const isDiffEnvQuery = this.isDiffEnvQuery(environment, query);

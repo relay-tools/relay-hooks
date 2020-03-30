@@ -1,4 +1,4 @@
-# relay-hooks
+# relay-hooks ![](https://github.com/relay-tools/relay-hooks/workflows/Build/badge.svg)
 Use Relay as React hooks
 
 ## Installation

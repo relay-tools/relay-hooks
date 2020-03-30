@@ -1,5 +1,3 @@
-import { RelayContext, FragmentSpecResolver } from 'relay-runtime/lib/store/RelayStoreTypes';
-
 import {
     Disposable,
     OperationType,
@@ -9,6 +7,7 @@ import {
     PageInfo,
     Observer,
 } from 'relay-runtime';
+import { RelayContext, FragmentSpecResolver } from 'relay-runtime/lib/store/RelayStoreTypes';
 
 export const NETWORK_ONLY = 'network-only';
 export const STORE_THEN_NETWORK = 'store-and-network';
@@ -28,7 +27,7 @@ export type ContainerResult = {
 
 export interface RenderProps<T extends OperationType> {
     error: Error;
-    props: T['response'];
+    props: T['response'] | null | undefined;
     retry: (_cacheConfigOverride?: CacheConfig) => void;
     cached?: boolean;
 }

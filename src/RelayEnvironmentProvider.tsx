@@ -1,6 +1,6 @@
 import * as React from 'react';
-import ReactRelayContext from './ReactRelayContext'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { Environment, RelayFeatureFlags } from 'relay-runtime';
+import ReactRelayContext from './ReactRelayContext'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 const RelayEnvironmentProvider = function(props: {
     children: React.ReactNode;

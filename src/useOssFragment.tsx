@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { RelayFeatureFlags, GraphQLTaggedNode } from 'relay-runtime';
 import FragmentResolver from './FragmentResolver';
 import {
@@ -44,22 +44,23 @@ function useOssFragment<TKey extends ArrayKeyType>(
         return (): void => {
             resolver.dispose();
         };
-    }, []);
+    }, [resolver]);
 
     resolver.resolve(environment, fragmentNode, fragmentRef);
 
     const data = resolver.getData();
 
-    return [
-        data,
-        {
+    const resolverFunction = useMemo(() => {
+        return {
             refetch: resolver.refetch,
             loadMore: resolver.loadMore,
             hasMore: resolver.hasMore,
             isLoading: resolver.isLoading,
             refetchConnection: resolver.refetchConnection,
-        },
-    ];
+        };
+    }, [resolver]);
+
+    return [data, resolverFunction];
 }
 
 export default useOssFragment;

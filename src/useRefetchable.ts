@@ -10,7 +10,7 @@ import {
     ArrayKeyType,
     ArrayKeyReturnType,
 } from './RelayHooksType';
-import useOssFragment from './useOssFragment';
+import useRefetch from './useRefetch';
 
 function useRefetchable<TKey extends KeyType, TOperationType extends OperationType = OperationType>(
     fragmentInput: GraphQLTaggedNode,
@@ -42,7 +42,7 @@ function useRefetchable<
 ] {
     const fragmentNode = getFragment(fragmentInput);
 
-    const [data, { refetch }] = useOssFragment(fragmentInput, fragmentRef);
+    const [data, refetch] = useRefetch(fragmentInput, fragmentRef);
 
     const refetchNode = useMemo(() => {
         const metadata = fragmentNode.metadata;
@@ -95,7 +95,7 @@ function useRefetchable<
                 options.refetchOptions,
             );
         },
-        [refetchNode],
+        [refetch, refetchNode],
     );
 
     return [data, refetchable];

@@ -1,0 +1,23 @@
+type Entry {
+    id: ID!
+    text: String
+}
+
+input CreateEntryInput {
+    clientMutationId: String
+    id: ID!
+    text: String!
+}
+
+type CreateEntryPayload {
+    clientMutationId: String
+    entry: Entry
+}
+
+type Query {
+    entries: [Entry]
+}
+
+type Mutation {
+    createEntry(input: CreateEntryInput): CreateEntryPayload
+}

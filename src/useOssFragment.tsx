@@ -1,10 +1,9 @@
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { RelayFeatureFlags, GraphQLTaggedNode } from 'relay-runtime';
 import FragmentResolver from './FragmentResolver';
 import {
     ContainerResult,
     KeyType,
-    OssFragmentFunction,
     KeyReturnType,
     $Call,
     ArrayKeyType,
@@ -15,19 +14,19 @@ import useRelayEnvironment from './useRelayEnvironment';
 function useOssFragment<TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey,
-): [$Call<KeyReturnType<TKey>>, OssFragmentFunction];
+): [$Call<KeyReturnType<TKey>>, FragmentResolver];
 function useOssFragment<TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null,
-): [$Call<KeyReturnType<TKey>> | null, OssFragmentFunction];
+): [$Call<KeyReturnType<TKey>> | null, FragmentResolver];
 function useOssFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey,
-): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>, OssFragmentFunction];
+): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>, FragmentResolver];
 function useOssFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null,
-): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null, OssFragmentFunction] {
+): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null, FragmentResolver] {
     RelayFeatureFlags.PREFER_FRAGMENT_OWNER_OVER_CONTEXT = true;
     const environment = useRelayEnvironment();
     const [, forceUpdate] = useState<ContainerResult>(null);
@@ -50,17 +49,7 @@ function useOssFragment<TKey extends ArrayKeyType>(
 
     const data = resolver.getData();
 
-    const resolverFunction = useMemo(() => {
-        return {
-            refetch: resolver.refetch,
-            loadMore: resolver.loadMore,
-            hasMore: resolver.hasMore,
-            isLoading: resolver.isLoading,
-            refetchConnection: resolver.refetchConnection,
-        };
-    }, [resolver]);
-
-    return [data, resolverFunction];
+    return [data, resolver];
 }
 
 export default useOssFragment;

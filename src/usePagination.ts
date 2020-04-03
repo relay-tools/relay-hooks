@@ -38,16 +38,16 @@ function usePagination<
     ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null,
     PaginationFunction<TOperationType['variables']>,
 ] {
-    const [data, resolverFunction] = useOssFragment(fragmentNode, fragmentRef);
+    const [data, resolver] = useOssFragment(fragmentNode, fragmentRef);
 
     const fns = useMemo(() => {
         return {
-            loadMore: resolverFunction.loadMore,
-            hasMore: resolverFunction.hasMore,
-            isLoading: resolverFunction.isLoading,
-            refetchConnection: resolverFunction.refetchConnection,
+            loadMore: resolver.loadMore,
+            hasMore: resolver.hasMore,
+            isLoading: resolver.isLoading,
+            refetchConnection: resolver.refetchConnection,
         };
-    }, [resolverFunction]);
+    }, [resolver]);
 
     return [data, fns];
 }

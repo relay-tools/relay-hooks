@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { GraphQLTaggedNode, OperationType } from 'relay-runtime';
 import {
     PaginationFunction,
@@ -37,12 +38,18 @@ function usePagination<
     ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null,
     PaginationFunction<TOperationType['variables']>,
 ] {
-    const [data, { loadMore, hasMore, isLoading, refetchConnection }] = useOssFragment(
-        fragmentNode,
-        fragmentRef,
-    );
+    const [data, resolver] = useOssFragment(fragmentNode, fragmentRef);
 
-    return [data, { loadMore, hasMore, isLoading, refetchConnection }];
+    const fns = useMemo(() => {
+        return {
+            loadMore: resolver.loadMore,
+            hasMore: resolver.hasMore,
+            isLoading: resolver.isLoading,
+            refetchConnection: resolver.refetchConnection,
+        };
+    }, [resolver]);
+
+    return [data, fns];
 }
 
 export default usePagination;

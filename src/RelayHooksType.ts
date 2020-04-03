@@ -98,11 +98,6 @@ export type RefetchFunction<TVariables extends Variables = Variables> = (
     options?: RefetchOptions,
 ) => Disposable;
 
-export interface OssFragmentFunction extends PaginationFunction {
-    refetch: RefetchFunction;
-}
-
-export type FragmentResult = [any, OssFragmentFunction];
 export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
 
 // pagination

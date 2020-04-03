@@ -1,42 +1,33 @@
-//const { defaults: tsjPreset } = require("ts-jest/presets");
-
 module.exports = {
     transform: {
-        '.*': '<rootDir>/scripts/jest/preprocessor.js',
+        '^.+\\.(js|jsx|ts|tsx)$': 'ts-jest',
     },
+    preset: 'ts-jest',
     verbose: true,
 
     globals: {
         __DEV__: true,
+        'ts-jest': {
+            diagnostics: {
+                warnOnly: true,
+            },
+            isolatedModules: true,
+        },
     },
 
     moduleFileExtensions: ['ts', 'tsx', 'js', 'json'],
     testURL: 'http://localhost',
     testEnvironment: 'node',
-    timers: 'fake',
 
-    testMatch: ['<rootDir>/__tests__/**/*-test.js'],
-
-    transformIgnorePatterns: ['<rootDir>/node_modules/(?!(relay-runtime))'],
-    modulePathIgnorePatterns: [
-        '<rootDir>/lib/',
-        '<rootDir>/node_modules/(?!(fbjs/lib/|react/lib/|fbjs-scripts/jest))',
-    ],
+    testMatch: ['<rootDir>/__tests__/*-test.tsx'],
     testPathIgnorePatterns: [
+        './node_modules/',
         '/node_modules/',
         '/lib/',
         '<rootDir>/lib/',
         '<rootDir>/node_modules/',
     ],
-    roots: [
-        '<rootDir>/',
-        '<rootDir>/node_modules/fbjs/lib/',
-        '<rootDir>/node_modules/fbjs-scripts/jest',
-    ],
-    setupFiles: [
-        '<rootDir>/node_modules/fbjs-scripts/jest/environment.js',
-        '<rootDir>/scripts/jest/environment.js',
-    ],
+    transformIgnorePatterns: ['./node_modules/(?!(@react-native-community|react-native))'],
     coverageThreshold: {
         global: {
             branches: 0,
@@ -45,4 +36,5 @@ module.exports = {
             statements: 0,
         },
     },
+    setupFiles: ['./scripts/setup.ts'],
 };

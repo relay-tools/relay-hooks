@@ -10,9 +10,17 @@
 
 'use strict';
 
-const React = require('react');
-const ReactTestRenderer = require('react-test-renderer');
-import { useFragment, RelayEnvironmentProvider, useRelayEnvironment } from '../lib';
+/* eslint-disable */
+
+import * as React from 'react';
+import * as ReactTestRenderer from 'react-test-renderer';
+import {
+    useQuery,
+    useFragment,
+    RelayEnvironmentProvider,
+    useRelayEnvironment,
+    NETWORK_ONLY,
+} from '../src';
 
 const ReactRelayFragmentContainer = {
     createContainer: (Component, spec) => (props) => {
@@ -61,9 +69,10 @@ describe('ReactRelayFragmentContainer', () => {
     let spec;
     let variables;
 
-    class ContextSetter extends React.Component {
+    class ContextSetter extends React.Component<any, any> {
+        __relayContext: { environment: any };
         constructor(props) {
-            super();
+            super(props);
             this.__relayContext = {
                 environment: props.environment,
             };
@@ -86,7 +95,7 @@ describe('ReactRelayFragmentContainer', () => {
             this.setProps({});
         }
         render() {
-            let child = React.Children.only(this.props.children);
+            let child: any = React.Children.only(this.props.children);
             if (this.state.props) {
                 child = React.cloneElement(child, this.state.props);
             }

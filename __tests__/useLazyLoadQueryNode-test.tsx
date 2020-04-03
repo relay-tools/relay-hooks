@@ -9,18 +9,19 @@
  * @format
  */
 
-// flowlint ambiguous-object-type:error
+/* eslint-disable */
 
 'use strict';
 
-const React = require('react');
-const ReactTestRenderer = require('react-test-renderer');
+import * as React from 'react';
+import * as ReactTestRenderer from 'react-test-renderer';
 
-import { useLazyLoadQuery as useLazyLoadQueryNode, RelayEnvironmentProvider } from '../lib';
+import { useLazyLoadQuery as useLazyLoadQueryNode, RelayEnvironmentProvider } from '../src';
 
 const { createOperationDescriptor } = require('relay-runtime');
 
 const defaultFetchPolicy = 'network-only';
+jest.useFakeTimers();
 
 function expectToBeRendered(renderFn, readyState) {
     // Ensure useEffect is called before other timers
@@ -72,7 +73,7 @@ describe('useLazyLoadQueryNode', () => {
 
         ({ createMockEnvironment, generateAndCompile } = require('relay-test-utils-internal'));
 
-        class ErrorBoundary extends React.Component {
+        class ErrorBoundary extends React.Component<any, any> {
             state = { error: null };
             componentDidCatch(error) {
                 this.setState({ error });
@@ -94,7 +95,10 @@ describe('useLazyLoadQueryNode', () => {
                 /* $FlowFixMe(>=0.111.0) This comment suppresses an error found when
                  * Flow v0.111.0 was deployed. To see the error, delete this comment
                  * and run Flow. */
-                { fetchPolicy: renderProps.fetchPolicy || defaultFetchPolicy, skip: renderProps.skip },
+                {
+                    fetchPolicy: renderProps.fetchPolicy || defaultFetchPolicy,
+                    skip: renderProps.skip,
+                },
             );
             return renderFn(props);
         };
@@ -155,7 +159,9 @@ describe('useLazyLoadQueryNode', () => {
         gqlNoNameQuery = generated.UserNoNameQuery;
         variables = { id: '1' };
         query = createOperationDescriptor(gqlQuery, variables);
-        renderFn = jest.fn((result) => result?.node?.name ?? 'Empty');
+        renderFn = jest.fn((result) =>
+            result && result.node && result.node.name ? result.node.name : 'Empty',
+        );
     });
 
     afterEach(() => {
@@ -188,13 +194,11 @@ describe('useLazyLoadQueryNode', () => {
     it('skip', () => {
         const instance = render(environment, <Container variables={variables} skip={true} />);
 
-        
         expect(instance.toJSON()).toEqual('Empty');
         expect(environment.execute).toBeCalledTimes(0);
         expect(renderFn).toBeCalled();
         expect(environment.retain).toHaveBeenCalledTimes(0);
 
-        
         renderFn.mockClear();
         environment.retain.mockClear();
         environment.execute.mockClear();
@@ -208,8 +212,6 @@ describe('useLazyLoadQueryNode', () => {
         expectToHaveFetched(environment, query);
         expect(renderFn).not.toBeCalled();
         expect(environment.retain).toHaveBeenCalledTimes(1);
-
-
 
         environment.mock.resolve(gqlQuery, {
             data: {

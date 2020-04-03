@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { GraphQLSubscriptionConfig, requestSubscription } from 'relay-runtime';
 import useRelayEnvironment from './useRelayEnvironment';
 
-export function useSubscription<TSubscriptionPayload>(
+function useSubscription<TSubscriptionPayload>(
     config: GraphQLSubscriptionConfig<TSubscriptionPayload>,
 ): void {
     const environment = useRelayEnvironment();

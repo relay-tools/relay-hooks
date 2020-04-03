@@ -1,5 +1,9 @@
-const React = require('react');
-const ReactTestRenderer = require('react-test-renderer');
+/* eslint-disable */
+import * as React from 'react';
+import * as ReactTestRenderer from 'react-test-renderer';
+
+import { createOperationDescriptor } from 'relay-runtime';
+import { createMockEnvironment, generateAndCompile } from 'relay-test-utils-internal';
 import {
     useOssFragment,
     RelayEnvironmentProvider,
@@ -7,10 +11,7 @@ import {
     usePagination,
     useRefetch,
     useRefetchable,
-} from '../lib';
-
-const { createOperationDescriptor } = require('relay-runtime');
-const { createMockEnvironment, generateAndCompile } = require('relay-test-utils-internal');
+} from '../src';
 
 describe('useMemo resolver functions', () => {
     let TestComponent;
@@ -30,9 +31,10 @@ describe('useMemo resolver functions', () => {
     let relayContext;
     let renderSpy;
 
-    class ContextSetter extends React.Component {
+    class ContextSetter extends React.Component<any, any> {
+        __relayContext: { environment: any };
         constructor(props) {
-            super();
+            super(props);
 
             this.__relayContext = {
                 environment: props.environment,
@@ -59,7 +61,7 @@ describe('useMemo resolver functions', () => {
             this.setProps({});
         }
         render() {
-            let child = React.Children.only(this.props.children);
+            let child: any = React.Children.only(this.props.children);
             if (this.state.props) {
                 child = React.cloneElement(child, this.state.props);
             }

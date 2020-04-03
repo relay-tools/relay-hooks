@@ -9,22 +9,18 @@
  */
 
 'use strict';
-
-const React = require('react');
-const ReactTestRenderer = require('react-test-renderer');
-import { useRefetchable, RelayEnvironmentProvider, useRelayEnvironment } from '../lib';
+/* eslint-disable */
+import * as React from 'react';
+import * as ReactTestRenderer from 'react-test-renderer';
+import { useRefetch, RelayEnvironmentProvider, useRelayEnvironment } from '../src';
 
 const ReactRelayRefetchContainer = {
     createContainer: (Component, spec, query) => (props) => {
         const { user, ...others } = props;
         const environment = useRelayEnvironment();
-        const [data, refetchHooks] = useRefetchable(spec, user);
+        const [data, refetchHooks] = useRefetch(spec, user);
         const refetch = (refetchVariables, renderVariables, observer, options) => {
-            return refetchHooks(refetchVariables, {
-                renderVariables,
-                observerOrCallback: observer,
-                refetchOptions: options,
-            });
+            return refetchHooks(query, refetchVariables, renderVariables, observer, options);
         };
         return <Component user={data} {...others} relay={{ environment, refetch }} />;
     },
@@ -37,13 +33,12 @@ const {
     unwrapContainer,
 } = require('relay-test-utils-internal');
 
-describe('useRefetchable', () => {
+describe('ReactRelayRefetchContainer', () => {
     let TestComponent;
     let TestContainer;
     let UserFragment;
     let UserQuery;
     let UserQueryWithCond;
-    let UserFragmentRefetchQuery;
 
     let environment;
     let ownerUser1;
@@ -54,9 +49,10 @@ describe('useRefetchable', () => {
     let variables;
     let relayContext;
 
-    class ContextSetter extends React.Component {
+    class ContextSetter extends React.Component<any, any> {
+        __relayContext: { environment: any };
         constructor(props) {
-            super();
+            super(props);
 
             this.__relayContext = {
                 environment: props.environment,
@@ -83,7 +79,7 @@ describe('useRefetchable', () => {
             this.setProps({});
         }
         render() {
-            let child = React.Children.only(this.props.children);
+            let child: any = React.Children.only(this.props.children);
             if (this.state.props) {
                 child = React.cloneElement(child, this.state.props);
             }
@@ -98,23 +94,7 @@ describe('useRefetchable', () => {
         jest.resetModules();
 
         environment = createMockEnvironment();
-        ({
-            UserFragment,
-            UserQuery,
-            UserQueryWithCond,
-            UserFragmentRefetchQuery,
-        } = generateAndCompile(`
-
-      fragment UserFragment on User 
-      @refetchable(queryName: "UserFragmentRefetchQuery")
-      @argumentDefinitions(
-        cond: {type: "Boolean!", defaultValue: true}
-      ) {
-        id
-        name @include(if: $cond)
-      }
-
-
+        ({ UserFragment, UserQuery, UserQueryWithCond } = generateAndCompile(`
       query UserQuery(
         $id: ID!
       ) {
@@ -131,15 +111,14 @@ describe('useRefetchable', () => {
           ...UserFragment @arguments(cond: $condGlobal)
         }
       }
-    `));
 
-        /*invariant(
-      UserFragment.metadata.refetch.operation ===
-        '@@MODULE_START@@UserFragmentRefetchQuery.graphql@@MODULE_END@@',
-      'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
-    );*/
-        // Manually set the refetchable operation for the test.
-        UserFragment.metadata.refetch.operation = UserFragmentRefetchQuery;
+      fragment UserFragment on User @argumentDefinitions(
+        cond: {type: "Boolean!", defaultValue: true}
+      ) {
+        id
+        name @include(if: $cond)
+      }
+    `));
 
         function ContextGetter({ refetch }) {
             const environment = useRelayEnvironment();
@@ -188,6 +167,23 @@ describe('useRefetchable', () => {
             },
         });
     });
+
+    /*it('generates a name for containers', () => {
+    expect(TestContainer.$$typeof).toBe(Symbol.for('react.forward_ref'));
+    expect(TestContainer.render.displayName).toBe('Relay(TestComponent)');
+  });
+
+  it('throws for invalid fragments', () => {
+    expect(() => {
+      ReactRelayRefetchContainer.createContainer(TestComponent, {
+        foo: null,
+      });
+    }).toThrowError(
+      'Could not create Relay Container for `TestComponent`. ' +
+        'The value of fragment `foo` was expected to be a fragment, ' +
+        'got `null` instead.',
+    );
+  });*/
 
     it('passes non-fragment props to the component', () => {
         ReactTestRenderer.create(
@@ -420,10 +416,10 @@ describe('useRefetchable', () => {
             cond: false,
             id: '4',
         };
+        const fetchedVariables = { id: '4' };
         refetch(refetchVariables, null, jest.fn());
-        expect(environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables)).toBe(true);
-
-        environment.mock.resolve(UserFragmentRefetchQuery, {
+        expect(environment.mock.isLoading(UserQuery, fetchedVariables)).toBe(true);
+        environment.mock.resolve(UserQuery, {
             data: {
                 node: {
                     id: '4',
@@ -638,11 +634,10 @@ describe('useRefetchable', () => {
                 cond: false,
                 id: '4',
             };
+            const fetchedVariables = { id: '4' };
             refetch(refetchVariables, null, jest.fn());
-            expect(environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables)).toBe(
-                true,
-            );
-            environment.mock.resolve(UserFragmentRefetchQuery, {
+            expect(environment.mock.isLoading(UserQuery, fetchedVariables)).toBe(true);
+            environment.mock.resolve(UserQuery, {
                 data: {
                     node: {
                         id: '4',
@@ -675,7 +670,7 @@ describe('useRefetchable', () => {
                 id: '4',
             };
             refetch(variables, null, callback);
-            environment.mock.resolve(UserFragmentRefetchQuery, {
+            environment.mock.resolve(UserQuery, {
                 data: {
                     node: {
                         id: '4',
@@ -694,7 +689,7 @@ describe('useRefetchable', () => {
                 id: '4',
             };
             refetch(variables, null, callback);
-            environment.mock.nextValue(UserFragmentRefetchQuery, {
+            environment.mock.nextValue(UserQuery, {
                 data: {
                     node: {
                         id: '4',
@@ -705,7 +700,7 @@ describe('useRefetchable', () => {
             expect(callback.mock.calls.length).toBe(1);
             expect(callback).toBeCalledWith(undefined);
 
-            environment.mock.nextValue(UserFragmentRefetchQuery, {
+            environment.mock.nextValue(UserQuery, {
                 data: {
                     node: {
                         id: '4',
@@ -716,7 +711,7 @@ describe('useRefetchable', () => {
             expect(callback.mock.calls.length).toBe(2);
             expect(callback).toBeCalledWith(undefined);
 
-            environment.mock.complete(UserFragmentRefetchQuery);
+            environment.mock.complete(UserQuery);
             expect(callback.mock.calls.length).toBe(2);
         });
 
@@ -729,7 +724,7 @@ describe('useRefetchable', () => {
             };
             refetch(variables, null, callback);
             const error = new Error('oops');
-            environment.mock.reject(UserFragmentRefetchQuery, error);
+            environment.mock.reject(UserQuery, error);
             expect(callback.mock.calls.length).toBe(1);
             expect(callback).toBeCalledWith(error);
         });
@@ -739,7 +734,8 @@ describe('useRefetchable', () => {
                 cond: false,
                 id: '4',
             };
-            environment.mock.cachePayload(UserFragmentRefetchQuery, refetchVariables, {
+            const fetchedVariables = { id: '4' };
+            environment.mock.cachePayload(UserQuery, fetchedVariables, {
                 data: {
                     node: {
                         id: '4',
@@ -782,7 +778,7 @@ describe('useRefetchable', () => {
             };
             refetch(variables, null, jest.fn());
             expect(render.mock.calls.length).toBe(1);
-            environment.mock.resolve(UserFragmentRefetchQuery, {
+            environment.mock.resolve(UserQuery, {
                 data: {
                     node: {
                         id: '4',
@@ -805,7 +801,7 @@ describe('useRefetchable', () => {
             };
             refetch(variables, null, jest.fn());
             expect(render.mock.calls.length).toBe(1);
-            environment.mock.reject(UserFragmentRefetchQuery, new Error('oops'));
+            environment.mock.reject(UserQuery, new Error('oops'));
             expect(render.mock.calls.length).toBe(1);
         });
 
@@ -844,7 +840,7 @@ describe('useRefetchable', () => {
                 id: '4',
             };
             refetch(variables, null, jest.fn());
-            environment.mock.resolve(UserFragmentRefetchQuery, {
+            environment.mock.resolve(UserQuery, {
                 data: {
                     node: {
                         id: '4',
@@ -864,7 +860,7 @@ describe('useRefetchable', () => {
                 id: '4',
             };
             refetch(variables, null, jest.fn());
-            environment.mock.resolve(UserFragmentRefetchQuery, {
+            environment.mock.resolve(UserQuery, {
                 data: {
                     node: {
                         id: '4',
@@ -885,7 +881,7 @@ describe('useRefetchable', () => {
                 id: '4',
             };
             refetch(variables, null, jest.fn());
-            environment.mock.resolve(UserFragmentRefetchQuery, {
+            environment.mock.resolve(UserQuery, {
                 data: {
                     node: {
                         id: '4',

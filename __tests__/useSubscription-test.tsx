@@ -8,13 +8,23 @@
  * @format
  */
 
+/* eslint-disable */
 'use strict';
 
-const React = require('react');
-const { useMemo, useRef, useState } = React;
-const ReactTestRenderer = require('react-test-renderer');
+import * as React from 'react';
+import { useMemo, useState } from 'react';
+import * as ReactTestRenderer from 'react-test-renderer';
 
-const { createMockEnvironment, generateAndCompile } = require('relay-test-utils-internal');
+import { createMockEnvironment, generateAndCompile } from 'relay-test-utils-internal';
+import { RelayEnvironmentProvider } from '../src';
+
+const dispose = jest.fn();
+const requestSubscription = jest.fn((_passedEnv, _passedConfig) => ({
+    dispose,
+}));
+
+const relayRuntime = require('relay-runtime');
+relayRuntime.requestSubscription = requestSubscription;
 
 const { CommentCreateSubscription } = generateAndCompile(`
   subscription CommentCreateSubscription(
@@ -41,18 +51,8 @@ describe('useSubscription', () => {
         variables: {},
         subscription: CommentCreateSubscription,
     };
-    const dispose = jest.fn();
-    const requestSubscription = jest.fn((_passedEnv, _passedConfig) => ({
-        dispose,
-    }));
-    const relayRuntime = require('relay-runtime');
-    jest.mock('relay-runtime', () => {
-        return {
-            ...relayRuntime,
-            requestSubscription,
-        };
-    });
-    const { useSubscription, ReactRelayContext } = require('../lib');
+
+    const { useSubscription } = require('../src');
 
     const ContextProvider = ({ children }) => {
         const [env, _setEnv] = useState(mockEnv);
@@ -61,7 +61,9 @@ describe('useSubscription', () => {
         setEnvironment = _setEnv;
 
         return (
-            <ReactRelayContext.Provider value={relayContext}>{children}</ReactRelayContext.Provider>
+            <RelayEnvironmentProvider environment={relayContext.environment}>
+                {children}
+            </RelayEnvironmentProvider>
         );
     };
 
@@ -73,7 +75,7 @@ describe('useSubscription', () => {
     });
 
     function MyComponent({ env }) {
-        function InnerComponent() {
+        function InnerComponent(): any {
             useSubscription(config);
             return 'Hello Relay!';
         }

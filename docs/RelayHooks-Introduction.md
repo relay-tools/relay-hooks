@@ -24,6 +24,33 @@ yarn add react-relay relay-hooks
 
 * **Please sponsor me**
 
+### relay-hooks
+
+The initial purpose of the library was to provide the ability to use all react-relay HOCs as react hooks and to implement the store-or-network and store-only policies used by the [react-relay-offline](https://github.com/morrys/react-relay-offline) library to manage offline relay applications
+
+After Relay's core team shared information about the the initial differences in the issue https://github.com/relay-tools/relay-hooks/issues/5, all the necessary changes were made in order to make relay-hooks as close as possible to their specifications.
+
+* current differences with upcoming Relay Hooks in react-relay
+
+  * **useLazyLoadQuery**: returns a *single* data object with the query's data, and nothing else.
+  * **useFragment**: not use suspense
+  * **usePagination**: not use suspense
+  * **useRefetchable**: not use suspense
+  * **useMutation**: not use suspense
+  * **useSubscription**: not use suspense
+
+* what's more in relay-hooks
+
+  * **useQuery**: it is the same as `useLazyLoadQuery` but does not use suspense, it allows you to use hooks without having to migrate the application in concurrent mode and its return is the same as the QueryRenderer HOC
+  * **useRefetch**: it is the same as `useRefetchable`, allows you to migrate the Refetch Container without changing the fragment specifications
+  * **conditional useQuery & useLazyLoadQuery**: added `skip`: [Optional] If skip is true, the query will be skipped entirely
+
+* why use relay-hooks?
+
+It is a stable library and none of its dependencies is experimental and it allows you to immediately use react hooks with relay-runtime and it is designed for easy migration to react-relay hooks.
+
+It is a light library and compatible with react-relay
+
 ## RelayEnvironmentProvider
 
 Since queries with `useQuery` no longer set context, we will expose a new `RelayEnvironmentProvider` component that takes an `environment` and sets it in context; 

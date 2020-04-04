@@ -1963,10 +1963,10 @@ babel-plugin-macros@^2.0.0:
     cosmiconfig "^5.0.5"
     resolve "^1.8.1"
 
-babel-plugin-relay@^8.0.0:
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/babel-plugin-relay/-/babel-plugin-relay-8.0.0.tgz#4e412fe085c1aaf6a7d458a653f7a1d249cce067"
-  integrity sha512-modTJugk/BKmrZedRMq2B2Dx7JU/CbBlI0OY/fcs4pdt4rN5nimQEhwuuytltCYnUOHny5a/VemZwVReiH+sKg==
+babel-plugin-relay@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/babel-plugin-relay/-/babel-plugin-relay-9.0.0.tgz#05b25bb7296151a9c7c91338a8e71f7d95a83b64"
+  integrity sha512-2v+7fPI8Iv/MKcutAma8iryVGkwe5Hfmb6rIo0B9USZpMnOYS3TamCq8SwaQLBR5R9RrkbHsx5vxz2cUvhSeOg==
   dependencies:
     babel-plugin-macros "^2.0.0"
 
@@ -6827,18 +6827,18 @@ regjsparser@^0.6.0:
   dependencies:
     jsesc "~0.5.0"
 
-relay-compiler-language-typescript@10.1.3:
-  version "10.1.3"
-  resolved "https://registry.yarnpkg.com/relay-compiler-language-typescript/-/relay-compiler-language-typescript-10.1.3.tgz#5a61b9b518b18d98215f2da0198f344d3b1d7c8d"
-  integrity sha512-kyt+yD26Dk9lvCCAtR2JBgrr5JtxdYEGiOZf5T6CXGaUVr43FEKh94cdGMwGYX1e+vHZg3gBH4EFi/VHC4Qs4Q==
+relay-compiler-language-typescript@12.0.0:
+  version "12.0.0"
+  resolved "https://registry.yarnpkg.com/relay-compiler-language-typescript/-/relay-compiler-language-typescript-12.0.0.tgz#65f6fa969483dbf37aa3f3bd97c8e9f9854e7dc7"
+  integrity sha512-jTg6aO3FcC6P1mnp6AKdfJcwGx8WQ+ui3HQz9Wn25SbKiqzW4FHBAg9Q38cS/YYOk7a4otcYQPLIcaKE0HXksg==
   dependencies:
     immutable "^4.0.0-rc.12"
     invariant "^2.2.4"
 
-relay-compiler@^8.0.0:
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/relay-compiler/-/relay-compiler-8.0.0.tgz#567edebc857db5748142b57a78d197f976b5e3ac"
-  integrity sha512-JrS3Bv6+6S0KloHmXUyTcrdFRpI3NxWdiVQC146vD5jgay9EM464lyf9bEUsCol3na4JUrad4aQ/r+4wWxG1kw==
+relay-compiler@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/relay-compiler/-/relay-compiler-9.0.0.tgz#821c2fb972598ea8479db27fc5198133babec6c0"
+  integrity sha512-V509bPZMqVvITUcgXFgvO9pcnAKzF7pJXObnxfglOl3JsfJeDwTW1fu/CzPtvk5suxVMK6Cn9fMxZK2GdRXqYQ==
   dependencies:
     "@babel/core" "^7.0.0"
     "@babel/generator" "^7.5.0"
@@ -6853,22 +6853,22 @@ relay-compiler@^8.0.0:
     fbjs "^1.0.0"
     immutable "~3.7.6"
     nullthrows "^1.1.1"
-    relay-runtime "8.0.0"
+    relay-runtime "9.0.0"
     signedsource "^1.0.0"
     yargs "^14.2.0"
 
-relay-hooks@3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/relay-hooks/-/relay-hooks-3.0.0.tgz#4ed5aef9f7de42aa738d800c75ff6f27e7365042"
-  integrity sha512-3j9tGQJjcfBbQq7Mje9p1ceBGdzH3ZmmBuq3iazoBUq1C0GUEl/AZFHVWAVLmtSxe2fJfW1VGqE/HN4DcVZ3Pw==
+relay-hooks@3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/relay-hooks/-/relay-hooks-3.3.0.tgz#d77f75d7a8d2a611182bc2397d872b812871b353"
+  integrity sha512-An0tIPPhY/PaLkTLSMUsF65vjnOMWy33QhnSIZrz43LlJx+RiWioPphP38XdEy5QANGFPPqmH9p/K900uj56Sw==
   dependencies:
     "@restart/hooks" "^0.3.1"
     fbjs "^1.0.0"
 
-relay-runtime@8.0.0:
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/relay-runtime/-/relay-runtime-8.0.0.tgz#52585a7bf04a710bd1bc664bfb0a60dbff3ce6e1"
-  integrity sha512-lOaZ7K/weTuCIt3pWHkxUG8s7iohI4IyYj65YV4sB9iX6W0uMvt626BFJ4GvNXFmd+OrgNnXcvx1mqRFqJaV8A==
+relay-runtime@9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/relay-runtime/-/relay-runtime-9.0.0.tgz#03633be24dc3c8b56e472062de6f103954e3d296"
+  integrity sha512-bBNeNmwMOnqtCvuPnWdgflFSVwuUbGV7m7os8qHCUCSJ52DT5B/m6K4wisVh3eZ0QWYr7hheRDfmR/3UEdUe5A==
   dependencies:
     "@babel/runtime" "^7.0.0"
     fbjs "^1.0.0"

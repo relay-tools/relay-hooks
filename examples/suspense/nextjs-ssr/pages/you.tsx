@@ -15,6 +15,9 @@ const Home = () => {
   const {props, retry} = useLazyLoadQuery<TodoAppQuery>(query, variables, {
     fetchPolicy: STORE_OR_NETWORK,
   });
+  if (!props) {
+    return <div>no data || skip</div>;
+  }
   return <TodoApp query={props} retry={retry} />;
 };
 

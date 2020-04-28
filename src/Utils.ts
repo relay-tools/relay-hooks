@@ -2,10 +2,9 @@ import * as areEqual from 'fbjs/lib/areEqual';
 import * as invariant from 'fbjs/lib/invariant';
 import * as warning from 'fbjs/lib/warning';
 import {
-    ConnectionConfig,
+    PageInfo,
     Observer,
     Variables,
-    ReactConnectionMetadata,
     ConnectionMetadata,
     ConnectionInterface,
     createRequestDescriptor,
@@ -26,7 +25,25 @@ import {
     PaginationData,
 } from './RelayHooksType';
 
-export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
+interface ConnectionData {
+    edges?: ReadonlyArray<any> | null;
+    pageInfo?: Partial<PageInfo> | null;
+}
+
+export interface ConnectionConfig<Props = object> {
+    direction?: 'backward' | 'forward';
+    getConnectionFromProps?: (props: Props) => ConnectionData | null | undefined;
+    getFragmentVariables?: (prevVars: Variables, totalCount: number) => Variables;
+    getVariables: (
+        props: Props,
+        paginationInfo: { count: number; cursor?: string | null },
+        fragmentVariables: Variables,
+    ) => Variables;
+    query: GraphQLTaggedNode;
+}
+export type ReactConnectionMetadata = ConnectionMetadata & { fragmentName: string };
+
+export type ObserverOrCallback = Observer<void> | ((error?: Error | null | undefined) => void);
 
 export const isNetworkPolicy = (policy: FetchPolicy, storeSnapshot): boolean => {
     return (

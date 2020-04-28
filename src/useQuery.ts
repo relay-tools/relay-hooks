@@ -22,7 +22,7 @@ export function useMemoOperationDescriptor(
     return useMemo(() => createOperation(gqlQuery, memoVariables), [gqlQuery, memoVariables]);
 }
 
-export const useQuery = <TOperationType extends OperationType>(
+export const useQuery = <TOperationType extends OperationType = OperationType>(
     gqlQuery: GraphQLTaggedNode,
     variables: TOperationType['variables'] = {},
     options: QueryOptions = {},

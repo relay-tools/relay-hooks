@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { OperationType, OperationDescriptor } from 'relay-runtime';
-import QueryFetcher, { getOrCreateQueryFetcher } from './QueryFetcher';
+import { QueryFetcher, getOrCreateQueryFetcher } from './QueryFetcher';
 
 export type Reference<TOperationType extends OperationType> = {
     queryFetcher: QueryFetcher<TOperationType>;
@@ -24,5 +24,3 @@ export const useQueryFetcher = <TOperationType extends OperationType>(
     }, []);
     return ref.current.queryFetcher;
 };
-
-export default useQueryFetcher;

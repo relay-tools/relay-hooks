@@ -15,4 +15,4 @@ import { __internal } from 'relay-runtime';
 
 const { createRelayContext } = __internal;
 
-export default createRelayContext(React);
+export const ReactRelayContext = createRelayContext(React);

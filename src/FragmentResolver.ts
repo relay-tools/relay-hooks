@@ -57,7 +57,7 @@ type FragmentResult = {
     data: any;
 };
 
-class FragmentResolver {
+export class FragmentResolver {
     _environment: IEnvironment;
     _fragment: any;
     _fragmentNode: any;
@@ -561,5 +561,3 @@ class FragmentResolver {
         return refetchSubscription;
     }
 }
-
-export default FragmentResolver;

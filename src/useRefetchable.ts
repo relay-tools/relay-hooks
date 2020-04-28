@@ -10,17 +10,23 @@ import {
     ArrayKeyType,
     ArrayKeyReturnType,
 } from './RelayHooksType';
-import useRefetch from './useRefetch';
+import { useRefetch } from './useRefetch';
 
-function useRefetchable<TKey extends KeyType, TOperationType extends OperationType = OperationType>(
+export function useRefetchable<
+    TKey extends KeyType,
+    TOperationType extends OperationType = OperationType
+>(
     fragmentInput: GraphQLTaggedNode,
     fragmentRef: TKey,
 ): [$Call<KeyReturnType<TKey>>, RefetchableFunction<TOperationType['variables']>];
-function useRefetchable<TKey extends KeyType, TOperationType extends OperationType = OperationType>(
+export function useRefetchable<
+    TKey extends KeyType,
+    TOperationType extends OperationType = OperationType
+>(
     fragmentInput: GraphQLTaggedNode,
     fragmentRef: TKey | null,
 ): [$Call<KeyReturnType<TKey>> | null, RefetchableFunction<TOperationType['variables']>];
-function useRefetchable<
+export function useRefetchable<
     TKey extends ArrayKeyType,
     TOperationType extends OperationType = OperationType
 >(
@@ -30,7 +36,7 @@ function useRefetchable<
     ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>,
     RefetchableFunction<TOperationType['variables']>,
 ];
-function useRefetchable<
+export function useRefetchable<
     TKey extends ArrayKeyType,
     TOperationType extends OperationType = OperationType
 >(
@@ -100,5 +106,3 @@ function useRefetchable<
 
     return [data, refetchable];
 }
-
-export default useRefetchable;

@@ -1,7 +1,7 @@
 /*eslint-disable */
 import * as invariant from 'fbjs/lib/invariant';
 import * as React from 'react';
-import ReactRelayContext from './ReactRelayContext';
+import { ReactRelayContext } from './ReactRelayContext';
 import {
     MutationConfig as BaseMutationConfig,
     Environment,
@@ -158,5 +158,3 @@ export function Mutation<T extends MutationParameters>({
     const [mutate, state] = useMutation(mutation, config, environment);
     return children(mutate, state) as React.ReactElement;
 }
-
-export default useMutation;

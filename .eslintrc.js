@@ -48,6 +48,7 @@ module.exports = {
         semi: 'off',
         '@typescript-eslint/semi': [2, 'always'],
         '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions'] }],
+        'import/no-default-export': ['error'],
         'import/order': [
             'error',
             {

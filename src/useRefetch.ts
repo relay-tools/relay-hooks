@@ -7,24 +7,30 @@ import {
     ArrayKeyType,
     ArrayKeyReturnType,
 } from './RelayHooksType';
-import useOssFragment from './useOssFragment';
+import { useOssFragment } from './useOssFragment';
 
-function useRefetch<TKey extends KeyType, TOperationType extends OperationType = OperationType>(
+export function useRefetch<
+    TKey extends KeyType,
+    TOperationType extends OperationType = OperationType
+>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey,
 ): [$Call<KeyReturnType<TKey>>, RefetchFunction<TOperationType['variables']>];
-function useRefetch<TKey extends KeyType, TOperationType extends OperationType = OperationType>(
+export function useRefetch<
+    TKey extends KeyType,
+    TOperationType extends OperationType = OperationType
+>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null,
 ): [$Call<KeyReturnType<TKey>> | null, RefetchFunction<TOperationType['variables']>];
-function useRefetch<
+export function useRefetch<
     TKey extends ArrayKeyType,
     TOperationType extends OperationType = OperationType
 >(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey,
 ): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>, RefetchFunction<TOperationType['variables']>];
-function useRefetch<
+export function useRefetch<
     TKey extends ArrayKeyType,
     TOperationType extends OperationType = OperationType
 >(
@@ -38,5 +44,3 @@ function useRefetch<
 
     return [data, refetch];
 }
-
-export default useRefetch;

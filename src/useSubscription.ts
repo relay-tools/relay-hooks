@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { GraphQLSubscriptionConfig, requestSubscription } from 'relay-runtime';
-import useRelayEnvironment from './useRelayEnvironment';
+import { useRelayEnvironment } from './useRelayEnvironment';
 
-function useSubscription<TSubscriptionPayload>(
+export function useSubscription<TSubscriptionPayload>(
     config: GraphQLSubscriptionConfig<TSubscriptionPayload>,
 ): void {
     const environment = useRelayEnvironment();
@@ -12,5 +12,3 @@ function useSubscription<TSubscriptionPayload>(
         return dispose;
     }, [environment, config]);
 }
-
-export default useSubscription;

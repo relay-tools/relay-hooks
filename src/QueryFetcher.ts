@@ -30,7 +30,7 @@ export function getOrCreateQueryFetcher<TOperationType extends OperationType>(
 
 const DATA_RETENTION_TIMEOUT = 30 * 1000;
 
-class QueryFetcher<TOperationType extends OperationType> {
+export class QueryFetcher<TOperationType extends OperationType> {
     environment: IEnvironment;
     query: any;
     networkSubscription: Disposable;
@@ -237,5 +237,3 @@ class QueryFetcher<TOperationType extends OperationType> {
         }
     }
 }
-
-export default QueryFetcher;

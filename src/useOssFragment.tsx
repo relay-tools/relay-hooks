@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { RelayFeatureFlags, GraphQLTaggedNode } from 'relay-runtime';
+import { GraphQLTaggedNode } from 'relay-runtime';
 import { FragmentResolver } from './FragmentResolver';
 import {
     ContainerResult,
@@ -27,7 +27,6 @@ export function useOssFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null,
 ): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null, FragmentResolver] {
-    RelayFeatureFlags.PREFER_FRAGMENT_OWNER_OVER_CONTEXT = true;
     const environment = useRelayEnvironment();
     const [, forceUpdate] = useState<ContainerResult>(null);
     const ref = useRef<{ resolver: FragmentResolver }>(null);

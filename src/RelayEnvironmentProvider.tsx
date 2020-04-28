@@ -1,15 +1,13 @@
 import * as React from 'react';
-import { Environment, RelayFeatureFlags } from 'relay-runtime';
+import { Environment } from 'relay-runtime';
 import { ReactRelayContext } from './ReactRelayContext'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export const RelayEnvironmentProvider = function(props: {
     children: React.ReactNode;
-    environment?: Environment;
+    environment: Environment;
 }): JSX.Element {
-    RelayFeatureFlags.PREFER_FRAGMENT_OWNER_OVER_CONTEXT = true;
+    const context = React.useMemo(() => ({ environment: props.environment }), [props.environment]);
     return (
-        <ReactRelayContext.Provider value={{ environment: props.environment, variables: {} }}>
-            {props.children}
-        </ReactRelayContext.Provider>
+        <ReactRelayContext.Provider value={context}>{props.children}</ReactRelayContext.Provider>
     );
 };

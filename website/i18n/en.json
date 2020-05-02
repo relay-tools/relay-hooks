@@ -25,6 +25,9 @@
       },
       "use-refetchable": {
         "title": "useRefetchable"
+      },
+      "use-subscription": {
+        "title": "useSubscription"
       }
     },
     "links": {

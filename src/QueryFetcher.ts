@@ -30,7 +30,7 @@ export function getOrCreateQueryFetcher<TOperationType extends OperationType>(
 
 const DATA_RETENTION_TIMEOUT = 30 * 1000;
 
-export class QueryFetcher<TOperationType extends OperationType> {
+export class QueryFetcher<TOperationType extends OperationType = OperationType> {
     environment: IEnvironment;
     query: any;
     networkSubscription: Disposable;
@@ -89,7 +89,7 @@ export class QueryFetcher<TOperationType extends OperationType> {
             (environment.check(operation) === 'available' ||
                 environment.check(operation).status === 'available')
         ) {
-            return environment.lookup(operation.fragment, operation);
+            return environment.lookup(operation.fragment);
         }
         return null;
     }

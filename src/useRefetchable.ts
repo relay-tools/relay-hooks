@@ -1,6 +1,6 @@
 import * as invariant from 'fbjs/lib/invariant';
 import { useCallback, useMemo } from 'react';
-import { GraphQLTaggedNode, getFragment, ObserverOrCallback, OperationType } from 'relay-runtime';
+import { GraphQLTaggedNode, getFragment, OperationType, ConcreteRequest } from 'relay-runtime';
 import {
     RefetchableFunction,
     RefetchOptions,
@@ -9,6 +9,7 @@ import {
     $Call,
     ArrayKeyType,
     ArrayKeyReturnType,
+    ObserverOrCallback,
 } from './RelayHooksType';
 import { useRefetch } from './useRefetch';
 
@@ -46,11 +47,10 @@ export function useRefetchable<
     ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null,
     RefetchableFunction<TOperationType['variables']>,
 ] {
-    const fragmentNode = getFragment(fragmentInput);
-
     const [data, refetch] = useRefetch(fragmentInput, fragmentRef);
 
     const refetchNode = useMemo(() => {
+        const fragmentNode = getFragment(fragmentInput);
         const metadata = fragmentNode.metadata;
         invariant(
             metadata != null,
@@ -79,8 +79,14 @@ export function useRefetchable<
             'useRefetchable',
             fragmentNode.name,
         );
-        return refetchMetadata.operation;
-    }, [fragmentNode]);
+
+        // handle both commonjs and es modules
+        const refetchableRequest: ConcreteRequest = (refetchMetadata as any).operation.default
+            ? (refetchMetadata as any).operation.default
+            : refetchMetadata.operation;
+
+        return refetchableRequest;
+    }, [fragmentInput]);
 
     const refetchable = useCallback(
         (

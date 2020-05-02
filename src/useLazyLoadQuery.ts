@@ -4,7 +4,7 @@ import { useMemoOperationDescriptor } from './useQuery';
 import { useQueryFetcher } from './useQueryFetcher';
 import { useRelayEnvironment } from './useRelayEnvironment';
 
-export const useLazyLoadQuery = <TOperationType extends OperationType>(
+export const useLazyLoadQuery = <TOperationType extends OperationType = OperationType>(
     gqlQuery: GraphQLTaggedNode,
     variables: TOperationType['variables'] = {},
     options: QueryOptions = {},

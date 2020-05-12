@@ -1,5 +1,6 @@
 node_modules
 lib
+es
 *.tgz
 coverage
 .DS_Store

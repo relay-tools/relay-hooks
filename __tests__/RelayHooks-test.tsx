@@ -533,7 +533,6 @@ describe('useMemo resolver functions', () => {
                 </ContextSetter>,
             );
             const before = renderSpy.mock.calls[0][1];
-            console.log('data before', before);
             renderSpy.mockClear();
             render.mockClear();
 

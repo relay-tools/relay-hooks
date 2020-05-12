@@ -26,7 +26,7 @@ export type ContainerResult = {
 };
 
 export interface RenderProps<T extends OperationType> {
-    error: Error;
+    error: Error | null;
     props: T['response'] | null | undefined;
     retry: (_cacheConfigOverride?: CacheConfig) => void;
     cached?: boolean;
@@ -98,7 +98,7 @@ export type RefetchFunction<TVariables extends Variables = Variables> = (
     options?: RefetchOptions,
 ) => Disposable;
 
-export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
+export type ObserverOrCallback = Observer<void> | ((error?: Error | null | undefined) => void);
 
 // pagination
 
@@ -106,21 +106,21 @@ export const FORWARD = 'forward';
 
 export type FragmentVariablesGetter = (prevVars: Variables, totalCount: number) => Variables;
 
-export type ConnectionConfig = {
+export interface ConnectionConfig<Props = object> {
     direction?: 'backward' | 'forward';
-    getConnectionFromProps?: (props: object) => ConnectionData;
-    getFragmentVariables?: FragmentVariablesGetter;
+    getConnectionFromProps?: (props: Props) => ConnectionData | null | undefined;
+    getFragmentVariables?: (prevVars: Variables, totalCount: number) => Variables;
     getVariables: (
-        props: object,
-        paginationInfo: { count: number; cursor: string },
+        props: Props,
+        paginationInfo: { count: number; cursor?: string | null },
         fragmentVariables: Variables,
     ) => Variables;
     query: GraphQLTaggedNode;
-};
-export type ConnectionData = {
-    edges?: ReadonlyArray<any>;
-    pageInfo?: PageInfo;
-};
+}
+export interface ConnectionData {
+    edges?: ReadonlyArray<any> | null;
+    pageInfo?: Partial<PageInfo> | null;
+}
 
 export type PaginationData = {
     direction: string;

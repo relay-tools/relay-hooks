@@ -9,6 +9,7 @@
     "ssr"
   ],
   "main": "lib/index.js",
+  "module": "es/index.js",
   "license": "MIT",
   "description": "Relay Hooks",
   "author": {
@@ -20,8 +21,8 @@
     "url": "https://github.com/relay-tools/relay-hooks"
   },
   "scripts": {
-    "clean": "rimraf lib",
-    "compile": "npm run clean && tsc",
+    "clean": "rimraf lib es",
+    "compile": "npm run clean && tsc && tsc --module ES2015 --target ES2015 --outDir es",
     "build": "npm run compile && npm run test",
     "test": "cross-env NODE_ENV=test jest --coverage",
     "format": "prettier --write \"src/**/*.{j,t}s*\"",

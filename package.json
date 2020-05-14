@@ -10,6 +10,7 @@
   ],
   "main": "lib/index.js",
   "module": "es/index.js",
+  "unpkg": "es/index.js",
   "license": "MIT",
   "description": "Relay Hooks",
   "author": {

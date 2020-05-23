@@ -197,6 +197,10 @@ const App = (
 
 [See useSubscription.md](./useSubscription.md)
 
+## usePreloadedQuery
+
+[See usePreloadedQuery.md](./usePreloadedQuery.md)
+
 ## useOssFragment
 
 the useOssFragment is a hooks not provided in the official version of react-relay. Using it you can manage fragment, refetch and pagination containers.

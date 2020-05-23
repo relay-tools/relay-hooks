@@ -10,7 +10,8 @@
             "use-pagination",
             "use-mutation",
             "use-oss-fragment",
-            "use-subscription"
+            "use-subscription",
+            "use-preloaded-query"
         ]
     }
 }

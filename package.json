@@ -1,6 +1,6 @@
 {
   "name": "relay-hooks",
-  "version": "3.4.0",
+  "version": "3.5.0",
   "keywords": [
     "graphql",
     "relay",
@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "cross-env": "6.0.3",
-    "typescript": "3.5.1",
+    "typescript": "3.8.3",
     "react": "16.11.0",
     "graphql": "^14.2.0",
     "@types/react": "16.9.11",

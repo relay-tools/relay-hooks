@@ -9,6 +9,8 @@ export {
 export { ReactRelayContext } from './ReactRelayContext';
 export { useQuery } from './useQuery';
 export { useLazyLoadQuery } from './useLazyLoadQuery';
+export { loadQuery, loadLazyQuery } from './loadQuery';
+export { usePreloadedQuery } from './usePreloadedQuery';
 export { useFragment } from './useFragment';
 export { useMutation } from './useMutation';
 export { useSubscription } from './useSubscription';

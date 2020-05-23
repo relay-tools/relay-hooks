@@ -20,33 +20,36 @@ export function getOrCreateQueryFetcher<TOperationType extends OperationType>(
     query: OperationDescriptor | null,
     forceUpdate: any,
 ): QueryFetcher<TOperationType> {
-    if (query && cache.has(query.request.identifier)) {
-        const queryFetcher = cache.get(query.request.identifier);
-        queryFetcher.setForceUpdate(forceUpdate);
-        return queryFetcher;
-    }
-    return new QueryFetcher(forceUpdate, !!query);
+    const suspense = !!query;
+    const queryFetcher =
+        suspense && cache.has(query.request.identifier)
+            ? cache.get(query.request.identifier)
+            : new QueryFetcher(suspense, suspense);
+    queryFetcher.setForceUpdate(forceUpdate);
+    return queryFetcher;
 }
 
 const DATA_RETENTION_TIMEOUT = 30 * 1000;
 
 export class QueryFetcher<TOperationType extends OperationType = OperationType> {
     environment: IEnvironment;
-    query: any;
+    query: OperationDescriptor;
     networkSubscription: Disposable;
     rootSubscription: Disposable;
-    error: Error;
+    error: Error | null;
     snapshot: Snapshot;
     fetchPolicy: FetchPolicy;
     fetchKey: string | number;
     disposableRetain: Disposable;
     forceUpdate: (_o: any) => void;
     suspense: boolean;
+    useLazy: boolean;
     releaseQueryTimeout;
 
-    constructor(forceUpdate, suspense = false) {
+    constructor(suspense = false, useLazy = false) {
         this.suspense = suspense;
-        this.setForceUpdate(forceUpdate);
+        this.useLazy = suspense && useLazy;
+        this.setForceUpdate(() => undefined);
     }
 
     setForceUpdate(forceUpdate): void {
@@ -84,12 +87,11 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
     }
 
     lookupInStore(environment: IEnvironment, operation, fetchPolicy: FetchPolicy): Snapshot {
-        if (
-            isStorePolicy(fetchPolicy) &&
-            (environment.check(operation) === 'available' ||
-                environment.check(operation).status === 'available')
-        ) {
-            return environment.lookup(operation.fragment);
+        if (isStorePolicy(fetchPolicy)) {
+            const check = environment.check(operation);
+            if (check === 'available' || check.status === 'available') {
+                return environment.lookup(operation.fragment);
+            }
         }
         return null;
     }
@@ -120,7 +122,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         if (isDiffEnvQuery || fetchPolicy !== this.fetchPolicy || fetchKey !== this.fetchKey) {
             if (isDiffEnvQuery) {
                 this.disposeRetain();
-                this.suspense && cache.set(query.request.identifier, this);
+                this.useLazy && cache.set(query.request.identifier, this);
                 this.disposableRetain = retain(environment, query);
             }
             this.environment = environment;
@@ -139,6 +141,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
                 this.subscribe(storeSnapshot);
             }
         }
+
         const resultSnapshot = storeSnapshot || this.snapshot;
         return {
             cached: !!storeSnapshot,
@@ -173,6 +176,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
                 };
             },
             next: () => {
+                this.error = null;
                 this._onQueryDataAvailable({ notifyFirstResult: fetchHasReturned, suspense });
                 resolveNetworkPromise();
             },
@@ -182,7 +186,6 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
                 if (fetchHasReturned && !suspense) {
                     this.forceUpdate(error);
                 }
-                this.error = error;
                 resolveNetworkPromise();
                 this.networkSubscription = null;
             },
@@ -190,15 +193,17 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
                 this.networkSubscription = null;
             },
             unsubscribe: () => {
-                if (suspense && !this.rootSubscription && this.releaseQueryTimeout) {
+                if (this.useLazy && !this.rootSubscription && this.releaseQueryTimeout) {
                     this.dispose();
                 }
             },
         });
         fetchHasReturned = true;
         if (suspense) {
-            this.setForceUpdate(() => undefined);
-            this.temporaryRetain();
+            if (this.useLazy) {
+                this.setForceUpdate(() => undefined);
+                this.temporaryRetain();
+            }
             throw new Promise((resolve) => {
                 resolveNetworkPromise = resolve;
             });
@@ -232,7 +237,6 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         this.subscribe(this.snapshot);
 
         if (this.snapshot && notifyFirstResult && !suspense) {
-            this.error = null;
             this.forceUpdate(this.snapshot);
         }
     }

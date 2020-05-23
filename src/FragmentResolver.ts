@@ -229,13 +229,12 @@ export class FragmentResolver {
     }
 
     lookupInStore(environment: IEnvironment, operation, fetchPolicy): Snapshot | null {
-        if (
-            isStorePolicy(fetchPolicy) &&
-            (environment.check(operation) === 'available' ||
-                environment.check(operation).status === 'available')
-        ) {
-            this._retainCachedOperation(operation);
-            return environment.lookup(operation.fragment);
+        if (isStorePolicy(fetchPolicy)) {
+            const check = environment.check(operation);
+            if (check === 'available' || check.status === 'available') {
+                this._retainCachedOperation(operation);
+                return environment.lookup(operation.fragment);
+            }
         }
         return null;
     }

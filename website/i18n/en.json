@@ -20,6 +20,9 @@
       "use-pagination": {
         "title": "usePagination"
       },
+      "use-preloaded-query": {
+        "title": "usePreloadedQuery"
+      },
       "use-refetch": {
         "title": "useRefetch"
       },

@@ -68,16 +68,16 @@ export type PaginationFunction<Props, TVariables extends Variables = Variables> 
     loadMore: (
         connectionConfig: ConnectionConfig<Props>,
         pageSize: number,
-        observerOrCallback: ObserverOrCallback,
-        options: RefetchOptions,
+        observerOrCallback?: ObserverOrCallback,
+        options?: RefetchOptions,
     ) => Disposable;
     hasMore: (connectionConfig?: ConnectionConfig<Props>) => boolean;
     isLoading: () => boolean;
     refetchConnection: (
         connectionConfig: ConnectionConfig<Props>,
         totalCount: number,
-        observerOrCallback: ObserverOrCallback,
-        refetchVariables: TVariables,
+        observerOrCallback?: ObserverOrCallback,
+        refetchVariables?: TVariables,
     ) => Disposable;
 };
 

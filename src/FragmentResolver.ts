@@ -294,8 +294,8 @@ export class FragmentResolver {
     refetchConnection = (
         connectionConfig: ConnectionConfig,
         totalCount: number,
-        observerOrCallback: ObserverOrCallback,
-        refetchVariables: Variables,
+        observerOrCallback?: ObserverOrCallback,
+        refetchVariables?: Variables,
     ): Disposable => {
         this.paginationData = getPaginationData(this.paginationData, this._fragment);
 
@@ -316,8 +316,8 @@ export class FragmentResolver {
     loadMore = (
         connectionConfig: ConnectionConfig,
         pageSize: number,
-        observerOrCallback: ObserverOrCallback,
-        options: RefetchOptions,
+        observerOrCallback?: ObserverOrCallback,
+        options?: RefetchOptions,
     ): Disposable => {
         this.paginationData = getPaginationData(this.paginationData, this._fragment);
 

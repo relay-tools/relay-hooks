@@ -16,14 +16,20 @@ export function usePagination<
 >(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey,
-): [$Call<KeyReturnType<TKey>>, PaginationFunction<TOperationType['variables']>];
+): [
+    $Call<KeyReturnType<TKey>>,
+    PaginationFunction<$Call<KeyReturnType<TKey>>, TOperationType['variables']>,
+];
 export function usePagination<
     TKey extends KeyType,
     TOperationType extends OperationType = OperationType
 >(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null,
-): [$Call<KeyReturnType<TKey>> | null, PaginationFunction<TOperationType['variables']>];
+): [
+    $Call<KeyReturnType<TKey>> | null,
+    PaginationFunction<$Call<KeyReturnType<TKey>> | null, TOperationType['variables']>,
+];
 export function usePagination<
     TKey extends ArrayKeyType,
     TOperationType extends OperationType = OperationType
@@ -32,7 +38,7 @@ export function usePagination<
     fragmentRef: TKey,
 ): [
     ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>,
-    PaginationFunction<TOperationType['variables']>,
+    PaginationFunction<ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>, TOperationType['variables']>,
 ];
 export function usePagination<
     TKey extends ArrayKeyType,
@@ -42,7 +48,10 @@ export function usePagination<
     fragmentRef: TKey | null,
 ): [
     ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null,
-    PaginationFunction<TOperationType['variables']>,
+    PaginationFunction<
+        ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null,
+        TOperationType['variables']
+    >,
 ] {
     const [data, resolver] = useOssFragment(fragmentNode, fragmentRef);
 

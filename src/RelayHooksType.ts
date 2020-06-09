@@ -64,20 +64,20 @@ export type ArrayKeyReturnType<T extends ArrayKeyType> = (
     arg: T,
 ) => NonNullable<NonNullable<T[0]>[' $data']>[0];
 
-export type PaginationFunction<TVariables extends Variables = Variables> = {
+export type PaginationFunction<Props, TVariables extends Variables = Variables> = {
     loadMore: (
-        connectionConfig: ConnectionConfig,
+        connectionConfig: ConnectionConfig<Props>,
         pageSize: number,
-        observerOrCallback: ObserverOrCallback,
-        options: RefetchOptions,
+        observerOrCallback?: ObserverOrCallback,
+        options?: RefetchOptions,
     ) => Disposable;
-    hasMore: (connectionConfig?: ConnectionConfig) => boolean;
+    hasMore: (connectionConfig?: ConnectionConfig<Props>) => boolean;
     isLoading: () => boolean;
     refetchConnection: (
-        connectionConfig: ConnectionConfig,
+        connectionConfig: ConnectionConfig<Props>,
         totalCount: number,
-        observerOrCallback: ObserverOrCallback,
-        refetchVariables: TVariables,
+        observerOrCallback?: ObserverOrCallback,
+        refetchVariables?: TVariables,
     ) => Disposable;
 };
 

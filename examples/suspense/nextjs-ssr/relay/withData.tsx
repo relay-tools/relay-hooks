@@ -53,7 +53,6 @@ export default (ComposedComponent: NextPage, options: OptionsWithData) => {
       ...composedInitialProps,
       queryRecords,
       environment,
-      ssr: true,
     };
   };
 

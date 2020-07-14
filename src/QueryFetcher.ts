@@ -88,7 +88,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
 
     lookupInStore(environment: IEnvironment, operation, fetchPolicy: FetchPolicy): Snapshot {
         if (isStorePolicy(fetchPolicy)) {
-            const check = environment.check(operation);
+            const check: any = environment.check(operation);
             if (check === 'available' || check.status === 'available') {
                 return environment.lookup(operation.fragment);
             }

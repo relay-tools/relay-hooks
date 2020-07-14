@@ -5295,10 +5295,10 @@ relay-compiler@9.0.0:
     signedsource "^1.0.0"
     yargs "^14.2.0"
 
-relay-hooks@3.3.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/relay-hooks/-/relay-hooks-3.3.0.tgz#d77f75d7a8d2a611182bc2397d872b812871b353"
-  integrity sha512-An0tIPPhY/PaLkTLSMUsF65vjnOMWy33QhnSIZrz43LlJx+RiWioPphP38XdEy5QANGFPPqmH9p/K900uj56Sw==
+relay-hooks@3.5.1:
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/relay-hooks/-/relay-hooks-3.5.1.tgz#d22d5da896999c276d1db8529e66b5bdc2bc2835"
+  integrity sha512-A7ytAEtItvOJSteleGbCDpVqnixTjTG807eDo3sdEI8qy9aIta58pWeM0RU+UUDOObnwPFNdY5w4HILJ6YUYyg==
   dependencies:
     "@restart/hooks" "^0.3.1"
     fbjs "^1.0.0"

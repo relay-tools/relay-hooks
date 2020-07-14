@@ -22,7 +22,7 @@ const internalLoadQuery = <TOperationType extends OperationType = OperationType>
     let data: RenderProps<TOperationType> | null | Promise<any> = null;
     let listener;
 
-    const queryFetcher = new QueryFetcher(true);
+    const queryFetcher = new QueryFetcher<TOperationType>(true);
 
     const prev = {
         environment: null,

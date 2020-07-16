@@ -1,4 +1,8 @@
-# relay-hooks ![](https://github.com/relay-tools/relay-hooks/workflows/Build/badge.svg)
+# relay-hooks 
+![](https://github.com/relay-tools/relay-hooks/workflows/Build/badge.svg) 
+[![npm](https://img.shields.io/npm/v/relay-hooks.svg)](https://www.npmjs.com/package/relay-hooks)
+[![npm downloads](https://img.shields.io/npm/dm/relay-hooks.svg)](https://www.npmjs.com/package/relay-hooks)
+
 Use Relay as React hooks
 
 ## Installation

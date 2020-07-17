@@ -18,22 +18,6 @@ class ErrorBoundary extends React.Component<any> {
   }
 }
 
-const Suspense = ({children, ssr, reload}) => {
-  const [suspense, setSuspense] = React.useState(!ssr);
-  React.useEffect(() => {
-    if (!suspense && reload) {
-      setSuspense(true);
-    }
-  }, [ssr]);
-  return suspense || !ssr ? (
-    <React.Suspense fallback={<div>loading suspense</div>}>
-      {children}
-    </React.Suspense>
-  ) : (
-    <React.Fragment>{children}</React.Fragment>
-  );
-};
-
 class CustomApp extends App {
   render() {
     const {Component, pageProps} = this.props;
@@ -48,9 +32,9 @@ class CustomApp extends App {
           fallback={({error}) =>
             `Error: ${error.message + ': ' + error.stack}`
           }>
-          <Suspense ssr={pageProps.ssr} reload={false}>
-            <Component {...pageProps} />
-          </Suspense>
+            <React.Suspense fallback={<div>loading suspense</div>}>
+              <Component {...pageProps} />
+            </React.Suspense>
         </ErrorBoundary>
       </React.Fragment>
     );

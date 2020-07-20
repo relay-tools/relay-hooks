@@ -230,7 +230,7 @@ export class FragmentResolver {
 
     lookupInStore(environment: IEnvironment, operation, fetchPolicy): Snapshot | null {
         if (isStorePolicy(fetchPolicy)) {
-            const check = environment.check(operation);
+            const check: any = environment.check(operation);
             if (check === 'available' || check.status === 'available') {
                 this._retainCachedOperation(operation);
                 return environment.lookup(operation.fragment);
@@ -517,7 +517,7 @@ export class FragmentResolver {
                 .mergeMap((payload) => {
                     return Observable.create((sink) => {
                         onNext(operation, payload, () => {
-                            sink.next(); // pass void to public observer's `next(undefined)`
+                            sink.next(undefined); // pass void to public observer's `next()`
                             sink.complete();
                         });
                     });

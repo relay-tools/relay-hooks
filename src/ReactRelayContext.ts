@@ -13,6 +13,6 @@
 import * as React from 'react';
 import { __internal } from 'relay-runtime';
 
-const { createRelayContext } = __internal;
+const { createRelayContext } = __internal as any;
 
 export const ReactRelayContext = createRelayContext(React);

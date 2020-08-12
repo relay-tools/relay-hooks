@@ -32,7 +32,9 @@ export function useOssFragment<TKey extends ArrayKeyType>(
     const ref = useRef<{ resolver: FragmentResolver }>(null);
     const unmountedRef = useRef(false);
     useEffect(() => {
-        unmountedRef.current = true;
+        return (): void => {
+            unmountedRef.current = true;
+        };
     }, []);
     if (ref.current === null || ref.current === undefined) {
         ref.current = {

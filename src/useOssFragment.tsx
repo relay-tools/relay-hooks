@@ -28,10 +28,10 @@ export function useOssFragment<TKey extends ArrayKeyType>(
     fragmentRef: TKey | null,
 ): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null, FragmentResolver] {
     const environment = useRelayEnvironment();
-    const ref = useRef<{ resolver: FragmentResolver }>(null);
     const unmountedRef = useRef(false);
-    const [, forceUpdate] = useState<ContainerResult>(null);
     useEffect(() => (): void => void (unmountedRef.current = true), []);
+    const [, forceUpdate] = useState<ContainerResult>(null);
+    const ref = useRef<{ resolver: FragmentResolver }>(null);
     if (ref.current === null || ref.current === undefined) {
         ref.current = {
             resolver: new FragmentResolver((index) => {

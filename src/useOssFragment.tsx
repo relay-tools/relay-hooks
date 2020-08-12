@@ -31,11 +31,7 @@ export function useOssFragment<TKey extends ArrayKeyType>(
     const [, forceUpdate] = useState<ContainerResult>(null);
     const ref = useRef<{ resolver: FragmentResolver }>(null);
     const unmountedRef = useRef(false);
-    useEffect(() => {
-        return (): void => {
-            unmountedRef.current = true;
-        };
-    }, []);
+    useEffect(() => (): void => void (unmountedRef.current = true), []);
     if (ref.current === null || ref.current === undefined) {
         ref.current = {
             resolver: new FragmentResolver((index) => {

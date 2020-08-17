@@ -6,8 +6,28 @@ import {
     Variables,
     PageInfo,
     Observer,
+    MutationConfig as BaseMutationConfig,
+    MutationParameters,
 } from 'relay-runtime';
 import { RelayContext, FragmentSpecResolver } from 'relay-runtime/lib/store/RelayStoreTypes';
+
+export type MutationState<T extends MutationParameters> = {
+    loading: boolean;
+    data: T['response'] | null;
+    error?: Error | null;
+};
+
+export type MutationNode<T extends MutationParameters> = BaseMutationConfig<T>['mutation'];
+
+export type MutationConfig<T extends MutationParameters> = Partial<
+    Omit<BaseMutationConfig<T>, 'mutation' | 'onCompleted'>
+> & {
+    onCompleted?(response: T['response']): void;
+};
+
+export type Mutate<T extends MutationParameters> = (
+    config?: Partial<MutationConfig<T>>,
+) => Promise<T['response']>;
 
 export const NETWORK_ONLY = 'network-only';
 export const STORE_THEN_NETWORK = 'store-and-network';

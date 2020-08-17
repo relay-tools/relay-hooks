@@ -2,32 +2,10 @@
 import * as invariant from 'fbjs/lib/invariant';
 import * as React from 'react';
 import { ReactRelayContext } from './ReactRelayContext';
-import {
-    MutationConfig as BaseMutationConfig,
-    Environment,
-    MutationParameters,
-    commitMutation,
-} from 'relay-runtime';
+import { Environment, MutationParameters, commitMutation } from 'relay-runtime';
 import useMounted from '@restart/hooks/useMounted';
+import { MutationNode, MutationConfig, MutationState, Mutate } from './RelayHooksType';
 const { useCallback, useContext, useState } = React;
-
-export type MutationState<T extends MutationParameters> = {
-    loading: boolean;
-    data: T['response'] | null;
-    error?: Error | null;
-};
-
-export type MutationNode<T extends MutationParameters> = BaseMutationConfig<T>['mutation'];
-
-export type MutationConfig<T extends MutationParameters> = Partial<
-    Omit<BaseMutationConfig<T>, 'mutation' | 'onCompleted'>
-> & {
-    onCompleted?(response: T['response']): void;
-};
-
-export type Mutate<T extends MutationParameters> = (
-    config?: Partial<MutationConfig<T>>,
-) => Promise<T['response']>;
 
 export function useMutation<T extends MutationParameters>(
     mutation: MutationNode<T>,

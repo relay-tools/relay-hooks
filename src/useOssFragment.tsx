@@ -30,9 +30,15 @@ export function useOssFragment<TKey extends ArrayKeyType>(
     const environment = useRelayEnvironment();
     const [, forceUpdate] = useState<ContainerResult>(null);
     const ref = useRef<{ resolver: FragmentResolver }>(null);
+    const mountedRef = useRef(false);
+    useEffect(() => {
+        mountedRef.current = true;
+    }, []);
     if (ref.current === null || ref.current === undefined) {
         ref.current = {
-            resolver: new FragmentResolver(forceUpdate),
+            resolver: new FragmentResolver((id) => {
+                if (mountedRef.current) forceUpdate(id);
+            }),
         };
     }
 

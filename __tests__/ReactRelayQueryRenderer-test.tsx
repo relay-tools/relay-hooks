@@ -55,12 +55,14 @@ const QueryRendererHook = (props) => {
         cacheConfig,
         fetchKey,
         skip,
+        fetchObserver,
     } = props;
     const { cached, ...relays } = useQuery(query, variables, {
         networkCacheConfig: cacheConfig,
         fetchPolicy,
         fetchKey,
         skip,
+        fetchObserver,
     });
 
     return <React.Fragment>{render(relays)}</React.Fragment>;
@@ -206,6 +208,53 @@ describe('ReactRelayQueryRenderer', () => {
             );
             expect(environment.mock.isLoading(TestQuery, variables, cacheConfig)).toBe(true);
         });
+
+        it('observe query', () => {
+            const observer = {
+                next: jest.fn(() => undefined),
+                error: jest.fn(() => undefined),
+                complete: jest.fn(() => undefined),
+                start: jest.fn(() => undefined),
+            };
+            ReactTestRenderer.create(
+                <PropsSetter>
+                    <ReactRelayQueryRenderer
+                        query={TestQuery}
+                        cacheConfig={cacheConfig}
+                        environment={environment}
+                        render={render}
+                        variables={variables}
+                        fetchObserver={observer}
+                    />
+                </PropsSetter>,
+            );
+
+            expect(environment.execute.mock.calls.length).toBe(1);
+            expect(observer.start).toBeCalled();
+            expect(observer.next).not.toBeCalled();
+            render.mockClear();
+            environment.mock.resolve(TestQuery, response);
+            expect(observer.next).toBeCalled();
+            expect(observer.complete).toBeCalled();
+            const owner = createOperationDescriptor(TestQuery, variables);
+            expect({
+                error: null,
+                props: {
+                    node: {
+                        id: '4',
+
+                        __fragments: {
+                            TestFragment: {},
+                        },
+
+                        __fragmentOwner: owner.request,
+                        __id: '4',
+                    },
+                },
+                retry: expect.any(Function),
+            }).toBeRendered();
+        });
+
         describe('when constructor fires multiple times', () => {
             describe('when store does not have snapshot and fetch does not return snapshot', () => {
                 it('fetches the query only once, renders loading state', () => {
@@ -662,7 +711,7 @@ describe('ReactRelayQueryRenderer', () => {
 
             it('skip loading state when request failed synchronously', () => {
                 const error = new Error('Mock Network Error');
-                const fetch = () => error;
+                const fetch: any = () => error;
                 store = new Store(new RecordSource());
                 environment = new Environment({
                     network: Network.create(fetch),
@@ -1097,6 +1146,37 @@ describe('ReactRelayQueryRenderer', () => {
         retry: null
       }).toBeRendered();
     });*/
+        });
+    });
+
+    describe('observe when the fetch fails', () => {
+        it('observe error', () => {
+            const observer = {
+                next: jest.fn(() => undefined),
+                error: jest.fn(() => undefined),
+                complete: jest.fn(() => undefined),
+                start: jest.fn(() => undefined),
+            };
+            ReactTestRenderer.create(
+                <ReactRelayQueryRenderer
+                    environment={environment}
+                    query={TestQuery}
+                    render={render}
+                    variables={variables}
+                    fetchObserver={observer}
+                />,
+            );
+            render.mockClear();
+
+            const error = new Error('fail');
+            expect(observer.error).not.toBeCalled();
+            environment.mock.reject(TestQuery, error);
+            expect(observer.error).toBeCalled();
+            expect({
+                error,
+                props: null,
+                retry: expect.any(Function),
+            }).toBeRendered();
         });
     });
 
@@ -1775,6 +1855,54 @@ describe('ReactRelayQueryRenderer', () => {
             expect(environment.mock.getMostRecentOperation().request.variables).toEqual({
                 id: '5',
             });
+        });
+
+        it('observe retry', () => {
+            ReactTestRenderer.create(
+                <PropsSetter>
+                    <ReactRelayQueryRenderer
+                        environment={environment}
+                        query={TestQuery}
+                        render={render}
+                        variables={variables}
+                    />
+                </PropsSetter>,
+            );
+            render.mockClear();
+            environment.mock.resolve(TestQuery, response);
+
+            expect(render).toBeCalledTimes(1);
+            const readyState = render.mock.calls[0][0];
+            expect(readyState.retry).not.toBe(null);
+            environment.mockClear();
+
+            const observer = {
+                next: jest.fn(() => undefined),
+                error: jest.fn(() => undefined),
+                complete: jest.fn(() => undefined),
+                start: jest.fn(() => undefined),
+            };
+
+            readyState.retry({ force: true }, observer);
+            expect(environment.mock.isLoading(TestQuery, variables, { force: true })).toBe(true);
+
+            jest.runAllTimers();
+            expect(observer.start).toBeCalled();
+            expect(observer.next).not.toBeCalled();
+            environment.mock.resolve(TestQuery, {
+                data: {
+                    node: {
+                        __typename: 'User',
+                        id: '5',
+                        name: 'Zuck',
+                    },
+                },
+            });
+
+            expect(observer.next).toBeCalled();
+            expect(observer.complete).toBeCalled();
+            expect(observer.error).not.toBeCalled();
+            environment.mockClear();
         });
 
         it('skips cache if `force` is set to true', () => {

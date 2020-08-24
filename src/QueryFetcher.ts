@@ -6,8 +6,9 @@ import {
     __internal,
     OperationType,
     OperationDescriptor,
+    Observer,
 } from 'relay-runtime';
-import { FetchPolicy, RenderProps } from './RelayHooksType';
+import { FetchPolicy, RenderProps, QueryOptions } from './RelayHooksType';
 import { isNetworkPolicy, isStorePolicy } from './Utils';
 
 const { fetchQuery } = __internal;
@@ -98,16 +99,25 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
 
     execute(
         environment: IEnvironment,
-        query,
-        options,
+        query: OperationDescriptor,
+        options: QueryOptions,
         retain: (environment, query) => Disposable = (environment, query): Disposable =>
             environment.retain(query),
     ): RenderProps<TOperationType> {
-        const { fetchPolicy = defaultPolicy, networkCacheConfig, fetchKey, skip } = options;
+        const {
+            fetchPolicy = defaultPolicy,
+            networkCacheConfig,
+            fetchKey,
+            skip,
+            fetchObserver,
+        } = options;
         let storeSnapshot;
-        const retry = (cacheConfigOverride: CacheConfig = networkCacheConfig): void => {
+        const retry = (
+            cacheConfigOverride: CacheConfig = networkCacheConfig,
+            observer?: Observer<Snapshot>,
+        ): void => {
             this.disposeRequest();
-            this.fetch(cacheConfigOverride, false);
+            this.fetch(cacheConfigOverride, false, observer);
         };
         if (skip) {
             return {
@@ -134,7 +144,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             storeSnapshot = this.lookupInStore(environment, this.query, fetchPolicy);
             const isNetwork = isNetworkPolicy(fetchPolicy, storeSnapshot);
             if (isNetwork) {
-                this.fetch(networkCacheConfig, this.suspense && !storeSnapshot);
+                this.fetch(networkCacheConfig, this.suspense && !storeSnapshot, fetchObserver);
             } else if (!!storeSnapshot) {
                 this.snapshot = storeSnapshot;
                 this.error = null;
@@ -163,7 +173,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         });
     }
 
-    fetch(networkCacheConfig, suspense: boolean): void {
+    fetch(networkCacheConfig, suspense: boolean, observer = {} as Observer<Snapshot>): void {
         let fetchHasReturned = false;
         let resolveNetworkPromise = (): void => {};
         fetchQuery(this.environment, this.query, {
@@ -174,10 +184,15 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
                 this.networkSubscription = {
                     dispose: (): void => subscription.unsubscribe(),
                 };
+                observer.start && observer.start(subscription);
             },
             next: () => {
                 this.error = null;
-                this._onQueryDataAvailable({ notifyFirstResult: fetchHasReturned, suspense });
+                this._onQueryDataAvailable({
+                    notifyFirstResult: fetchHasReturned,
+                    suspense,
+                    observer,
+                });
                 resolveNetworkPromise();
             },
             error: (error) => {
@@ -188,14 +203,17 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
                 }
                 resolveNetworkPromise();
                 this.networkSubscription = null;
+                observer.error && observer.error(error);
             },
             complete: () => {
                 this.networkSubscription = null;
+                observer.complete && observer.complete();
             },
-            unsubscribe: () => {
+            unsubscribe: (subscription) => {
                 if (this.useLazy && !this.rootSubscription && this.releaseQueryTimeout) {
                     this.dispose();
                 }
+                observer.unsubscribe && observer.unsubscribe(subscription);
             },
         });
         fetchHasReturned = true;
@@ -223,11 +241,21 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         }
     }
 
-    _onQueryDataAvailable({ notifyFirstResult, suspense }): void {
+    _onQueryDataAvailable({
+        notifyFirstResult,
+        suspense,
+        observer,
+    }: {
+        notifyFirstResult: boolean;
+        suspense: boolean;
+        observer: Observer<Snapshot>;
+    }): void {
         // `_onQueryDataAvailable` can be called synchronously the first time and can be called
         // multiple times by network layers that support data subscriptions.
         // Wait until the first payload to call `onDataChange` and subscribe for data updates.
+
         if (this.snapshot) {
+            observer.next && observer.next(this.snapshot);
             return;
         }
 
@@ -235,6 +263,8 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
 
         // Subscribe to changes in the data of the root fragment
         this.subscribe(this.snapshot);
+
+        observer.next && observer.next(this.snapshot);
 
         if (this.snapshot && notifyFirstResult && !suspense) {
             this.forceUpdate(this.snapshot);

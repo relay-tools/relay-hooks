@@ -44,6 +44,7 @@ After Relay's core team shared information about the the initial differences in 
   * **useQuery**: it is the same as `useLazyLoadQuery` but does not use suspense, it allows you to use hooks without having to migrate the application in concurrent mode and its return is the same as the QueryRenderer HOC
   * **useRefetch**: it is the same as `useRefetchable`, allows you to migrate the Refetch Container without changing the fragment specifications
   * **conditional useQuery & useLazyLoadQuery**: added `skip`: [Optional] If skip is true, the query will be skipped entirely
+  * **observe the execution of the query in the network in useQuery & useLazyLoadQuery**: added `fetchObserver`: [Optional] A fetchObserver can be passed to observe the execution of the query in the network
 
 * why use relay-hooks?
 
@@ -84,6 +85,8 @@ In addition to `query` (first argument) and `variables` (second argument), `useQ
 `networkCacheConfig`: [Optional] Object containing cache config options for the network layer. Note the the network layer may contain an additional query response cache which will reuse network responses for identical queries. If you want to bypass this cache completely, pass {force: true} as the value for this option.
 
 `skip`: [Optional] If skip is true, the query will be skipped entirely.
+
+`fetchObserver`: [Optional] A fetchObserver can be passed to observe the execution of the query in the network
 
 ```ts
 import {useQuery, graphql } from 'relay-hooks';

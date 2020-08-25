@@ -14,6 +14,14 @@ import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 import { useRefetch, RelayEnvironmentProvider, useRelayEnvironment } from '../src';
 
+function createHooks(component) {
+    const result = ReactTestRenderer.create(component);
+    ReactTestRenderer.act(() => {
+        jest.runAllImmediates();
+    });
+    return result;
+}
+
 const ReactRelayRefetchContainer = {
     createContainer: (Component, spec, query) => (props) => {
         const { user, ...others } = props;
@@ -186,7 +194,7 @@ describe('ReactRelayRefetchContainer', () => {
   });*/
 
     it('passes non-fragment props to the component', () => {
-        ReactTestRenderer.create(
+        createHooks(
             <ContextSetter environment={environment}>
                 <TestContainer bar={1} foo="foo" />
             </ContextSetter>,
@@ -206,7 +214,7 @@ describe('ReactRelayRefetchContainer', () => {
     });
 
     it('passes through null props', () => {
-        ReactTestRenderer.create(
+        createHooks(
             <ContextSetter environment={environment}>
                 <TestContainer user={null} />
             </ContextSetter>,
@@ -225,7 +233,7 @@ describe('ReactRelayRefetchContainer', () => {
     });
 
     it('passes through context', () => {
-        ReactTestRenderer.create(
+        createHooks(
             <ContextSetter environment={environment}>
                 <TestContainer user={null} />
             </ContextSetter>,
@@ -236,7 +244,7 @@ describe('ReactRelayRefetchContainer', () => {
     it('resolves & subscribes fragment props', () => {
         const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
 
-        ReactTestRenderer.create(
+        createHooks(
             <ContextSetter environment={environment}>
                 <TestContainer user={userPointer} />
             </ContextSetter>,
@@ -269,7 +277,7 @@ describe('ReactRelayRefetchContainer', () => {
     it('re-renders on subscription callback', () => {
         const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
 
-        ReactTestRenderer.create(
+        createHooks(
             <ContextSetter environment={environment}>
                 <TestContainer user={userPointer} />
             </ContextSetter>,
@@ -309,7 +317,7 @@ describe('ReactRelayRefetchContainer', () => {
 
     it('resolves new props', () => {
         let userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
-        const instance = ReactTestRenderer.create(
+        const instance = createHooks(
             <ContextSetter environment={environment}>
                 <TestContainer user={userPointer} />
             </ContextSetter>,
@@ -355,7 +363,7 @@ describe('ReactRelayRefetchContainer', () => {
 
     it('resolves new props when ids dont change', () => {
         let userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
-        const instance = ReactTestRenderer.create(
+        const instance = createHooks(
             <ContextSetter environment={environment}>
                 <TestContainer user={userPointer} />
             </ContextSetter>,
@@ -402,7 +410,7 @@ describe('ReactRelayRefetchContainer', () => {
 
     it('resolves new props when ids dont change even after it has refetched', () => {
         let userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
-        const instance = ReactTestRenderer.create(
+        const instance = createHooks(
             <ContextSetter environment={environment}>
                 <TestContainer user={userPointer} />
             </ContextSetter>,
@@ -469,7 +477,7 @@ describe('ReactRelayRefetchContainer', () => {
 
     it('does not update for same props/data', () => {
         const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
-        const instance = ReactTestRenderer.create(
+        const instance = createHooks(
             <ContextSetter environment={environment}>
                 <TestContainer user={userPointer} />
             </ContextSetter>,
@@ -493,7 +501,7 @@ describe('ReactRelayRefetchContainer', () => {
         const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
         const scalar = 42;
         const fn = () => null;
-        const instance = ReactTestRenderer.create(
+        const instance = createHooks(
             <ContextSetter environment={environment}>
                 <TestContainer fn={fn} nil={null} scalar={scalar} user={userPointer} />
             </ContextSetter>,
@@ -519,7 +527,7 @@ describe('ReactRelayRefetchContainer', () => {
         const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
         const scalar = 42;
         const fn = () => null;
-        const instance = ReactTestRenderer.create(
+        const instance = createHooks(
             <ContextSetter environment={environment}>
                 <TestContainer fn={fn} scalar={scalar} user={userPointer} />
             </ContextSetter>,
@@ -552,7 +560,7 @@ describe('ReactRelayRefetchContainer', () => {
         const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
         const scalar = 42;
         const fn = () => null;
-        const instance = ReactTestRenderer.create(
+        const instance = createHooks(
             <ContextSetter environment={environment}>
                 <TestContainer fn={fn} scalar={scalar} user={userPointer} />
             </ContextSetter>,
@@ -582,7 +590,7 @@ describe('ReactRelayRefetchContainer', () => {
 
     it('always updates for non-scalar props', () => {
         const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
-        const instance = ReactTestRenderer.create(
+        const instance = createHooks(
             <ContextSetter environment={environment}>
                 <TestContainer arr={[]} obj={{}} user={userPointer} />
             </ContextSetter>,
@@ -622,7 +630,7 @@ describe('ReactRelayRefetchContainer', () => {
             };
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
             environment.mock.clearCache();
-            instance = ReactTestRenderer.create(
+            instance = createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,
@@ -957,7 +965,7 @@ describe('ReactRelayRefetchContainer', () => {
                 }
             }
 
-            instance = ReactTestRenderer.create(
+            instance = createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainerWrapper />
                 </ContextSetter>,
@@ -985,7 +993,7 @@ describe('ReactRelayRefetchContainer', () => {
 
     const UnwrappedComponent = unwrapContainer(TestUnwrappingContainer);
 
-    const renderer = ReactTestRenderer.create(
+    const renderer = createHooks(
       <UnwrappedComponent user={{ id: "4", name: "Mark" }} />
     );
 

@@ -37,4 +37,5 @@ module.exports = {
         },
     },
     setupFiles: ['./scripts/setup.ts'],
+    timers: 'fake',
 };

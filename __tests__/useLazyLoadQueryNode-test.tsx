@@ -98,6 +98,7 @@ describe('useLazyLoadQueryNode', () => {
                 {
                     fetchPolicy: renderProps.fetchPolicy || defaultFetchPolicy,
                     skip: renderProps.skip,
+                    fetchObserver: renderProps.fetchObserver,
                 },
             );
             return renderFn(props);
@@ -189,6 +190,72 @@ describe('useLazyLoadQueryNode', () => {
 
         const data = environment.lookup(query.fragment).data;
         expectToBeRendered(renderFn, data);
+    });
+
+    it('observe query', () => {
+        const observer = {
+            next: jest.fn(() => undefined),
+            error: jest.fn(() => undefined),
+            complete: jest.fn(() => undefined),
+            start: jest.fn(() => undefined),
+        };
+        const instance = render(
+            environment,
+            <Container variables={variables} fetchObserver={observer} />,
+        );
+
+        expect(instance.toJSON()).toEqual('Fallback');
+        expectToHaveFetched(environment, query);
+        expect(renderFn).not.toBeCalled();
+        expect(environment.retain).toHaveBeenCalledTimes(1);
+
+        expect(observer.start).toBeCalled();
+        expect(observer.next).not.toBeCalled();
+
+        environment.mock.resolve(gqlQuery, {
+            data: {
+                node: {
+                    __typename: 'User',
+                    id: variables.id,
+                    name: 'Alice',
+                },
+            },
+        });
+
+        const data = environment.lookup(query.fragment).data;
+        expectToBeRendered(renderFn, data);
+
+        expect(observer.next).toBeCalled();
+        expect(observer.complete).toBeCalled();
+    });
+
+    it('observe query error', () => {
+        const observer = {
+            next: jest.fn(() => undefined),
+            error: jest.fn(() => undefined),
+            complete: jest.fn(() => undefined),
+            start: jest.fn(() => undefined),
+        };
+        const instance = render(
+            environment,
+            <Container variables={variables} fetchObserver={observer} />,
+        );
+
+        expect(instance.toJSON()).toEqual('Fallback');
+        expectToHaveFetched(environment, query);
+        expect(renderFn).not.toBeCalled();
+        expect(environment.retain).toHaveBeenCalledTimes(1);
+
+        expect(observer.start).toBeCalled();
+        expect(observer.next).not.toBeCalled();
+        expect(observer.error).not.toBeCalled();
+
+        const error = new Error('fail');
+        environment.mock.reject(gqlQuery, error);
+
+        expect(observer.next).not.toBeCalled();
+        expect(observer.complete).not.toBeCalled();
+        expect(observer.error).toBeCalled();
     });
 
     it('skip', () => {

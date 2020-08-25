@@ -255,7 +255,6 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         // Wait until the first payload to call `onDataChange` and subscribe for data updates.
 
         if (this.snapshot) {
-            observer.next && observer.next(this.snapshot);
             return;
         }
 

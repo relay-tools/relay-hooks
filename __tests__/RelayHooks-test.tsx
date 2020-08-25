@@ -13,6 +13,14 @@ import {
     useRefetchable,
 } from '../src';
 
+function createHooks(component, options?: any) {
+    const result = ReactTestRenderer.create(component, options);
+    ReactTestRenderer.act(() => {
+        jest.runAllImmediates();
+    });
+    return result;
+}
+
 describe('useMemo resolver functions', () => {
     let TestComponent;
     let TestContainer;
@@ -182,7 +190,7 @@ describe('useMemo resolver functions', () => {
         it('re-renders on subscription callbac', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
 
-            ReactTestRenderer.create(
+            createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,
@@ -211,7 +219,7 @@ describe('useMemo resolver functions', () => {
         it('re-renders on change props', () => {
             let userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
 
-            const instance = ReactTestRenderer.create(
+            const instance = createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,
@@ -233,7 +241,7 @@ describe('useMemo resolver functions', () => {
         it('unmount', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
 
-            const instance = ReactTestRenderer.create(
+            const instance = createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,
@@ -243,7 +251,7 @@ describe('useMemo resolver functions', () => {
             render.mockClear();
 
             instance.unmount();
-            const instance2 = ReactTestRenderer.create(
+            const instance2 = createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,
@@ -280,7 +288,7 @@ describe('useMemo resolver functions', () => {
         it('re-renders on subscription callbac', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
 
-            ReactTestRenderer.create(
+            createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,
@@ -309,7 +317,7 @@ describe('useMemo resolver functions', () => {
         it('re-renders on change props', () => {
             let userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
 
-            const instance = ReactTestRenderer.create(
+            const instance = createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,
@@ -331,7 +339,7 @@ describe('useMemo resolver functions', () => {
         it('unmount', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
 
-            const instance = ReactTestRenderer.create(
+            const instance = createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,
@@ -341,7 +349,7 @@ describe('useMemo resolver functions', () => {
             render.mockClear();
 
             instance.unmount();
-            const instance2 = ReactTestRenderer.create(
+            const instance2 = createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,
@@ -378,7 +386,7 @@ describe('useMemo resolver functions', () => {
         it('re-renders on subscription callbac', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
 
-            ReactTestRenderer.create(
+            createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,
@@ -407,7 +415,7 @@ describe('useMemo resolver functions', () => {
         it('re-renders on change props', () => {
             let userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
 
-            const instance = ReactTestRenderer.create(
+            const instance = createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,
@@ -429,7 +437,7 @@ describe('useMemo resolver functions', () => {
         it('unmount', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
 
-            const instance = ReactTestRenderer.create(
+            const instance = createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,
@@ -439,7 +447,7 @@ describe('useMemo resolver functions', () => {
             render.mockClear();
 
             instance.unmount();
-            const instance2 = ReactTestRenderer.create(
+            const instance2 = createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,
@@ -476,7 +484,7 @@ describe('useMemo resolver functions', () => {
         it('re-renders on subscription callbac', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
 
-            ReactTestRenderer.create(
+            createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,
@@ -505,7 +513,7 @@ describe('useMemo resolver functions', () => {
         it('re-renders on change props', () => {
             let userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
 
-            const instance = ReactTestRenderer.create(
+            const instance = createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,
@@ -527,7 +535,7 @@ describe('useMemo resolver functions', () => {
         it('unmount', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
 
-            const instance = ReactTestRenderer.create(
+            const instance = createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,
@@ -537,7 +545,7 @@ describe('useMemo resolver functions', () => {
             render.mockClear();
 
             instance.unmount();
-            const instance2 = ReactTestRenderer.create(
+            const instance2 = createHooks(
                 <ContextSetter environment={environment}>
                     <TestContainer user={userPointer} />
                 </ContextSetter>,

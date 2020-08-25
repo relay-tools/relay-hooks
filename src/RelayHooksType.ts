@@ -6,8 +6,32 @@ import {
     Variables,
     PageInfo,
     Observer,
+    MutationConfig as BaseMutationConfig,
+    MutationParameters,
 } from 'relay-runtime';
-import { RelayContext, FragmentSpecResolver } from 'relay-runtime/lib/store/RelayStoreTypes';
+import {
+    RelayContext,
+    FragmentSpecResolver,
+    Snapshot,
+} from 'relay-runtime/lib/store/RelayStoreTypes';
+
+export type MutationState<T extends MutationParameters> = {
+    loading: boolean;
+    data: T['response'] | null;
+    error?: Error | null;
+};
+
+export type MutationNode<T extends MutationParameters> = BaseMutationConfig<T>['mutation'];
+
+export type MutationConfig<T extends MutationParameters> = Partial<
+    Omit<BaseMutationConfig<T>, 'mutation' | 'onCompleted'>
+> & {
+    onCompleted?(response: T['response']): void;
+};
+
+export type Mutate<T extends MutationParameters> = (
+    config?: Partial<MutationConfig<T>>,
+) => Promise<T['response']>;
 
 export const NETWORK_ONLY = 'network-only';
 export const STORE_THEN_NETWORK = 'store-and-network';
@@ -28,7 +52,7 @@ export type ContainerResult = {
 export interface RenderProps<T extends OperationType> {
     error: Error | null;
     props: T['response'] | null | undefined;
-    retry: (_cacheConfigOverride?: CacheConfig) => void;
+    retry: (_cacheConfigOverride?: CacheConfig, observer?: Observer<Snapshot>) => void;
     cached?: boolean;
 }
 
@@ -48,6 +72,7 @@ export type QueryOptions = {
     fetchKey?: string | number;
     networkCacheConfig?: CacheConfig;
     skip?: boolean;
+    fetchObserver?: Observer<Snapshot>;
 };
 
 export type $Call<Fn extends (...args: any[]) => any> = Fn extends (arg: any) => infer RT

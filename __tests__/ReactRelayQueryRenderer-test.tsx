@@ -22,6 +22,14 @@ import * as ReactTestRenderer from 'react-test-renderer';
 
 //import readContext from "react-relay/lib/readContext";
 
+function createHooks(component, options?: any) {
+    const result = ReactTestRenderer.create(component, options);
+    ReactTestRenderer.act(() => {
+        jest.runAllImmediates();
+    });
+    return result;
+}
+
 import {
     createOperationDescriptor,
     Environment,
@@ -55,12 +63,14 @@ const QueryRendererHook = (props) => {
         cacheConfig,
         fetchKey,
         skip,
+        fetchObserver,
     } = props;
     const { cached, ...relays } = useQuery(query, variables, {
         networkCacheConfig: cacheConfig,
         fetchPolicy,
         fetchKey,
         skip,
+        fetchObserver,
     });
 
     return <React.Fragment>{render(relays)}</React.Fragment>;
@@ -148,7 +158,7 @@ describe('ReactRelayQueryRenderer', () => {
 
     describe('when initialized', () => {
         it('skip', () => {
-            const renderer = ReactTestRenderer.create(
+            const renderer = createHooks(
                 <PropsSetter>
                     <ReactRelayQueryRenderer
                         query={TestQuery}
@@ -195,7 +205,7 @@ describe('ReactRelayQueryRenderer', () => {
         });
 
         it('fetches the query', () => {
-            ReactTestRenderer.create(
+            createHooks(
                 <ReactRelayQueryRenderer
                     query={TestQuery}
                     cacheConfig={cacheConfig}
@@ -206,6 +216,53 @@ describe('ReactRelayQueryRenderer', () => {
             );
             expect(environment.mock.isLoading(TestQuery, variables, cacheConfig)).toBe(true);
         });
+
+        it('observe query', () => {
+            const observer = {
+                next: jest.fn(() => undefined),
+                error: jest.fn(() => undefined),
+                complete: jest.fn(() => undefined),
+                start: jest.fn(() => undefined),
+            };
+            createHooks(
+                <PropsSetter>
+                    <ReactRelayQueryRenderer
+                        query={TestQuery}
+                        cacheConfig={cacheConfig}
+                        environment={environment}
+                        render={render}
+                        variables={variables}
+                        fetchObserver={observer}
+                    />
+                </PropsSetter>,
+            );
+
+            expect(environment.execute.mock.calls.length).toBe(1);
+            expect(observer.start).toBeCalled();
+            expect(observer.next).not.toBeCalled();
+            render.mockClear();
+            environment.mock.resolve(TestQuery, response);
+            expect(observer.next).toBeCalled();
+            expect(observer.complete).toBeCalled();
+            const owner = createOperationDescriptor(TestQuery, variables);
+            expect({
+                error: null,
+                props: {
+                    node: {
+                        id: '4',
+
+                        __fragments: {
+                            TestFragment: {},
+                        },
+
+                        __fragmentOwner: owner.request,
+                        __id: '4',
+                    },
+                },
+                retry: expect.any(Function),
+            }).toBeRendered();
+        });
+
         describe('when constructor fires multiple times', () => {
             describe('when store does not have snapshot and fetch does not return snapshot', () => {
                 it('fetches the query only once, renders loading state', () => {
@@ -456,7 +513,7 @@ describe('ReactRelayQueryRenderer', () => {
                             };
                         });
                     });
-                    const renderer = ReactTestRenderer.create(
+                    const renderer = createHooks(
                         <PropsSetter>
                             <ReactRelayQueryRenderer
                                 environment={environment}
@@ -553,7 +610,7 @@ describe('ReactRelayQueryRenderer', () => {
             });
 
             it('fetches the query with default variables', () => {
-                ReactTestRenderer.create(
+                createHooks(
                     <ReactRelayQueryRenderer
                         query={TestQuery}
                         cacheConfig={cacheConfig}
@@ -567,7 +624,7 @@ describe('ReactRelayQueryRenderer', () => {
             });
 
             it('renders with a default ready state', () => {
-                ReactTestRenderer.create(
+                createHooks(
                     <ReactRelayQueryRenderer
                         query={TestQuery}
                         cacheConfig={cacheConfig}
@@ -597,7 +654,7 @@ describe('ReactRelayQueryRenderer', () => {
                     },
                 });
 
-                ReactTestRenderer.create(
+                createHooks(
                     <ReactRelayQueryRenderer
                         query={TestQuery}
                         fetchPolicy="store-and-network"
@@ -632,7 +689,7 @@ describe('ReactRelayQueryRenderer', () => {
                     network: Network.create(fetch),
                     store,
                 });
-                ReactTestRenderer.create(
+                createHooks(
                     <ReactRelayQueryRenderer
                         query={TestQuery}
                         cacheConfig={cacheConfig}
@@ -662,13 +719,13 @@ describe('ReactRelayQueryRenderer', () => {
 
             it('skip loading state when request failed synchronously', () => {
                 const error = new Error('Mock Network Error');
-                const fetch = () => error;
+                const fetch: any = () => error;
                 store = new Store(new RecordSource());
                 environment = new Environment({
                     network: Network.create(fetch),
                     store,
                 });
-                ReactTestRenderer.create(
+                createHooks(
                     <ReactRelayQueryRenderer
                         query={TestQuery}
                         cacheConfig={cacheConfig}
@@ -701,7 +758,7 @@ describe('ReactRelayQueryRenderer', () => {
 
       it("sets an environment on context", () => {
         expect.assertions(1);
-        ReactTestRenderer.create(
+        createHooks(
           <ReactRelayQueryRenderer
             environment={environment}
             query={TestQuery}
@@ -716,7 +773,7 @@ describe('ReactRelayQueryRenderer', () => {
 
       it("sets an environment on context with empty query", () => {
         variables = { foo: "bar" };
-        ReactTestRenderer.create(
+        createHooks(
           <ReactRelayQueryRenderer
             environment={environment}
             query={null}
@@ -735,7 +792,7 @@ describe('ReactRelayQueryRenderer', () => {
 
       it("updates the context when the environment changes", () => {
         expect.assertions(2);
-        const renderer = ReactTestRenderer.create(
+        const renderer = createHooks(
           <PropsSetter>
             <ReactRelayQueryRenderer
               environment={environment}
@@ -761,7 +818,7 @@ describe('ReactRelayQueryRenderer', () => {
 
       it("updates the context when the query changes", () => {
         expect.assertions(2);
-        const renderer = ReactTestRenderer.create(
+        const renderer = createHooks(
           <PropsSetter>
             <ReactRelayQueryRenderer
               environment={environment}
@@ -787,7 +844,7 @@ describe('ReactRelayQueryRenderer', () => {
 
       it("updates the context when variables change", () => {
         expect.assertions(5);
-        const renderer = ReactTestRenderer.create(
+        const renderer = createHooks(
           <PropsSetter>
             <ReactRelayQueryRenderer
               environment={environment}
@@ -841,7 +898,7 @@ describe('ReactRelayQueryRenderer', () => {
       it("does not update the context for equivalent variables", () => {
         expect.assertions(2);
         variables = { foo: ["bar"] };
-        const renderer = ReactTestRenderer.create(
+        const renderer = createHooks(
           <PropsSetter>
             <ReactRelayQueryRenderer
               environment={environment}
@@ -872,7 +929,7 @@ describe('ReactRelayQueryRenderer', () => {
             let renderer;
 
             beforeEach(() => {
-                renderer = ReactTestRenderer.create(
+                renderer = createHooks(
                     <PropsSetter>
                         <ReactRelayQueryRenderer
                             environment={environment}
@@ -901,7 +958,7 @@ describe('ReactRelayQueryRenderer', () => {
 
             it('does not update if variables are equivalent', () => {
                 variables = { foo: [1] };
-                renderer = ReactTestRenderer.create(
+                renderer = createHooks(
                     <PropsSetter>
                         <ReactRelayQueryRenderer
                             environment={environment}
@@ -1100,9 +1157,40 @@ describe('ReactRelayQueryRenderer', () => {
         });
     });
 
+    describe('observe when the fetch fails', () => {
+        it('observe error', () => {
+            const observer = {
+                next: jest.fn(() => undefined),
+                error: jest.fn(() => undefined),
+                complete: jest.fn(() => undefined),
+                start: jest.fn(() => undefined),
+            };
+            createHooks(
+                <ReactRelayQueryRenderer
+                    environment={environment}
+                    query={TestQuery}
+                    render={render}
+                    variables={variables}
+                    fetchObserver={observer}
+                />,
+            );
+            render.mockClear();
+
+            const error = new Error('fail');
+            expect(observer.error).not.toBeCalled();
+            environment.mock.reject(TestQuery, error);
+            expect(observer.error).toBeCalled();
+            expect({
+                error,
+                props: null,
+                retry: expect.any(Function),
+            }).toBeRendered();
+        });
+    });
+
     describe('when the fetch fails', () => {
         beforeEach(() => {
-            ReactTestRenderer.create(
+            createHooks(
                 <ReactRelayQueryRenderer
                     environment={environment}
                     query={TestQuery}
@@ -1197,7 +1285,7 @@ describe('ReactRelayQueryRenderer', () => {
                         );
                     }
                 }
-                const renderer = ReactTestRenderer.create(<Example />);
+                const renderer = createHooks(<Example />);
                 expect.assertions(3);
                 mockA.mockClear();
                 mockB.mockClear();
@@ -1252,7 +1340,7 @@ describe('ReactRelayQueryRenderer', () => {
 
     describe('when the fetch succeeds', () => {
         beforeEach(() => {
-            ReactTestRenderer.create(
+            createHooks(
                 <ReactRelayQueryRenderer
                     environment={environment}
                     query={TestQuery}
@@ -1325,7 +1413,7 @@ describe('ReactRelayQueryRenderer', () => {
       `));
 
             variables = { id: '4' };
-            renderer = ReactTestRenderer.create(
+            renderer = createHooks(
                 <PropsSetter>
                     <ReactRelayQueryRenderer
                         environment={environment}
@@ -1425,7 +1513,7 @@ describe('ReactRelayQueryRenderer', () => {
       `));
 
             variables = { id: '4' };
-            renderer = ReactTestRenderer.create(
+            renderer = createHooks(
                 <PropsSetter>
                     <ReactRelayQueryRenderer
                         environment={environment}
@@ -1503,7 +1591,7 @@ describe('ReactRelayQueryRenderer', () => {
         }
       `));
 
-            renderer = ReactTestRenderer.create(
+            renderer = createHooks(
                 <PropsSetter>
                     <ReactRelayQueryRenderer
                         environment={environment}
@@ -1584,7 +1672,7 @@ describe('ReactRelayQueryRenderer', () => {
 
     describe('when unmounted', () => {
         it('releases its reference if unmounted before fetch completes', () => {
-            const renderer = ReactTestRenderer.create(
+            const renderer = createHooks(
                 <ReactRelayQueryRenderer
                     environment={environment}
                     query={TestQuery}
@@ -1605,7 +1693,7 @@ describe('ReactRelayQueryRenderer', () => {
         });
 
         it('releases its reference if unmounted after fetch completes', () => {
-            const renderer = ReactTestRenderer.create(
+            const renderer = createHooks(
                 <ReactRelayQueryRenderer
                     environment={environment}
                     query={TestQuery}
@@ -1623,7 +1711,7 @@ describe('ReactRelayQueryRenderer', () => {
         });
 
         it('aborts a pending fetch', () => {
-            const renderer = ReactTestRenderer.create(
+            const renderer = createHooks(
                 <ReactRelayQueryRenderer
                     environment={environment}
                     query={TestQuery}
@@ -1654,7 +1742,7 @@ describe('ReactRelayQueryRenderer', () => {
         }
       `));
 
-            renderer = ReactTestRenderer.create(
+            renderer = createHooks(
                 <PropsSetter>
                     <ReactRelayQueryRenderer
                         environment={environment}
@@ -1708,7 +1796,7 @@ describe('ReactRelayQueryRenderer', () => {
                 throw error;
             });
 
-            ReactTestRenderer.create(
+            createHooks(
                 <ErrorBoundary>
                     <ReactRelayQueryRenderer
                         environment={environment}
@@ -1735,7 +1823,7 @@ describe('ReactRelayQueryRenderer', () => {
 
     describe('When retry', () => {
         it('uses the latest variables after initial render', () => {
-            const renderer = ReactTestRenderer.create(
+            const renderer = createHooks(
                 <PropsSetter>
                     <ReactRelayQueryRenderer
                         environment={environment}
@@ -1777,8 +1865,56 @@ describe('ReactRelayQueryRenderer', () => {
             });
         });
 
+        it('observe retry', () => {
+            createHooks(
+                <PropsSetter>
+                    <ReactRelayQueryRenderer
+                        environment={environment}
+                        query={TestQuery}
+                        render={render}
+                        variables={variables}
+                    />
+                </PropsSetter>,
+            );
+            render.mockClear();
+            environment.mock.resolve(TestQuery, response);
+
+            expect(render).toBeCalledTimes(1);
+            const readyState = render.mock.calls[0][0];
+            expect(readyState.retry).not.toBe(null);
+            environment.mockClear();
+
+            const observer = {
+                next: jest.fn(() => undefined),
+                error: jest.fn(() => undefined),
+                complete: jest.fn(() => undefined),
+                start: jest.fn(() => undefined),
+            };
+
+            readyState.retry({ force: true }, observer);
+            expect(environment.mock.isLoading(TestQuery, variables, { force: true })).toBe(true);
+
+            jest.runAllTimers();
+            expect(observer.start).toBeCalled();
+            expect(observer.next).not.toBeCalled();
+            environment.mock.resolve(TestQuery, {
+                data: {
+                    node: {
+                        __typename: 'User',
+                        id: '5',
+                        name: 'Zuck',
+                    },
+                },
+            });
+
+            expect(observer.next).toBeCalled();
+            expect(observer.complete).toBeCalled();
+            expect(observer.error).not.toBeCalled();
+            environment.mockClear();
+        });
+
         it('skips cache if `force` is set to true', () => {
-            ReactTestRenderer.create(
+            createHooks(
                 <PropsSetter>
                     <ReactRelayQueryRenderer
                         environment={environment}
@@ -1805,7 +1941,7 @@ describe('ReactRelayQueryRenderer', () => {
         });
 
         it('uses cache if `force` is set to false', () => {
-            ReactTestRenderer.create(
+            createHooks(
                 <PropsSetter>
                     <ReactRelayQueryRenderer
                         environment={environment}
@@ -1838,7 +1974,7 @@ describe('ReactRelayQueryRenderer', () => {
         const fetchKey = 'fetchKey';
 
         beforeEach(() => {
-            renderer = ReactTestRenderer.create(
+            renderer = createHooks(
                 <PropsSetter>
                     <ReactRelayQueryRenderer
                         environment={environment}

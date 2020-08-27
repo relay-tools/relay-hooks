@@ -1,20 +1,8 @@
 import * as areEqual from 'fbjs/lib/areEqual';
 import { GraphQLTaggedNode, OperationType, IEnvironment, isPromise } from 'relay-runtime';
 import { QueryFetcher } from './QueryFetcher';
-import { RenderProps, QueryOptions } from './RelayHooksType';
+import { RenderProps, QueryOptions, LoadQuery } from './RelayHooksType';
 import { createOperation } from './Utils';
-
-export type LoadQuery<TOperationType extends OperationType = OperationType> = {
-    next: (
-        environment: IEnvironment,
-        gqlQuery: GraphQLTaggedNode,
-        variables?: TOperationType['variables'],
-        options?: QueryOptions,
-    ) => Promise<void>;
-    subscribe: (callback: (value: any) => any) => () => void;
-    getValue: (environment?: IEnvironment) => RenderProps<TOperationType> | Promise<any>;
-    dispose: () => void;
-};
 
 const internalLoadQuery = <TOperationType extends OperationType = OperationType>(
     promise = false,

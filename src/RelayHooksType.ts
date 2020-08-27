@@ -3,6 +3,8 @@ import {
     OperationType,
     CacheConfig,
     GraphQLTaggedNode,
+    Environment,
+    IEnvironment,
     Variables,
     PageInfo,
     Observer,
@@ -32,6 +34,13 @@ export type MutationConfig<T extends MutationParameters> = Partial<
 export type Mutate<T extends MutationParameters> = (
     config?: Partial<MutationConfig<T>>,
 ) => Promise<T['response']>;
+
+export type MutationProps<T extends MutationParameters> = MutationConfig<T> & {
+    children: (mutate: Mutate<T>, state: MutationState<T>) => React.ReactNode;
+    mutation: MutationNode<T>;
+    /** if not provided, the context environment will be used. */
+    environment?: Environment;
+};
 
 export const NETWORK_ONLY = 'network-only';
 export const STORE_THEN_NETWORK = 'store-and-network';
@@ -151,4 +160,16 @@ export type PaginationData = {
     direction: string;
     getConnectionFromProps: Function;
     getFragmentVariables: Function;
+};
+
+export type LoadQuery<TOperationType extends OperationType = OperationType> = {
+    next: (
+        environment: IEnvironment,
+        gqlQuery: GraphQLTaggedNode,
+        variables?: TOperationType['variables'],
+        options?: QueryOptions,
+    ) => Promise<void>;
+    subscribe: (callback: (value: any) => any) => () => void;
+    getValue: (environment?: IEnvironment) => RenderProps<TOperationType> | Promise<any>;
+    dispose: () => void;
 };

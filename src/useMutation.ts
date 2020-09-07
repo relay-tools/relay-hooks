@@ -4,7 +4,13 @@ import * as React from 'react';
 import { ReactRelayContext } from './ReactRelayContext';
 import { Environment, MutationParameters, commitMutation } from 'relay-runtime';
 import useMounted from '@restart/hooks/useMounted';
-import { MutationNode, MutationConfig, MutationState, Mutate } from './RelayHooksType';
+import {
+    MutationNode,
+    MutationConfig,
+    MutationState,
+    Mutate,
+    MutationProps,
+} from './RelayHooksType';
 const { useCallback, useContext, useState } = React;
 
 export function useMutation<T extends MutationParameters>(
@@ -119,13 +125,6 @@ export function useMutation<T extends MutationParameters>(
 
     return [mutate, state];
 }
-
-export type MutationProps<T extends MutationParameters> = MutationConfig<T> & {
-    children: (mutate: Mutate<T>, state: MutationState<T>) => React.ReactNode;
-    mutation: MutationNode<T>;
-    /** if not provided, the context environment will be used. */
-    environment?: Environment;
-};
 
 export function Mutation<T extends MutationParameters>({
     children,

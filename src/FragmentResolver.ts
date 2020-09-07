@@ -19,7 +19,12 @@ import {
     __internal,
     ReaderSelector,
 } from 'relay-runtime';
-import { RefetchOptions, PaginationData, ConnectionConfig } from './RelayHooksType';
+import {
+    RefetchOptions,
+    PaginationData,
+    ConnectionConfig,
+    ObserverOrCallback,
+} from './RelayHooksType';
 import {
     isNetworkPolicy,
     isStorePolicy,
@@ -30,8 +35,6 @@ import {
     getNewSelector,
     createOperation,
 } from './Utils';
-
-export type ObserverOrCallback = Observer<void> | ((error: Error) => any);
 
 const { fetchQuery } = __internal;
 

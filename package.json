@@ -1,6 +1,6 @@
 {
   "name": "relay-hooks",
-  "version": "3.5.2",
+  "version": "3.6.0",
   "keywords": [
     "graphql",
     "relay",
@@ -9,8 +9,6 @@
     "ssr"
   ],
   "main": "lib/index.js",
-  "unpkg": "lib/umd-relay-hooks.min.js",
-  "module": "lib/es-relay-hooks.min.js",
   "license": "MIT",
   "description": "Relay Hooks",
   "author": {

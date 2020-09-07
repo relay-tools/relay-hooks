@@ -12,3 +12,4 @@ __mocks__
 .eslintrc.js
 .prettierrc
 jest.config.js
+rollup.config.js

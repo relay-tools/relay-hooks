@@ -81,7 +81,9 @@ const internalLoadQuery = <TOperationType extends OperationType = OperationType>
 
     const subscribe = (callback: (value) => any): (() => void) => {
         listener = callback;
-        return dispose;
+        return (): void => {
+            listener = null;
+        };
     };
     return {
         next,

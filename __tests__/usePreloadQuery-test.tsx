@@ -798,5 +798,16 @@ describe('usePreloadQuery', () => {
                 },
             });
         });
+
+        it('dispose subscription', () => {
+            const callback = jest.fn(() => {});
+            const dispose = prefetched.subscribe(callback);
+            dispose();
+            prefetched.next(environment, params, { id: '4' });
+            dataSource.next(response);
+            dataSource.complete();
+            TestRenderer.act(() => jest.runAllImmediates());
+            expect(callback).not.toBeCalled();
+        });
     });
 });

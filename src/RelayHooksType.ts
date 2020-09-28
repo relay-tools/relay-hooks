@@ -162,14 +162,17 @@ export type PaginationData = {
     getFragmentVariables: Function;
 };
 
-export type LoadQuery<TOperationType extends OperationType = OperationType> = {
+export type LoadQuery<
+    TOperationType extends OperationType = OperationType,
+    TEnvironment extends IEnvironment = IEnvironment
+> = {
     next: (
-        environment: IEnvironment,
+        environment: TEnvironment,
         gqlQuery: GraphQLTaggedNode,
         variables?: TOperationType['variables'],
         options?: QueryOptions,
     ) => Promise<void>;
     subscribe: (callback: (value: any) => any) => () => void;
-    getValue: (environment?: IEnvironment) => RenderProps<TOperationType> | Promise<any>;
+    getValue: (environment?: TEnvironment) => RenderProps<TOperationType> | Promise<any>;
     dispose: () => void;
 };

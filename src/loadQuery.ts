@@ -1,11 +1,25 @@
 import * as areEqual from 'fbjs/lib/areEqual';
-import { GraphQLTaggedNode, OperationType, IEnvironment, isPromise } from 'relay-runtime';
+import {
+    GraphQLTaggedNode,
+    OperationType,
+    IEnvironment,
+    isPromise,
+    OperationDescriptor,
+    Disposable,
+} from 'relay-runtime';
 import { QueryFetcher } from './QueryFetcher';
 import { RenderProps, QueryOptions, LoadQuery } from './RelayHooksType';
 import { createOperation } from './Utils';
 
-const internalLoadQuery = <TOperationType extends OperationType = OperationType>(
+export const internalLoadQuery = <TOperationType extends OperationType = OperationType>(
     promise = false,
+    queryExecute = (
+        queryFetcher: QueryFetcher<TOperationType>,
+        environment: IEnvironment,
+        query: OperationDescriptor,
+        options: QueryOptions,
+        retain?: (environment, query) => Disposable,
+    ): RenderProps<TOperationType> => queryFetcher.execute(environment, query, options, retain),
 ): LoadQuery<TOperationType> => {
     let data: RenderProps<TOperationType> | null | Promise<any> = null;
     let listener = undefined;
@@ -47,7 +61,7 @@ const internalLoadQuery = <TOperationType extends OperationType = OperationType>
             prev.query = createOperation(gqlQuery, prev.variables);
         }
         const execute = (): void => {
-            data = queryFetcher.execute(prev.environment, prev.query, prev.options);
+            data = queryExecute(queryFetcher, prev.environment, prev.query, prev.options);
             listener && listener(data);
         };
 

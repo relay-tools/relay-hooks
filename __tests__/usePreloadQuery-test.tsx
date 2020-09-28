@@ -749,5 +749,65 @@ describe('usePreloadQuery', () => {
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Error Boundary');
         });
+
+        it('issue-115', () => {
+            prefetched.next(environment, params, { id: '4' });
+
+            let data;
+            function Component(props) {
+                data = usePreloadedQuery(props.prefetched);
+                if (data.error) {
+                    return 'Error Boundary';
+                }
+                if (data.props && data.props.node) {
+                    return data.props.node.name;
+                }
+                return data.props;
+            }
+            const renderer = TestRenderer.create(
+                <RelayEnvironmentProvider environment={environment}>
+                    <Component prefetched={prefetched} />
+                </RelayEnvironmentProvider>,
+            );
+            // Ensure that useEffect runs
+            TestRenderer.act(() => jest.runAllImmediates());
+            expect(renderer.toJSON()).toEqual(null);
+            expect(data).toEqual(loadingData);
+
+            dataSource.next(response);
+            dataSource.complete();
+            TestRenderer.act(() => jest.runAllImmediates());
+            expect(renderer.toJSON()).toEqual('Zuck');
+            expect(data.props).toEqual({
+                node: {
+                    id: '4',
+                    name: 'Zuck',
+                },
+            });
+
+            TestRenderer.act(() => renderer.unmount());
+            TestRenderer.act(() => jest.runAllImmediates());
+            prefetched.next(environment, params, { id: '4' });
+            dataSource.next(response);
+            dataSource.complete();
+            TestRenderer.act(() => jest.runAllImmediates());
+            expect((prefetched.getValue(environment) as any).props).toEqual({
+                node: {
+                    id: '4',
+                    name: 'Zuck',
+                },
+            });
+        });
+
+        it('dispose subscription', () => {
+            const callback = jest.fn(() => {});
+            const dispose = prefetched.subscribe(callback);
+            dispose();
+            prefetched.next(environment, params, { id: '4' });
+            dataSource.next(response);
+            dataSource.complete();
+            TestRenderer.act(() => jest.runAllImmediates());
+            expect(callback).not.toBeCalled();
+        });
     });
 });

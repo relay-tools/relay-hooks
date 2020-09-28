@@ -8,11 +8,10 @@ const internalLoadQuery = <TOperationType extends OperationType = OperationType>
     promise = false,
 ): LoadQuery<TOperationType> => {
     let data: RenderProps<TOperationType> | null | Promise<any> = null;
-    let listener;
+    let listener = undefined;
+    let queryFetcher = new QueryFetcher<TOperationType>(true);
 
-    const queryFetcher = new QueryFetcher<TOperationType>(true);
-
-    const prev = {
+    let prev = {
         environment: null,
         gqlQuery: null,
         variables: null,
@@ -22,7 +21,16 @@ const internalLoadQuery = <TOperationType extends OperationType = OperationType>
 
     const dispose = (): void => {
         queryFetcher.dispose();
-        listener = null;
+        queryFetcher = new QueryFetcher<TOperationType>(true);
+        listener = undefined;
+        data = null;
+        prev = {
+            environment: null,
+            gqlQuery: null,
+            variables: null,
+            options: null,
+            query: null,
+        };
     };
 
     const next = (
@@ -73,7 +81,9 @@ const internalLoadQuery = <TOperationType extends OperationType = OperationType>
 
     const subscribe = (callback: (value) => any): (() => void) => {
         listener = callback;
-        return dispose;
+        return (): void => {
+            listener = null;
+        };
     };
     return {
         next,

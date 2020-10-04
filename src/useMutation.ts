@@ -1,7 +1,6 @@
 /*eslint-disable */
 import * as invariant from 'fbjs/lib/invariant';
 import * as React from 'react';
-import { ReactRelayContext } from './ReactRelayContext';
 import { Environment, MutationParameters, commitMutation } from 'relay-runtime';
 import useMounted from '@restart/hooks/useMounted';
 import {
@@ -11,7 +10,8 @@ import {
     Mutate,
     MutationProps,
 } from './RelayHooksType';
-const { useCallback, useContext, useState } = React;
+import { useRelayEnvironment } from './useRelayEnvironment';
+const { useCallback, useState } = React;
 
 export function useMutation<T extends MutationParameters>(
     mutation: MutationNode<T>,
@@ -27,8 +27,8 @@ export function useMutation<T extends MutationParameters>(
 
     const isMounted = useMounted();
 
-    const relayContext: any = useContext(ReactRelayContext);
-    const resolvedEnvironment = environment || relayContext.environment;
+    const relayEnvironment = useRelayEnvironment();
+    const resolvedEnvironment = environment || relayEnvironment;
     const {
         configs,
         variables,

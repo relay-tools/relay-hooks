@@ -59,12 +59,14 @@ variables will no longer be part of context.
 A `RelayEnvironmentProvider` should be rendered once at the root of the app, and multiple useQuery's can be rendered under this environment provider.
 
 ```ts
+import { RelayEnvironmentProvider } from 'relay-hooks';
+
 ReactDOM.render(
-    <RelayEnvironmentProvider environment={modernEnvironment}>
-      <AppTodo/>
-    </RelayEnvironmentProvider>,
-    rootElement,
-  );
+  <RelayEnvironmentProvider environment={modernEnvironment}>
+    <AppTodo/>
+  </RelayEnvironmentProvider>,
+  rootElement,
+);
 ```
 
 ## useQuery
@@ -89,7 +91,7 @@ In addition to `query` (first argument) and `variables` (second argument), `useQ
 `fetchObserver`: [Optional] A fetchObserver can be passed to observe the execution of the query in the network
 
 ```ts
-import {useQuery, graphql } from 'relay-hooks';
+import { useQuery, graphql } from 'relay-hooks';
 
 const query = graphql`
   query appQuery($userId: String) {
@@ -101,7 +103,7 @@ const query = graphql`
 
 const variables = {
   userId: 'me',
-}; 
+};
 
 const options = {
   fetchPolicy: 'store-or-network', //default
@@ -109,7 +111,7 @@ const options = {
 }
 
 const AppTodo = function (appProps)  {
-  const {props, error, retry, cached} = useQuery(query, variables, options);
+  const { props, error, retry, cached } = useQuery(query, variables, options);
 
   if (props && props.user) {
     return <TodoApp user={props.user} />;
@@ -127,7 +129,7 @@ same to useQuery
 
 ```ts
 import * as React from 'react';
-import {useQuery, graphql, RelayEnvironmentProvider } from 'relay-hooks';
+import { useQuery, graphql, RelayEnvironmentProvider } from 'relay-hooks';
 
 const query = graphql`
   query appQuery($userId: String) {
@@ -138,36 +140,35 @@ const query = graphql`
 `;
 
 class ErrorBoundary extends React.Component {
-    state = { error: null };
-    componentDidCatch(error) {
-        this.setState({ error });
+  state = { error: null };
+    
+  componentDidCatch(error) {
+    this.setState({ error });
+  }
+
+  render() {
+    const { children, fallback } = this.props;
+    const { error } = this.state;
+    if (error) {
+      return React.createElement(fallback, { error });
     }
-    render() {
-        const { children, fallback } = this.props;
-        const { error } = this.state;
-        if (error) {
-            return React.createElement(fallback, { error });
-        }
-        return children;
-    }
+    return children;
+  }
 }
 
 const variables = {
   userId: 'me',
-}; 
+};
 
 const options = {
   fetchPolicy: 'store-or-network', //default
   networkCacheConfig: undefined,
 }
 
-
 const AppTodo = function (appProps)  {
-  const {props, cached} = useLazyLoadQuery(query, variables, options);
+  const { props, cached } = useLazyLoadQuery(query, variables, options);
   return <TodoApp user={props.user} />;
-
 }
-
 
 const App = (
   <RelayEnvironmentProvider environment={modernEnvironment}>

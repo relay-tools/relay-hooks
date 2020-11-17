@@ -18,6 +18,8 @@ import {
     PluralReaderSelector,
     __internal,
     ReaderSelector,
+    ConcreteRequest,
+    SingularReaderSelector,
 } from 'relay-runtime';
 import {
     RefetchOptions,
@@ -219,14 +221,23 @@ export class FragmentResolver {
         };
     }
 
-    changeVariables(variables, request): void {
+    changeVariables(
+        variables: Variables,
+        request: ConcreteRequest,
+        cacheConfig: CacheConfig,
+    ): void {
         if (this._selector.kind === 'PluralReaderSelector') {
             (this._selector as any).selectors = (this
                 ._selector as PluralReaderSelector).selectors.map((s) =>
-                getNewSelector(request, s, variables),
+                getNewSelector(request, s, variables, cacheConfig),
             );
         } else {
-            this._selector = getNewSelector(request, this._selector, variables);
+            this._selector = getNewSelector(
+                request,
+                this._selector as SingularReaderSelector,
+                variables,
+                cacheConfig,
+            );
         }
         this.lookup();
     }
@@ -245,9 +256,9 @@ export class FragmentResolver {
     refetch = (
         taggedNode: GraphQLTaggedNode,
         refetchVariables: Variables | ((fragmentVariables: Variables) => Variables),
-        renderVariables: Variables,
-        observerOrCallback: ObserverOrCallback,
-        options: RefetchOptions,
+        renderVariables?: Variables,
+        observerOrCallback?: ObserverOrCallback,
+        options?: RefetchOptions,
     ): Disposable => {
         //TODO Function
         const fragmentVariables = this.getFragmentVariables();
@@ -259,23 +270,17 @@ export class FragmentResolver {
             ? { ...fetchVariables, ...renderVariables }
             : fetchVariables;
 
-        /*eslint-disable */
-        const observer =
-            typeof observerOrCallback === 'function'
-                ? {
-                      next: observerOrCallback,
-                      error: observerOrCallback,
-                  }
-                : observerOrCallback || ({} as any);
-
-        /*eslint-enable */
-        const onNext = (operation, payload, complete): void => {
-            this.changeVariables(newFragmentVariables, operation.request.node);
+        const onNext = (operation: OperationDescriptor, payload, complete): void => {
+            this.changeVariables(
+                newFragmentVariables,
+                operation.request.node,
+                operation.request.cacheConfig,
+            );
             this.refreshHooks();
             complete();
         };
 
-        return this.executeFetcher(taggedNode, fetchVariables, options, observer, onNext);
+        return this.executeFetcher(taggedNode, fetchVariables, options, observerOrCallback, onNext);
     };
 
     // pagination
@@ -404,7 +409,7 @@ export class FragmentResolver {
             ...fragmentVariables,
         };
 
-        const onNext = (operation, payload, complete): void => {
+        const onNext = (operation: OperationDescriptor, payload, complete): void => {
             const prevData = this.getData();
 
             const getFragmentVariables =
@@ -412,6 +417,7 @@ export class FragmentResolver {
             this.changeVariables(
                 getFragmentVariables(fragmentVariables, paginatingVariables.totalCount),
                 operation.request.node,
+                operation.request.cacheConfig,
             );
 
             const nextData = this.getData();
@@ -449,13 +455,16 @@ export class FragmentResolver {
     executeFetcher(
         taggedNode: GraphQLTaggedNode,
         fetchVariables: Variables,
-        options: RefetchOptions,
+        options: RefetchOptions = {},
         observerOrCallback: ObserverOrCallback,
         onNext: (operation, payload, complete) => void,
     ): Disposable {
-        const cacheConfig: CacheConfig = options ? { force: !!options.force } : undefined;
-        if (cacheConfig != null && options && options.metadata != null) {
+        const cacheConfig: CacheConfig = {};
+        if (options.metadata != null) {
             cacheConfig.metadata = options.metadata;
+        }
+        if (options.force != null) {
+            cacheConfig.force = options.force;
         }
 
         /*eslint-disable */
@@ -468,12 +477,9 @@ export class FragmentResolver {
                 : observerOrCallback || ({} as any);
 
         /*eslint-enable */
+        const operation = createOperation(taggedNode, fetchVariables, cacheConfig);
 
-        const operation = createOperation(taggedNode, fetchVariables);
-
-        const optionsFetch = options ? options : {};
-
-        const { fetchPolicy = 'network-only' } = optionsFetch;
+        const { fetchPolicy = 'network-only' } = options;
 
         const storeSnapshot = this.lookupInStore(this._environment, operation, fetchPolicy);
         if (storeSnapshot != null) {
@@ -485,28 +491,11 @@ export class FragmentResolver {
         // Cancel any previously running refetch.
         this._refetchSubscription && this._refetchSubscription.unsubscribe();
 
-        // Declare refetchSubscription before assigning it in .start(), since
-        // synchronous completion may call callbacks .subscribe() returns.
-        let refetchSubscription: Subscription;
-
-        const isNetwork = isNetworkPolicy(fetchPolicy, storeSnapshot);
-        if (!isNetwork) {
-            return {
-                dispose: (): void => {},
-            };
-        }
-        if (isNetwork) {
+        if (isNetworkPolicy(fetchPolicy, storeSnapshot)) {
+            // Declare refetchSubscription before assigning it in .start(), since
+            // synchronous completion may call callbacks .subscribe() returns.
+            let refetchSubscription: Subscription;
             const reference = this._environment.retain(operation);
-
-            /*eslint-disable */
-            const fetchQueryOptions =
-                cacheConfig != null
-                    ? {
-                          networkCacheConfig: cacheConfig,
-                      }
-                    : {};
-
-            /*eslint-enable */
             const cleanup = (): void => {
                 this._selectionReferences = this._selectionReferences.concat(reference);
                 if (this._refetchSubscription === refetchSubscription) {
@@ -516,7 +505,7 @@ export class FragmentResolver {
             };
 
             this._isARequestInFlight = true;
-            fetchQuery(this._environment, operation, fetchQueryOptions)
+            fetchQuery(this._environment, operation)
                 .mergeMap((payload) => {
                     return Observable.create((sink) => {
                         onNext(operation, payload, () => {
@@ -541,12 +530,14 @@ export class FragmentResolver {
                         observer.start && observer.start(subscription);
                     },
                 });
+            return {
+                dispose: (): void => {
+                    refetchSubscription && refetchSubscription.unsubscribe();
+                },
+            };
         }
-
         return {
-            dispose: (): void => {
-                refetchSubscription && refetchSubscription.unsubscribe();
-            },
+            dispose: (): void => {},
         };
     }
 }

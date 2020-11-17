@@ -276,6 +276,7 @@ describe('useRefetchable', () => {
                 name: 'Zuck',
             },
             isMissingData: false,
+            missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(UserFragment, '4', { cond: true }, ownerUser1.request),
         });
@@ -358,6 +359,7 @@ describe('useRefetchable', () => {
                 name: 'Joe',
             },
             isMissingData: false,
+            missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(
                 UserFragment,
@@ -405,6 +407,7 @@ describe('useRefetchable', () => {
                 // Name is excluded since value of cond is now false
             },
             isMissingData: false,
+            missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(
                 UserFragment,
@@ -472,6 +475,7 @@ describe('useRefetchable', () => {
                 // Name is excluded since value of cond is now false
             },
             isMissingData: false,
+            missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(
                 UserFragment,

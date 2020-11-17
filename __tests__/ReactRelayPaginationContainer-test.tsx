@@ -366,6 +366,7 @@ describe('ReactRelayPaginationContainer', () => {
         expect(environment.subscribe.mock.calls[0][0]).toEqual({
             data: expect.any(Object),
             isMissingData: false,
+            missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(
                 UserFragment,
@@ -467,6 +468,7 @@ describe('ReactRelayPaginationContainer', () => {
         expect(environment.subscribe.mock.calls[0][0]).toEqual({
             data: expect.any(Object),
             isMissingData: false,
+            missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(
                 UserFragment,
@@ -527,6 +529,7 @@ describe('ReactRelayPaginationContainer', () => {
         expect(environment.subscribe.mock.calls[0][0]).toEqual({
             data: expect.any(Object),
             isMissingData: false,
+            missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(
                 UserFragment,
@@ -618,6 +621,7 @@ describe('ReactRelayPaginationContainer', () => {
         expect(environment.subscribe.mock.calls[0][0]).toEqual({
             data: expect.any(Object),
             isMissingData: false,
+            missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(
                 UserFragment,

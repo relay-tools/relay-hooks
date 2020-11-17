@@ -35,8 +35,8 @@
     "fbjs": "^3.0.0"
   },
   "peerDependencies": {
-    "react": ">=16.8.0",
-    "relay-runtime": ">=8.0.0"
+    "react": "^16.9.0",
+    "relay-runtime": ">=10.1.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
@@ -45,7 +45,7 @@
     "graphql": "^14.2.0",
     "@types/react": "16.9.11",
     "@types/react-dom": "16.9.4",
-    "@types/relay-runtime": "9.1.6",
+    "@types/relay-runtime": "10.0.12",
     "relay-runtime": "^10.1.0",
     "react-test-renderer": "16.11.0",
     "relay-test-utils": "10.1.0",

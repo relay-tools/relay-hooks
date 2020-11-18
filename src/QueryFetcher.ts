@@ -9,7 +9,7 @@ import {
     Observer,
 } from 'relay-runtime';
 import { FetchPolicy, RenderProps, QueryOptions } from './RelayHooksType';
-import { isNetworkPolicy, isStorePolicy } from './Utils';
+import { createOperation, isNetworkPolicy, isStorePolicy } from './Utils';
 
 const { fetchQuery } = __internal;
 
@@ -89,8 +89,8 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
 
     lookupInStore(environment: IEnvironment, operation, fetchPolicy: FetchPolicy): Snapshot {
         if (isStorePolicy(fetchPolicy)) {
-            const check: any = environment.check(operation);
-            if (check === 'available' || check.status === 'available') {
+            const check = environment.check(operation);
+            if (check.status === 'available') {
                 return environment.lookup(operation.fragment);
             }
         }
@@ -104,20 +104,17 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         retain: (environment, query) => Disposable = (environment, query): Disposable =>
             environment.retain(query),
     ): RenderProps<TOperationType> {
-        const {
-            fetchPolicy = defaultPolicy,
-            networkCacheConfig,
-            fetchKey,
-            skip,
-            fetchObserver,
-        } = options;
+        const { fetchPolicy = defaultPolicy, fetchKey, skip, fetchObserver } = options;
         let storeSnapshot;
         const retry = (
-            cacheConfigOverride: CacheConfig = networkCacheConfig,
-            observer?: Observer<Snapshot>,
+            cacheConfigOverride?: CacheConfig | null,
+            fetchObserver?: Observer<Snapshot>,
         ): void => {
             this.disposeRequest();
-            this.fetch(cacheConfigOverride, false, observer);
+            this.fetch({
+                cacheConfigOverride,
+                observer: fetchObserver,
+            });
         };
         if (skip) {
             return {
@@ -144,7 +141,10 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             storeSnapshot = this.lookupInStore(environment, this.query, fetchPolicy);
             const isNetwork = isNetworkPolicy(fetchPolicy, storeSnapshot);
             if (isNetwork) {
-                this.fetch(networkCacheConfig, this.suspense && !storeSnapshot, fetchObserver);
+                this.fetch({
+                    suspense: this.suspense && !storeSnapshot,
+                    observer: fetchObserver,
+                });
             } else if (!!storeSnapshot) {
                 this.snapshot = storeSnapshot;
                 this.error = null;
@@ -173,13 +173,27 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         });
     }
 
-    fetch(networkCacheConfig, suspense: boolean, observer = {} as Observer<Snapshot>): void {
+    fetch({
+        suspense,
+        observer = {},
+        cacheConfigOverride,
+    }: {
+        suspense?: boolean;
+        observer?: Observer<Snapshot>;
+        cacheConfigOverride?: CacheConfig | null;
+    }): void {
+        /* eslint-disable indent */
+        const operation = cacheConfigOverride
+            ? createOperation(
+                  this.query.request.node,
+                  this.query.request.variables,
+                  cacheConfigOverride,
+              )
+            : this.query;
+        /* eslint-enable indent */
         let fetchHasReturned = false;
         let resolveNetworkPromise = (): void => {};
-        fetchQuery(this.environment, this.query, {
-            networkCacheConfig:
-                suspense && !networkCacheConfig ? { force: true } : networkCacheConfig,
-        }).subscribe({
+        fetchQuery(this.environment, operation).subscribe({
             start: (subscription) => {
                 this.networkSubscription = {
                     dispose: (): void => subscription.unsubscribe(),

@@ -32,24 +32,24 @@
   },
   "dependencies": {
     "@restart/hooks": "^0.3.1",
-    "fbjs": "^1.0.0"
+    "fbjs": "^3.0.0"
   },
   "peerDependencies": {
-    "react": ">=16.8.0",
-    "relay-runtime": ">=8.0.0"
+    "react": "^16.9.0",
+    "relay-runtime": ">=10.1.0"
   },
   "devDependencies": {
-    "cross-env": "6.0.3",
+    "cross-env": "^7.0.2",
     "typescript": "3.8.3",
     "react": "16.11.0",
     "graphql": "^14.2.0",
     "@types/react": "16.9.11",
     "@types/react-dom": "16.9.4",
-    "@types/relay-runtime": "9.1.6",
-    "relay-runtime": "^9.0.0",
+    "@types/relay-runtime": "10.1.0",
+    "relay-runtime": "^10.1.0",
     "react-test-renderer": "16.11.0",
-    "relay-test-utils": "9.0.0",
-    "relay-test-utils-internal": "9.0.0",
+    "relay-test-utils": "10.1.0",
+    "relay-test-utils-internal": "10.1.0",
     "@types/jest": "24.0.18",
     "ts-jest": "24.1.0",
     "jest": "24.9.0",

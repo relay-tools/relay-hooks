@@ -1,6 +1,12 @@
 import * as areEqual from 'fbjs/lib/areEqual';
 import { useRef, useMemo } from 'react';
-import { GraphQLTaggedNode, OperationType, OperationDescriptor, Variables } from 'relay-runtime';
+import {
+    GraphQLTaggedNode,
+    OperationType,
+    OperationDescriptor,
+    Variables,
+    CacheConfig,
+} from 'relay-runtime';
 import { RenderProps, QueryOptions } from './RelayHooksType';
 import { useQueryFetcher } from './useQueryFetcher';
 import { useRelayEnvironment } from './useRelayEnvironment';
@@ -17,9 +23,14 @@ export function useDeepCompare<T>(value: T): T {
 export function useMemoOperationDescriptor(
     gqlQuery: GraphQLTaggedNode,
     variables: Variables,
+    cacheConfig?: CacheConfig | null,
 ): OperationDescriptor {
     const memoVariables = useDeepCompare(variables);
-    return useMemo(() => createOperation(gqlQuery, memoVariables), [gqlQuery, memoVariables]);
+    return useMemo(() => createOperation(gqlQuery, memoVariables, cacheConfig), [
+        gqlQuery,
+        memoVariables,
+        cacheConfig,
+    ]);
 }
 
 export const useQuery = <TOperationType extends OperationType = OperationType>(
@@ -28,7 +39,7 @@ export const useQuery = <TOperationType extends OperationType = OperationType>(
     options: QueryOptions = {},
 ): RenderProps<TOperationType> => {
     const environment = useRelayEnvironment();
-    const query = useMemoOperationDescriptor(gqlQuery, variables);
+    const query = useMemoOperationDescriptor(gqlQuery, variables, options.networkCacheConfig);
     const queryFetcher = useQueryFetcher<TOperationType>();
 
     return queryFetcher.execute(environment, query, options);

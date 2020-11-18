@@ -9,7 +9,7 @@ import {
 } from 'relay-runtime';
 import { QueryFetcher } from './QueryFetcher';
 import { RenderProps, QueryOptions, LoadQuery } from './RelayHooksType';
-import { createOperation } from './Utils';
+import { createOperation, forceCache } from './Utils';
 
 export const internalLoadQuery = <TOperationType extends OperationType = OperationType>(
     promise = false,
@@ -55,10 +55,15 @@ export const internalLoadQuery = <TOperationType extends OperationType = Operati
     ): Promise<void> => {
         prev.environment = environment;
         prev.options = options;
-        if (!areEqual(variables, prev.variables) || gqlQuery != prev.gqlQuery) {
+        if (
+            !areEqual(variables, prev.variables) ||
+            gqlQuery != prev.gqlQuery ||
+            options.networkCacheConfig != prev.options.networkCacheConfig
+        ) {
+            const { networkCacheConfig = forceCache } = options;
             prev.variables = variables;
             prev.gqlQuery = gqlQuery;
-            prev.query = createOperation(gqlQuery, prev.variables);
+            prev.query = createOperation(gqlQuery, prev.variables, networkCacheConfig);
         }
         const execute = (): void => {
             data = queryExecute(queryFetcher, prev.environment, prev.query, prev.options);

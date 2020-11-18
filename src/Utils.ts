@@ -13,6 +13,8 @@ import {
     GraphQLTaggedNode,
     OperationDescriptor,
     SingularReaderSelector,
+    CacheConfig,
+    ConcreteRequest,
 } from 'relay-runtime';
 import {
     STORE_OR_NETWORK,
@@ -40,12 +42,15 @@ export const isStorePolicy = (policy: FetchPolicy): boolean => {
     return policy !== NETWORK_ONLY;
 };
 
+export const forceCache = { force: true };
+
 // Fetcher
 export function createOperation(
     gqlQuery: GraphQLTaggedNode,
     variables: Variables,
+    cacheConfig?: CacheConfig | null,
 ): OperationDescriptor {
-    return createOperationDescriptor(getRequest(gqlQuery), variables);
+    return createOperationDescriptor(getRequest(gqlQuery), variables, cacheConfig);
 }
 
 // pagination utils
@@ -157,7 +162,12 @@ export function getPaginationData(paginationData, fragment): PaginationData {
     return paginationData;
 }
 
-export function getNewSelector(request, s, variables): SingularReaderSelector {
+export function getNewSelector(
+    request: ConcreteRequest,
+    s: SingularReaderSelector,
+    variables: Variables,
+    cacheConfig: CacheConfig | null,
+): SingularReaderSelector {
     if (areEqual(variables, s.variables)) {
         // If we're not actually setting new variables, we don't actually want
         // to create a new fragment owner, since areEqualSelectors relies on
@@ -175,7 +185,7 @@ export function getNewSelector(request, s, variables): SingularReaderSelector {
     // behavior of RelayModern containers while using fragment ownership
     // to propagate variables instead of Context.
     // For more details, see the summary of D13999308
-    const requestDescriptor = createRequestDescriptor(request, variables);
+    const requestDescriptor = createRequestDescriptor(request, variables, cacheConfig);
     const selector = createReaderSelector(s.node, s.dataID, variables, requestDescriptor);
     return selector;
 }

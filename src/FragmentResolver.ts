@@ -244,8 +244,8 @@ export class FragmentResolver {
 
     lookupInStore(environment: IEnvironment, operation, fetchPolicy): Snapshot | null {
         if (isStorePolicy(fetchPolicy)) {
-            const check: any = environment.check(operation);
-            if (check === 'available' || check.status === 'available') {
+            const check = environment.check(operation);
+            if (check.status === 'available') {
                 this._retainCachedOperation(operation);
                 return environment.lookup(operation.fragment);
             }

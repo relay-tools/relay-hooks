@@ -10,12 +10,9 @@ import {
     Observer,
     MutationConfig as BaseMutationConfig,
     MutationParameters,
-} from 'relay-runtime';
-import {
-    RelayContext,
     FragmentSpecResolver,
     Snapshot,
-} from 'relay-runtime/lib/store/RelayStoreTypes';
+} from 'relay-runtime';
 
 export type MutationState<T extends MutationParameters> = {
     loading: boolean;
@@ -64,11 +61,6 @@ export interface RenderProps<T extends OperationType> {
     retry: (_cacheConfigOverride?: CacheConfig, observer?: Observer<Snapshot>) => void;
     cached?: boolean;
 }
-
-export type OperationContextProps = {
-    operation: any;
-    relay: RelayContext;
-};
 
 export type RefetchOptions = {
     force?: boolean;

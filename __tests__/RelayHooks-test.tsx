@@ -9,7 +9,6 @@ import {
     RelayEnvironmentProvider,
     useRelayEnvironment,
     usePagination,
-    useRefetch,
     useRefetchable,
 } from '../src';
 
@@ -26,12 +25,10 @@ describe('useMemo resolver functions', () => {
     let TestContainer;
     let UserFragment;
     let UserQuery;
-    let UserQueryWithCond;
     let UserFragmentRefetchQuery;
 
     let environment;
     let ownerUser1;
-    let ownerUser1WithCondVar;
     let ownerUser2;
     let refetch;
     let render;
@@ -87,36 +84,43 @@ describe('useMemo resolver functions', () => {
         ({
             UserFragment,
             UserQuery,
-            UserQueryWithCond,
             UserFragmentRefetchQuery,
         } = generateAndCompile(`
 
-      fragment UserFragment on User 
-      @refetchable(queryName: "UserFragmentRefetchQuery")
-      @argumentDefinitions(
-        cond: {type: "Boolean!", defaultValue: true}
-      ) {
-        id
-        name @include(if: $cond)
-      }
-
-
-      query UserQuery(
-        $id: ID!
-      ) {
-        node(id: $id) {
-          ...UserFragment
+        fragment UserFragment on User
+        @refetchable(queryName: "UserFragmentRefetchQuery")
+          @argumentDefinitions(
+            isViewerFriendLocal: {type: "Boolean", defaultValue: false}
+            orderby: {type: "[String]"}
+          ) {
+          id
+          friends(
+            after: $after,
+            first: $count,
+            orderby: $orderby,
+            isViewerFriend: $isViewerFriendLocal
+          ) @connection(key: "UserFragment_friends") {
+            edges {
+              node {
+                id
+              }
+            }
+          }
         }
-      }
 
-      query UserQueryWithCond(
-        $id: ID!
-        $condGlobal: Boolean!
-      ) {
-        node(id: $id) {
-          ...UserFragment @arguments(cond: $condGlobal)
-        }
-      }
+        query UserQuery(
+            $after: ID
+            $count: Int!
+            $id: ID!
+            $orderby: [String]
+            $isViewerFriend: Boolean
+          ) {
+            node(id: $id) {
+              id
+              __typename
+              ...UserFragment @arguments(isViewerFriendLocal: $isViewerFriend, orderby: $orderby)
+            }
+          }
     `));
 
         // Manually set the refetchable operation for the test.
@@ -144,10 +148,6 @@ describe('useMemo resolver functions', () => {
                 __typename: 'User',
                 name: 'Zuck',
             },
-        });
-        ownerUser1WithCondVar = createOperationDescriptor(UserQueryWithCond, {
-            id: '4',
-            condGlobal: false,
         });
         environment.commitPayload(ownerUser1, {
             node: {
@@ -275,107 +275,9 @@ describe('useMemo resolver functions', () => {
             };
 
             function usePaginationJest(fragmentNode, fragmentRef) {
-                const [data, refetchFunction] = usePagination(fragmentNode, fragmentRef);
-                renderSpy(data, refetchFunction);
-                return [data, refetchFunction];
-            }
-            TestContainer = ReactRelayContainer.createContainer(
-                TestComponent,
-                UserFragment,
-                UserQuery,
-            );
-        });
-        it('re-renders on subscription callbac', () => {
-            const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
-
-            createHooks(
-                <ContextSetter environment={environment}>
-                    <TestContainer user={userPointer} />
-                </ContextSetter>,
-            );
-            const callback = environment.subscribe.mock.calls[0][1];
-            const before = renderSpy.mock.calls[0][1];
-            renderSpy.mockClear();
-            render.mockClear();
-
-            callback({
-                dataID: '4',
-                node: UserFragment,
-                variables: { cond: true },
-                data: {
-                    id: '4',
-                    name: 'Mark', // !== 'Zuck'
-                },
-                seenRecords: {},
-            });
-            // Data & Variables are passed to component
-            const after = renderSpy.mock.calls[0][1];
-            expect(render.mock.calls.length).toBe(1);
-            expect(before).toBe(after);
-        });
-
-        it('re-renders on change props', () => {
-            let userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
-
-            const instance = createHooks(
-                <ContextSetter environment={environment}>
-                    <TestContainer user={userPointer} />
-                </ContextSetter>,
-            );
-            const before = renderSpy.mock.calls[0][1];
-            renderSpy.mockClear();
-            render.mockClear();
-
-            userPointer = environment.lookup(ownerUser2.fragment, ownerUser2).data.node;
-            instance.getInstance().setProps({
-                user: userPointer,
-            });
-            // Data & Variables are passed to component
-            const after = renderSpy.mock.calls[0][1];
-            expect(render.mock.calls.length).toBe(1);
-            expect(before).toBe(after);
-        });
-
-        it('unmount', () => {
-            const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
-
-            const instance = createHooks(
-                <ContextSetter environment={environment}>
-                    <TestContainer user={userPointer} />
-                </ContextSetter>,
-            );
-            const before = renderSpy.mock.calls[0][1];
-            renderSpy.mockClear();
-            render.mockClear();
-
-            instance.unmount();
-            const instance2 = createHooks(
-                <ContextSetter environment={environment}>
-                    <TestContainer user={userPointer} />
-                </ContextSetter>,
-            );
-            // Data & Variables are passed to component
-            const after = renderSpy.mock.calls[0][1];
-            expect(render.mock.calls.length).toBe(1);
-            expect(before).not.toBe(after);
-        });
-    });
-
-    describe('useRefetch', () => {
-        beforeEach(() => {
-            const ReactRelayContainer = {
-                createContainer: (Component, spec, query) => (props) => {
-                    const { user, ...others } = props;
-                    const environment = useRelayEnvironment();
-                    const [data, refetchFunction] = useRefetchJest(spec, user);
-                    return <Component user={data} {...others} relay={{ environment }} />;
-                },
-            };
-
-            function useRefetchJest(fragmentNode, fragmentRef) {
-                const [data, refetchFunction] = useRefetch(fragmentNode, fragmentRef);
-                renderSpy(data, refetchFunction);
-                return [data, refetchFunction];
+                const { data, refetch} = usePagination(fragmentNode, fragmentRef);
+                renderSpy(data, refetch);
+                return [data, refetch];
             }
             TestContainer = ReactRelayContainer.createContainer(
                 TestComponent,
@@ -471,9 +373,9 @@ describe('useMemo resolver functions', () => {
             };
 
             function useRefetchableJest(fragmentNode, fragmentRef) {
-                const [data, refetchFunction] = useRefetchable(fragmentNode, fragmentRef);
-                renderSpy(data, refetchFunction);
-                return [data, refetchFunction];
+                const {data, refetch} = useRefetchable(fragmentNode, fragmentRef);
+                renderSpy(data, refetch);
+                return [data, refetch];
             }
             TestContainer = ReactRelayContainer.createContainer(
                 TestComponent,

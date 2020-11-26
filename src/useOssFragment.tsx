@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react';
-import { GraphQLTaggedNode } from 'relay-runtime';
+import { useEffect, useState, useRef, useMemo } from 'react';
+import { GraphQLTaggedNode, getFragmentIdentifier, getFragment } from 'relay-runtime';
 import { FragmentResolver } from './FragmentResolver';
 import {
     ContainerResult,
@@ -44,7 +44,15 @@ export function useOssFragment<TKey extends ArrayKeyType>(
         };
     }, [resolver]);
 
-    resolver.resolve(environment, fragmentNode, fragmentRef);
+    const fragment = useMemo(() => {
+        return getFragment(fragmentNode);
+    }, [fragmentNode]);
+
+    const idfragment = useMemo(() => {
+        return getFragmentIdentifier(fragment, fragmentRef);
+    }, [fragment, fragmentRef]);
+
+    resolver.resolve(environment, idfragment, fragment, fragmentRef);
 
     const data = resolver.getData();
 

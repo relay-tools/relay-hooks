@@ -1,68 +1,64 @@
 import { useMemo } from 'react';
 import { GraphQLTaggedNode, OperationType } from 'relay-runtime';
-import {
-    PaginationFunction,
-    KeyType,
-    KeyReturnType,
-    $Call,
-    ArrayKeyType,
-    ArrayKeyReturnType,
-} from './RelayHooksType';
+import { KeyType, KeyTypeData, LoadMoreFn, RefetchFnDynamic } from './RelayHooksType';
 import { useOssFragment } from './useOssFragment';
+/*
+export function usePagination<TQuery extends OperationType, TKey extends KeyType>(
+    fragmentInput: GraphQLTaggedNode,
+    parentFragmentRef: TKey | null,
+): // tslint:disable-next-line no-unnecessary-generics
+[KeyTypeData<TKey> | null, PaginationFunction<TQuery, TKey | null>];
+export function usePagination<TQuery extends OperationType, TKey extends KeyType>(
+    fragmentNode: GraphQLTaggedNode,
+    fragmentRef: TKey,
+): [KeyTypeData<TKey>, PaginationFunction<TQuery, TKey>] {*/
 
-export function usePagination<
-    TKey extends KeyType,
-    TOperationType extends OperationType = OperationType
->(
+export interface ReturnType<
+    TQuery extends OperationType,
+    TKey extends KeyType | null,
+    TFragmentData
+> {
+    data: TFragmentData;
+    loadNext: LoadMoreFn<TQuery>;
+    loadPrevious: LoadMoreFn<TQuery>;
+    hasNext: boolean;
+    hasPrevious: boolean;
+    isLoadingNext: boolean;
+    isLoadingPrevious: boolean;
+    refetch: RefetchFnDynamic<TQuery, TKey>;
+}
+
+export function usePagination<TQuery extends OperationType, TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey,
-): [
-    $Call<KeyReturnType<TKey>>,
-    PaginationFunction<$Call<KeyReturnType<TKey>>, TOperationType['variables']>,
-];
-export function usePagination<
-    TKey extends KeyType,
-    TOperationType extends OperationType = OperationType
->(
+): // tslint:disable-next-line no-unnecessary-generics
+ReturnType<TQuery, TKey, KeyTypeData<TKey>>;
+export function usePagination<TQuery extends OperationType, TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null,
-): [
-    $Call<KeyReturnType<TKey>> | null,
-    PaginationFunction<$Call<KeyReturnType<TKey>> | null, TOperationType['variables']>,
-];
-export function usePagination<
-    TKey extends ArrayKeyType,
-    TOperationType extends OperationType = OperationType
->(
-    fragmentNode: GraphQLTaggedNode,
-    fragmentRef: TKey,
-): [
-    ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>,
-    PaginationFunction<ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>, TOperationType['variables']>,
-];
-export function usePagination<
-    TKey extends ArrayKeyType,
-    TOperationType extends OperationType = OperationType
->(
-    fragmentNode: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
-): [
-    ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null,
-    PaginationFunction<
-        ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null,
-        TOperationType['variables']
-    >,
-] {
+): // tslint:disable-next-line no-unnecessary-generics
+ReturnType<TQuery, TKey | null, KeyTypeData<TKey> | null> {
     const [data, resolver] = useOssFragment(fragmentNode, fragmentRef);
 
     const fns = useMemo(() => {
         return {
-            loadMore: resolver.loadMore,
-            hasMore: resolver.hasMore,
-            isLoading: resolver.isLoading,
-            refetchConnection: resolver.refetchConnection,
+            loadPrevious: resolver.loadPrevious,
+            loadNext: resolver.loadNext,
+            refetch: resolver.refetch,
         };
     }, [resolver]);
 
-    return [data, fns];
+    const [hasNext, isLoadingNext] = resolver.getPaginationData('forward');
+    const [hasPrevious, isLoadingPrevious] = resolver.getPaginationData('backward');
+
+    return {
+        data,
+        loadNext: fns.loadNext,
+        loadPrevious: fns.loadPrevious,
+        hasNext,
+        hasPrevious,
+        isLoadingNext,
+        isLoadingPrevious,
+        refetch: fns.refetch,
+    };
 }

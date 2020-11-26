@@ -16,7 +16,6 @@ export { useMutation } from './useMutation';
 export { useSubscription } from './useSubscription';
 export { useOssFragment } from './useOssFragment';
 export { usePagination } from './usePagination';
-export { useRefetch } from './useRefetch';
 export { useRefetchable } from './useRefetchable';
 export { useQueryFetcher } from './useQueryFetcher';
 export { useRelayEnvironment } from './useRelayEnvironment';

@@ -18,8 +18,8 @@ export const useQueryFetcher = <TOperationType extends OperationType>(
         };
     }
     //const { queryFetcher } = ref.current;
-
     useEffect(() => {
+        ref.current.queryFetcher.setMounted();
         return (): void => ref.current.queryFetcher.dispose();
     }, []);
     return ref.current.queryFetcher;

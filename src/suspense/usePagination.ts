@@ -1,6 +1,6 @@
 import { GraphQLTaggedNode, OperationType } from 'relay-runtime';
-import { usePagination as usePaginationIntenal } from './internal/usePagination';
-import { KeyType, KeyTypeData, LoadMoreFn, RefetchFnDynamic } from './RelayHooksType';
+import { usePagination as usePaginationIntenal } from '../internal/usePagination';
+import { KeyType, KeyTypeData, LoadMoreFn, RefetchFnDynamic } from '../RelayHooksType';
 export interface ReturnType<
     TQuery extends OperationType,
     TKey extends KeyType | null,
@@ -27,5 +27,5 @@ export function usePagination<TQuery extends OperationType, TKey extends KeyType
     fragmentRef: TKey | null,
 ): // tslint:disable-next-line no-unnecessary-generics
 ReturnType<TQuery, TKey | null, KeyTypeData<TKey> | null> {
-    return usePaginationIntenal(fragmentNode, fragmentRef, false);
+    return usePaginationIntenal(fragmentNode, fragmentRef, true);
 }

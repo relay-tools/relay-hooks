@@ -5,7 +5,6 @@ import {
     IEnvironment,
     isPromise,
     OperationDescriptor,
-    Disposable,
 } from 'relay-runtime';
 import { QueryFetcher } from './QueryFetcher';
 import { RenderProps, QueryOptions, LoadQuery } from './RelayHooksType';
@@ -18,8 +17,7 @@ export const internalLoadQuery = <TOperationType extends OperationType = Operati
         environment: IEnvironment,
         query: OperationDescriptor,
         options: QueryOptions,
-        retain?: (environment, query) => Disposable,
-    ): RenderProps<TOperationType> => queryFetcher.execute(environment, query, options, retain),
+    ): RenderProps<TOperationType> => queryFetcher.execute(environment, query, options),
 ): LoadQuery<TOperationType> => {
     let data: RenderProps<TOperationType> | null | Promise<any> = null;
     let listener = undefined;

@@ -8,7 +8,10 @@ export {
 } from 'relay-runtime';
 export { ReactRelayContext } from './ReactRelayContext';
 export { useQuery } from './useQuery';
-export { useLazyLoadQuery } from './useLazyLoadQuery';
+export { useQuery as useLazyLoadQuery } from './suspense/useQuery';
+export { usePagination as usePaginationFragment } from './suspense/usePagination';
+export { useRefetchable as useRefetchableFragment } from './suspense/useRefetchable';
+export { useFragment as useSuspenseFragment } from './suspense/useFragment';
 export { loadQuery, loadLazyQuery } from './loadQuery';
 export { usePreloadedQuery } from './usePreloadedQuery';
 export { useFragment } from './useFragment';

@@ -1,3 +1,4 @@
+import * as warning from 'fbjs/lib/warning';
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { GraphQLTaggedNode, getFragmentIdentifier, getFragment } from 'relay-runtime';
 import { FragmentResolver } from './FragmentResolver';
@@ -14,29 +15,39 @@ import { useRelayEnvironment } from './useRelayEnvironment';
 export function useOssFragment<TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey,
+    suspense: boolean,
 ): [$Call<KeyReturnType<TKey>>, FragmentResolver];
 export function useOssFragment<TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null,
+    suspense: boolean,
 ): [$Call<KeyReturnType<TKey>> | null, FragmentResolver];
 export function useOssFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey,
+    suspense: boolean,
 ): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>, FragmentResolver];
 export function useOssFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null,
+    suspense: boolean,
 ): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null, FragmentResolver] {
     const environment = useRelayEnvironment();
     const [, forceUpdate] = useState<ContainerResult>(null);
     const ref = useRef<{ resolver: FragmentResolver }>(null);
     if (ref.current === null || ref.current === undefined) {
         ref.current = {
-            resolver: new FragmentResolver(forceUpdate),
+            resolver: new FragmentResolver(forceUpdate, suspense),
         };
     }
 
     const { resolver } = ref.current;
+
+    useEffect(() => {
+        return (): void => {
+            ref.current.resolver.setUnmounted();
+        };
+    }, []);
 
     useEffect(() => {
         return (): void => {
@@ -55,6 +66,29 @@ export function useOssFragment<TKey extends ArrayKeyType>(
     resolver.resolve(environment, idfragment, fragment, fragmentRef);
 
     const data = resolver.getData();
+
+    if ('production' !== process.env.NODE_ENV) {
+        if (
+            fragmentRef != null &&
+            (data === undefined ||
+                (Array.isArray(data) &&
+                    data.length > 0 &&
+                    data.every((data) => data === undefined)))
+        ) {
+            warning(
+                false,
+                'Relay: Expected to have been able to read non-null data for ' +
+                    'fragment `%s` declared in ' +
+                    '`%s`, since fragment reference was non-null. ' +
+                    "Make sure that that `%s`'s parent isn't " +
+                    'holding on to and/or passing a fragment reference for data that ' +
+                    'has been deleted.',
+                fragment,
+                'useOssFragment',
+                'useOssFragment',
+            );
+        }
+    }
 
     return [data, resolver];
 }

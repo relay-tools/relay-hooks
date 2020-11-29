@@ -63,14 +63,14 @@ const QueryRendererHook = (props) => {
         cacheConfig,
         fetchKey,
         skip,
-        fetchObserver,
+        onComplete,
     } = props;
     const { cached, ...relays } = useQuery(query, variables, {
         networkCacheConfig: cacheConfig,
         fetchPolicy,
         fetchKey,
         skip,
-        fetchObserver,
+        onComplete,
     });
 
     return <React.Fragment>{render(relays)}</React.Fragment>;
@@ -218,12 +218,7 @@ describe('ReactRelayQueryRenderer', () => {
         });
 
         it('observe query', () => {
-            const observer = {
-                next: jest.fn(() => undefined),
-                error: jest.fn(() => undefined),
-                complete: jest.fn(() => undefined),
-                start: jest.fn(() => undefined),
-            };
+            const onComplete = jest.fn(() => undefined)
             createHooks(
                 <PropsSetter>
                     <ReactRelayQueryRenderer
@@ -232,18 +227,16 @@ describe('ReactRelayQueryRenderer', () => {
                         environment={environment}
                         render={render}
                         variables={variables}
-                        fetchObserver={observer}
+                        onComplete={onComplete}
                     />
                 </PropsSetter>,
             );
 
             expect(environment.execute.mock.calls.length).toBe(1);
-            expect(observer.start).toBeCalled();
-            expect(observer.next).not.toBeCalled();
+            expect(onComplete).not.toBeCalled();
             render.mockClear();
             environment.mock.resolve(TestQuery, response);
-            expect(observer.next).toBeCalled();
-            expect(observer.complete).toBeCalled();
+            expect(onComplete).toBeCalled();
             const owner = createOperationDescriptor(TestQuery, variables);
             expect({
                 error: null,
@@ -1159,27 +1152,22 @@ describe('ReactRelayQueryRenderer', () => {
 
     describe('observe when the fetch fails', () => {
         it('observe error', () => {
-            const observer = {
-                next: jest.fn(() => undefined),
-                error: jest.fn(() => undefined),
-                complete: jest.fn(() => undefined),
-                start: jest.fn(() => undefined),
-            };
+            const onComplete = jest.fn(() => undefined)
             createHooks(
                 <ReactRelayQueryRenderer
                     environment={environment}
                     query={TestQuery}
                     render={render}
                     variables={variables}
-                    fetchObserver={observer}
+                    onComplete={onComplete}
                 />,
             );
             render.mockClear();
 
             const error = new Error('fail');
-            expect(observer.error).not.toBeCalled();
+            expect(onComplete).not.toBeCalled();
             environment.mock.reject(TestQuery, error);
-            expect(observer.error).toBeCalled();
+            expect(onComplete).toBeCalledWith(error);
             expect({
                 error,
                 props: null,
@@ -1884,19 +1872,13 @@ describe('ReactRelayQueryRenderer', () => {
             expect(readyState.retry).not.toBe(null);
             environment.mockClear();
 
-            const observer = {
-                next: jest.fn(() => undefined),
-                error: jest.fn(() => undefined),
-                complete: jest.fn(() => undefined),
-                start: jest.fn(() => undefined),
-            };
+            const onComplete = jest.fn(() => undefined);
 
-            readyState.retry({ force: true }, observer);
+            readyState.retry({ force: true }, onComplete);
             expect(environment.mock.isLoading(TestQuery, variables, { force: true })).toBe(true);
 
             jest.runAllTimers();
-            expect(observer.start).toBeCalled();
-            expect(observer.next).not.toBeCalled();
+            expect(onComplete).not.toBeCalled();
             environment.mock.resolve(TestQuery, {
                 data: {
                     node: {
@@ -1907,9 +1889,7 @@ describe('ReactRelayQueryRenderer', () => {
                 },
             });
 
-            expect(observer.next).toBeCalled();
-            expect(observer.complete).toBeCalled();
-            expect(observer.error).not.toBeCalled();
+            expect(onComplete).toBeCalled();
             environment.mockClear();
         });
 

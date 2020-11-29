@@ -32,6 +32,7 @@ const ReactRelayPaginationContainer = {
         const {
                 data,
                 hasNext: hasMoreHooks,
+                isLoading,
                 isLoadingNext,
                 loadNext: loadMoreHooks,
                 refetch: refetchConnectionHooks,
@@ -52,9 +53,9 @@ const ReactRelayPaginationContainer = {
             <Component
                 user={data}
                 //hasMore={hasMoreHooks}
-                //isLoading={isLoadingNext}
+                //isLoadingNext={isLoadingNextNext}
                 {...others}
-                relay={{ environment, refetchConnection, hasMore: hasMoreHooks, isLoading: isLoadingNext, loadMore }}
+                relay={{ environment, refetchConnection, hasMore: hasMoreHooks, isLoadingNext, loadMore, isLoading }}
             />
         );
     },
@@ -82,7 +83,7 @@ describe('ReactRelayPaginationContainer', () => {
     let getConnectionFromProps;
     let getVariables;
     let hasMore;
-    let isLoading;
+    let isLoadingNext;
     let loadMore;
     let ownerUser1;
     let ownerUser1WithOtherVar;
@@ -176,7 +177,7 @@ describe('ReactRelayPaginationContainer', () => {
     UserFragment.metadata.refetch.operation = UserFragmentRefetchQuery;
 
         render = jest.fn((props) => {
-            ({ hasMore, isLoading, loadMore, refetchConnection } = props.relay);
+            ({ hasMore, isLoadingNext, loadMore, refetchConnection } = props.relay);
             return <div />;
         });
         variables = {
@@ -298,6 +299,7 @@ describe('ReactRelayPaginationContainer', () => {
             relay: {
                 environment: expect.any(Object),
                 hasMore: false,
+                isLoadingNext: false,
                 isLoading: false,
                 loadMore: expect.any(Function),
                 refetchConnection: expect.any(Function),
@@ -320,6 +322,7 @@ describe('ReactRelayPaginationContainer', () => {
             relay: {
                 environment: expect.any(Object),
                 hasMore: false,
+                isLoadingNext: false,
                 isLoading: false,
                 loadMore: expect.any(Function),
                 refetchConnection: expect.any(Function),
@@ -362,6 +365,7 @@ describe('ReactRelayPaginationContainer', () => {
             relay: {
                 environment: expect.any(Object),
                 hasMore: true,
+                isLoadingNext: false,
                 isLoading: false,
                 loadMore: expect.any(Function),
                 refetchConnection: expect.any(Function),
@@ -425,6 +429,7 @@ describe('ReactRelayPaginationContainer', () => {
             relay: {
                 environment: expect.any(Object),
                 hasMore: false,
+                isLoadingNext: false,
                 isLoading: false,
                 loadMore: expect.any(Function),
                 refetchConnection: expect.any(Function),
@@ -464,6 +469,7 @@ describe('ReactRelayPaginationContainer', () => {
             relay: {
                 environment: expect.any(Object),
                 hasMore: false,
+                isLoadingNext: false,
                 isLoading: false,
                 loadMore: expect.any(Function),
                 refetchConnection: expect.any(Function),
@@ -525,6 +531,7 @@ describe('ReactRelayPaginationContainer', () => {
             relay: {
                 environment: expect.any(Object),
                 hasMore: false,
+                isLoadingNext: false,
                 isLoading: false,
                 loadMore: expect.any(Function),
                 refetchConnection: expect.any(Function),
@@ -591,11 +598,11 @@ describe('ReactRelayPaginationContainer', () => {
         });
         expect(render.mock.calls.length).toBe(3);
         expect(render.mock.calls[0][0].user.friends.edges.length).toBe(1);
-        expect(render.mock.calls[0][0].relay.isLoading).toBe(true);
+        expect(render.mock.calls[0][0].relay.isLoadingNext).toBe(true);
         expect(render.mock.calls[1][0].user.friends.edges.length).toBe(2);
-        expect(render.mock.calls[1][0].relay.isLoading).toBe(true);
+        expect(render.mock.calls[1][0].relay.isLoadingNext).toBe(true);
         expect(render.mock.calls[2][0].user.friends.edges.length).toBe(2);
-        expect(render.mock.calls[2][0].relay.isLoading).toBe(false);
+        expect(render.mock.calls[2][0].relay.isLoadingNext).toBe(false);
         render.mockClear();
         environment.subscribe.mockClear();
 
@@ -622,6 +629,7 @@ describe('ReactRelayPaginationContainer', () => {
             relay: {
                 environment: expect.any(Object),
                 hasMore: false,
+                isLoadingNext: false,
                 isLoading: false,
                 loadMore: expect.any(Function),
                 refetchConnection: expect.any(Function),
@@ -943,6 +951,7 @@ describe('ReactRelayPaginationContainer', () => {
                 relay: {
                     environment: expect.any(Object),
                     hasMore: true,
+                    isLoadingNext: false,
                     isLoading: false,
                     loadMore: expect.any(Function),
                     refetchConnection: expect.any(Function),
@@ -985,6 +994,7 @@ describe('ReactRelayPaginationContainer', () => {
                 relay: {
                     environment: expect.any(Object),
                     hasMore: false,
+                    isLoadingNext: false,
                     isLoading: false,
                     loadMore: expect.any(Function),
                     refetchConnection: expect.any(Function),
@@ -1027,6 +1037,7 @@ describe('ReactRelayPaginationContainer', () => {
                 relay: {
                     environment: expect.any(Object),
                     hasMore: false,
+                    isLoadingNext: false,
                     isLoading: false,
                     loadMore: expect.any(Function),
                     refetchConnection: expect.any(Function),
@@ -1069,6 +1080,7 @@ describe('ReactRelayPaginationContainer', () => {
                 relay: {
                     environment: expect.any(Object),
                     hasMore: false,
+                    isLoadingNext: false,
                     isLoading: false,
                     loadMore: expect.any(Function),
                     refetchConnection: expect.any(Function),
@@ -1117,11 +1129,11 @@ describe('ReactRelayPaginationContainer', () => {
             });
             expect(render.mock.calls.length).toBe(3);
             expect(render.mock.calls[0][0].user.friends.edges.length).toBe(1);
-            expect(render.mock.calls[0][0].relay.isLoading).toBe(true);
+            expect(render.mock.calls[0][0].relay.isLoadingNext).toBe(true);
             expect(render.mock.calls[1][0].user.friends.edges.length).toBe(2);
-            expect(render.mock.calls[1][0].relay.isLoading).toBe(true);
+            expect(render.mock.calls[1][0].relay.isLoadingNext).toBe(true);
             expect(render.mock.calls[2][0].user.friends.edges.length).toBe(2);
-            expect(render.mock.calls[2][0].relay.isLoading).toBe(false);
+            expect(render.mock.calls[2][0].relay.isLoadingNext).toBe(false);
             expect(render.mock.calls[2][0].relay.hasMore).toBe(true);
         });
     
@@ -1166,17 +1178,17 @@ describe('ReactRelayPaginationContainer', () => {
             });
             expect(render.mock.calls.length).toBe(3);
             expect(render.mock.calls[0][0].user.friends.edges.length).toBe(1);
-            expect(render.mock.calls[0][0].relay.isLoading).toBe(true);
+            expect(render.mock.calls[0][0].relay.isLoadingNext).toBe(true);
             expect(render.mock.calls[1][0].user.friends.edges.length).toBe(2);
-            expect(render.mock.calls[1][0].relay.isLoading).toBe(true);
+            expect(render.mock.calls[1][0].relay.isLoadingNext).toBe(true);
             expect(render.mock.calls[2][0].user.friends.edges.length).toBe(2);
-            expect(render.mock.calls[2][0].relay.isLoading).toBe(false);
+            expect(render.mock.calls[2][0].relay.isLoadingNext).toBe(false);
             expect(render.mock.calls[2][0].relay.hasMore).toBe(false);
             
         });
     });
 
-    describe('isLoading()', () => {
+    describe('isLoadingNext()', () => {
         beforeEach(() => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
             environment.mock.clearCache();
@@ -1188,20 +1200,21 @@ describe('ReactRelayPaginationContainer', () => {
         });
 
         it('returns false initially', () => {
-            expect(render.mock.calls[0][0].relay.isLoading).toBe(false);
+            expect(render.mock.calls[0][0].relay.isLoadingNext).toBe(false);
         });
 
         it('returns true when a fetch is pending', () => {
             loadMore(10, jest.fn());
-            expect(render.mock.calls[1][0].relay.isLoading).toBe(true);
+            expect(render.mock.calls[1][0].relay.isLoadingNext).toBe(true);
         });
 
+        /*
         it('returns false if a fetch is cancelled', () => {
             const { dispose } = loadMore(10, jest.fn());
-            expect(render.mock.calls[1][0].relay.isLoading).toBe(true);
+            expect(render.mock.calls[1][0].relay.isLoadingNext).toBe(true);
             dispose();
-            expect(render.mock.calls[2][0].relay.isLoading).toBe(false);
-        });
+            expect(render.mock.calls[2][0].relay.isLoadingNext).toBe(false);
+        });*/
 
         it('returns false once a fetch completes', () => {
             expect.assertions(1);
@@ -1216,14 +1229,14 @@ describe('ReactRelayPaginationContainer', () => {
                     },
                 },
             });
-            expect(render.mock.calls[3][0].relay.isLoading).toBe(false);
+            expect(render.mock.calls[3][0].relay.isLoadingNext).toBe(false);
         });
 
         /*
         it('returns false in the loadMore callback', () => {
             expect.assertions(2);
             loadMore(1, () => {
-                expect(isLoading()).toBe(false);
+                expect(isLoadingNext()).toBe(false);
             });
             environment.mock.resolve(UserFragmentRefetchQuery, {
                 data: {
@@ -1235,7 +1248,7 @@ describe('ReactRelayPaginationContainer', () => {
                     },
                 },
             });
-            expect(isLoading()).toBe(false);
+            expect(isLoadingNext()).toBe(false);
         });
 
         it('returns false if a cached response exists', () => {
@@ -1275,7 +1288,7 @@ describe('ReactRelayPaginationContainer', () => {
                 },
             );
             loadMore(1, jest.fn());
-            expect(isLoading()).toBe(false);
+            expect(isLoadingNext()).toBe(false);
         });
         */
     });
@@ -1426,8 +1439,8 @@ describe('ReactRelayPaginationContainer', () => {
             loadMore(1, jest.fn());
             environment.mock.reject(UserFragmentRefetchQuery, new Error('oops'));
             expect(render.mock.calls.length).toBe(2);
-            expect(render.mock.calls[0][0].relay.isLoading).toBe(true);
-            expect(render.mock.calls[1][0].relay.isLoading).toBe(false);
+            expect(render.mock.calls[0][0].relay.isLoadingNext).toBe(true);
+            expect(render.mock.calls[1][0].relay.isLoadingNext).toBe(false);
         });
 
         it('continues the fetch if new props refer to the same records', () => {
@@ -1445,7 +1458,7 @@ describe('ReactRelayPaginationContainer', () => {
             instance.getInstance().setProps({ user: userPointer });
             expect(subscription.closed).toBe(true);
         });
-
+/*
         it('holds pagination results if new props refer to the same records', () => {
             expect.assertions(2);
             loadMore(1, jest.fn());
@@ -1500,7 +1513,7 @@ describe('ReactRelayPaginationContainer', () => {
             instance.unmount();
             expect(references.length).toBe(1);
             expect(references[0].dispose).toBeCalled();
-        });
+        });*/
 
         it('should not load more data if container is unmounted', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
@@ -1665,7 +1678,7 @@ describe('ReactRelayPaginationContainer', () => {
         relay: {
           environment: expect.any(Object),
           hasMore: false,
-          isLoading: false,
+          isLoadingNext: false,
           loadMore: expect.any(Function),
           refetchConnection: expect.any(Function),
         },
@@ -1691,7 +1704,7 @@ describe('ReactRelayPaginationContainer', () => {
         relay: {
           environment: expect.any(Object),
           hasMore: false,
-          isLoading: false,
+          isLoadingNext: false,
           loadMore: expect.any(Function),
           refetchConnection: expect.any(Function),
         },
@@ -1836,6 +1849,7 @@ describe('ReactRelayPaginationContainer', () => {
                 relay: {
                     environment: expect.any(Object),
                     hasMore: true,
+                    isLoadingNext: false,
                     isLoading: false,
                     loadMore: expect.any(Function),
                     refetchConnection: expect.any(Function),

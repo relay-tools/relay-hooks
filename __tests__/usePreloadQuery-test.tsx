@@ -769,6 +769,7 @@ describe('usePreloadQuery', () => {
                     <Component prefetched={prefetched} />
                 </RelayEnvironmentProvider>,
             );
+            
             // Ensure that useEffect runs
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual(null);

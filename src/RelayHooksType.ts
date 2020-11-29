@@ -11,7 +11,6 @@ import {
     MutationConfig as BaseMutationConfig,
     MutationParameters,
     FragmentSpecResolver,
-    Snapshot,
     VariablesOf,
     FragmentReference,
 } from 'relay-runtime';
@@ -60,7 +59,7 @@ export type ContainerResult = {
 export interface RenderProps<T extends OperationType> {
     error: Error | null;
     props: T['response'] | null | undefined;
-    retry: (_cacheConfigOverride?: CacheConfig, observer?: Observer<Snapshot>) => void;
+    retry: (_cacheConfigOverride?: CacheConfig, onComplete?: (_e: Error | null) => void) => void;
     cached?: boolean;
 }
 
@@ -75,7 +74,7 @@ export type QueryOptions = {
     fetchKey?: string | number;
     networkCacheConfig?: CacheConfig;
     skip?: boolean;
-    fetchObserver?: Observer<Snapshot>;
+    onComplete?: (_e: Error | null) => void;
 };
 
 export type $Call<Fn extends (...args: any[]) => any> = Fn extends (arg: any) => infer RT

@@ -1,5 +1,4 @@
 import { GraphQLTaggedNode, OperationType } from 'relay-runtime';
-import { useRefetchable as useRefetchableInternal } from './internal/useRefetchable';
 import {
     RefetchableFunction,
     KeyType,
@@ -7,7 +6,8 @@ import {
     $Call,
     ArrayKeyType,
     ArrayKeyReturnType,
-} from './RelayHooksType';
+} from '../RelayHooksType';
+import { useOssFragment } from '../useOssFragment';
 
 export function useRefetchable<
     TKey extends KeyType,
@@ -15,6 +15,7 @@ export function useRefetchable<
 >(
     fragmentInput: GraphQLTaggedNode,
     fragmentRef: TKey,
+    suspense: boolean,
 ): {
     data: $Call<KeyReturnType<TKey>>;
     refetch: RefetchableFunction<TOperationType['variables']>;
@@ -26,6 +27,7 @@ export function useRefetchable<
 >(
     fragmentInput: GraphQLTaggedNode,
     fragmentRef: TKey | null,
+    suspense: boolean,
 ): {
     data: $Call<KeyReturnType<TKey>> | null;
     refetch: RefetchableFunction<TOperationType['variables']>;
@@ -37,6 +39,7 @@ export function useRefetchable<
 >(
     fragmentInput: GraphQLTaggedNode,
     fragmentRef: TKey,
+    suspense: boolean,
 ): {
     data: ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>;
     refetch: RefetchableFunction<TOperationType['variables']>;
@@ -48,10 +51,13 @@ export function useRefetchable<
 >(
     fragmentInput: GraphQLTaggedNode,
     fragmentRef: TKey | null,
+    suspense: boolean,
 ): {
     data: ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null;
     refetch: RefetchableFunction<TOperationType['variables']>;
     isLoading: boolean;
 } {
-    return useRefetchableInternal(fragmentInput, fragmentRef, false);
+    const [data, resolver] = useOssFragment(fragmentInput, fragmentRef, suspense);
+
+    return { data, refetch: resolver.refetch, isLoading: resolver.isLoading() };
 }

@@ -1,5 +1,5 @@
 import { GraphQLTaggedNode, OperationType } from 'relay-runtime';
-import { useRefetchable as useRefetchableInternal } from './internal/useRefetchable';
+import { useRefetchable as useRefetchableInternal } from '../internal/useRefetchable';
 import {
     RefetchableFunction,
     KeyType,
@@ -7,7 +7,7 @@ import {
     $Call,
     ArrayKeyType,
     ArrayKeyReturnType,
-} from './RelayHooksType';
+} from '../RelayHooksType';
 
 export function useRefetchable<
     TKey extends KeyType,
@@ -18,7 +18,6 @@ export function useRefetchable<
 ): {
     data: $Call<KeyReturnType<TKey>>;
     refetch: RefetchableFunction<TOperationType['variables']>;
-    isLoading: boolean;
 };
 export function useRefetchable<
     TKey extends KeyType,
@@ -40,7 +39,6 @@ export function useRefetchable<
 ): {
     data: ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>;
     refetch: RefetchableFunction<TOperationType['variables']>;
-    isLoading: boolean;
 };
 export function useRefetchable<
     TKey extends ArrayKeyType,
@@ -51,7 +49,6 @@ export function useRefetchable<
 ): {
     data: ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null;
     refetch: RefetchableFunction<TOperationType['variables']>;
-    isLoading: boolean;
 } {
-    return useRefetchableInternal(fragmentInput, fragmentRef, false);
+    return useRefetchableInternal(fragmentInput, fragmentRef, true);
 }

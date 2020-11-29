@@ -1,6 +1,6 @@
 import { GraphQLTaggedNode } from 'relay-runtime';
-import { KeyType, KeyReturnType, $Call, ArrayKeyType, ArrayKeyReturnType } from './RelayHooksType';
-import { useOssFragment } from './useOssFragment';
+import { KeyType, KeyReturnType, $Call, ArrayKeyType, ArrayKeyReturnType } from '../RelayHooksType';
+import { useOssFragment } from '../useOssFragment';
 
 export function useFragment<TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
@@ -18,7 +18,6 @@ export function useFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null,
 ): ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> {
-    const [data] = useOssFragment(fragmentNode, fragmentRef, false);
-
+    const [data] = useOssFragment(fragmentNode, fragmentRef, true);
     return data;
 }

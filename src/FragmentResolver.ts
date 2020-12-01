@@ -19,7 +19,7 @@ import {
     RequestDescriptor,
 } from 'relay-runtime';
 import { Fetcher, fetchResolver } from './FetchResolver';
-import { getConnectionState } from './getConnectionState';
+import { getConnectionState, getStateFromConnection } from './getConnectionState';
 import { getPaginationMetadata } from './getPaginationMetadata';
 import { getPaginationVariables } from './getPaginationVariables';
 import { getRefetchMetadata } from './getRefetchMetadata';
@@ -118,6 +118,8 @@ export class FragmentResolver {
         this._disposable && this._disposable.dispose();
         this.fetcherNext && this.fetcherNext.dispose();
         this.fetcherPrevious && this.fetcherPrevious.dispose();
+        this._idfragmentrefetch = null;
+        this._fragmentRefRefetch = null;
         this.fetcherRefecth && this.fetcherRefecth.dispose();
     }
 
@@ -408,19 +410,26 @@ export class FragmentResolver {
         return !!fetcher && fetcher.getData().isLoading;
     };
 
-    getPaginationData = (direction: 'backward' | 'forward'): boolean[] => {
-        const isLoading = this.isLoading(direction);
+    getPaginationData = (): boolean[] => {
         const { connectionPathInFragmentData } = getPaginationMetadata(
             this._fragment,
             'usePagination()',
         );
-        const { hasMore } = getConnectionState(
-            direction,
+
+        const connection = getValueAtPath(this.getData(), connectionPathInFragmentData);
+        const { hasMore: hasNext } = getStateFromConnection('forward', this._fragment, connection);
+        const { hasMore: hasPrevious } = getStateFromConnection(
+            'backward',
             this._fragment,
-            this.getData(),
-            connectionPathInFragmentData,
+            connection,
         );
-        return [hasMore, isLoading];
+        return [
+            hasNext,
+            this.isLoading('forward'),
+            hasPrevious,
+            this.isLoading('backward'),
+            this.isLoading(),
+        ];
     };
 
     loadPrevious = (count: number, options?: OptionsLoadMore): Disposable => {

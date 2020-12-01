@@ -30,7 +30,7 @@ const ReactRelayRefetchContainer = {
     createContainer: (Component, spec, query) => (props) => {
         const { user, ...others } = props;
         const environment = useRelayEnvironment();
-        const{ data, refetch:  refetchHooks, isLoading} = useRefetchable(spec, user);
+        const [data, refetchHooks, isLoading] = useRefetchable(spec, user);
         const refetch = (refetchVariables, renderVariables, observer, options) => {
             return refetchHooks(refetchVariables, {
                 onComplete: observer?.complete ?? observer,

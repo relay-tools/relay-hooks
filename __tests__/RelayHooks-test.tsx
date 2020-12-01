@@ -177,7 +177,7 @@ describe('useMemo resolver functions', () => {
             };
 
             function useOssFragmentJest(fragmentNode, fragmentRef) {
-                const [data, refetchFunction] = useOssFragment(fragmentNode, fragmentRef);
+                const [data, refetchFunction] = useOssFragment(fragmentNode, fragmentRef, false);
                 renderSpy(data, refetchFunction);
                 return [data, refetchFunction];
             }
@@ -373,7 +373,7 @@ describe('useMemo resolver functions', () => {
             };
 
             function useRefetchableJest(fragmentNode, fragmentRef) {
-                const {data, refetch} = useRefetchable(fragmentNode, fragmentRef);
+                const [data, refetch] = useRefetchable(fragmentNode, fragmentRef);
                 renderSpy(data, refetch);
                 return [data, refetch];
             }

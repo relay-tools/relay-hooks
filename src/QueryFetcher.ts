@@ -85,7 +85,6 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
 
         if (onlyStore || !fromStore) {
             this.subscribe(snapshot);
-            //this.cached = true;
         }
 
         const suspense = !this.cached && this.suspense;

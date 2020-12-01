@@ -5,9 +5,6 @@ import {
     GraphQLTaggedNode,
     Environment,
     IEnvironment,
-    Variables,
-    PageInfo,
-    Observer,
     MutationConfig as BaseMutationConfig,
     MutationParameters,
     FragmentSpecResolver,
@@ -63,12 +60,6 @@ export interface RenderProps<T extends OperationType> {
     cached?: boolean;
 }
 
-export type RefetchOptions = {
-    force?: boolean;
-    fetchPolicy?: FetchPolicy;
-    metadata?: { [key: string]: any };
-};
-
 export type QueryOptions = {
     fetchPolicy?: FetchPolicy;
     fetchKey?: string | number;
@@ -94,79 +85,14 @@ export type ArrayKeyReturnType<T extends ArrayKeyType> = (
     arg: T,
 ) => NonNullable<NonNullable<T[0]>[' $data']>[0];
 
-export type LoadMoreFn<TQuery extends OperationType> = (
+export type LoadMoreFn<TQuery extends OperationType = OperationType> = (
     count: number,
-    options?: OptionsLoadMore,
+    options?: OptionsLoadMore<TQuery>,
 ) => Disposable;
-
-export type PaginationFunction<
-    TQuery extends OperationType = OperationType,
-    TKey extends KeyType | null = null
-> = {
-    loadNext: LoadMoreFn<TQuery>;
-    loadPrevious: LoadMoreFn<TQuery>;
-    hasNext: boolean;
-    hasPrevious: boolean;
-    isLoadingNext: boolean;
-    isLoadingPrevious: boolean;
-    refetch: RefetchFnDynamic<TQuery, TKey>;
-};
-
-export type PaginationReturn<
-    TQuery extends OperationType = OperationType,
-    TKey extends KeyType | null = null
-> = {
-    loadNext: LoadMoreFn<TQuery>;
-    loadPrevious: LoadMoreFn<TQuery>;
-    hasNext: boolean;
-    hasPrevious: boolean;
-    isLoadingNext: boolean;
-    isLoadingPrevious: boolean;
-    refetch: RefetchFnDynamic<TQuery, TKey>;
-};
-
-export type RefetchableFunction<TVariables extends Variables = Variables> = (
-    variables: TVariables | ((fragmentVariables: TVariables) => TVariables),
-    options?: Options,
-) => Disposable;
-
-export type RefetchFunction<TVariables extends Variables = Variables> = (
-    taggedNode: GraphQLTaggedNode,
-    refetchVariables: TVariables | ((fragmentVariables: TVariables) => TVariables),
-    renderVariables?: TVariables,
-    observerOrCallback?: ObserverOrCallback,
-    options?: RefetchOptions,
-) => Disposable;
-
-export type ObserverOrCallback = Observer<void> | ((error?: Error | null | undefined) => void);
 
 // pagination
 
 export const FORWARD = 'forward';
-
-export type FragmentVariablesGetter = (prevVars: Variables, totalCount: number) => Variables;
-
-export interface ConnectionConfig<Props = object> {
-    direction?: 'backward' | 'forward';
-    getConnectionFromProps?: (props: Props) => ConnectionData | null | undefined;
-    getFragmentVariables?: (prevVars: Variables, totalCount: number) => Variables;
-    getVariables: (
-        props: Props,
-        paginationInfo: { count: number; cursor?: string | null },
-        fragmentVariables: Variables,
-    ) => Variables;
-    query: GraphQLTaggedNode;
-}
-export interface ConnectionData {
-    edges?: ReadonlyArray<any> | null;
-    pageInfo?: Partial<PageInfo> | null;
-}
-
-export type PaginationData = {
-    direction: string;
-    getConnectionFromProps: Function;
-    getFragmentVariables: Function;
-};
 
 export type LoadQuery<
     TOperationType extends OperationType = OperationType,
@@ -191,16 +117,11 @@ export interface Options {
     //UNSTABLE_renderPolicy?: RenderPolicy;
 }
 
-export interface OptionsLoadMore {
+export interface OptionsLoadMore<TQuery extends OperationType = OperationType> {
     fetchPolicy?: FetchPolicy;
     onComplete?: (arg: Error | null) => void;
-    UNSTABLE_extraVariables: Variables;
+    UNSTABLE_extraVariables: VariablesOf<TQuery>;
 }
-
-export type RefetchFn<TQuery extends OperationType, TOptions = Options> = RefetchFnExact<
-    TQuery,
-    TOptions
->;
 
 // NOTE: RefetchFnDynamic returns a refetch function that:
 //  - Expects the /exact/ set of query variables if the provided key type is
@@ -237,3 +158,40 @@ export type RefetchFnInexact<TQuery extends OperationType, TOptions = Options> =
     Partial<VariablesOf<TQuery>>,
     TOptions
 >;
+
+export type ReturnTypeRefetchNode<
+    TQuery extends OperationType,
+    TKey extends KeyType | null,
+    TFragmentData
+> = [TFragmentData, RefetchFnDynamic<TQuery, TKey>, boolean];
+
+export type ReturnTypeRefetchSuspenseNode<
+    TQuery extends OperationType,
+    TKey extends KeyType | null,
+    TFragmentData
+> = [TFragmentData, RefetchFnDynamic<TQuery, TKey>];
+
+// pagination
+
+export interface ReturnTypePagination<
+    TQuery extends OperationType,
+    TKey extends KeyType | null,
+    TFragmentData
+> extends ReturnTypePaginationSuspense<TQuery, TKey, TFragmentData> {
+    isLoading: boolean;
+}
+
+export interface ReturnTypePaginationSuspense<
+    TQuery extends OperationType,
+    TKey extends KeyType | null,
+    TFragmentData
+> {
+    data: TFragmentData;
+    loadNext: LoadMoreFn<TQuery>;
+    loadPrevious: LoadMoreFn<TQuery>;
+    hasNext: boolean;
+    hasPrevious: boolean;
+    isLoadingNext: boolean;
+    isLoadingPrevious: boolean;
+    refetch: RefetchFnDynamic<TQuery, TKey>;
+}

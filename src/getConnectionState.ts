@@ -2,15 +2,17 @@ import * as invariant from 'fbjs/lib/invariant';
 import { ConnectionInterface, ReaderFragment } from 'relay-runtime';
 import { getValueAtPath } from './getValueAtPath';
 
-export function getConnectionState(
+export function getStateFromConnection(
     direction: string,
     fragmentNode: ReaderFragment,
-    fragmentData: any,
-    connectionPathInFragmentData: ReadonlyArray<string | number>,
+    connection: any | null,
 ): {
     cursor: string | null;
     hasMore: boolean;
 } {
+    if (connection == null) {
+        return { cursor: null, hasMore: false };
+    }
     const {
         EDGES,
         PAGE_INFO,
@@ -19,10 +21,6 @@ export function getConnectionState(
         END_CURSOR,
         START_CURSOR,
     } = ConnectionInterface.get();
-    const connection = getValueAtPath(fragmentData, connectionPathInFragmentData);
-    if (connection == null) {
-        return { cursor: null, hasMore: false };
-    }
 
     invariant(
         typeof connection === 'object',
@@ -75,4 +73,17 @@ export function getConnectionState(
     }
 
     return { cursor, hasMore };
+}
+
+export function getConnectionState(
+    direction: string,
+    fragmentNode: ReaderFragment,
+    fragmentData: any,
+    connectionPathInFragmentData: ReadonlyArray<string | number>,
+): {
+    cursor: string | null;
+    hasMore: boolean;
+} {
+    const connection = getValueAtPath(fragmentData, connectionPathInFragmentData);
+    return getStateFromConnection(direction, fragmentNode, connection);
 }

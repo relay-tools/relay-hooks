@@ -7,7 +7,7 @@ import {
     OperationDescriptor,
 } from 'relay-runtime';
 import { Fetcher, fetchResolver } from './FetchResolver';
-import { FetchPolicy, RenderProps, QueryOptions } from './RelayHooksType';
+import { FetchPolicy, RenderProps, InternalQueryOptions } from './RelayHooksType';
 import { createOperation } from './Utils';
 
 const defaultPolicy = 'store-or-network';
@@ -121,7 +121,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
     execute(
         environment: IEnvironment,
         query: OperationDescriptor,
-        options: QueryOptions,
+        options: InternalQueryOptions,
     ): RenderProps<TOperationType> {
         const { fetchPolicy = defaultPolicy, fetchKey, skip, onComplete } = options;
         const diffQuery = !this.query || query.request.identifier !== this.query.request.identifier;

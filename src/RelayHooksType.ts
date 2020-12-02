@@ -60,6 +60,13 @@ export interface RenderProps<T extends OperationType> {
     cached?: boolean;
 }
 
+export type InternalQueryOptions = {
+    fetchPolicy?: FetchPolicy;
+    fetchKey?: string | number;
+    skip?: boolean;
+    onComplete?: (_e: Error | null) => void;
+};
+
 export type QueryOptions = {
     fetchPolicy?: FetchPolicy;
     fetchKey?: string | number;

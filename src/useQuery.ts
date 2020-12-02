@@ -1,5 +1,5 @@
 import * as areEqual from 'fbjs/lib/areEqual';
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import {
     GraphQLTaggedNode,
     OperationType,
@@ -7,12 +7,17 @@ import {
     Variables,
     CacheConfig,
 } from 'relay-runtime';
-import { RenderProps, QueryOptions } from './RelayHooksType';
-import { useQueryFetcher } from './useQueryFetcher';
+import { getOrCreateQueryFetcher, QueryFetcher } from './QueryFetcher';
+import { RenderProps, QueryOptions, InternalQueryOptions } from './RelayHooksType';
+import { useForceUpdate } from './useForceUpdate';
 import { useRelayEnvironment } from './useRelayEnvironment';
-import { createOperation } from './Utils';
+import { createOperation, forceCache } from './Utils';
 
-export function useDeepCompare<T>(value: T): T {
+type Reference<TOperationType extends OperationType = OperationType> = {
+    queryFetcher: QueryFetcher<TOperationType>;
+};
+
+function useDeepCompare<T>(value: T): T {
     const latestValue = useRef(value);
     if (!areEqual(latestValue.current, value)) {
         latestValue.current = value;
@@ -20,7 +25,7 @@ export function useDeepCompare<T>(value: T): T {
     return latestValue.current;
 }
 
-export function useMemoOperationDescriptor(
+function useMemoOperationDescriptor(
     gqlQuery: GraphQLTaggedNode,
     variables: Variables,
     cacheConfig?: CacheConfig | null,
@@ -33,14 +38,50 @@ export function useMemoOperationDescriptor(
     ]);
 }
 
+const useQueryFetcher = <TOperationType extends OperationType>(
+    query?: OperationDescriptor,
+): QueryFetcher<TOperationType> => {
+    const forceUpdate = useForceUpdate();
+    const ref = useRef<Reference<TOperationType>>();
+    if (ref.current === null || ref.current === undefined) {
+        ref.current = {
+            queryFetcher: getOrCreateQueryFetcher(query, forceUpdate),
+        };
+    }
+    //const { queryFetcher } = ref.current;
+    useEffect(() => {
+        ref.current.queryFetcher.setMounted();
+        return (): void => ref.current.queryFetcher.dispose();
+    }, []);
+    return ref.current.queryFetcher;
+};
+
+const useInternalQuery = <TOperationType extends OperationType = OperationType>(
+    gqlQuery: GraphQLTaggedNode,
+    variables: TOperationType['variables'] = {},
+    options: InternalQueryOptions = {},
+    networkCacheConfig: CacheConfig,
+    suspense: boolean,
+): RenderProps<TOperationType> => {
+    const environment = useRelayEnvironment();
+    const query = useMemoOperationDescriptor(gqlQuery, variables, networkCacheConfig);
+    const queryFetcher = useQueryFetcher<TOperationType>(suspense ? query : null);
+    return queryFetcher.execute(environment, query, options);
+};
+
 export const useQuery = <TOperationType extends OperationType = OperationType>(
     gqlQuery: GraphQLTaggedNode,
     variables: TOperationType['variables'] = {},
     options: QueryOptions = {},
 ): RenderProps<TOperationType> => {
-    const environment = useRelayEnvironment();
-    const query = useMemoOperationDescriptor(gqlQuery, variables, options.networkCacheConfig);
-    const queryFetcher = useQueryFetcher<TOperationType>();
+    return useInternalQuery(gqlQuery, variables, options, options.networkCacheConfig, false);
+};
 
-    return queryFetcher.execute(environment, query, options);
+export const useLazyLoadQuery = <TOperationType extends OperationType = OperationType>(
+    gqlQuery: GraphQLTaggedNode,
+    variables: TOperationType['variables'] = {},
+    options: QueryOptions = {},
+): RenderProps<TOperationType> => {
+    const { networkCacheConfig = forceCache } = options;
+    return useInternalQuery(gqlQuery, variables, options, networkCacheConfig, true);
 };

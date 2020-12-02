@@ -85,9 +85,9 @@ export function isNotNull<T>(it: T): it is NonNullable<T> {
 
 const AppTodo = (props: Props) => {
   const environment = useRelayEnvironment();
-  const {data: {
+  const [{
     user
-  }, refetch} = useRefetchable(fragmentSpec, props.query);
+  }, refetch] = useRefetchable(fragmentSpec, props.query);
   if (user == null) {
     return <div />;
   }
@@ -122,6 +122,7 @@ const AppTodo = (props: Props) => {
           <StyledButton
             onClick={() => {
               refetch({
+                prova: 1,
                 userId: user.userId === 'me' ? 'you' : 'me',
               });
             }}>

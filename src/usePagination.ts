@@ -1,19 +1,26 @@
 import { useMemo } from 'react';
 import { GraphQLTaggedNode, OperationType } from 'relay-runtime';
-import { KeyType, KeyTypeData, ReturnTypePagination } from './RelayHooksType';
+import {
+    KeyType,
+    KeyTypeData,
+    ReturnTypePagination,
+    ReturnTypePaginationSuspense,
+} from './RelayHooksType';
 import { useOssFragment } from './useOssFragment';
 
-export function usePagination<TQuery extends OperationType, TKey extends KeyType>(
+function useInternalPagination<TQuery extends OperationType, TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey,
+    suspense: boolean,
 ): // tslint:disable-next-line no-unnecessary-generics
 ReturnTypePagination<TQuery, TKey, KeyTypeData<TKey>>;
-export function usePagination<TQuery extends OperationType, TKey extends KeyType>(
+function useInternalPagination<TQuery extends OperationType, TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null,
+    suspense: boolean,
 ): // tslint:disable-next-line no-unnecessary-generics
 ReturnTypePagination<TQuery, TKey | null, KeyTypeData<TKey> | null> {
-    const [data, resolver] = useOssFragment(fragmentNode, fragmentRef, false);
+    const [data, resolver] = useOssFragment(fragmentNode, fragmentRef, suspense);
 
     const [loadPrevious, loadNext, refetch] = useMemo(
         () => [resolver.loadPrevious, resolver.loadNext, resolver.refetch],
@@ -37,4 +44,30 @@ ReturnTypePagination<TQuery, TKey | null, KeyTypeData<TKey> | null> {
         isLoadingPrevious,
         isLoading,
     };
+}
+
+export function usePagination<TQuery extends OperationType, TKey extends KeyType>(
+    fragmentNode: GraphQLTaggedNode,
+    fragmentRef: TKey,
+): // tslint:disable-next-line no-unnecessary-generics
+ReturnTypePagination<TQuery, TKey, KeyTypeData<TKey>>;
+export function usePagination<TQuery extends OperationType, TKey extends KeyType>(
+    fragmentNode: GraphQLTaggedNode,
+    fragmentRef: TKey | null,
+): // tslint:disable-next-line no-unnecessary-generics
+ReturnTypePagination<TQuery, TKey | null, KeyTypeData<TKey> | null> {
+    return useInternalPagination(fragmentNode, fragmentRef, false);
+}
+
+export function usePaginationFragment<TQuery extends OperationType, TKey extends KeyType>(
+    fragmentNode: GraphQLTaggedNode,
+    fragmentRef: TKey,
+): // tslint:disable-next-line no-unnecessary-generics
+ReturnTypePaginationSuspense<TQuery, TKey, KeyTypeData<TKey>>;
+export function usePaginationFragment<TQuery extends OperationType, TKey extends KeyType>(
+    fragmentNode: GraphQLTaggedNode,
+    fragmentRef: TKey | null,
+): // tslint:disable-next-line no-unnecessary-generics
+ReturnTypePaginationSuspense<TQuery, TKey | null, KeyTypeData<TKey> | null> {
+    return useInternalPagination(fragmentNode, fragmentRef, true);
 }

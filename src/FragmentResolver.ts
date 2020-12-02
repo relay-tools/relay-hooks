@@ -65,8 +65,7 @@ export class FragmentResolver {
     _result: FragmentResult;
     _disposable: Disposable = { dispose: () => {} };
     _selector: ReaderSelector;
-    _forceUpdate: any;
-    indexUpdate = 0;
+    refreshHooks: any;
     fetcherRefecth: Fetcher;
     fetcherNext: Fetcher;
     fetcherPrevious: Fetcher;
@@ -74,7 +73,7 @@ export class FragmentResolver {
     suspense = false;
 
     constructor(forceUpdate, suspense = false) {
-        this._forceUpdate = forceUpdate;
+        this.refreshHooks = forceUpdate;
 
         this.suspense = suspense;
         const setLoading = (_loading): void => this.refreshHooks();
@@ -109,18 +108,13 @@ export class FragmentResolver {
         return true;
     }
 
-    refreshHooks(): void {
-        this.indexUpdate += 1;
-        this._forceUpdate(this.indexUpdate);
-    }
-
     dispose(): void {
         this._disposable && this._disposable.dispose();
-        this.fetcherNext && this.fetcherNext.dispose();
-        this.fetcherPrevious && this.fetcherPrevious.dispose();
+        this.fetcherNext.dispose();
+        this.fetcherPrevious.dispose();
         this._idfragmentrefetch = null;
         this._fragmentRefRefetch = null;
-        this.fetcherRefecth && this.fetcherRefecth.dispose();
+        this.fetcherRefecth.dispose();
     }
 
     getFragmentVariables(fRef = this._fragmentRef): Variables {
@@ -386,8 +380,8 @@ export class FragmentResolver {
                 this.refreshHooks();
             }
         };
-        this.fetcherNext && this.fetcherNext.dispose();
-        this.fetcherPrevious && this.fetcherPrevious.dispose();
+        this.fetcherNext.dispose();
+        this.fetcherPrevious.dispose();
         const operation = createOperation(refetchableRequest, refetchVariables, forceCache);
         return this.fetcherRefecth.fetch(
             this._environment,

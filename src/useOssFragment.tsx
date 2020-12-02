@@ -1,15 +1,9 @@
 import * as warning from 'fbjs/lib/warning';
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { GraphQLTaggedNode, getFragmentIdentifier, getFragment } from 'relay-runtime';
 import { FragmentResolver } from './FragmentResolver';
-import {
-    ContainerResult,
-    KeyType,
-    KeyReturnType,
-    $Call,
-    ArrayKeyType,
-    ArrayKeyReturnType,
-} from './RelayHooksType';
+import { KeyType, KeyReturnType, $Call, ArrayKeyType, ArrayKeyReturnType } from './RelayHooksType';
+import { useForceUpdate } from './useForceUpdate';
 import { useRelayEnvironment } from './useRelayEnvironment';
 
 export function useOssFragment<TKey extends KeyType>(
@@ -33,7 +27,7 @@ export function useOssFragment<TKey extends ArrayKeyType>(
     suspense: boolean,
 ): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null, FragmentResolver] {
     const environment = useRelayEnvironment();
-    const [, forceUpdate] = useState<ContainerResult>(null);
+    const forceUpdate = useForceUpdate();
     const ref = useRef<{ resolver: FragmentResolver }>(null);
     if (ref.current === null || ref.current === undefined) {
         ref.current = {

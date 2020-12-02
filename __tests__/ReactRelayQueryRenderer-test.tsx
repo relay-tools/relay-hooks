@@ -218,7 +218,7 @@ describe('ReactRelayQueryRenderer', () => {
         });
 
         it('observe query', () => {
-            const onComplete = jest.fn(() => undefined)
+            const onComplete = jest.fn(() => undefined);
             createHooks(
                 <PropsSetter>
                     <ReactRelayQueryRenderer
@@ -1152,7 +1152,7 @@ describe('ReactRelayQueryRenderer', () => {
 
     describe('observe when the fetch fails', () => {
         it('observe error', () => {
-            const onComplete = jest.fn(() => undefined)
+            const onComplete = jest.fn(() => undefined);
             createHooks(
                 <ReactRelayQueryRenderer
                     environment={environment}

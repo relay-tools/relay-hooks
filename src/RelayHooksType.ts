@@ -10,6 +10,7 @@ import {
     FragmentSpecResolver,
     VariablesOf,
     FragmentReference,
+    RenderPolicy,
 } from 'relay-runtime';
 
 export type MutationState<T extends MutationParameters> = {
@@ -65,6 +66,7 @@ export type InternalQueryOptions = {
     fetchKey?: string | number;
     skip?: boolean;
     onComplete?: (_e: Error | null) => void;
+    UNSTABLE_renderPolicy?: RenderPolicy;
 };
 
 export type QueryOptions = {
@@ -73,6 +75,7 @@ export type QueryOptions = {
     networkCacheConfig?: CacheConfig;
     skip?: boolean;
     onComplete?: (_e: Error | null) => void;
+    UNSTABLE_renderPolicy?: RenderPolicy;
 };
 
 export type $Call<Fn extends (...args: any[]) => any> = Fn extends (arg: any) => infer RT
@@ -121,7 +124,7 @@ export type LoadQuery<
 export interface Options {
     fetchPolicy?: FetchPolicy;
     onComplete?: (arg: Error | null) => void;
-    //UNSTABLE_renderPolicy?: RenderPolicy;
+    UNSTABLE_renderPolicy?: RenderPolicy;
 }
 
 export interface OptionsLoadMore<TQuery extends OperationType = OperationType> {

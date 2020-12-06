@@ -159,7 +159,7 @@ describe('useLazyLoadQueryNode', () => {
         gqlQuery = generated.UserQuery;
         gqlNoNameQuery = generated.UserNoNameQuery;
         variables = { id: '1' };
-        query = createOperationDescriptor(gqlQuery, variables, { force: true});
+        query = createOperationDescriptor(gqlQuery, variables, { force: true });
         renderFn = jest.fn((result) =>
             result && result.node && result.node.name ? result.node.name : 'Empty',
         );
@@ -543,7 +543,9 @@ describe('useLazyLoadQueryNode', () => {
             setProps({ gqlQuery: gqlNoNameQuery, variables });
         });
 
-        const queryNoNameQuery = createOperationDescriptor(gqlNoNameQuery, variables, { force: true });
+        const queryNoNameQuery = createOperationDescriptor(gqlNoNameQuery, variables, {
+            force: true,
+        });
         expect(instance.toJSON()).toEqual('Fallback');
         expectToHaveFetched(environment, queryNoNameQuery);
         expect(renderFn).not.toBeCalled();

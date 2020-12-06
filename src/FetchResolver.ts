@@ -6,6 +6,7 @@ import {
     OperationDescriptor,
     IEnvironment,
     Snapshot,
+    RenderPolicy,
 } from 'relay-runtime';
 import { isNetworkPolicy, isStorePolicy } from './Utils';
 const { fetchQuery } = __internal;
@@ -23,24 +24,21 @@ export type Fetcher = {
             fromStore: boolean,
             onlyStore: boolean,
         ) => void,
+        renderPolicy?: RenderPolicy,
     ) => Disposable;
     getData: () => {
         isLoading: boolean;
         error?: Error | null;
     };
     dispose: () => void;
-    clearTemporaryRetain: () => void;
+    checkAndSuspense: (suspense: boolean, useLazy?: boolean) => Promise<any> | Error | null;
 };
 
 export function fetchResolver({
-    suspense = false,
-    useLazy = false,
     setLoading,
     doRetain = true,
     disposeTemporary,
 }: {
-    suspense?: boolean;
-    useLazy?: boolean;
     doRetain?: boolean;
     setLoading?: (loading: boolean) => void;
     disposeTemporary?: () => void;
@@ -50,7 +48,7 @@ export function fetchResolver({
     let releaseQueryTimeout;
     let isLoading = false;
     let query;
-    let promise;
+    let promise: Promise<any>;
     let error: Error | null = null;
     let env;
 
@@ -58,14 +56,23 @@ export function fetchResolver({
         isLoading = loading;
         setLoading && setLoading(isLoading);
     };
-    const lookupInStore = (environment: IEnvironment, operation, fetchPolicy): Snapshot | null => {
+    const lookupInStore = (
+        environment: IEnvironment,
+        operation,
+        fetchPolicy,
+        renderPolicy: RenderPolicy,
+    ): { snapshot: Snapshot | null; full: boolean } => {
         if (isStorePolicy(fetchPolicy)) {
             const check = environment.check(operation);
-            if (check.status === 'available') {
-                return environment.lookup(operation.fragment);
+            const queryStatus = check.status;
+            const hasFullQuery = queryStatus === 'available';
+            const canPartialRender =
+                hasFullQuery || (renderPolicy === 'partial' && queryStatus !== 'stale');
+            if (canPartialRender) {
+                return { snapshot: environment.lookup(operation.fragment), full: hasFullQuery };
             }
         }
-        return null;
+        return { snapshot: null, full: false };
     };
 
     const dispose = (): void => {
@@ -99,6 +106,7 @@ export function fetchResolver({
         fetchPolicy: FetchPolicy = 'network-only',
         onComplete = (_e: Error | null): void => undefined,
         onNext: (operation: OperationDescriptor, snapshot: Snapshot, fromStore, onlyStore) => void,
+        renderPolicy?: RenderPolicy,
     ): Disposable => {
         const observer = {
             complete: (): void => {
@@ -119,18 +127,17 @@ export function fetchResolver({
         query = operation;
 
         disposeRequest();
-        const storeSnapshot = lookupInStore(environment, operation, fetchPolicy);
-        const isNetwork = isNetworkPolicy(fetchPolicy, storeSnapshot);
-        if (storeSnapshot != null) {
+        const { snapshot, full } = lookupInStore(environment, operation, fetchPolicy, renderPolicy);
+        const isNetwork = isNetworkPolicy(fetchPolicy, full);
+        if (snapshot != null) {
             const onlyStore = !isNetwork;
-            onNext(operation, storeSnapshot, true, onlyStore);
+            onNext(operation, snapshot, true, onlyStore);
             if (onlyStore) {
                 observer.complete();
             }
         }
         // Cancel any previously running refetch.
         _refetchSubscription && _refetchSubscription.unsubscribe();
-
         if (isNetwork) {
             let resolveNetworkPromise = (): void => {};
 
@@ -173,7 +180,7 @@ export function fetchResolver({
                     updateLoading(true);
                 },
             });
-            if (!storeSnapshot) {
+            if (!snapshot) {
                 promise = new Promise((resolve) => {
                     resolveNetworkPromise = resolve;
                 });
@@ -189,19 +196,22 @@ export function fetchResolver({
         };
     };
 
+    const checkAndSuspense = (suspense, useLazy): Promise<any> | Error | null => {
+        clearTemporaryRetain();
+        const toThrow = promise || error;
+        if (suspense && toThrow) {
+            if (promise && useLazy) {
+                temporaryRetain();
+            }
+            throw toThrow;
+        }
+        return toThrow;
+    };
+
     const getData = (): {
         isLoading: boolean;
         error?: Error | null;
     } => {
-        if (promise && suspense) {
-            if (useLazy) {
-                //this.setForceUpdate(() => undefined);
-                temporaryRetain();
-            }
-            const toThrow = promise;
-            promise = null; // loadQuery, only throw promise first time
-            throw toThrow;
-        }
         return {
             isLoading,
             error,
@@ -212,6 +222,6 @@ export function fetchResolver({
         fetch,
         getData,
         dispose,
-        clearTemporaryRetain,
+        checkAndSuspense,
     };
 }

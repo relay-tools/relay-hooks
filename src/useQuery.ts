@@ -66,7 +66,9 @@ const useInternalQuery = <TOperationType extends OperationType = OperationType>(
     const environment = useRelayEnvironment();
     const query = useMemoOperationDescriptor(gqlQuery, variables, networkCacheConfig);
     const queryFetcher = useQueryFetcher<TOperationType>(suspense ? query : null);
-    return queryFetcher.execute(environment, query, options);
+    queryFetcher.execute(environment, query, options);
+    queryFetcher.checkAndSuspense(suspense, suspense);
+    return queryFetcher.getData();
 };
 
 export const useQuery = <TOperationType extends OperationType = OperationType>(

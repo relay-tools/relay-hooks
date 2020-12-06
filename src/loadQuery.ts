@@ -1,11 +1,5 @@
 import * as areEqual from 'fbjs/lib/areEqual';
-import {
-    GraphQLTaggedNode,
-    OperationType,
-    IEnvironment,
-    isPromise,
-    OperationDescriptor,
-} from 'relay-runtime';
+import { GraphQLTaggedNode, OperationType, IEnvironment, OperationDescriptor } from 'relay-runtime';
 import { QueryFetcher } from './QueryFetcher';
 import { RenderProps, QueryOptions, LoadQuery } from './RelayHooksType';
 import { createOperation, forceCache } from './Utils';
@@ -19,9 +13,8 @@ export const internalLoadQuery = <TOperationType extends OperationType = Operati
         options: QueryOptions,
     ): RenderProps<TOperationType> => queryFetcher.execute(environment, query, options),
 ): LoadQuery<TOperationType> => {
-    let data: RenderProps<TOperationType> | null | Promise<any> = null;
     let listener = undefined;
-    let queryFetcher = new QueryFetcher<TOperationType>(true);
+    let queryFetcher = new QueryFetcher<TOperationType>();
 
     let prev = {
         environment: null,
@@ -33,9 +26,8 @@ export const internalLoadQuery = <TOperationType extends OperationType = Operati
 
     const dispose = (): void => {
         queryFetcher.dispose();
-        queryFetcher = new QueryFetcher<TOperationType>(true);
+        queryFetcher = new QueryFetcher<TOperationType>();
         listener = undefined;
-        data = null;
         prev = {
             environment: null,
             gqlQuery: null,
@@ -64,23 +56,19 @@ export const internalLoadQuery = <TOperationType extends OperationType = Operati
             prev.query = createOperation(gqlQuery, prev.variables, networkCacheConfig);
         }
         const execute = (): void => {
-            data = queryExecute(queryFetcher, prev.environment, prev.query, prev.options);
+            queryExecute(queryFetcher, prev.environment, prev.query, prev.options);
+            const data = queryFetcher.getData();
             listener && listener(data);
         };
-
+        queryFetcher.setMounted();
         queryFetcher.setForceUpdate(execute);
-        let result;
-        try {
-            execute();
-        } catch (e) {
-            result = e.then(execute);
-            if (promise) {
-                data = result;
-            } else {
-                execute();
-            }
-        }
-        return result ?? Promise.resolve();
+        execute();
+        const toThrow = queryFetcher.checkAndSuspense();
+        return toThrow
+            ? toThrow instanceof Error
+                ? Promise.reject(toThrow)
+                : toThrow.then(execute)
+            : Promise.resolve();
     };
 
     const getValue = (
@@ -89,11 +77,10 @@ export const internalLoadQuery = <TOperationType extends OperationType = Operati
         if (environment && environment != prev.environment) {
             next(environment, prev.gqlQuery, prev.variables, prev.options);
         }
-        if (isPromise(data)) {
-            throw data;
-        }
 
-        return data;
+        queryFetcher.checkAndSuspense(promise);
+
+        return queryFetcher.getData();
     };
 
     const subscribe = (callback: (value) => any): (() => void) => {

@@ -1,4 +1,5 @@
 import { GraphQLTaggedNode, OperationType } from 'relay-runtime';
+import { getRefetchMetadata } from './getRefetchMetadata';
 import {
     KeyType,
     KeyTypeData,
@@ -19,8 +20,11 @@ function useInternalRefetchable<TQuery extends OperationType, TKey extends KeyTy
     suspense: boolean,
 ): // tslint:disable-next-line no-unnecessary-generics
 ReturnTypeRefetchNode<TQuery, TKey, KeyTypeData<TKey> | null> {
-    const [data, resolver] = useOssFragment(fragmentInput, fragmentRef, suspense);
-
+    const [data, resolver] = useOssFragment(fragmentInput, fragmentRef, suspense, 'useRefetchable');
+    if ('production' !== process.env.NODE_ENV) {
+        getRefetchMetadata(resolver.getFragment(), 'useRefetchable()');
+    }
+    resolver.checkRefechAndSuspense(suspense);
     return [data, resolver.refetch, resolver.isLoading()];
 }
 

@@ -10,28 +10,32 @@ export function useOssFragment<TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey,
     suspense: boolean,
+    name: string,
 ): [$Call<KeyReturnType<TKey>>, FragmentResolver];
 export function useOssFragment<TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null,
     suspense: boolean,
+    name: string,
 ): [$Call<KeyReturnType<TKey>> | null, FragmentResolver];
 export function useOssFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey,
     suspense: boolean,
+    name: string,
 ): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>, FragmentResolver];
 export function useOssFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null,
     suspense: boolean,
+    name: string,
 ): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null, FragmentResolver] {
     const environment = useRelayEnvironment();
     const forceUpdate = useForceUpdate();
     const ref = useRef<{ resolver: FragmentResolver }>(null);
     if (ref.current === null || ref.current === undefined) {
         ref.current = {
-            resolver: new FragmentResolver(forceUpdate, suspense),
+            resolver: new FragmentResolver(name, forceUpdate),
         };
     }
 
@@ -58,6 +62,8 @@ export function useOssFragment<TKey extends ArrayKeyType>(
     }, [fragment, fragmentRef]);
 
     resolver.resolve(environment, idfragment, fragment, fragmentRef);
+
+    resolver.checkAndSuspense(suspense);
 
     const data = resolver.getData();
 

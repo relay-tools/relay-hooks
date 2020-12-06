@@ -20,7 +20,9 @@ function useInternalPagination<TQuery extends OperationType, TKey extends KeyTyp
     suspense: boolean,
 ): // tslint:disable-next-line no-unnecessary-generics
 ReturnTypePagination<TQuery, TKey | null, KeyTypeData<TKey> | null> {
-    const [data, resolver] = useOssFragment(fragmentNode, fragmentRef, suspense);
+    const [data, resolver] = useOssFragment(fragmentNode, fragmentRef, suspense, 'usePagination');
+
+    resolver.checkRefechAndSuspense(suspense);
 
     const [loadPrevious, loadNext, refetch] = useMemo(
         () => [resolver.loadPrevious, resolver.loadNext, resolver.refetch],

@@ -18,12 +18,11 @@ export function getOrCreateQueryFetcher<TOperationType extends OperationType>(
     query: OperationDescriptor | null,
     forceUpdate: any,
 ): QueryFetcher<TOperationType> {
-    const suspense = !!query;
-    const toGet = suspense && cache.has(query.request.identifier);
-    const queryFetcher = toGet
-        ? cache.get(query.request.identifier)
-        : new QueryFetcher(suspense, suspense);
+    const withCache = !!query;
+    const toGet = query && cache.has(query.request.identifier);
+    const queryFetcher = toGet ? cache.get(query.request.identifier) : new QueryFetcher(withCache);
     queryFetcher.setForceUpdate(forceUpdate);
+    queryFetcher.setMounted(false);
     return queryFetcher;
 }
 
@@ -37,23 +36,19 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
     fetchPolicy: FetchPolicy;
     fetchKey: string | number;
     forceUpdate: (_o: any) => void;
-    suspense: boolean;
-    useLazy: boolean;
     mounted = false;
+    withCache = false;
 
-    constructor(suspense = false, useLazy = false) {
-        this.suspense = suspense;
-        this.useLazy = suspense && useLazy;
+    constructor(withCache?: boolean) {
         this.setForceUpdate(() => undefined);
+        this.withCache = withCache;
         this.fetcher = fetchResolver({
-            suspense,
-            useLazy,
             disposeTemporary: () => this.dispose(),
         });
     }
 
-    setMounted(): void {
-        this.mounted = true;
+    setMounted(mounted = true): void {
+        this.mounted = mounted;
     }
 
     setForceUpdate(forceUpdate): void {
@@ -87,9 +82,10 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             this.subscribe(snapshot);
         }
 
-        const suspense = !this.cached && this.suspense;
+        //const suspense = !this.cached && this.suspense;
         this.cached = fromStore;
-        if (!suspense && !fromStore && this.mounted) {
+        if (!fromStore && this.mounted) {
+            // !suspense &&
             this.forceUpdate(snapshot);
         }
     };
@@ -109,8 +105,9 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             : this.query;
         /* eslint-enable indent */
         const complete = (error: Error | null): void => {
-            const suspense = !this.cached && this.suspense;
-            if (error && !suspense && this.mounted) {
+            //const suspense = !this.cached && this.suspense;
+            if (error && this.mounted) {
+                // && !suspense
                 this.forceUpdate(error);
             }
             onComplete && onComplete(error);
@@ -124,29 +121,22 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         options: InternalQueryOptions,
     ): RenderProps<TOperationType> {
         const { fetchPolicy = defaultPolicy, fetchKey, skip, onComplete } = options;
-        const diffQuery = !this.query || query.request.identifier !== this.query.request.identifier;
-
-        this.fetcher.clearTemporaryRetain();
-
         if (skip) {
-            return {
-                cached: false,
-                retry: this.retry,
-                error: null,
-                props: undefined,
-            };
+            this.fetcher.dispose();
+            this.disposeSnapshot();
+            return;
         }
+        const diffQuery = !this.query || query.request.identifier !== this.query.request.identifier;
         if (
             diffQuery ||
             environment !== this.environment ||
             fetchPolicy !== this.fetchPolicy ||
             fetchKey !== this.fetchKey
         ) {
-            if (diffQuery && this.useLazy) {
+            if (diffQuery && this.withCache) {
                 this.query && cache.delete(this.query.request.identifier);
                 cache.set(query.request.identifier, this);
             }
-            //if (diffQuery || environment !== this.environment) this.disposeSnapshot();
             this.disposeSnapshot();
             this.environment = environment;
             this.query = query;
@@ -154,16 +144,30 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             this.fetchKey = fetchKey;
 
             const complete = (error: Error | null): void => {
-                const suspense = !this.cached && this.suspense;
-                if (error && !suspense && this.mounted) {
+                //const suspense = !this.cached; // && this.suspense;
+                if (error && this.mounted) {
+                    //!suspense
                     this.forceUpdate(error);
                 }
                 onComplete && onComplete(error);
             };
 
-            this.fetcher.fetch(environment, query, fetchPolicy, complete, this.onNext);
+            this.fetcher.fetch(
+                environment,
+                query,
+                fetchPolicy,
+                complete,
+                this.onNext,
+                options.UNSTABLE_renderPolicy,
+            );
         }
+    }
 
+    checkAndSuspense(suspense = false, useLazy = false): Promise<any> | Error | null {
+        return this.fetcher.checkAndSuspense(suspense, useLazy);
+    }
+
+    getData(): RenderProps<TOperationType> {
         const { error } = this.fetcher.getData();
         return {
             cached: this.cached,

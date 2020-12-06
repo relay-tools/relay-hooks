@@ -61,14 +61,6 @@ export interface RenderProps<T extends OperationType> {
     cached?: boolean;
 }
 
-export type InternalQueryOptions = {
-    fetchPolicy?: FetchPolicy;
-    fetchKey?: string | number;
-    skip?: boolean;
-    onComplete?: (_e: Error | null) => void;
-    UNSTABLE_renderPolicy?: RenderPolicy;
-};
-
 export type QueryOptions = {
     fetchPolicy?: FetchPolicy;
     fetchKey?: string | number;
@@ -114,7 +106,7 @@ export type LoadQuery<
         variables?: TOperationType['variables'],
         options?: QueryOptions,
     ) => Promise<void>;
-    subscribe: (callback: (value: any) => any) => () => void;
+    subscribe: (callback: () => any) => () => void;
     getValue: (environment?: TEnvironment) => RenderProps<TOperationType> | Promise<any>;
     dispose: () => void;
 };

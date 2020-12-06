@@ -1,3 +1,4 @@
+import * as areEqual from 'fbjs/lib/areEqual';
 import {
     Disposable,
     CacheConfig,
@@ -5,9 +6,11 @@ import {
     Snapshot,
     OperationType,
     OperationDescriptor,
+    GraphQLTaggedNode,
+    Variables,
 } from 'relay-runtime';
 import { Fetcher, fetchResolver } from './FetchResolver';
-import { FetchPolicy, RenderProps, InternalQueryOptions } from './RelayHooksType';
+import { FetchPolicy, RenderProps, QueryOptions } from './RelayHooksType';
 import { createOperation } from './Utils';
 
 const defaultPolicy = 'store-or-network';
@@ -15,12 +18,17 @@ const defaultPolicy = 'store-or-network';
 const cache: Map<string, QueryFetcher<any>> = new Map();
 
 export function getOrCreateQueryFetcher<TOperationType extends OperationType>(
-    query: OperationDescriptor | null,
+    suspense: boolean,
+    gqlQuery: GraphQLTaggedNode,
+    variables: TOperationType['variables'],
+    networkCacheConfig: CacheConfig,
     forceUpdate: any,
 ): QueryFetcher<TOperationType> {
-    const withCache = !!query;
-    const toGet = query && cache.has(query.request.identifier);
+    const withCache = suspense;
+    const query = createOperation(gqlQuery, variables, networkCacheConfig);
+    const toGet = withCache && cache.has(query.request.identifier);
     const queryFetcher = toGet ? cache.get(query.request.identifier) : new QueryFetcher(withCache);
+    queryFetcher.setQuery(gqlQuery, variables, networkCacheConfig, query);
     queryFetcher.setForceUpdate(forceUpdate);
     queryFetcher.setMounted(false);
     return queryFetcher;
@@ -35,16 +43,35 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
     snapshot: Snapshot;
     fetchPolicy: FetchPolicy;
     fetchKey: string | number;
-    forceUpdate: (_o: any) => void;
+    forceUpdate: () => void;
     mounted = false;
     withCache = false;
+    variables: Variables;
+    cacheConfig: Variables;
+    gqlQuery: GraphQLTaggedNode;
+    options: QueryOptions;
 
     constructor(withCache?: boolean) {
         this.setForceUpdate(() => undefined);
         this.withCache = withCache;
         this.fetcher = fetchResolver({
-            disposeTemporary: () => this.dispose(),
+            disposeTemporary: () => {
+                this.dispose();
+                this.query && cache.delete(this.query.request.identifier);
+            },
         });
+    }
+
+    setQuery(
+        gqlQuery: GraphQLTaggedNode,
+        variables: TOperationType['variables'],
+        networkCacheConfig: CacheConfig,
+        query: OperationDescriptor,
+    ): void {
+        this.gqlQuery = gqlQuery;
+        this.variables = variables;
+        this.query = query;
+        this.cacheConfig = networkCacheConfig;
     }
 
     setMounted(mounted = true): void {
@@ -58,7 +85,6 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
     dispose(): void {
         this.fetcher.dispose();
         this.disposeSnapshot();
-        this.query && cache.delete(this.query.request.identifier);
     }
 
     disposeSnapshot(): void {
@@ -86,7 +112,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         this.cached = fromStore;
         if (!fromStore && this.mounted) {
             // !suspense &&
-            this.forceUpdate(snapshot);
+            this.forceUpdate();
         }
     };
 
@@ -108,19 +134,41 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             //const suspense = !this.cached && this.suspense;
             if (error && this.mounted) {
                 // && !suspense
-                this.forceUpdate(error);
+                this.forceUpdate();
             }
             onComplete && onComplete(error);
         };
         this.fetcher.fetch(this.environment, query, 'network-only', complete, this.onNext);
     };
 
-    execute(
+    getQuery(gqlQuery, variables, networkCacheConfig): OperationDescriptor | null {
+        if (
+            gqlQuery != this.gqlQuery ||
+            networkCacheConfig != this.cacheConfig ||
+            variables != this.variables ||
+            !areEqual(variables, this.variables)
+        ) {
+            this.variables = variables;
+            this.gqlQuery = gqlQuery;
+            this.cacheConfig = networkCacheConfig;
+            return createOperation(gqlQuery, variables, networkCacheConfig);
+        }
+        return this.query;
+    }
+
+    resolveEnvironment(environment: IEnvironment): RenderProps<TOperationType> {
+        return this.resolve(environment, this.gqlQuery, this.variables, this.options);
+    }
+
+    resolve(
         environment: IEnvironment,
-        query: OperationDescriptor,
-        options: InternalQueryOptions,
+        gqlQuery: GraphQLTaggedNode,
+        variables: Variables,
+        options: QueryOptions,
     ): RenderProps<TOperationType> {
+        const query = this.getQuery(gqlQuery, variables, options.networkCacheConfig);
         const { fetchPolicy = defaultPolicy, fetchKey, skip, onComplete } = options;
+        this.options = options;
         if (skip) {
             this.fetcher.dispose();
             this.disposeSnapshot();
@@ -133,10 +181,6 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             fetchPolicy !== this.fetchPolicy ||
             fetchKey !== this.fetchKey
         ) {
-            if (diffQuery && this.withCache) {
-                this.query && cache.delete(this.query.request.identifier);
-                cache.set(query.request.identifier, this);
-            }
             this.disposeSnapshot();
             this.environment = environment;
             this.query = query;
@@ -147,7 +191,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
                 //const suspense = !this.cached; // && this.suspense;
                 if (error && this.mounted) {
                     //!suspense
-                    this.forceUpdate(error);
+                    this.forceUpdate();
                 }
                 onComplete && onComplete(error);
             };
@@ -164,10 +208,12 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
     }
 
     checkAndSuspense(suspense = false, useLazy = false): Promise<any> | Error | null {
+        useLazy && cache.set(this.query.request.identifier, this);
         return this.fetcher.checkAndSuspense(suspense, useLazy);
     }
 
     getData(): RenderProps<TOperationType> {
+        cache.delete(this.query.request.identifier);
         const { error } = this.fetcher.getData();
         return {
             cached: this.cached,
@@ -185,7 +231,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             // Read from this._fetchOptions in case onDataChange() was lazily added.
             this.snapshot = snapshot;
             //this.error = null;
-            this.forceUpdate(snapshot);
+            this.forceUpdate();
         });
     }
 }

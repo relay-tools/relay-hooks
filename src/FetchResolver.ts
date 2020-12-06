@@ -89,6 +89,7 @@ export function fetchResolver({
 
     const temporaryRetain = (): void => {
         const localReleaseTemporaryRetain = (): void => {
+            clearTemporaryRetain();
             dispose();
             disposeTemporary && disposeTemporary();
         };

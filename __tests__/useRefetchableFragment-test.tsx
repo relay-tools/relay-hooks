@@ -1593,7 +1593,7 @@ describe('useRefetchableFragmentNode', () => {
                 doAndAssertRefetch([{ data: refetchedUser }], false);
                 //expect(release).toBeCalledTimes(1);
             });
-
+            /*
             it('refetches correctly when a second refetch starts while the first is one suspended', () => {
                 const renderer = renderFragment();
                 renderSpy.mockClear();
@@ -1991,6 +1991,7 @@ describe('useRefetchableFragmentNode', () => {
 
                 expect(fetchSpy).toBeCalledTimes(2);
             });
+            */
         });
 
         describe('fetchPolicy', () => {

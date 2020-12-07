@@ -57,7 +57,7 @@ export type ContainerResult = {
 export interface RenderProps<T extends OperationType> {
     error: Error | null;
     props: T['response'] | null | undefined;
-    retry: (_cacheConfigOverride?: CacheConfig, onComplete?: (_e: Error | null) => void) => void;
+    retry: (_cacheConfigOverride?: CacheConfig, options?: Options) => void;
     cached?: boolean;
 }
 

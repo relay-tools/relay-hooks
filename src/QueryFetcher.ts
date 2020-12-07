@@ -10,7 +10,7 @@ import {
     Variables,
 } from 'relay-runtime';
 import { Fetcher, fetchResolver } from './FetchResolver';
-import { FetchPolicy, RenderProps, QueryOptions } from './RelayHooksType';
+import { FetchPolicy, RenderProps, QueryOptions, Options } from './RelayHooksType';
 import { createOperation } from './Utils';
 
 const defaultPolicy = 'store-or-network';
@@ -116,11 +116,8 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         }
     };
 
-    retry = (
-        cacheConfigOverride?: CacheConfig | null,
-        onComplete?: (_e: Error | null) => void,
-    ): void => {
-        this.disposeSnapshot();
+    retry = (cacheConfigOverride?: CacheConfig | null, options: Options = {}): void => {
+        const { fetchPolicy = 'network-only' } = options;
         /* eslint-disable indent */
         const query = cacheConfigOverride
             ? createOperation(
@@ -129,17 +126,23 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
                   cacheConfigOverride,
               )
             : this.query;
-        /* eslint-enable indent */
+        this.fetch(query, fetchPolicy, options);
+        this.forceUpdate();
+    };
+
+    fetch(query: OperationDescriptor, fetchPolicy: FetchPolicy, options: Options): void {
+        this.disposeSnapshot();
+        const { onComplete } = options;
         const complete = (error: Error | null): void => {
-            //const suspense = !this.cached && this.suspense;
+            //const suspense = !this.cached; // && this.suspense;
             if (error && this.mounted) {
-                // && !suspense
+                //!suspense
                 this.forceUpdate();
             }
             onComplete && onComplete(error);
         };
-        this.fetcher.fetch(this.environment, query, 'network-only', complete, this.onNext);
-    };
+        this.fetcher.fetch(this.environment, query, fetchPolicy, complete, this.onNext);
+    }
 
     getQuery(gqlQuery, variables, networkCacheConfig): OperationDescriptor | null {
         if (
@@ -156,8 +159,8 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         return this.query;
     }
 
-    resolveEnvironment(environment: IEnvironment): RenderProps<TOperationType> {
-        return this.resolve(environment, this.gqlQuery, this.variables, this.options);
+    resolveEnvironment(environment: IEnvironment): void {
+        this.resolve(environment, this.gqlQuery, this.variables, this.options);
     }
 
     resolve(
@@ -165,13 +168,12 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         gqlQuery: GraphQLTaggedNode,
         variables: Variables,
         options: QueryOptions,
-    ): RenderProps<TOperationType> {
+    ): void {
         const query = this.getQuery(gqlQuery, variables, options.networkCacheConfig);
-        const { fetchPolicy = defaultPolicy, fetchKey, skip, onComplete } = options;
+        const { fetchPolicy = defaultPolicy, fetchKey, skip } = options;
         this.options = options;
         if (skip) {
-            this.fetcher.dispose();
-            this.disposeSnapshot();
+            this.dispose();
             return;
         }
         const diffQuery = !this.query || query.request.identifier !== this.query.request.identifier;
@@ -181,29 +183,11 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             fetchPolicy !== this.fetchPolicy ||
             fetchKey !== this.fetchKey
         ) {
-            this.disposeSnapshot();
             this.environment = environment;
             this.query = query;
             this.fetchPolicy = fetchPolicy;
             this.fetchKey = fetchKey;
-
-            const complete = (error: Error | null): void => {
-                //const suspense = !this.cached; // && this.suspense;
-                if (error && this.mounted) {
-                    //!suspense
-                    this.forceUpdate();
-                }
-                onComplete && onComplete(error);
-            };
-
-            this.fetcher.fetch(
-                environment,
-                query,
-                fetchPolicy,
-                complete,
-                this.onNext,
-                options.UNSTABLE_renderPolicy,
-            );
+            this.fetch(this.query, fetchPolicy, options);
         }
     }
 

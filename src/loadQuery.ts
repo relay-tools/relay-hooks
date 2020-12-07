@@ -5,14 +5,6 @@ import { forceCache } from './Utils';
 
 export const internalLoadQuery = <TOperationType extends OperationType = OperationType>(
     promise = false,
-    queryExecute = (
-        queryFetcher: QueryFetcher<TOperationType>,
-        environment: IEnvironment,
-        gqlQuery: GraphQLTaggedNode,
-        variables: TOperationType['variables'] = {},
-        options: QueryOptions,
-    ): RenderProps<TOperationType> =>
-        queryFetcher.resolve(environment, gqlQuery, variables, options),
 ): LoadQuery<TOperationType> => {
     let queryFetcher = new QueryFetcher<TOperationType>();
     queryFetcher.setMounted();
@@ -30,7 +22,7 @@ export const internalLoadQuery = <TOperationType extends OperationType = Operati
         options: QueryOptions = {},
     ): Promise<void> => {
         options.networkCacheConfig = options.networkCacheConfig ?? forceCache;
-        queryExecute(queryFetcher, environment, gqlQuery, variables, options);
+        queryFetcher.resolve(environment, gqlQuery, variables, options);
         const toThrow = queryFetcher.checkAndSuspense();
         return toThrow
             ? toThrow instanceof Error

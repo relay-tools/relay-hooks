@@ -1208,7 +1208,7 @@ describe('ReactRelayQueryRenderer', () => {
         });
 
         it('refetch the query if `retry`', () => {
-            expect.assertions(4); // changed to 4
+            expect.assertions(7);
             render.mockClear();
             const error = new Error('network fails');
             environment.mock.reject(TestQuery, error);
@@ -1217,11 +1217,11 @@ describe('ReactRelayQueryRenderer', () => {
 
             render.mockClear();
             readyState.retry(); // removed, now retry only try on network and forceupdate after call ending
-            /* expect({
-        error: null,
-        props: null,
-        retry: null
-      }).toBeRendered();*/
+            expect({
+                error: null,
+                props: null,
+                retry: expect.any(Function),
+            }).toBeRendered();
 
             render.mockClear();
             environment.mock.resolve(TestQuery, response);
@@ -1874,7 +1874,7 @@ describe('ReactRelayQueryRenderer', () => {
 
             const onComplete = jest.fn(() => undefined);
 
-            readyState.retry({ force: true }, onComplete);
+            readyState.retry({ force: true }, { onComplete });
             expect(environment.mock.isLoading(TestQuery, variables, { force: true })).toBe(true);
 
             jest.runAllTimers();

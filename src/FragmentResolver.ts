@@ -24,7 +24,13 @@ import { getPaginationMetadata } from './getPaginationMetadata';
 import { getPaginationVariables } from './getPaginationVariables';
 import { getRefetchMetadata } from './getRefetchMetadata';
 import { getValueAtPath } from './getValueAtPath';
-import { Options, OptionsLoadMore } from './RelayHooksType';
+import {
+    FragmentNames,
+    Options,
+    OptionsLoadMore,
+    PAGINATION_NAME,
+    REFETCHABLE_NAME,
+} from './RelayHooksType';
 import { createOperation, forceCache } from './Utils';
 const { getPromiseForActiveRequest } = __internal;
 
@@ -58,6 +64,27 @@ function isMissingData(snapshot: SingularOrPluralSnapshot): boolean {
     return snapshot.isMissingData;
 }
 
+function getPromiseForPendingOperationAffectingOwner(
+    environment: IEnvironment,
+    request: RequestDescriptor,
+): Promise<void> | null {
+    return environment.getOperationTracker().getPromiseForPendingOperationsAffectingOwner(request);
+}
+
+function _getAndSavePromiseForFragmentRequestInFlight(
+    fragmentOwner: RequestDescriptor,
+    environment: IEnvironment,
+): Promise<void> | null {
+    const networkPromise =
+        getPromiseForActiveRequest(environment, fragmentOwner) ??
+        getPromiseForPendingOperationAffectingOwner(environment, fragmentOwner);
+
+    if (!networkPromise) {
+        return null;
+    }
+    return networkPromise;
+}
+
 export class FragmentResolver {
     _environment: IEnvironment;
     _fragment: ReaderFragment;
@@ -65,7 +92,7 @@ export class FragmentResolver {
     _fragmentRefRefetch: any;
     _idfragment: any;
     _idfragmentrefetch: any;
-    _result: FragmentResult;
+    resolverData: FragmentResult;
     _disposable: Disposable = { dispose: () => {} };
     _selector: ReaderSelector;
     refreshHooks: any;
@@ -74,18 +101,30 @@ export class FragmentResolver {
     fetcherPrevious: Fetcher;
     unmounted = false;
     name: string;
+    refetchable = false;
+    pagination = false;
+    result: any;
 
-    constructor(name, forceUpdate) {
+    constructor(name: FragmentNames, forceUpdate) {
         this.name = name;
-        this.refreshHooks = forceUpdate;
+        this.pagination = name === PAGINATION_NAME;
+        this.refetchable = name === REFETCHABLE_NAME || this.pagination;
+        this.refreshHooks = (): void => {
+            this.resolveResult();
+            forceUpdate();
+        };
 
         const setLoading = (_loading): void => this.refreshHooks();
-        this.fetcherRefecth = fetchResolver({
-            setLoading,
-            doRetain: true,
-        });
-        this.fetcherNext = fetchResolver({ setLoading });
-        this.fetcherPrevious = fetchResolver({ setLoading });
+        if (this.refetchable) {
+            this.fetcherRefecth = fetchResolver({
+                setLoading,
+                doRetain: true,
+            });
+        }
+        if (this.pagination) {
+            this.fetcherNext = fetchResolver({ setLoading });
+            this.fetcherPrevious = fetchResolver({ setLoading });
+        }
     }
 
     setUnmounted(): void {
@@ -111,51 +150,15 @@ export class FragmentResolver {
 
     dispose(): void {
         this._disposable && this._disposable.dispose();
-        this.fetcherNext.dispose();
-        this.fetcherPrevious.dispose();
+        this.fetcherNext && this.fetcherNext.dispose();
+        this.fetcherPrevious && this.fetcherPrevious.dispose();
         this._idfragmentrefetch = null;
         this._fragmentRefRefetch = null;
-        this.fetcherRefecth.dispose();
+        this.fetcherRefecth && this.fetcherRefecth.dispose();
     }
 
     getFragmentVariables(fRef = this._fragmentRef): Variables {
         return getVariablesFromFragment(this._fragment, fRef);
-    }
-
-    getPromiseForPendingOperationAffectingOwner(
-        environment: IEnvironment,
-        request: RequestDescriptor,
-    ): Promise<void> | null {
-        return environment
-            .getOperationTracker()
-            .getPromiseForPendingOperationsAffectingOwner(request);
-    }
-
-    _getAndSavePromiseForFragmentRequestInFlight(
-        fragmentOwner: RequestDescriptor,
-    ): Promise<void> | null {
-        const environment = this._environment;
-        const networkPromise =
-            getPromiseForActiveRequest(environment, fragmentOwner) ??
-            this.getPromiseForPendingOperationAffectingOwner(environment, fragmentOwner);
-
-        if (!networkPromise) {
-            return null;
-        }
-        // When the Promise for the request resolves, we need to make sure to
-        // update the cache with the latest data available in the store before
-        // resolving the Promise
-        const promise = networkPromise
-            .then(() => {
-                this._idfragment = null;
-            })
-            .catch((_error: Error) => {
-                this._idfragment = null;
-            });
-
-        // $FlowExpectedError[prop-missing] Expando to annotate Promises.
-        (promise as any).displayName = 'Relay(' + fragmentOwner.node.params.name + ')';
-        return promise;
     }
 
     resolve(
@@ -173,50 +176,73 @@ export class FragmentResolver {
             this._fragment = fragment;
             this._fragmentRef = fragmentRef;
             this._idfragment = idfragment;
-            this._result = null;
+            this.resolverData = null;
             this._selector = null;
             this.dispose();
             this._environment = environment;
             this.lookup(fragment, this._fragmentRef);
+            this.resolveResult();
         }
     }
 
     lookup(fragment, fragmentRef): void {
         if (fragmentRef == null) {
-            this._result = { data: null, snapshot: null };
+            this.resolverData = { data: null, snapshot: null };
+            this.resolveResult();
             return;
         }
         const isPlural =
             fragment.metadata && fragment.metadata.plural && fragment.metadata.plural === true;
         if (isPlural) {
             if (fragmentRef.length === 0) {
-                this._result = { data: [], snapshot: [] };
+                this.resolverData = { data: [], snapshot: [] };
+                this.resolveResult();
                 return;
             }
         }
         this._selector = getSelector(fragment, fragmentRef);
         const snapshot = lookupFragment(this._environment, this._selector);
 
-        this._result = getFragmentResult(snapshot);
+        this.resolverData = getFragmentResult(snapshot);
         const owner = this._selector
             ? this._selector.kind === 'PluralReaderSelector'
                 ? (this._selector as any).selectors[0].owner
                 : (this._selector as any).owner
             : null;
-        this._result.owner = owner;
+        this.resolverData.owner = owner;
         this.subscribe();
     }
 
     checkAndSuspense(suspense): void {
-        if (suspense && this._result != null && this._result.isMissingData && this._result.owner) {
-            const networkPromise = this._getAndSavePromiseForFragmentRequestInFlight(
-                this._result.owner,
+        if (
+            suspense &&
+            this.resolverData != null &&
+            this.resolverData.isMissingData &&
+            this.resolverData.owner
+        ) {
+            const fragmentOwner = this.resolverData.owner;
+            const networkPromise = _getAndSavePromiseForFragmentRequestInFlight(
+                fragmentOwner,
+                this._environment,
             );
+            const parentQueryName = fragmentOwner.node.params.name ?? 'Unknown Parent Query';
             if (networkPromise != null) {
+                // When the Promise for the request resolves, we need to make sure to
+                // update the cache with the latest data available in the store before
+                // resolving the Promise
+                const promise = networkPromise
+                    .then(() => {
+                        this._idfragment = null;
+                    })
+                    .catch((_error: Error) => {
+                        this._idfragment = null;
+                    });
+
+                // $FlowExpectedError[prop-missing] Expando to annotate Promises.
+                (promise as any).displayName = 'Relay(' + parentQueryName + ')';
                 this._disposable && this._disposable.dispose();
-                throw networkPromise;
+                throw promise;
             }
-            const parentQueryName = this._result.owner.node.params.name ?? 'Unknown Parent Query';
             warning(
                 false,
                 'Relay: Tried reading fragment `%s` declared in ' +
@@ -238,19 +264,73 @@ export class FragmentResolver {
                 parentQueryName,
             );
         }
+        this.fetcherRefecth && this.fetcherRefecth.checkAndSuspense(suspense);
     }
 
     getData(): any | null {
-        return this._result ? this._result.data : null;
+        return this.result;
     }
 
-    getFragment(): ReaderFragment {
-        return this._fragment;
+    resolveResult(): any {
+        const data = this.resolverData ? this.resolverData.data : null;
+        if (this.refetchable || this.pagination) {
+            const { isLoading, error } = this.fetcherRefecth.getData();
+            const refetch = this.refetch;
+            if (!this.pagination) {
+                if ('production' !== process.env.NODE_ENV) {
+                    getRefetchMetadata(this._fragment, this.name);
+                }
+                this.result = {
+                    data,
+                    isLoading,
+                    error,
+                    refetch,
+                };
+                return;
+            }
+            const { connectionPathInFragmentData } = getPaginationMetadata(
+                this._fragment,
+                this.name,
+            );
+
+            const connection = getValueAtPath(data, connectionPathInFragmentData);
+            const { hasMore: hasNext } = getStateFromConnection(
+                'forward',
+                this._fragment,
+                connection,
+            );
+            const { hasMore: hasPrevious } = getStateFromConnection(
+                'backward',
+                this._fragment,
+                connection,
+            );
+            const { isLoading: isLoadingNext, error: errorNext } = this.fetcherNext.getData();
+            const {
+                isLoading: isLoadingPrevious,
+                error: errorPrevious,
+            } = this.fetcherPrevious.getData();
+            this.result = {
+                data,
+                hasNext,
+                isLoadingNext,
+                hasPrevious,
+                isLoadingPrevious,
+                isLoading,
+                errorNext,
+                errorPrevious,
+                error,
+                refetch,
+                loadNext: this.loadNext,
+                loadPrevious: this.loadPrevious,
+            };
+            return;
+        }
+        this.result = data;
     }
 
     subscribe(): void {
         const environment = this._environment;
-        const renderedSnapshot = this._result.snapshot;
+        const renderedSnapshot = this.resolverData.snapshot;
 
         this._disposable && this._disposable.dispose();
         if (!renderedSnapshot) {
@@ -263,9 +343,9 @@ export class FragmentResolver {
             renderedSnapshot.forEach((snapshot, idx) => {
                 dataSubscriptions.push(
                     environment.subscribe(snapshot, (latestSnapshot) => {
-                        this._result.snapshot[idx] = latestSnapshot;
-                        this._result.data[idx] = latestSnapshot.data;
-                        this._result.isMissingData = false;
+                        this.resolverData.snapshot[idx] = latestSnapshot;
+                        this.resolverData.data[idx] = latestSnapshot.data;
+                        this.resolverData.isMissingData = false;
                         this.refreshHooks();
                     }),
                 );
@@ -273,8 +353,8 @@ export class FragmentResolver {
         } else {
             dataSubscriptions.push(
                 environment.subscribe(renderedSnapshot, (latestSnapshot) => {
-                    this._result = getFragmentResult(latestSnapshot);
-                    this._result.isMissingData = false;
+                    this.resolverData = getFragmentResult(latestSnapshot);
+                    this.resolverData.isMissingData = false;
                     this.refreshHooks();
                 }),
             );
@@ -320,7 +400,7 @@ export class FragmentResolver {
             identifierField,
             refetchableRequest,
         } = getRefetchMetadata(this._fragment, this.name);
-        const fragmentData = this.getData();
+        const fragmentData = this.getData().data;
         const identifierValue =
             identifierField != null && fragmentData != null && typeof fragmentData === 'object'
                 ? fragmentData[identifierField]
@@ -373,13 +453,13 @@ export class FragmentResolver {
             refetchVariables.id = identifierValue;
         }
 
-        const onNext = (operation: OperationDescriptor, snapshot: Snapshot, fromStore): void => {
+        const onNext = (operation: OperationDescriptor, snapshot: Snapshot): void => {
             const fragmentRef = getValueAtPath(snapshot.data, fragmentRefPathInResponse);
             const isEquals = this.isEqualsFragmentRef(
                 this._fragmentRefRefetch || this._fragmentRef,
                 fragmentRef,
             );
-            const missData = fromStore && isMissingData(snapshot);
+            const missData = isMissingData(snapshot); //fromStore && isMissingData(snapshot);
             if (!isEquals || missData) {
                 this._fragmentRefRefetch = fragmentRef;
                 this._idfragmentrefetch = getFragmentIdentifier(this._fragment, fragmentRef);
@@ -387,13 +467,15 @@ export class FragmentResolver {
                 /*if (!missData) {
                     this.subscribe();
                 }*/
-                this._result.isMissingData = missData;
-                this._result.owner = operation.request;
+                this.resolverData.isMissingData = missData;
+                this.resolverData.owner = operation.request;
                 this.refreshHooks();
             }
         };
-        this.fetcherNext.dispose();
-        this.fetcherPrevious.dispose();
+        if (this.pagination) {
+            this.fetcherNext.dispose();
+            this.fetcherPrevious.dispose();
+        }
         const operation = createOperation(refetchableRequest, refetchVariables, forceCache);
         return this.fetcherRefecth.fetch(
             this._environment,
@@ -403,41 +485,6 @@ export class FragmentResolver {
             onNext,
             options?.UNSTABLE_renderPolicy,
         );
-    };
-
-    checkRefechAndSuspense = (suspense: boolean): void => {
-        this.fetcherRefecth.checkAndSuspense(suspense);
-    };
-
-    isLoading = (direction?: 'backward' | 'forward'): boolean => {
-        /* eslint-disable indent */
-        const fetcher =
-            direction === 'backward'
-                ? this.fetcherPrevious
-                : direction === 'forward'
-                ? this.fetcherNext
-                : this.fetcherRefecth;
-        /* eslint-enable indent */
-        return fetcher.getData().isLoading;
-    };
-
-    getPaginationData = (): boolean[] => {
-        const { connectionPathInFragmentData } = getPaginationMetadata(this._fragment, this.name);
-
-        const connection = getValueAtPath(this.getData(), connectionPathInFragmentData);
-        const { hasMore: hasNext } = getStateFromConnection('forward', this._fragment, connection);
-        const { hasMore: hasPrevious } = getStateFromConnection(
-            'backward',
-            this._fragment,
-            connection,
-        );
-        return [
-            hasNext,
-            this.isLoading('forward'),
-            hasPrevious,
-            this.isLoading('backward'),
-            this.isLoading(),
-        ];
     };
 
     loadPrevious = (count: number, options?: OptionsLoadMore): Disposable => {
@@ -455,7 +502,7 @@ export class FragmentResolver {
     ): Disposable => {
         const onComplete = options?.onComplete ?? ((): void => undefined);
 
-        const fragmentData = this.getData();
+        const fragmentData = this.getData().data;
 
         const fetcher = direction === 'backward' ? this.fetcherPrevious : this.fetcherNext;
         if (this.unmounted === true) {
@@ -560,7 +607,7 @@ export class FragmentResolver {
         return fetcher.fetch(
             this._environment,
             operation,
-            options?.fetchPolicy,
+            undefined, //options?.fetchPolicy,
             onComplete,
             onNext,
         );

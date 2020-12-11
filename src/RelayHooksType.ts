@@ -43,6 +43,12 @@ export const STORE_THEN_NETWORK = 'store-and-network';
 export const STORE_OR_NETWORK = 'store-or-network';
 export const STORE_ONLY = 'store-only';
 
+export const PAGINATION_NAME = 'usePagination';
+export const REFETCHABLE_NAME = 'useRefetchable';
+export const FRAGMENT_NAME = 'useFragment';
+
+export type FragmentNames = typeof PAGINATION_NAME | typeof REFETCHABLE_NAME | typeof FRAGMENT_NAME;
+
 export type FetchPolicy =
     | typeof STORE_ONLY
     | typeof STORE_OR_NETWORK
@@ -58,7 +64,7 @@ export interface RenderProps<T extends OperationType> {
     error: Error | null;
     props: T['response'] | null | undefined;
     retry: (_cacheConfigOverride?: CacheConfig, options?: Options) => void;
-    cached?: boolean;
+    isLoading: boolean;
 }
 
 export type QueryOptions = {
@@ -120,9 +126,9 @@ export interface Options {
 }
 
 export interface OptionsLoadMore<TQuery extends OperationType = OperationType> {
-    fetchPolicy?: FetchPolicy;
+    //fetchPolicy?: FetchPolicy;
     onComplete?: (arg: Error | null) => void;
-    UNSTABLE_extraVariables: VariablesOf<TQuery>;
+    UNSTABLE_extraVariables?: VariablesOf<TQuery>;
 }
 
 // NOTE: RefetchFnDynamic returns a refetch function that:
@@ -161,17 +167,19 @@ export type RefetchFnInexact<TQuery extends OperationType, TOptions = Options> =
     TOptions
 >;
 
-export type ReturnTypeRefetchNode<
+export interface ReturnTypeRefetchNode<
     TQuery extends OperationType,
     TKey extends KeyType | null,
     TFragmentData
-> = [TFragmentData, RefetchFnDynamic<TQuery, TKey>, boolean];
+> extends ReturnTypeRefetchSuspenseNode<TQuery, TKey, TFragmentData> {
+    isLoading: boolean;
+}
 
 export type ReturnTypeRefetchSuspenseNode<
     TQuery extends OperationType,
     TKey extends KeyType | null,
     TFragmentData
-> = [TFragmentData, RefetchFnDynamic<TQuery, TKey>];
+> = { data: TFragmentData; refetch: RefetchFnDynamic<TQuery, TKey> };
 
 // pagination
 

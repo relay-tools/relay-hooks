@@ -7,11 +7,9 @@ export const internalLoadQuery = <TOperationType extends OperationType = Operati
     promise = false,
 ): LoadQuery<TOperationType> => {
     let queryFetcher = new QueryFetcher<TOperationType>();
-    queryFetcher.setMounted();
 
     const dispose = (): void => {
         queryFetcher.dispose();
-        queryFetcher.setMounted(false);
         queryFetcher = new QueryFetcher<TOperationType>();
     };
 
@@ -35,9 +33,7 @@ export const internalLoadQuery = <TOperationType extends OperationType = Operati
         environment?: IEnvironment,
     ): RenderProps<TOperationType> | null | Promise<any> => {
         queryFetcher.resolveEnvironment(environment);
-
         queryFetcher.checkAndSuspense(promise);
-
         return queryFetcher.getData();
     };
 

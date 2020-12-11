@@ -16,7 +16,7 @@ import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 import { useRefetchable, RelayEnvironmentProvider, useRelayEnvironment } from '../src';
 
-const forceCache = {force: true};
+const forceCache = { force: true };
 
 function createHooks(component, options?: any) {
     const result = ReactTestRenderer.create(component, options);
@@ -30,14 +30,21 @@ const ReactRelayRefetchContainer = {
     createContainer: (Component, spec, query) => (props) => {
         const { user, ...others } = props;
         const environment = useRelayEnvironment();
-        const [data, refetchHooks, isLoading] = useRefetchable(spec, user);
+        const { data, refetch: refetchHooks, isLoading } = useRefetchable(spec, user);
         const refetch = (refetchVariables, renderVariables, observer, options) => {
             return refetchHooks(refetchVariables, {
                 onComplete: observer?.complete ?? observer,
-                fetchPolicy: options?.fetchPolicy
+                fetchPolicy: options?.fetchPolicy,
             });
         };
-        return <Component isLoading={isLoading} user={data} {...others} relay={{ environment, refetch }} />;
+        return (
+            <Component
+                isLoading={isLoading}
+                user={data}
+                {...others}
+                relay={{ environment, refetch }}
+            />
+        );
     },
 };
 
@@ -442,7 +449,9 @@ describe('useRefetchable', () => {
             id: '4',
         };
         refetch(refetchVariables, null, jest.fn());
-        expect(environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache)).toBe(true);
+        expect(
+            environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache),
+        ).toBe(true);
 
         environment.mock.resolve(UserFragmentRefetchQuery, {
             data: {
@@ -662,9 +671,9 @@ describe('useRefetchable', () => {
                 id: '4',
             };
             refetch(refetchVariables, null, jest.fn());
-            expect(environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache)).toBe(
-                true,
-            );
+            expect(
+                environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache),
+            ).toBe(true);
             environment.mock.resolve(UserFragmentRefetchQuery, {
                 data: {
                     node: {
@@ -686,7 +695,9 @@ describe('useRefetchable', () => {
             };
             refetch(refetchVariables, null, jest.fn(), refetchOptions);
             expect(render.mock.calls.length).toBe(2);
-            expect(environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache)).toBe(false);
+            expect(
+                environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache),
+            ).toBe(false);
             expect(environment.execute).toBeCalledTimes(0);
         });
 
@@ -830,7 +841,7 @@ describe('useRefetchable', () => {
             expect.assertions(10);
             expect(render.mock.calls.length).toBe(1);
             expect(render.mock.calls[0][0].user.name).toBe('Zuck');
-            
+
             const callback = jest.fn();
             variables = {
                 cond: false,

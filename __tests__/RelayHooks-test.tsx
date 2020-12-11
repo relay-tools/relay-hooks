@@ -81,11 +81,7 @@ describe('useMemo resolver functions', () => {
         jest.resetModules();
         renderSpy = jest.fn();
         environment = createMockEnvironment();
-        ({
-            UserFragment,
-            UserQuery,
-            UserFragmentRefetchQuery,
-        } = generateAndCompile(`
+        ({ UserFragment, UserQuery, UserFragmentRefetchQuery } = generateAndCompile(`
 
         fragment UserFragment on User
         @refetchable(queryName: "UserFragmentRefetchQuery")
@@ -177,7 +173,12 @@ describe('useMemo resolver functions', () => {
             };
 
             function useOssFragmentJest(fragmentNode, fragmentRef) {
-                const [data, refetchFunction] = useOssFragment(fragmentNode, fragmentRef, false);
+                const [data, refetchFunction] = useOssFragment(
+                    fragmentNode,
+                    fragmentRef,
+                    false,
+                    'useOssFragment',
+                );
                 renderSpy(data, refetchFunction);
                 return [data, refetchFunction];
             }
@@ -275,7 +276,7 @@ describe('useMemo resolver functions', () => {
             };
 
             function usePaginationJest(fragmentNode, fragmentRef) {
-                const { data, refetch} = usePagination(fragmentNode, fragmentRef);
+                const { data, refetch } = usePagination(fragmentNode, fragmentRef);
                 renderSpy(data, refetch);
                 return [data, refetch];
             }
@@ -373,7 +374,7 @@ describe('useMemo resolver functions', () => {
             };
 
             function useRefetchableJest(fragmentNode, fragmentRef) {
-                const [data, refetch] = useRefetchable(fragmentNode, fragmentRef);
+                const { data, refetch } = useRefetchable(fragmentNode, fragmentRef);
                 renderSpy(data, refetch);
                 return [data, refetch];
             }

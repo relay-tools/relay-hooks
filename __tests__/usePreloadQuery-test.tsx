@@ -416,10 +416,10 @@ describe('usePreloadQuery', () => {
 
     describe('no suspense', () => {
         const loadingData = {
-            cached: false,
             error: null,
             props: null,
-            retry: expect.any(Function), // added
+            retry: expect.any(Function),
+            isLoading: true,
         };
         const prefetched = loadQuery();
 

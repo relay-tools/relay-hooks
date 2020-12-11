@@ -14,7 +14,12 @@
 
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
-import { usePagination, RelayEnvironmentProvider, useRelayEnvironment, RefetchOptions } from '../src';
+import {
+    usePagination,
+    RelayEnvironmentProvider,
+    useRelayEnvironment,
+    RefetchOptions,
+} from '../src';
 import { forceCache } from '../src/Utils';
 
 function createHooks(component, options?: any) {
@@ -29,25 +34,28 @@ const ReactRelayPaginationContainer = {
     createContainer: (Component, spec, connectionConfigs) => (props: any) => {
         const { user, ...others } = props;
         const environment = useRelayEnvironment();
+        const dataPag = usePagination(spec, user);
         const {
-                data,
-                hasNext: hasMoreHooks,
-                isLoading,
-                isLoadingNext,
-                loadNext: loadMoreHooks,
-                refetch: refetchConnectionHooks,
-        } = usePagination(spec, user);
-        const loadMore = (count, callback: (error: Error) => void,
-        options?: RefetchOptions) => {
+            data,
+            hasNext: hasMoreHooks,
+            isLoading,
+            isLoadingNext,
+            loadNext: loadMoreHooks,
+            refetch: refetchConnectionHooks,
+        } = dataPag;
+        const loadMore = (count, callback: (error: Error) => void, options?: RefetchOptions) => {
             // @ts-ignore
-            return loadMoreHooks(count, {fetchPolicy: options?.fetchPolicy, onComplete: callback});
+            return loadMoreHooks(count, {
+                fetchPolicy: options?.fetchPolicy,
+                onComplete: callback,
+            });
         };
         const refetchConnection = (count, callback, variables) => {
             const varia = {
                 count,
-                ...variables
-            }
-            return refetchConnectionHooks(varia, {onComplete: callback});
+                ...variables,
+            };
+            return refetchConnectionHooks(varia, { onComplete: callback });
         };
         return (
             <Component
@@ -55,7 +63,14 @@ const ReactRelayPaginationContainer = {
                 //hasMore={hasMoreHooks}
                 //isLoadingNext={isLoadingNextNext}
                 {...others}
-                relay={{ environment, refetchConnection, hasMore: hasMoreHooks, isLoadingNext, loadMore, isLoading }}
+                relay={{
+                    environment,
+                    refetchConnection,
+                    hasMore: hasMoreHooks,
+                    isLoadingNext,
+                    loadMore,
+                    isLoading,
+                }}
             />
         );
     },
@@ -174,7 +189,7 @@ describe('ReactRelayPaginationContainer', () => {
       }
     `));
 
-    UserFragment.metadata.refetch.operation = UserFragmentRefetchQuery;
+        UserFragment.metadata.refetch.operation = UserFragmentRefetchQuery;
 
         render = jest.fn((props) => {
             ({ hasMore, isLoadingNext, loadMore, refetchConnection } = props.relay);
@@ -848,7 +863,12 @@ describe('ReactRelayPaginationContainer', () => {
 */
     it('does not fail invariant if one fragment has a @connection directive', () => {
         let ViewerFragment;
-        ({ UserFragment, UserQuery, ViewerFragment, UserFragmentRefetchQuery } = generateAndCompile(`
+        ({
+            UserFragment,
+            UserQuery,
+            ViewerFragment,
+            UserFragmentRefetchQuery,
+        } = generateAndCompile(`
       query UserQuery(
         $after: ID
         $count: Int!
@@ -888,8 +908,7 @@ describe('ReactRelayPaginationContainer', () => {
       }
     `));
 
-    
-    UserFragment.metadata.refetch.operation = UserFragmentRefetchQuery;
+        UserFragment.metadata.refetch.operation = UserFragmentRefetchQuery;
 
         TestContainer = ReactRelayPaginationContainer.createContainer(
             TestComponent,
@@ -920,7 +939,6 @@ describe('ReactRelayPaginationContainer', () => {
     });
 
     describe('hasMore()', () => {
-
         it('returns true if there are more items', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
             createHooks(
@@ -958,7 +976,7 @@ describe('ReactRelayPaginationContainer', () => {
                 },
             });
         });
-    
+
         it('returns false if there are no edges', () => {
             environment.commitPayload(ownerUser2, {
                 node: {
@@ -985,10 +1003,10 @@ describe('ReactRelayPaginationContainer', () => {
                     id: 'noedges',
                     friends: {
                         edges: null,
-                    pageInfo: {
-                        endCursor: '<cursor>',
-                        hasNextPage: true,
-                    },
+                        pageInfo: {
+                            endCursor: '<cursor>',
+                            hasNextPage: true,
+                        },
                     },
                 },
                 relay: {
@@ -1089,21 +1107,20 @@ describe('ReactRelayPaginationContainer', () => {
         });
 
         it('updates after pagination (if more results)', () => {
-            const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1)
-            .data.node;
-          ReactTestRenderer.create(
-            <ContextSetter environment={environment}>
-              <TestContainer user={userPointer} />
-            </ContextSetter>,
-          );
-          expect(render.mock.calls.length).toBe(1);
+            const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
+            ReactTestRenderer.create(
+                <ContextSetter environment={environment}>
+                    <TestContainer user={userPointer} />
+                </ContextSetter>,
+            );
+            expect(render.mock.calls.length).toBe(1);
             expect(render.mock.calls[0][0].user.friends.edges.length).toBe(1);
-            
+
             render.mockClear();
             ReactTestRenderer.act(() => {
                 loadMore(1, jest.fn());
-              });
-              
+            });
+
             environment.mock.resolve(UserFragmentRefetchQuery, {
                 data: {
                     node: {
@@ -1136,24 +1153,23 @@ describe('ReactRelayPaginationContainer', () => {
             expect(render.mock.calls[2][0].relay.isLoadingNext).toBe(false);
             expect(render.mock.calls[2][0].relay.hasMore).toBe(true);
         });
-    
+
         it('updates after pagination (if no more results)', () => {
-            const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1)
-            .data.node;
-          ReactTestRenderer.create(
-            <ContextSetter environment={environment}>
-              <TestContainer user={userPointer} />
-            </ContextSetter>,
-          );
-          expect(render.mock.calls.length).toBe(1);
+            const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
+            ReactTestRenderer.create(
+                <ContextSetter environment={environment}>
+                    <TestContainer user={userPointer} />
+                </ContextSetter>,
+            );
+            expect(render.mock.calls.length).toBe(1);
             expect(render.mock.calls[0][0].user.friends.edges.length).toBe(1);
-            
+
             render.mockClear();
             ReactTestRenderer.act(() => {
                 loadMore(1, jest.fn());
-              });
-              
-              environment.mock.resolve(UserFragmentRefetchQuery, {
+            });
+
+            environment.mock.resolve(UserFragmentRefetchQuery, {
                 data: {
                     node: {
                         __typename: 'User',
@@ -1184,7 +1200,6 @@ describe('ReactRelayPaginationContainer', () => {
             expect(render.mock.calls[2][0].user.friends.edges.length).toBe(2);
             expect(render.mock.calls[2][0].relay.isLoadingNext).toBe(false);
             expect(render.mock.calls[2][0].relay.hasMore).toBe(false);
-            
         });
     });
 
@@ -1344,7 +1359,6 @@ describe('ReactRelayPaginationContainer', () => {
         });
         */
 
-
         it('returns a disposable that can be called to cancel the fetch', () => {
             variables = {
                 after: 'cursor:1',
@@ -1367,7 +1381,9 @@ describe('ReactRelayPaginationContainer', () => {
                 isViewerFriendLocal: false,
             };
             loadMore(1, jest.fn());
-            expect(environment.mock.isLoading(UserFragmentRefetchQuery, variables, forceCache)).toBe(true);
+            expect(
+                environment.mock.isLoading(UserFragmentRefetchQuery, variables, forceCache),
+            ).toBe(true);
         });
 
         it('calls the callback when the fetch succeeds', () => {
@@ -1458,7 +1474,7 @@ describe('ReactRelayPaginationContainer', () => {
             instance.getInstance().setProps({ user: userPointer });
             expect(subscription.closed).toBe(true);
         });
-/*
+        /*
         it('holds pagination results if new props refer to the same records', () => {
             expect.assertions(2);
             loadMore(1, jest.fn());
@@ -1550,8 +1566,6 @@ describe('ReactRelayPaginationContainer', () => {
             );
         });
 
-        
-
         it('returns a disposable that can be called to cancel the fetch', () => {
             variables = {
                 count: 1,
@@ -1573,7 +1587,9 @@ describe('ReactRelayPaginationContainer', () => {
                 isViewerFriendLocal: false,
             };
             refetchConnection(1, jest.fn());
-            expect(environment.mock.isLoading(UserFragmentRefetchQuery, variables, forceCache)).toBe(true);
+            expect(
+                environment.mock.isLoading(UserFragmentRefetchQuery, variables, forceCache),
+            ).toBe(true);
         });
 
         it('calls the callback when the fetch succeeds', () => {
@@ -1894,7 +1910,9 @@ describe('ReactRelayPaginationContainer', () => {
                 isViewerFriendLocal: true,
                 id: '4',
             };
-            expect(environment.mock.isLoading(UserFragmentRefetchQuery, variables, forceCache)).toBe(true);
+            expect(
+                environment.mock.isLoading(UserFragmentRefetchQuery, variables, forceCache),
+            ).toBe(true);
         });
 
         it('should not refetch connection if container is unmounted', () => {

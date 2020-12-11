@@ -2,34 +2,16 @@ import * as warning from 'fbjs/lib/warning';
 import { useEffect, useRef, useMemo } from 'react';
 import { GraphQLTaggedNode, getFragmentIdentifier, getFragment } from 'relay-runtime';
 import { FragmentResolver } from './FragmentResolver';
-import { KeyType, KeyReturnType, $Call, ArrayKeyType, ArrayKeyReturnType } from './RelayHooksType';
+import { FragmentNames } from './RelayHooksType';
 import { useForceUpdate } from './useForceUpdate';
 import { useRelayEnvironment } from './useRelayEnvironment';
 
-export function useOssFragment<TKey extends KeyType>(
+export function useOssFragment(
     fragmentNode: GraphQLTaggedNode,
-    fragmentRef: TKey,
+    fragmentRef: any | null,
     suspense: boolean,
-    name: string,
-): [$Call<KeyReturnType<TKey>>, FragmentResolver];
-export function useOssFragment<TKey extends KeyType>(
-    fragmentNode: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
-    suspense: boolean,
-    name: string,
-): [$Call<KeyReturnType<TKey>> | null, FragmentResolver];
-export function useOssFragment<TKey extends ArrayKeyType>(
-    fragmentNode: GraphQLTaggedNode,
-    fragmentRef: TKey,
-    suspense: boolean,
-    name: string,
-): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>, FragmentResolver];
-export function useOssFragment<TKey extends ArrayKeyType>(
-    fragmentNode: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
-    suspense: boolean,
-    name: string,
-): [ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null, FragmentResolver] {
+    name: FragmentNames,
+): any {
     const environment = useRelayEnvironment();
     const forceUpdate = useForceUpdate();
     const ref = useRef<{ resolver: FragmentResolver }>(null);
@@ -84,8 +66,8 @@ export function useOssFragment<TKey extends ArrayKeyType>(
                     'holding on to and/or passing a fragment reference for data that ' +
                     'has been deleted.',
                 fragment,
-                'useOssFragment',
-                'useOssFragment',
+                name,
+                name,
             );
         }
     }

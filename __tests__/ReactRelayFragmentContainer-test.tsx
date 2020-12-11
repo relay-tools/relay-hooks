@@ -41,7 +41,7 @@ const ReactRelayFragmentContainer = {
 
 const QueryRendererHook = (props) => {
     const { render, fetchPolicy = NETWORK_ONLY, query, variables, cacheConfig } = props;
-    const { cached, ...relays } = useQuery(query, variables, {
+    const relays = useQuery(query, variables, {
         networkCacheConfig: cacheConfig,
         fetchPolicy,
     });

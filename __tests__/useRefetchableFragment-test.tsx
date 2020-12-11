@@ -135,7 +135,7 @@ describe('useRefetchableFragmentNode', () => {
     }
 
     function useRefetchableFragmentNode(fragmentNode, fragmentRef) {
-        const [data, refetchFunction] = useRefetchableFragmentNodeOriginal(
+        const { data, refetch: refetchFunction } = useRefetchableFragmentNodeOriginal(
             fragmentNode,
             fragmentRef,
         );

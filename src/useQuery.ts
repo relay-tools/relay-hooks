@@ -32,7 +32,6 @@ const useInternalQuery = <TOperationType extends OperationType = OperationType>(
     }
 
     useEffect(() => {
-        ref.current.queryFetcher.setMounted();
         return (): void => ref.current.queryFetcher.dispose();
     }, []);
 

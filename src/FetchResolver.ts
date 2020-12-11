@@ -21,8 +21,8 @@ export type Fetcher = {
         onNext: (
             operation: OperationDescriptor,
             snapshot: Snapshot,
-            fromStore: boolean,
-            onlyStore: boolean,
+            fromStore?: boolean,
+            onlyStore?: boolean,
         ) => void,
         renderPolicy?: RenderPolicy,
     ) => Disposable;
@@ -106,7 +106,12 @@ export function fetchResolver({
         operation: OperationDescriptor,
         fetchPolicy: FetchPolicy = 'network-only',
         onComplete = (_e: Error | null): void => undefined,
-        onNext: (operation: OperationDescriptor, snapshot: Snapshot, fromStore, onlyStore) => void,
+        onNext: (
+            operation: OperationDescriptor,
+            snapshot: Snapshot,
+            fromStore?: boolean,
+            onlyStore?: boolean,
+        ) => void,
         renderPolicy?: RenderPolicy,
     ): Disposable => {
         const observer = {
@@ -173,7 +178,7 @@ export function fetchResolver({
                     const store = environment.lookup(operation.fragment);
                     promise = null;
                     resolveNetworkPromise();
-                    onNext(operation, store, false, false);
+                    onNext(operation, store);
                 },
                 start: (subscription) => {
                     refetchSubscription = subscription;

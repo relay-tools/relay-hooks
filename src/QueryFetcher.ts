@@ -18,19 +18,17 @@ const defaultPolicy = 'store-or-network';
 const cache: Map<string, QueryFetcher<any>> = new Map();
 
 export function getOrCreateQueryFetcher<TOperationType extends OperationType>(
-    suspense: boolean,
+    useLazy: boolean,
     gqlQuery: GraphQLTaggedNode,
     variables: TOperationType['variables'],
     networkCacheConfig: CacheConfig,
     forceUpdate: any,
 ): QueryFetcher<TOperationType> {
-    const withCache = suspense;
     const query = createOperation(gqlQuery, variables, networkCacheConfig);
-    const toGet = withCache && cache.has(query.request.identifier);
-    const queryFetcher = toGet ? cache.get(query.request.identifier) : new QueryFetcher(withCache);
+    const toGet = useLazy && cache.has(query.request.identifier);
+    const queryFetcher = toGet ? cache.get(query.request.identifier) : new QueryFetcher();
     queryFetcher.setQuery(gqlQuery, variables, networkCacheConfig, query);
     queryFetcher.setForceUpdate(forceUpdate);
-    queryFetcher.setMounted(false);
     return queryFetcher;
 }
 
@@ -39,21 +37,24 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
     query: OperationDescriptor;
     fetcher: Fetcher;
     rootSubscription: Disposable;
-    cached = false;
     snapshot: Snapshot;
     fetchPolicy: FetchPolicy;
     fetchKey: string | number;
-    forceUpdate: () => void;
-    mounted = false;
-    withCache = false;
     variables: Variables;
     cacheConfig: Variables;
     gqlQuery: GraphQLTaggedNode;
     options: QueryOptions;
+    emptyforceUpdate = (): void => undefined;
+    forceUpdate = this.emptyforceUpdate;
+    result: RenderProps<TOperationType> = null;
 
-    constructor(withCache?: boolean) {
-        this.setForceUpdate(() => undefined);
-        this.withCache = withCache;
+    constructor() {
+        this.result = {
+            retry: this.retry,
+            error: null,
+            props: null,
+            isLoading: false,
+        };
         this.fetcher = fetchResolver({
             disposeTemporary: () => {
                 this.dispose();
@@ -74,10 +75,6 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         this.cacheConfig = networkCacheConfig;
     }
 
-    setMounted(mounted = true): void {
-        this.mounted = mounted;
-    }
-
     setForceUpdate(forceUpdate): void {
         this.forceUpdate = forceUpdate;
     }
@@ -88,33 +85,12 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
     }
 
     disposeSnapshot(): void {
-        this.cached = false;
         this.snapshot = null;
         if (this.rootSubscription) {
             this.rootSubscription.dispose();
             this.rootSubscription = null;
         }
     }
-
-    onNext = (
-        _o: OperationDescriptor,
-        snapshot: Snapshot,
-        fromStore: boolean,
-        onlyStore: boolean,
-    ): void => {
-        this.snapshot = snapshot;
-
-        if (onlyStore || !fromStore) {
-            this.subscribe(snapshot);
-        }
-
-        //const suspense = !this.cached && this.suspense;
-        this.cached = fromStore;
-        if (!fromStore && this.mounted) {
-            // !suspense &&
-            this.forceUpdate();
-        }
-    };
 
     retry = (cacheConfigOverride?: CacheConfig | null, options: Options = {}): void => {
         const { fetchPolicy = 'network-only' } = options;
@@ -127,21 +103,39 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
               )
             : this.query;
         this.fetch(query, fetchPolicy, options);
+        this.resolveResult();
         this.forceUpdate();
     };
 
     fetch(query: OperationDescriptor, fetchPolicy: FetchPolicy, options: Options): void {
         this.disposeSnapshot();
         const { onComplete } = options;
+        let fetchHasReturned = false;
+        const onNext = (_o: OperationDescriptor, snapshot: Snapshot): void => {
+            if (!this.snapshot) {
+                this.snapshot = snapshot;
+                this.subscribe(snapshot);
+
+                //const suspense = !this.cached && this.useLazy;
+                this.resolveResult();
+                //if (!fromStore && fetchHasReturned) {
+                if (fetchHasReturned) {
+                    //  && !suspense
+
+                    this.forceUpdate();
+                }
+            }
+        };
         const complete = (error: Error | null): void => {
-            //const suspense = !this.cached; // && this.suspense;
-            if (error && this.mounted) {
-                //!suspense
+            //const suspense = !this.cached && this.useLazy;
+            this.resolveResult();
+            if (fetchHasReturned) {
                 this.forceUpdate();
             }
             onComplete && onComplete(error);
         };
-        this.fetcher.fetch(this.environment, query, fetchPolicy, complete, this.onNext);
+        this.fetcher.fetch(this.environment, query, fetchPolicy, complete, onNext);
+        fetchHasReturned = true;
     }
 
     getQuery(gqlQuery, variables, networkCacheConfig): OperationDescriptor | null {
@@ -188,22 +182,35 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             this.fetchPolicy = fetchPolicy;
             this.fetchKey = fetchKey;
             this.fetch(this.query, fetchPolicy, options);
+            this.resolveResult();
         }
     }
 
-    checkAndSuspense(suspense = false, useLazy = false): Promise<any> | Error | null {
-        useLazy && cache.set(this.query.request.identifier, this);
-        return this.fetcher.checkAndSuspense(suspense, useLazy);
+    checkAndSuspense(suspense?: boolean, useLazy?: boolean): Promise<any> | Error | null {
+        const forceUpdate = this.forceUpdate;
+        if (useLazy) {
+            this.setForceUpdate(this.emptyforceUpdate);
+            cache.set(this.query.request.identifier, this);
+        }
+        const result = this.fetcher.checkAndSuspense(suspense, useLazy);
+        if (useLazy) {
+            this.setForceUpdate(forceUpdate);
+            cache.delete(this.query.request.identifier);
+        }
+        return result;
     }
 
     getData(): RenderProps<TOperationType> {
-        cache.delete(this.query.request.identifier);
-        const { error } = this.fetcher.getData();
-        return {
-            cached: this.cached,
+        return this.result;
+    }
+
+    resolveResult(): void {
+        const { error, isLoading } = this.fetcher.getData();
+        this.result = {
             retry: this.retry,
             error,
             props: this.snapshot ? this.snapshot.data : null,
+            isLoading,
         };
     }
 
@@ -215,6 +222,8 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             // Read from this._fetchOptions in case onDataChange() was lazily added.
             this.snapshot = snapshot;
             //this.error = null;
+
+            this.resolveResult();
             this.forceUpdate();
         });
     }

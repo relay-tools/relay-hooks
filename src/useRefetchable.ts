@@ -1,33 +1,13 @@
 import { GraphQLTaggedNode, OperationType } from 'relay-runtime';
-import { getRefetchMetadata } from './getRefetchMetadata';
 import {
     KeyType,
     KeyTypeData,
+    REFETCHABLE_NAME,
     ReturnTypeRefetchNode,
     ReturnTypeRefetchSuspenseNode,
 } from './RelayHooksType';
 import { useOssFragment } from './useOssFragment';
 
-function useInternalRefetchable<TQuery extends OperationType, TKey extends KeyType>(
-    fragmentInput: GraphQLTaggedNode,
-    fragmentRef: TKey,
-    suspense: boolean,
-): // tslint:disable-next-line no-unnecessary-generics
-ReturnTypeRefetchNode<TQuery, TKey, KeyTypeData<TKey>>;
-function useInternalRefetchable<TQuery extends OperationType, TKey extends KeyType>(
-    fragmentInput: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
-    suspense: boolean,
-): // tslint:disable-next-line no-unnecessary-generics
-ReturnTypeRefetchNode<TQuery, TKey, KeyTypeData<TKey> | null> {
-    const [data, resolver] = useOssFragment(fragmentInput, fragmentRef, suspense, 'useRefetchable');
-    if ('production' !== process.env.NODE_ENV) {
-        getRefetchMetadata(resolver.getFragment(), 'useRefetchable()');
-    }
-    resolver.checkRefechAndSuspense(suspense);
-    return [data, resolver.refetch, resolver.isLoading()];
-}
-
 export function useRefetchable<TQuery extends OperationType, TKey extends KeyType>(
     fragmentInput: GraphQLTaggedNode,
     fragmentRef: TKey,
@@ -38,7 +18,8 @@ export function useRefetchable<TQuery extends OperationType, TKey extends KeyTyp
     fragmentRef: TKey | null,
 ): // tslint:disable-next-line no-unnecessary-generics
 ReturnTypeRefetchNode<TQuery, TKey, KeyTypeData<TKey> | null> {
-    return useInternalRefetchable(fragmentInput, fragmentRef, false);
+    const [data] = useOssFragment(fragmentInput, fragmentRef, false, REFETCHABLE_NAME);
+    return data;
 }
 
 export function useRefetchableFragment<TQuery extends OperationType, TKey extends KeyType>(
@@ -51,9 +32,6 @@ export function useRefetchableFragment<TQuery extends OperationType, TKey extend
     fragmentRef: TKey | null,
 ): // tslint:disable-next-line no-unnecessary-generics
 ReturnTypeRefetchSuspenseNode<TQuery, TKey, KeyTypeData<TKey> | null> {
-    return (useInternalRefetchable(
-        fragmentInput,
-        fragmentRef,
-        true,
-    ) as any) as ReturnTypeRefetchSuspenseNode<TQuery, TKey, KeyTypeData<TKey>>;
+    const [data] = useOssFragment(fragmentInput, fragmentRef, true, REFETCHABLE_NAME);
+    return data;
 }

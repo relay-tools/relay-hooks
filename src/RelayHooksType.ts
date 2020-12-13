@@ -62,7 +62,7 @@ export type ContainerResult = {
 
 export interface RenderProps<T extends OperationType> {
     error: Error | null;
-    props: T['response'] | null | undefined;
+    data: T['response'] | null | undefined;
     retry: (_cacheConfigOverride?: CacheConfig, options?: Options) => void;
     isLoading: boolean;
 }

@@ -89,7 +89,7 @@ describe('useLazyLoadQueryNode', () => {
         }
 
         const Renderer = (renderProps) => {
-            const { props } = useLazyLoadQueryNode(
+            const { data } = useLazyLoadQueryNode(
                 renderProps.gqlQuery || gqlQuery,
                 renderProps.variables,
                 /* $FlowFixMe(>=0.111.0) This comment suppresses an error found when
@@ -101,7 +101,7 @@ describe('useLazyLoadQueryNode', () => {
                     onComplete: renderProps.onComplete,
                 },
             );
-            return renderFn(props);
+            return renderFn(data);
         };
 
         Container = (props) => {

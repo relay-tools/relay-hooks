@@ -53,7 +53,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         this.result = {
             retry: this.retry,
             error: null,
-            props: null,
+            data: null,
             isLoading: false,
         };
         this.fetcher = fetchResolver({
@@ -204,7 +204,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         this.result = {
             retry: this.retry,
             error,
-            props: this.snapshot ? this.snapshot.data : null,
+            data: this.snapshot ? this.snapshot.data : null,
             isLoading,
         };
     }

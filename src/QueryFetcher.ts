@@ -32,6 +32,8 @@ export function getOrCreateQueryFetcher<TOperationType extends OperationType>(
     return queryFetcher;
 }
 
+const emptyforceUpdate = (): void => undefined;
+
 export class QueryFetcher<TOperationType extends OperationType = OperationType> {
     environment: IEnvironment;
     query: OperationDescriptor;
@@ -44,8 +46,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
     cacheConfig: Variables;
     gqlQuery: GraphQLTaggedNode;
     options: QueryOptions;
-    emptyforceUpdate = (): void => undefined;
-    forceUpdate = this.emptyforceUpdate;
+    forceUpdate = emptyforceUpdate;
     result: RenderProps<TOperationType> = null;
 
     constructor() {
@@ -115,19 +116,13 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             if (!this.snapshot) {
                 this.snapshot = snapshot;
                 this.subscribe(snapshot);
-
-                //const suspense = !this.cached && this.useLazy;
                 this.resolveResult();
-                //if (!fromStore && fetchHasReturned) {
                 if (fetchHasReturned) {
-                    //  && !suspense
-
                     this.forceUpdate();
                 }
             }
         };
         const complete = (error: Error | null): void => {
-            //const suspense = !this.cached && this.useLazy;
             this.resolveResult();
             if (fetchHasReturned) {
                 this.forceUpdate();
@@ -189,7 +184,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
     checkAndSuspense(suspense?: boolean, useLazy?: boolean): Promise<any> | Error | null {
         const forceUpdate = this.forceUpdate;
         if (useLazy) {
-            this.setForceUpdate(this.emptyforceUpdate);
+            this.setForceUpdate(emptyforceUpdate);
             cache.set(this.query.request.identifier, this);
         }
         const result = this.fetcher.checkAndSuspense(suspense, useLazy);

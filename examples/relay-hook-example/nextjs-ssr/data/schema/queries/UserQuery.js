@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 // @flow
 /* graphql-relay doesn't export types, and isn't in flow-typed.  This gets too messy */
-/* eslint flowtype/require-return-type: 'off' */
 /**
  * This file provided by Facebook is for non-commercial testing and evaluation
  * purposes only.  Facebook reserves all rights not expressly granted.
@@ -13,16 +13,18 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {GraphQLString} from 'graphql';
-import {GraphQLUser} from '../nodes';
-import {User, getUserOrThrow} from '../../database';
+import { GraphQLString } from 'graphql';
+import { connectionArgs } from 'graphql-relay';
+import { getUserOrThrow } from '../../database';
+import { GraphQLUser } from '../nodes';
 
 const UserQuery = {
-  type: GraphQLUser,
-  args: {
-    id: {type: GraphQLString},
-  },
-  resolve: (root, {id}) => getUserOrThrow(id),
+    type: GraphQLUser,
+    args: {
+        id: { type: GraphQLString },
+        ...connectionArgs,
+    },
+    resolve: (root, { id }) => getUserOrThrow(id),
 };
 
-export {UserQuery};
+export { UserQuery };

@@ -11,44 +11,46 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {commitMutation, graphql} from 'relay-hooks';
-import {Disposable} from 'relay-runtime';
+import { commitMutation, graphql } from 'relay-hooks';
+import { Disposable } from 'relay-runtime';
 
 const mutation = graphql`
-  mutation RenameTodoMutation($input: RenameTodoInput!) {
-    renameTodo(input: $input) {
-      todo {
-        id
-        text
-      }
+    mutation RenameTodoMutation($input: RenameTodoInput!) {
+        renameTodo(input: $input) {
+            todo {
+                id
+                text
+            }
+        }
     }
-  }
 `;
 
 function getOptimisticResponse(text: string, todo: any): any {
-  return {
-    renameTodo: {
-      todo: {
+    return {
+        renameTodo: {
+            todo: {
+                id: todo.id,
+                text: text,
+            },
+        },
+    };
+}
+
+export function commit(environment: any, text: string, todo: any): Disposable {
+    const input: any = {
+        text,
         id: todo.id,
-        text: text,
-      },
-    },
-  };
+    };
+
+    return commitMutation(environment, {
+        mutation,
+        variables: {
+            input,
+        },
+        optimisticResponse: getOptimisticResponse(text, todo),
+    });
 }
 
-function commit(environment: any, text: string, todo: any): Disposable {
-  const input: any = {
-    text,
-    id: todo.id,
-  };
-
-  return commitMutation(environment, {
-    mutation,
-    variables: {
-      input,
-    },
-    optimisticResponse: getOptimisticResponse(text, todo),
-  });
-}
-
-export default {commit};
+export const RenameTodoMutation = {
+    commit,
+};

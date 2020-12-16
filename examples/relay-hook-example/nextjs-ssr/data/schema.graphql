@@ -67,7 +67,7 @@ type PageInfo {
 }
 
 type Query {
-  user(id: String): User
+  user(id: String, after: String, first: Int, before: String, last: Int): User
 
   """Fetches an object given its ID"""
   node(
@@ -111,7 +111,6 @@ type RenameTodoPayload {
 }
 
 type Todo {
-  """The ID of an object"""
   id: String!
   text: String!
   complete: Boolean!

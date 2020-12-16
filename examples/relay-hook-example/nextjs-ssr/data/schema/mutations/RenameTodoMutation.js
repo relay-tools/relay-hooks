@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 // @flow
 /* graphql-relay doesn't export types, and isn't in flow-typed.  This gets too messy */
-/* eslint flowtype/require-return-type: 'off' */
 /**
  * This file provided by Facebook is for non-commercial testing and evaluation
  * purposes only.  Facebook reserves all rights not expressly granted.
@@ -13,28 +13,28 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {mutationWithClientMutationId, fromGlobalId} from 'graphql-relay';
-import {GraphQLID, GraphQLNonNull, GraphQLString} from 'graphql';
-import {GraphQLTodo} from '../nodes';
-import {getTodoOrThrow, renameTodo, Todo} from '../../database';
+import { GraphQLID, GraphQLNonNull, GraphQLString } from 'graphql';
+import { mutationWithClientMutationId } from 'graphql-relay';
+import { getTodoOrThrow, renameTodo } from '../../database';
+import { GraphQLTodo } from '../nodes';
 
 const RenameTodoMutation = mutationWithClientMutationId({
-  name: 'RenameTodo',
-  inputFields: {
-    id: {type: new GraphQLNonNull(GraphQLID)},
-    text: {type: new GraphQLNonNull(GraphQLString)},
-  },
-  outputFields: {
-    todo: {
-      type: new GraphQLNonNull(GraphQLTodo),
-      resolve: ({id}) => getTodoOrThrow(id),
+    name: 'RenameTodo',
+    inputFields: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        text: { type: new GraphQLNonNull(GraphQLString) },
     },
-  },
-  mutateAndGetPayload: ({id, text}) => {
-    renameTodo(id, text);
+    outputFields: {
+        todo: {
+            type: new GraphQLNonNull(GraphQLTodo),
+            resolve: ({ id }) => getTodoOrThrow(id),
+        },
+    },
+    mutateAndGetPayload: ({ id, text }) => {
+        renameTodo(id, text);
 
-    return {id};
-  },
+        return { id };
+    },
 });
 
-export {RenameTodoMutation};
+export { RenameTodoMutation };

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 // @flow
 /**
  * This file provided by Facebook is for non-commercial testing and evaluation
@@ -11,18 +12,22 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import MarkAllTodosMutation from '../mutations/MarkAllTodosMutation';
-import Todo from './Todo';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import TablePagination from '@material-ui/core/TablePagination';
+import { useRouter } from 'next/router';
+import React, { useCallback, useState } from 'react';
 
-import React, {SyntheticEvent} from 'react';
-import {graphql} from 'relay-hooks';
+import InfiniteScroll from 'react-infinite-scroller';
+import { graphql, usePagination, useRelayEnvironment } from 'relay-hooks';
 import styled from 'styled-components';
-import {useFragment, useRelayEnvironment} from 'relay-hooks';
-import {
-  TodoList_user,
-  TodoList_user$key,
-} from '../__generated__/relay/TodoList_user.graphql';
-import {isNotNull} from './TodoApp';
+import { TodoList_user, TodoList_user$key } from '../__generated__/relay/TodoList_user.graphql';
+import { UserFragmentRefetchQuery } from '../__generated__/relay/UserFragmentRefetchQuery.graphql';
+import { AddTodoMutation } from '../mutations/AddTodoMutation';
+import { isPaginated, isScroll } from './Header';
+import { Todo } from './Todo';
+import { isNotNull, StyledButton, StyledDivButton } from './TodoApp';
+import { TodoTextInput } from './TodoTextInput';
+import { Disposable } from 'relay-runtime';
 type Todos = NonNullable<TodoList_user['todos']>;
 type Edges = NonNullable<Todos['edges']>;
 type Edge = NonNullable<Edges[number]>;
@@ -30,112 +35,225 @@ type Node = NonNullable<Edge['node']>;
 type NullableNode = Edge['node'];
 
 type Props = {
-  user: TodoList_user$key;
+    user: TodoList_user$key;
+    isLoading?: boolean;
 };
 
 const StyledSection = styled.section`
-  position: relative;
-  z-index: 2;
-  border-top: 1px solid #e6e6e6;
+    position: relative;
+    z-index: 2;
+    border-top: 1px solid #e6e6e6;
 `;
 const StyledList = styled.ul`
-  margin: 0;
-  padding: 0;
-  list-style: none;
-`;
-
-const StyledInput = styled.input`
-  position: absolute;
-  top: -55px;
-  left: -12px;
-  width: 60px;
-  height: 34px;
-  text-align: center;
-  border: none;
-
-  @media screen and (-webkit-min-device-pixel-ratio: 0) {
-    background: none;
-    -webkit-transform: rotate(90deg);
-    transform: rotate(90deg);
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  &:before {
-    content: '❯';
-    font-size: 22px;
-    color: #e6e6e6;
-    padding: 10px 27px 10px 27px;
-  }
-
-  &:checked:before {
-    color: #737373;
-  }
+    margin: 0;
+    padding: 0;
+    list-style: none;
 `;
 
 const fragmentSpecs = graphql`
-  fragment TodoList_user on User {
-    todos(
-      first: 2147483647 # max GraphQLInt
-    ) @connection(key: "TodoList_todos") {
-      edges {
-        node {
-          id
-          complete
-          ...Todo_todo
+    fragment TodoList_user on User
+        @refetchable(queryName: "UserFragmentRefetchQuery")
+        @argumentDefinitions(
+            first: { type: Int }
+            after: { type: String }
+            last: { type: Int }
+            before: { type: String }
+        ) {
+        todos(first: $first, after: $after, before: $before, last: $last)
+            @connection(key: "TodoList_todos") {
+            edges {
+                node {
+                    id
+                    complete
+                    ...Todo_todo
+                }
+            }
+            pageInfo {
+                hasNextPage
+                hasPreviousPage
+                startCursor
+                endCursor
+            }
         }
-      }
+        userId
+        totalCount
+        completedCount
+        ...ReadInlineUser_user
     }
-    id
-    userId
-    totalCount
-    completedCount
-    ...Todo_user
-  }
 `;
 
-const StyledLabelMark = styled.label`
-  display: none;
-`;
-const TodoList = (props: Props) => {
-  const environment = useRelayEnvironment();
-  const user = useFragment(fragmentSpecs, props.user);
-  const {todos, completedCount, totalCount, userId} = user;
-  const handleMarkAllChange = (e: SyntheticEvent<HTMLInputElement>) => {
-    const complete = e.currentTarget.checked;
-
-    if (todos) {
-      MarkAllTodosMutation.commit(environment, complete, todos, user);
+const fragmentTableSpecs = graphql`
+    fragment TodoListTable_user on User
+        @refetchable(queryName: "UserFragmentRefetchTableQuery")
+        @argumentDefinitions(
+            first: { type: Int }
+            after: { type: String }
+            last: { type: Int }
+            before: { type: String }
+        ) {
+        todos(first: $first, after: $after, before: $before, last: $last)
+            @connection(key: "TodoList_todos", handler: "connection_table") {
+            edges {
+                node {
+                    id
+                    complete
+                    ...Todo_todo
+                }
+            }
+            pageInfo {
+                hasNextPage
+                hasPreviousPage
+                startCursor
+                endCursor
+            }
+        }
+        userId
+        totalCount
+        completedCount
+        ...ReadInlineUser_user
     }
-  };
+`;
 
-  const nodes: ReadonlyArray<Node> =
-    todos && todos.edges
-      ? todos.edges
-          .filter(isNotNull)
-          .map((edge: Edge): NullableNode => edge.node)
-          .filter(isNotNull)
-      : [];
+export const TodoList = (props: Props): JSX.Element => {
+    const environment = useRelayEnvironment();
+    const [rowsPerPage, setRowsPerPage] = useState(2);
+    const [page, setPage] = useState(0);
+    const router = useRouter();
 
-  return (
-    <StyledSection>
-      <StyledInput
-        checked={totalCount === completedCount}
-        onChange={handleMarkAllChange}
-        type="checkbox"
-      />
+    const paginated = isPaginated(router);
+    const scroll = isScroll(router);
+    const {
+        data: user,
+        loadNext,
+        loadPrevious,
+        refetch,
+        hasNext,
+        isLoadingNext,
+        isLoadingPrevious,
+        isLoading: refetchLoading,
+    } = usePagination<UserFragmentRefetchQuery, TodoList_user$key>(
+        paginated ? fragmentTableSpecs : fragmentSpecs,
+        props.user,
+    );
 
-      <StyledLabelMark htmlFor="toggle-all">
-        Mark all as complete
-      </StyledLabelMark>
+    const { todos, totalCount } = user || {};
+    const refresh = useCallback((): Disposable => {
+        const onComplete = (): void => {
+            setRowsPerPage(rowsPerPage);
+            setPage(0);
+        };
+        return refetch({}, { onComplete });
+    }, [refetch, rowsPerPage]);
 
-      <StyledList>
-        {nodes.map((node: Node) => (
-          <Todo key={node.id} todo={node} user={user} />
-        ))}
-      </StyledList>
-    </StyledSection>
-  );
+    const list = React.useMemo(() => {
+        /* eslint-disable indent */
+        return todos && todos.edges
+            ? todos.edges
+                  .filter(isNotNull)
+                  .map((edge: Edge): NullableNode => edge.node)
+                  .filter(isNotNull)
+            : [];
+        /* eslint-enable indent */
+    }, [todos]);
+
+    const isLoading =
+        props.isLoading || refetchLoading || (paginated && (isLoadingPrevious || isLoadingNext));
+    const loadMore = useCallback(() => {
+        // Don't fetch again if we're already loading the next page
+        if (isLoading) {
+            return;
+        }
+        loadNext(1);
+    }, [isLoading, loadNext]);
+
+    const handleChangePage = useCallback(
+        (_event, newPage) => {
+            const previous = page < newPage;
+            const refetch = previous ? loadNext : loadPrevious;
+            refetch(rowsPerPage, {
+                onComplete: (_error: Error | null) => setPage(newPage),
+            });
+        },
+        [page, rowsPerPage, loadNext, loadPrevious],
+    );
+
+    const handleChangeRowsPerPage = useCallback(
+        (event) => {
+            const rowForPage = parseInt(event.target.value, 10);
+            refetch(
+                {
+                    first: rowForPage,
+                    before: null,
+                    after: null,
+                    last: null,
+                },
+                {
+                    onComplete: () => {
+                        setRowsPerPage(rowForPage);
+                        setPage(0);
+                    },
+                },
+            );
+        },
+        [refetch],
+    );
+
+    const onCompleted = useCallback(() => {
+        if (isPaginated(router)) {
+            refresh();
+        }
+    }, [router, refresh]);
+
+    const handleTextInputSave = useCallback(
+        (text: string) => {
+            console.log('onCompleted', onCompleted);
+            AddTodoMutation.commit(environment, text, user, onCompleted);
+            return;
+        },
+        [environment, user, onCompleted],
+    );
+
+    return (
+        <React.Fragment>
+            <TodoTextInput edit onSave={handleTextInputSave} placeholder="What needs to be done?" />
+            {isLoading && <LinearProgress key={'LinearProgress'} />}
+            <InfiniteScroll
+                pageStart={0}
+                loadMore={loadMore}
+                hasMore={scroll && hasNext && !isLoading}
+                loader={<LinearProgress />}
+                useWindow
+            >
+                <StyledSection>
+                    <ProvaList nodes={list} user={user} onCompleted={onCompleted} />
+                </StyledSection>
+            </InfiniteScroll>
+
+            {paginated && (
+                <TablePagination
+                    rowsPerPageOptions={[2, 5, 10, 25]}
+                    component="div"
+                    count={totalCount}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onChangePage={handleChangePage}
+                    onChangeRowsPerPage={handleChangeRowsPerPage}
+                />
+            )}
+            <StyledDivButton>
+                <StyledButton onClick={refresh}>Refresh</StyledButton>
+            </StyledDivButton>
+        </React.Fragment>
+    );
 };
 
-export default TodoList;
+const ProvaList = (props: any): JSX.Element => {
+    const { user, onCompleted } = props;
+    return (
+        <StyledList>
+            {props.nodes.map((node: Node) => (
+                <Todo key={node.id} todo={node} user={user} onCompleted={onCompleted} />
+            ))}
+        </StyledList>
+    );
+};

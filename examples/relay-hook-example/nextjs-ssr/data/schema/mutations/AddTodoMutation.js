@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 // @flow
 /* graphql-relay doesn't export types, and isn't in flow-typed.  This gets too messy */
-/* eslint flowtype/require-return-type: 'off' */
 /**
  * This file provided by Facebook is for non-commercial testing and evaluation
  * purposes only.  Facebook reserves all rights not expressly granted.
@@ -13,21 +13,12 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {
-  cursorForObjectInConnection,
-  mutationWithClientMutationId,
-} from 'graphql-relay';
+import { GraphQLID, GraphQLNonNull, GraphQLString } from 'graphql';
+import { cursorForObjectInConnection, mutationWithClientMutationId } from 'graphql-relay';
 
-import {GraphQLID, GraphQLNonNull, GraphQLString} from 'graphql';
-import {GraphQLTodoEdge, GraphQLUser} from '../nodes';
+import { addTodo, getTodoOrThrow, getTodos, getUserOrThrow } from '../../database';
+import { GraphQLTodoEdge, GraphQLUser } from '../nodes';
 
-import {
-  addTodo,
-  getTodoOrThrow,
-  getTodos,
-  getUserOrThrow,
-  User,
-} from '../../database';
 /*
 type Input = {|
   +id: string,
@@ -41,34 +32,34 @@ type Payload = {|
 |};
 */
 const AddTodoMutation = mutationWithClientMutationId({
-  name: 'AddTodo',
-  inputFields: {
-    id: {type: new GraphQLNonNull(GraphQLString)},
-    text: {type: new GraphQLNonNull(GraphQLString)},
-    userId: {type: new GraphQLNonNull(GraphQLID)},
-  },
-  outputFields: {
-    todoEdge: {
-      type: new GraphQLNonNull(GraphQLTodoEdge),
-      resolve: ({userId, todoId}) => {
-        const todo = getTodoOrThrow(todoId);
-
-        return {
-          cursor: cursorForObjectInConnection([...getTodos(userId)], todo),
-          node: todo,
-        };
-      },
+    name: 'AddTodo',
+    inputFields: {
+        id: { type: new GraphQLNonNull(GraphQLString) },
+        text: { type: new GraphQLNonNull(GraphQLString) },
+        userId: { type: new GraphQLNonNull(GraphQLID) },
     },
-    user: {
-      type: new GraphQLNonNull(GraphQLUser),
-      resolve: ({userId}) => getUserOrThrow(userId),
-    },
-  },
-  mutateAndGetPayload: ({id, text, userId}) => {
-    const todoId = addTodo(userId, id, text, false);
+    outputFields: {
+        todoEdge: {
+            type: new GraphQLNonNull(GraphQLTodoEdge),
+            resolve: ({ userId, todoId }) => {
+                const todo = getTodoOrThrow(todoId);
 
-    return {todoId, userId};
-  },
+                return {
+                    cursor: cursorForObjectInConnection([...getTodos(userId)], todo),
+                    node: todo,
+                };
+            },
+        },
+        user: {
+            type: new GraphQLNonNull(GraphQLUser),
+            resolve: ({ userId }) => getUserOrThrow(userId),
+        },
+    },
+    mutateAndGetPayload: ({ id, text, userId }) => {
+        const todoId = addTodo(userId, id, text, false);
+
+        return { todoId, userId };
+    },
 });
 
-export {AddTodoMutation};
+export { AddTodoMutation };

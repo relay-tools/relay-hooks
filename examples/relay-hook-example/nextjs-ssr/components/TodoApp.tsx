@@ -1,140 +1,101 @@
-import React from 'react';
-import AddTodoMutation from '../mutations/AddTodoMutation';
-import TodoList from './TodoList';
-import TodoListFooter from './TodoListFooter';
-import TodoTextInput from './TodoTextInput';
+/* eslint-disable @typescript-eslint/camelcase */
+import { useRouter } from 'next/router';
+import React, { useCallback } from 'react';
+import { graphql, useFragment } from 'relay-hooks';
 import styled from 'styled-components';
-import Header from './Header';
-import {useRefetchable, useRelayEnvironment, graphql} from 'relay-hooks';
-import {TodoApp_user$key} from '../__generated__/relay/TodoApp_user.graphql';
-//import {TodoApp_user$key} from 'relay/TodoApp_user.graphql';
-//import TodoApp, { fragmentSpec } from './components/TodoApp';
+import { TodoApp_user$key } from '../__generated__/relay/TodoApp_user.graphql';
+import { TodoList } from './TodoList';
 export const QUERY_APP = graphql`
-  query TodoAppQuery($userId: String) {
-    ...TodoApp_user
-  }
+    query TodoAppQuery($userId: String, $after: String, $first: Int, $before: String, $last: Int) {
+        ...TodoApp_user
+    }
 `;
 
-const StyledSection = styled.section`
-  flex: 1;
-  background: #fff;
-  margin: 130px 0 40px 0;
-  position: relative;
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 25px 50px 0 rgba(0, 0, 0, 0.1);
-  h1 {
-    position: absolute;
-    top: -155px;
-    width: 100%;
-    font-size: 100px;
-    font-weight: 100;
-    text-align: center;
-    color: rgba(175, 47, 47, 0.15);
-    -webkit-text-rendering: optimizeLegibility;
-    -moz-text-rendering: optimizeLegibility;
-    text-rendering: optimizeLegibility;
-  }
-`;
-
-const StyledButton = styled.button`
-  margin: auto;
-  padding: 10px;
-  cursor: pointer;
-  display: -webkit-box;
+export const StyledButton = styled.button`
+    margin: auto;
+    padding: 10px;
+    cursor: pointer;
+    display: -webkit-box;
 `;
 
 const StyledFooter = styled.footer`
-  margin: 65px auto 0;
-  color: #bfbfbf;
-  font-size: 10px;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-  text-align: center;
+    margin: 65px auto 0;
+    color: #bfbfbf;
+    font-size: 10px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    text-align: center;
 `;
 
 const StyledP = styled.p`
-  line-height: 1;
+    line-height: 1;
 `;
 
-const StyledDivButton = styled.div`
-  display: flex;
-  background: #fff;
+export const StyledDivButton = styled.div`
+    display: flex;
+    background: #fff;
 `;
 
-const isServer = typeof window === 'undefined';
 type Props = {
-  query: TodoApp_user$key;
-  retry: () => void;
+    query: TodoApp_user$key;
+    retry: any;
+    isLoading?: boolean;
 };
 
 const fragmentSpec = graphql`
-  fragment TodoApp_user on Query
-    @refetchable(queryName: "UserFragmentRefetchQuery") {
-    user(id: $userId) {
-      id
-      userId
-      totalCount
-      completedCount
-      ...TodoListFooter_user
-      ...TodoList_user
+    fragment TodoApp_user on Query {
+        user(id: $userId, first: $first, after: $after, before: $before, last: $last) {
+            id
+            userId
+            ...ReadInlineUser_user
+            ...TodoList_user @arguments(first: $first, after: $after, before: $before, last: $last)
+            ...TodoListTable_user
+                @arguments(first: $first, after: $after, before: $before, last: $last)
+        }
     }
-  }
 `;
 
 export function isNotNull<T>(it: T): it is NonNullable<T> {
-  return it != null;
+    return it != null;
 }
 
-const AppTodo = (props: Props) => {
-  const environment = useRelayEnvironment();
-  const [{
-    user
-  }, refetch] = useRefetchable(fragmentSpec, props.query);
-  if (user == null) {
-    return <div />;
-  }
+export const TodoApp = ({ query, retry, isLoading }: Props): JSX.Element => {
+    const router = useRouter();
+    const { user } = useFragment(fragmentSpec, query);
 
-  const handleTextInputSave = (text: string) => {
-    AddTodoMutation.commit(environment, text, user);
-    return;
-  };
+    const retryFunction = React.useCallback(
+        () => retry(undefined, { fetchPolicy: 'store-and-network' }),
+        [retry],
+    );
 
-  const hasTodos = user.totalCount > 0;
-  console.log('renderer');
-  return (
-    <React.Fragment>
-      <Header userId={user.userId} />
-      <StyledSection>
-        <header>
-          <h1>todos</h1>
+    const { userId } = user || {};
 
-          <TodoTextInput
-            edit
-            onSave={handleTextInputSave}
-            placeholder="What needs to be done?"
-          />
-        </header>
+    const changeUser = useCallback(() => {
+        router.push({
+            pathname: router.pathname,
+            query: { userId: userId === 'me' ? 'you' : 'me' },
+        });
+    }, [router, userId]);
 
-        <TodoList user={user} />
-        {hasTodos && <TodoListFooter user={user} />}
-        <StyledDivButton>
-          <StyledButton onClick={() => props.retry()}>Retry</StyledButton>
-        </StyledDivButton>
-        <StyledDivButton>
-          <StyledButton
-            onClick={() => {
-              refetch({
-                prova: 1,
-                userId: user.userId === 'me' ? 'you' : 'me',
-              });
-            }}>
-            Change User
-          </StyledButton>
-        </StyledDivButton>
-        <StyledFooter>
-          <StyledP>Double-click to edit a todo</StyledP>
-        </StyledFooter>
-      </StyledSection>
-    </React.Fragment>
-  );
+    if (!user) {
+        return <div />;
+    }
+
+    // <Profiler id="TodoApp" onRender={onRender}>
+
+    return (
+        <React.Fragment>
+            <TodoList isLoading={isLoading} user={user} />
+
+            <StyledDivButton>
+                <StyledButton onClick={changeUser}>Change User</StyledButton>
+            </StyledDivButton>
+
+            <StyledDivButton>
+                <StyledButton onClick={retryFunction}>Retry</StyledButton>
+            </StyledDivButton>
+            <StyledFooter>
+                <StyledP>Double-click to edit a todo</StyledP>
+            </StyledFooter>
+        </React.Fragment>
+    );
 };
-
-export default AppTodo;

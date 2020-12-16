@@ -1,4 +1,4 @@
 /* eslint-disable import/no-default-export */
 import { createRootPage } from '../components/RootPage';
-const first = 2147483647;
+const first = 1;
 export default createRootPage(first);

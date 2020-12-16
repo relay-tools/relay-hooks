@@ -1,60 +1,54 @@
+import { DocumentContext } from 'next/document';
 import React from 'react';
-import initEnvironment from './createRelayEnvironment';
-import {fetchQuery, RelayEnvironmentProvider} from 'relay-hooks';
-import {Variables, GraphQLTaggedNode} from 'relay-runtime';
-import {DocumentContext} from 'next/document';
-import {NextPage} from 'next';
+import { fetchQuery } from 'relay-hooks';
+import { GraphQLTaggedNode } from 'relay-runtime';
+import { initEnvironment } from './createRelayEnvironment';
 
 type OptionsWithData = {
-  query: GraphQLTaggedNode;
-  variables: Variables;
+    query: GraphQLTaggedNode;
+    first: number;
 };
 
-export default (ComposedComponent: NextPage, options: OptionsWithData) => {
-  function WithData(dataprops) {
-    const environment =
-      typeof window === 'undefined'
-        ? dataprops.environment
-        : initEnvironment({
-            records: dataprops.queryRecords,
-          });
-    return (
-      <RelayEnvironmentProvider environment={environment}>
-        <ComposedComponent />
-      </RelayEnvironmentProvider>
-    );
-  }
-
-  WithData.getInitialProps = async (ctx: DocumentContext) => {
-    const isServer = !!ctx.req;
-    let composedInitialProps = {};
-    if (ComposedComponent.getInitialProps) {
-      composedInitialProps = await ComposedComponent.getInitialProps(ctx);
-    }
-    if (!isServer) {
-      return {
-        ...composedInitialProps,
-        environment: null,
-      };
+export const withData = (ComposedComponent: any, options: OptionsWithData): any => {
+    function WithData(): JSX.Element {
+        return <ComposedComponent {...options} />;
     }
 
-    let queryRecords = {};
-    const environment = initEnvironment();
+    WithData.getInitialProps = async (ctx: DocumentContext): Promise<any> => {
+        const isServer = !!ctx.req;
+        let composedInitialProps = {};
+        if (ComposedComponent.getInitialProps) {
+            composedInitialProps = await ComposedComponent.getInitialProps(ctx);
+        }
+        if (!isServer) {
+            return {
+                ...composedInitialProps,
+                environment: null,
+            };
+        }
 
-    const {query, variables} = options;
-    if (query) {
-      await fetchQuery<any>(environment, query, variables);
-      queryRecords = environment
-        .getStore()
-        .getSource()
-        .toJSON();
-    }
-    return {
-      ...composedInitialProps,
-      queryRecords,
-      environment,
+        let queryRecords = {};
+        const environment = initEnvironment();
+        const userId = ctx.query && ctx.query.userId ? ctx.query.userId : 'me';
+
+        const { query, first } = options;
+        const variables = {
+            first,
+            userId,
+        };
+        if (query) {
+            await fetchQuery<any>(environment, query, variables);
+            queryRecords = environment
+                .getStore()
+                .getSource()
+                .toJSON();
+        }
+        return {
+            ...composedInitialProps,
+            queryRecords,
+            environment,
+        };
     };
-  };
 
-  return WithData;
+    return WithData;
 };

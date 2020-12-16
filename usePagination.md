@@ -9,7 +9,8 @@ const fragmentSpec = graphql`
         count: {type: "Int", defaultValue: 10}
         cursor: {type: "ID"}
         orderby: {type: "[FriendsOrdering]", defaultValue: [DATE_ADDED]}
-      ) {
+      )
+      @refetchable(queryName: "FeedRefetchQuery") {
         feed(
           first: $count
           after: $cursor
@@ -25,46 +26,19 @@ const fragmentSpec = graphql`
       }
     `;
 
-const connectionConfig = {
-    getVariables(props, {count, cursor}, fragmentVariables) {
-      return {
-        count,
-        cursor,
-        orderBy: fragmentVariables.orderBy,
-        // userID isn't specified as an @argument for the fragment, but it should be a variable available for the fragment under the query root.
-        userID: fragmentVariables.userID,
-      };
-    },
-    query: graphql`
-      # Pagination query to be fetched upon calling 'loadMore'.
-      # Notice that we re-use our fragment, and the shape of this query matches our fragment spec.
-      query FeedPaginationQuery(
-        $count: Int!
-        $cursor: ID
-        $orderBy: [FriendsOrdering]!
-        $userID: ID!
-      ) {
-        user: node(id: $userID) {
-          ...Feed_user @arguments(count: $count, cursor: $cursor, orderBy: $orderBy)
-        }
-      }
-    `
-};
 
 const Feed = (props) => {
-    const [ user, { isLoading, hasMore, loadMore } ] = usePagination(fragmentSpec, props.user);
+    const { data: user, isLoadingNext, hasNext, loadNext } = usePagination(fragmentSpec, props.user);
     const _loadMore = () => {
-      if (!hasMore() || isLoading()) {
+      if (!hasMore || isLoading) {
         return;
       }
 
-      loadMore(
-        connectionConfig,
-        10,  // Fetch the next 10 feed items
-        error => {
-          console.log(error);
-        },
-      );
+      const onComplete = (error: Error | null) => {
+        console.log("Complete", error);
+      }
+
+      loadMore(10, { onComplete });
     }
 
     return (   

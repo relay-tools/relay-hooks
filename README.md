@@ -110,10 +110,10 @@ const options = {
 }
 
 const AppTodo = function (appProps)  {
-  const {props, error, retry, cached} = useQuery(query, variables, options);
+  const {data, error, retry, isLoading} = useQuery(query, variables, options);
 
-  if (props && props.user) {
-    return <TodoApp user={props.user} />;
+  if (data && data.user) {
+    return <TodoApp user={data.user} />;
   } else if (error) {
     return <div>{error.message}</div>;
   }
@@ -165,8 +165,8 @@ const options = {
 
 
 const AppTodo = function (appProps) {
-  const {props, cached} = useLazyLoadQuery(query, variables, options);
-  return <TodoApp user={props.user} />;
+  const {data} = useLazyLoadQuery(query, variables, options);
+  return <TodoApp user={data.user} />;
 }
 
 

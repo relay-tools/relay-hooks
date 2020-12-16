@@ -114,15 +114,6 @@ export function fetchResolver({
         ) => void,
         renderPolicy?: RenderPolicy,
     ): Disposable => {
-        const observer = {
-            complete: (): void => {
-                onComplete(null);
-            },
-            error: (e: Error): void => {
-                error = e;
-                onComplete(error);
-            },
-        };
         if (env != environment || query.request.identifier !== operation.request.identifier) {
             dispose();
             if (doRetain) {
@@ -139,7 +130,7 @@ export function fetchResolver({
             const onlyStore = !isNetwork;
             onNext(operation, snapshot, true, onlyStore);
             if (onlyStore) {
-                observer.complete();
+                onComplete(null);
             }
         }
         // Cancel any previously running refetch.
@@ -166,13 +157,14 @@ export function fetchResolver({
                     resolveNetworkPromise();
                     updateLoading(false);
                     cleanup();
-                    observer.complete();
+                    onComplete(null);
                 },
-                error: (error: Error): void => {
+                error: (e: Error): void => {
+                    error = e;
                     resolveNetworkPromise();
                     updateLoading(false);
                     cleanup();
-                    observer.error(error);
+                    onComplete(e);
                 },
                 next: () => {
                     const store = environment.lookup(operation.fragment);
@@ -187,7 +179,7 @@ export function fetchResolver({
                 },
             });
             if (!snapshot) {
-                promise = new Promise((resolve) => {
+                promise = new Promise((resolve: any) => {
                     resolveNetworkPromise = resolve;
                 });
             }

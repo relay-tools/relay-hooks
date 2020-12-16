@@ -42,11 +42,11 @@ const ReactRelayPaginationContainer = {
             isLoadingNext,
             loadNext: loadMoreHooks,
             refetch: refetchConnectionHooks,
+            errorNext,
         } = dataPag;
         const loadMore = (count, callback: (error: Error) => void, options?: RefetchOptions) => {
             // @ts-ignore
             return loadMoreHooks(count, {
-                fetchPolicy: options?.fetchPolicy,
                 onComplete: callback,
             });
         };
@@ -70,6 +70,7 @@ const ReactRelayPaginationContainer = {
                     isLoadingNext,
                     loadMore,
                     isLoading,
+                    errorNext,
                 }}
             />
         );
@@ -316,6 +317,7 @@ describe('ReactRelayPaginationContainer', () => {
                 hasMore: false,
                 isLoadingNext: false,
                 isLoading: false,
+                errorNext: null,
                 loadMore: expect.any(Function),
                 refetchConnection: expect.any(Function),
             },
@@ -339,6 +341,7 @@ describe('ReactRelayPaginationContainer', () => {
                 hasMore: false,
                 isLoadingNext: false,
                 isLoading: false,
+                errorNext: null,
                 loadMore: expect.any(Function),
                 refetchConnection: expect.any(Function),
             },
@@ -382,6 +385,7 @@ describe('ReactRelayPaginationContainer', () => {
                 hasMore: true,
                 isLoadingNext: false,
                 isLoading: false,
+                errorNext: null,
                 loadMore: expect.any(Function),
                 refetchConnection: expect.any(Function),
             },
@@ -446,6 +450,7 @@ describe('ReactRelayPaginationContainer', () => {
                 hasMore: false,
                 isLoadingNext: false,
                 isLoading: false,
+                errorNext: null,
                 loadMore: expect.any(Function),
                 refetchConnection: expect.any(Function),
             },
@@ -486,6 +491,7 @@ describe('ReactRelayPaginationContainer', () => {
                 hasMore: false,
                 isLoadingNext: false,
                 isLoading: false,
+                errorNext: null,
                 loadMore: expect.any(Function),
                 refetchConnection: expect.any(Function),
             },
@@ -548,6 +554,7 @@ describe('ReactRelayPaginationContainer', () => {
                 hasMore: false,
                 isLoadingNext: false,
                 isLoading: false,
+                errorNext: null,
                 loadMore: expect.any(Function),
                 refetchConnection: expect.any(Function),
             },
@@ -646,6 +653,7 @@ describe('ReactRelayPaginationContainer', () => {
                 hasMore: false,
                 isLoadingNext: false,
                 isLoading: false,
+                errorNext: null,
                 loadMore: expect.any(Function),
                 refetchConnection: expect.any(Function),
             },
@@ -971,6 +979,7 @@ describe('ReactRelayPaginationContainer', () => {
                     hasMore: true,
                     isLoadingNext: false,
                     isLoading: false,
+                    errorNext: null,
                     loadMore: expect.any(Function),
                     refetchConnection: expect.any(Function),
                 },
@@ -1014,6 +1023,7 @@ describe('ReactRelayPaginationContainer', () => {
                     hasMore: false,
                     isLoadingNext: false,
                     isLoading: false,
+                    errorNext: null,
                     loadMore: expect.any(Function),
                     refetchConnection: expect.any(Function),
                 },
@@ -1057,6 +1067,7 @@ describe('ReactRelayPaginationContainer', () => {
                     hasMore: false,
                     isLoadingNext: false,
                     isLoading: false,
+                    errorNext: null,
                     loadMore: expect.any(Function),
                     refetchConnection: expect.any(Function),
                 },
@@ -1100,6 +1111,7 @@ describe('ReactRelayPaginationContainer', () => {
                     hasMore: false,
                     isLoadingNext: false,
                     isLoading: false,
+                    errorNext: null,
                     loadMore: expect.any(Function),
                     refetchConnection: expect.any(Function),
                 },
@@ -1450,13 +1462,16 @@ describe('ReactRelayPaginationContainer', () => {
         });
 
         it('does not update variables on failure', () => {
-            expect.assertions(3);
+            expect.assertions(5);
             render.mockClear();
             loadMore(1, jest.fn());
-            environment.mock.reject(UserFragmentRefetchQuery, new Error('oops'));
+            const error = new Error('oops');
+            environment.mock.reject(UserFragmentRefetchQuery, error);
             expect(render.mock.calls.length).toBe(2);
             expect(render.mock.calls[0][0].relay.isLoadingNext).toBe(true);
+            expect(render.mock.calls[0][0].relay.errorNext).toBe(null);
             expect(render.mock.calls[1][0].relay.isLoadingNext).toBe(false);
+            expect(render.mock.calls[1][0].relay.errorNext).toBe(error);
         });
 
         it('continues the fetch if new props refer to the same records', () => {
@@ -1867,6 +1882,7 @@ describe('ReactRelayPaginationContainer', () => {
                     hasMore: true,
                     isLoadingNext: false,
                     isLoading: false,
+                    errorNext: null,
                     loadMore: expect.any(Function),
                     refetchConnection: expect.any(Function),
                 },

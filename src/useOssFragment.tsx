@@ -17,7 +17,7 @@ export function useOssFragment(
     const ref = useRef<{ resolver: FragmentResolver }>(null);
     if (ref.current === null || ref.current === undefined) {
         ref.current = {
-            resolver: new FragmentResolver(name, forceUpdate),
+            resolver: new FragmentResolver(name),
         };
     }
 
@@ -46,6 +46,7 @@ export function useOssFragment(
     resolver.resolve(environment, idfragment, fragment, fragmentRef);
 
     resolver.checkAndSuspense(suspense);
+    resolver.setForceUpdate(forceUpdate);
 
     const data = resolver.getData();
 

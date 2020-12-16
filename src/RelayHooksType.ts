@@ -173,6 +173,7 @@ export interface ReturnTypeRefetchNode<
     TFragmentData
 > extends ReturnTypeRefetchSuspenseNode<TQuery, TKey, TFragmentData> {
     isLoading: boolean;
+    error: Error | null;
 }
 
 export type ReturnTypeRefetchSuspenseNode<
@@ -189,6 +190,7 @@ export interface ReturnTypePagination<
     TFragmentData
 > extends ReturnTypePaginationSuspense<TQuery, TKey, TFragmentData> {
     isLoading: boolean;
+    error: Error | null;
 }
 
 export interface ReturnTypePaginationSuspense<
@@ -203,5 +205,7 @@ export interface ReturnTypePaginationSuspense<
     hasPrevious: boolean;
     isLoadingNext: boolean;
     isLoadingPrevious: boolean;
+    errorNext: Error | null;
+    errorPrevious: Error | null;
     refetch: RefetchFnDynamic<TQuery, TKey>;
 }

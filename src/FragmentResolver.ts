@@ -105,14 +105,10 @@ export class FragmentResolver {
     pagination = false;
     result: any;
 
-    constructor(name: FragmentNames, forceUpdate) {
+    constructor(name: FragmentNames) {
         this.name = name;
         this.pagination = name === PAGINATION_NAME;
         this.refetchable = name === REFETCHABLE_NAME || this.pagination;
-        this.refreshHooks = (): void => {
-            this.resolveResult();
-            forceUpdate();
-        };
 
         const setLoading = (_loading): void => this.refreshHooks();
         if (this.refetchable) {
@@ -125,6 +121,13 @@ export class FragmentResolver {
             this.fetcherNext = fetchResolver({ setLoading });
             this.fetcherPrevious = fetchResolver({ setLoading });
         }
+    }
+
+    setForceUpdate(forceUpdate: () => void): void {
+        this.refreshHooks = (): void => {
+            this.resolveResult();
+            forceUpdate();
+        };
     }
 
     setUnmounted(): void {
@@ -232,15 +235,27 @@ export class FragmentResolver {
                 // resolving the Promise
                 const promise = networkPromise
                     .then(() => {
-                        this._idfragment = null;
+                        if (this._idfragmentrefetch) {
+                            this.resolveResult();
+                        } else {
+                            this._idfragment = null;
+                            this.dispose();
+                        }
+                        //;
                     })
                     .catch((_error: Error) => {
-                        this._idfragment = null;
+                        if (this._idfragmentrefetch) {
+                            this.resolveResult();
+                        } else {
+                            this._idfragment = null;
+                            this.dispose();
+                        }
                     });
 
                 // $FlowExpectedError[prop-missing] Expando to annotate Promises.
                 (promise as any).displayName = 'Relay(' + parentQueryName + ')';
                 this._disposable && this._disposable.dispose();
+                this.refreshHooks = (): void => undefined;
                 throw promise;
             }
             warning(

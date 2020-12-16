@@ -30,7 +30,7 @@ const ReactRelayRefetchContainer = {
     createContainer: (Component, spec, query) => (props) => {
         const { user, ...others } = props;
         const environment = useRelayEnvironment();
-        const { data, refetch: refetchHooks, isLoading } = useRefetchable(spec, user);
+        const { data, refetch: refetchHooks, isLoading, error } = useRefetchable(spec, user) as any;
         const refetch = (refetchVariables, renderVariables, observer, options) => {
             return refetchHooks(refetchVariables, {
                 onComplete: observer?.complete ?? observer,
@@ -39,6 +39,7 @@ const ReactRelayRefetchContainer = {
         };
         return (
             <Component
+                error={error}
                 isLoading={isLoading}
                 user={data}
                 {...others}
@@ -219,6 +220,7 @@ describe('useRefetchable', () => {
             bar: 1,
             foo: 'foo',
             isLoading: false,
+            error: null,
             relay: {
                 environment: expect.any(Object),
                 refetch: expect.any(Function),
@@ -239,6 +241,7 @@ describe('useRefetchable', () => {
         expect(render.mock.calls.length).toBe(1);
         expect(render.mock.calls[0][0]).toEqual({
             isLoading: false,
+            error: null,
             relay: {
                 environment: expect.any(Object),
                 refetch: expect.any(Function),
@@ -274,6 +277,7 @@ describe('useRefetchable', () => {
                 name: 'Zuck',
             },
             isLoading: false,
+            error: null,
             relay: {
                 environment: expect.any(Object),
                 refetch: expect.any(Function),
@@ -328,6 +332,7 @@ describe('useRefetchable', () => {
                 name: 'Mark',
             },
             isLoading: false,
+            error: null,
             relay: {
                 environment: expect.any(Object),
                 refetch: expect.any(Function),
@@ -359,6 +364,7 @@ describe('useRefetchable', () => {
                 name: 'Joe',
             },
             isLoading: false,
+            error: null,
             relay: {
                 environment: expect.any(Object),
                 refetch: expect.any(Function),
@@ -408,6 +414,7 @@ describe('useRefetchable', () => {
                 // Name is excluded since value of cond is now false
             },
             isLoading: false,
+            error: null,
             relay: {
                 environment: expect.any(Object),
                 refetch: expect.any(Function),
@@ -479,6 +486,7 @@ describe('useRefetchable', () => {
                 // Name is excluded since value of cond is now false
             },
             isLoading: false,
+            error: null,
             relay: {
                 environment: expect.any(Object),
                 refetch: expect.any(Function),
@@ -838,7 +846,7 @@ describe('useRefetchable', () => {
         });
 
         it('does not update variables on failure', () => {
-            expect.assertions(10);
+            expect.assertions(11);
             expect(render.mock.calls.length).toBe(1);
             expect(render.mock.calls[0][0].user.name).toBe('Zuck');
 
@@ -854,6 +862,7 @@ describe('useRefetchable', () => {
             const error = new Error('oops');
             environment.mock.reject(UserFragmentRefetchQuery, error);
             expect(render.mock.calls.length).toBe(3);
+            expect(render.mock.calls[2][0].error).toBe(error);
             expect(render.mock.calls[2][0].isLoading).toBe(false);
             expect(render.mock.calls[2][0].user.name).toBe('Zuck');
             expect(callback.mock.calls.length).toBe(1);

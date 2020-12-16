@@ -26,7 +26,6 @@ const useInternalQuery = <TOperationType extends OperationType = OperationType>(
                 gqlQuery,
                 variables,
                 options.networkCacheConfig,
-                forceUpdate,
             ),
         };
     }
@@ -38,6 +37,7 @@ const useInternalQuery = <TOperationType extends OperationType = OperationType>(
     const { queryFetcher } = ref.current;
     queryFetcher.resolve(environment, gqlQuery, variables, options);
     queryFetcher.checkAndSuspense(suspense, suspense);
+    queryFetcher.setForceUpdate(forceUpdate);
     return queryFetcher.getData();
 };
 

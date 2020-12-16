@@ -2398,7 +2398,6 @@ describe('useRefetchableFragmentNode', () => {
                             refetchVariables,
                             refetchQuery,
                         });
-
                         // Mock network response
                         TestRenderer.act(() => {
                             environment.mock.resolve(gqlRefetchQuery, {

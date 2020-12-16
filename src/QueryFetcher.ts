@@ -22,13 +22,11 @@ export function getOrCreateQueryFetcher<TOperationType extends OperationType>(
     gqlQuery: GraphQLTaggedNode,
     variables: TOperationType['variables'],
     networkCacheConfig: CacheConfig,
-    forceUpdate: any,
 ): QueryFetcher<TOperationType> {
     const query = createOperation(gqlQuery, variables, networkCacheConfig);
     const toGet = useLazy && cache.has(query.request.identifier);
     const queryFetcher = toGet ? cache.get(query.request.identifier) : new QueryFetcher();
     queryFetcher.setQuery(gqlQuery, variables, networkCacheConfig, query);
-    queryFetcher.setForceUpdate(forceUpdate);
     return queryFetcher;
 }
 
@@ -182,14 +180,12 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
     }
 
     checkAndSuspense(suspense?: boolean, useLazy?: boolean): Promise<any> | Error | null {
-        const forceUpdate = this.forceUpdate;
         if (useLazy) {
             this.setForceUpdate(emptyforceUpdate);
             cache.set(this.query.request.identifier, this);
         }
         const result = this.fetcher.checkAndSuspense(suspense, useLazy);
         if (useLazy) {
-            this.setForceUpdate(forceUpdate);
             cache.delete(this.query.request.identifier);
         }
         return result;

@@ -137,12 +137,14 @@ describe('usePaginationFragment', () => {
         const actualIsLoadingPrevious = actualResult.isLoadingPrevious;
         const actualHasNext = actualResult.hasNext;
         const actualHasPrevious = actualResult.hasPrevious;
+        const actualErrorNext = actualResult.errorNext;
 
         expect(actualData).toEqual(expected.data);
         expect(actualIsLoadingNext).toEqual(expected.isLoadingNext);
         expect(actualIsLoadingPrevious).toEqual(expected.isLoadingPrevious);
         expect(actualHasNext).toEqual(expected.hasNext);
         expect(actualHasPrevious).toEqual(expected.hasPrevious);
+        expected.errorNext && expect(actualErrorNext).toEqual(expected.errorNext);
     }
 
     function expectFragmentResults(
@@ -152,6 +154,7 @@ describe('usePaginationFragment', () => {
             isLoadingPrevious: boolean;
             hasNext: boolean;
             hasPrevious: boolean;
+            errorNext?: Error | null;
         }>,
     ) {
         // This ensures that useEffect runs
@@ -992,7 +995,6 @@ describe('usePaginationFragment', () => {
             });
 
             it('cancels load more if refetch is called', () => {
-
                 const callback = jest.fn();
                 const renderer = renderFragment();
                 expectFragmentResults([
@@ -1752,6 +1754,16 @@ describe('usePaginationFragment', () => {
                 // connection
                 expect(callback).toBeCalledTimes(1);
                 expect(callback).toBeCalledWith(error);
+                expectFragmentResults([
+                    {
+                        data: initialUser,
+                        isLoadingNext: false,
+                        isLoadingPrevious: false,
+                        hasNext: true,
+                        hasPrevious: false,
+                        errorNext: error,
+                    },
+                ]);
             });
 
             it('preserves pagination request if re-rendered with same fragment ref', () => {
@@ -2478,7 +2490,7 @@ describe('usePaginationFragment', () => {
                         },
                     });
                 });
-/*
+                /*
                 it('does not start pagination request even if query is no longer active but loadNext is bound to snapshot of data while query was active', () => {
                     const {
                         __internal: { fetchQuery },

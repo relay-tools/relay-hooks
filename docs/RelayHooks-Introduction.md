@@ -33,11 +33,13 @@ After Relay's core team shared information about the the initial differences in 
 * current differences with upcoming Relay Hooks in react-relay
 
   * **useLazyLoadQuery**: returns a *single* data object with the query's data, and nothing else.
-  * **useFragment**: not use suspense
-  * **usePagination**: not use suspense
-  * **useRefetchable**: not use suspense
-  * **useMutation**: not use suspense
-  * **useSubscription**: not use suspense
+  * **useFragment**: in relay-hooks it is called useSuspenseFragment
+
+* what's more in relay-hooks
+
+  * **useQuery**: it is the same as `useLazyLoadQuery` but does not use suspense, it allows you to use hooks without having to migrate the application in concurrent mode and its return is the same as the QueryRenderer HOC
+  * **conditional useQuery & useLazyLoadQuery**: added `skip`: [Optional] If skip is true, the query will be skipped entirely
+  * **observe the execution of the query in the network in useQuery & useLazyLoadQuery**: added `onComplete`: [Optional] Function that will be called whenever the fetch request has completed
 
 * what's more in relay-hooks
 
@@ -88,7 +90,7 @@ In addition to `query` (first argument) and `variables` (second argument), `useQ
 
 `skip`: [Optional] If skip is true, the query will be skipped entirely.
 
-`fetchObserver`: [Optional] A fetchObserver can be passed to observe the execution of the query in the network
+`onComplete`: [Optional] Function that will be called whenever the fetch request has completed
 
 ```ts
 import { useQuery, graphql } from 'relay-hooks';

@@ -9,7 +9,7 @@ import {
     MutationState,
     Mutate,
     MutationProps,
-} from './RelayHooksType';
+} from './RelayHooksTypes';
 import { useRelayEnvironment } from './useRelayEnvironment';
 const { useCallback, useState } = React;
 
@@ -74,7 +74,7 @@ export function useMutation<T extends MutationParameters>(
 
                     if (mergedConfig.onError) {
                         mergedConfig.onError(error);
-                        resolve();
+                        resolve(null);
                     } else {
                         reject(error);
                     }
@@ -124,14 +124,4 @@ export function useMutation<T extends MutationParameters>(
     );
 
     return [mutate, state];
-}
-
-export function Mutation<T extends MutationParameters>({
-    children,
-    mutation,
-    environment,
-    ...config
-}: MutationProps<T>) {
-    const [mutate, state] = useMutation(mutation, config, environment);
-    return children(mutate, state) as React.ReactElement;
 }

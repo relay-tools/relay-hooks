@@ -10,7 +10,7 @@ import {
     Variables,
 } from 'relay-runtime';
 import { Fetcher, fetchResolver } from './FetchResolver';
-import { FetchPolicy, RenderProps, QueryOptions, Options } from './RelayHooksType';
+import { FetchPolicy, RenderProps, QueryOptions, Options } from './RelayHooksTypes';
 import { createOperation } from './Utils';
 
 const defaultPolicy = 'store-or-network';

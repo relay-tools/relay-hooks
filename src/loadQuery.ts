@@ -1,6 +1,6 @@
 import { GraphQLTaggedNode, OperationType, IEnvironment } from 'relay-runtime';
 import { QueryFetcher } from './QueryFetcher';
-import { RenderProps, QueryOptions, LoadQuery } from './RelayHooksType';
+import { RenderProps, QueryOptions, LoadQuery } from './RelayHooksTypes';
 import { forceCache } from './Utils';
 
 export const internalLoadQuery = <TOperationType extends OperationType = OperationType>(

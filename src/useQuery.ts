@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { GraphQLTaggedNode, OperationType } from 'relay-runtime';
 import { getOrCreateQueryFetcher, QueryFetcher } from './QueryFetcher';
-import { RenderProps, QueryOptions } from './RelayHooksType';
+import { RenderProps, QueryOptions } from './RelayHooksTypes';
 import { useForceUpdate } from './useForceUpdate';
 import { useRelayEnvironment } from './useRelayEnvironment';
 import { forceCache } from './Utils';

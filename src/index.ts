@@ -18,4 +18,4 @@ export { usePagination, usePaginationFragment } from './usePagination';
 export { useRefetchable, useRefetchableFragment } from './useRefetchable';
 export { useRelayEnvironment } from './useRelayEnvironment';
 export { RelayEnvironmentProvider } from './RelayEnvironmentProvider';
-export * from './RelayHooksType';
+export * from './RelayHooksTypes';

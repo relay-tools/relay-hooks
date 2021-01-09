@@ -5,7 +5,7 @@ import {
     REFETCHABLE_NAME,
     ReturnTypeRefetchNode,
     ReturnTypeRefetchSuspenseNode,
-} from './RelayHooksType';
+} from './RelayHooksTypes';
 import { useOssFragment } from './useOssFragment';
 
 export function useRefetchable<TQuery extends OperationType, TKey extends KeyType>(

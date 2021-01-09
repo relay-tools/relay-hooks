@@ -30,7 +30,7 @@ import {
     OptionsLoadMore,
     PAGINATION_NAME,
     REFETCHABLE_NAME,
-} from './RelayHooksType';
+} from './RelayHooksTypes';
 import { createOperation, forceCache } from './Utils';
 const { getPromiseForActiveRequest } = __internal;
 

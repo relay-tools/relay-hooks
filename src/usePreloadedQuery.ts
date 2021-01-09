@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { OperationType } from 'relay-runtime';
-import { RenderProps, LoadQuery } from './RelayHooksType';
+import { RenderProps, LoadQuery } from './RelayHooksTypes';
 import { useForceUpdate } from './useForceUpdate';
 import { useRelayEnvironment } from './useRelayEnvironment';
 

@@ -7,7 +7,7 @@ import {
     OperationDescriptor,
     CacheConfig,
 } from 'relay-runtime';
-import { STORE_OR_NETWORK, STORE_THEN_NETWORK, NETWORK_ONLY, FetchPolicy } from './RelayHooksType';
+import { STORE_OR_NETWORK, STORE_THEN_NETWORK, NETWORK_ONLY, FetchPolicy } from './RelayHooksTypes';
 
 export type ReactConnectionMetadata = ConnectionMetadata & { fragmentName: string };
 

@@ -2,7 +2,7 @@ import * as warning from 'fbjs/lib/warning';
 import { useEffect, useRef, useMemo } from 'react';
 import { GraphQLTaggedNode, getFragmentIdentifier, getFragment } from 'relay-runtime';
 import { FragmentResolver } from './FragmentResolver';
-import { FragmentNames } from './RelayHooksType';
+import { FragmentNames } from './RelayHooksTypes';
 import { useForceUpdate } from './useForceUpdate';
 import { useRelayEnvironment } from './useRelayEnvironment';
 

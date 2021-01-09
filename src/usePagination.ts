@@ -5,7 +5,7 @@ import {
     PAGINATION_NAME,
     ReturnTypePagination,
     ReturnTypePaginationSuspense,
-} from './RelayHooksType';
+} from './RelayHooksTypes';
 import { useOssFragment } from './useOssFragment';
 
 export function usePagination<TQuery extends OperationType, TKey extends KeyType>(

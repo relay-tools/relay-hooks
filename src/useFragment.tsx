@@ -6,7 +6,7 @@ import {
     ArrayKeyType,
     ArrayKeyReturnType,
     FRAGMENT_NAME,
-} from './RelayHooksType';
+} from './RelayHooksTypes';
 import { useOssFragment } from './useOssFragment';
 
 export function useFragment<TKey extends KeyType>(

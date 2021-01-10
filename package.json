@@ -1,6 +1,6 @@
 {
   "name": "relay-hooks",
-  "version": "4.0.0-rc.1",
+  "version": "4.0.0-rc.2",
   "keywords": [
     "graphql",
     "relay",
@@ -35,7 +35,7 @@
     "fbjs": "^3.0.0"
   },
   "peerDependencies": {
-    "react": "^16.9.0",
+    "react": "^16.9.0 || ^17",
     "relay-runtime": ">=10.1.0"
   },
   "devDependencies": {

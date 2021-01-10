@@ -78,15 +78,7 @@ const TodoList = props => {
   };
 
   const handlerRefetch = () => {
-    const response = refetch(
-      QueryApp,
-      {userId: 'you'},
-      null,
-      () => {
-        console.log('Refetch done');
-      },
-      {force: true, fetchPolicy: 'network-only'},
-    );
+    const response = refetch({});
     //response.dispose();
   };
 

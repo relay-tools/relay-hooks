@@ -111,7 +111,7 @@ const AppTodo = function(appProps) {
 const isServer = typeof window === 'undefined';
 const LayoutTodo = ({userId}) => {
   console.log('LayoutTodo', userId, isServer);
-  const {props, retry, error} = useQuery(
+  const {data, retry, error} = useQuery(
     QueryApp,
     {userId},
     {
@@ -119,9 +119,9 @@ const LayoutTodo = ({userId}) => {
     },
   );
 
-  console.log('renderer', props);
-  if (props && props.user) {
-    return <TodoApp user={props.user} userId={userId} retry={retry} />;
+  console.log('renderer', data);
+  if (data && data.user) {
+    return <TodoApp user={data.user} userId={userId} retry={retry} />;
   } else if (error) {
     return (
       <div>

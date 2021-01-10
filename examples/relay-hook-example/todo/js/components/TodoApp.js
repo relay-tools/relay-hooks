@@ -19,7 +19,7 @@ import TodoTextInput from './TodoTextInput';
 import React from 'react';
 import {graphql} from 'react-relay';
 import type {RelayProp} from 'react-relay';
-import {useRefetch, useMutation} from 'relay-hooks';
+import {useRefetchable, useMutation} from 'relay-hooks';
 import type {TodoApp_user} from 'relay/TodoApp_user.graphql';
 
 type Props = {|
@@ -28,7 +28,8 @@ type Props = {|
 |};
 
 const fragmentSpec = graphql`
-  fragment TodoApp_user on User {
+  fragment TodoApp_user on User 
+  @refetchable(queryName: "UserFragmentRefetchTableQuery") {
     id
     userId
     totalCount
@@ -38,7 +39,7 @@ const fragmentSpec = graphql`
 `;
 
 const TodoApp = props => {
-  const [user, refetch] = useRefetch(fragmentSpec, props.user);
+  const { data: user, refetch} = useRefetchable(fragmentSpec, props.user);
   const [mutate, {loading}] = useMutation(mutation);
   const handleTextInputSave = (text: string) => {
     AddTodoMutation.commit(mutate, text, user);

@@ -12,7 +12,7 @@
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
     "relay-compiler": "^10.1.2",
-    "relay-hooks": "4.0.0-rc.1",
+    "relay-hooks": "4.0.0-rc.2",
     "relay-runtime": "10.1.2"
   }, 
   "devDependencies": {

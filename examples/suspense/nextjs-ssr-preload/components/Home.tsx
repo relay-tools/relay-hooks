@@ -4,7 +4,6 @@ import { usePreloadedQuery, useQuery } from 'relay-hooks';
 import { TodoAppQuery } from '../__generated__/relay/TodoAppQuery.graphql';
 
 const Home = ({ prefetch }) => {
-    console.log('prefetch ssr', prefetch);
     const { data, retry } = usePreloadedQuery<TodoAppQuery>(prefetch);
     if (!data) {
         return <div>no data || skip</div>;

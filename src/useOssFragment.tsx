@@ -43,6 +43,13 @@ export function useOssFragment(
         return getFragmentIdentifier(fragment, fragmentRef);
     }, [fragment, fragmentRef]);
 
+    useEffect(() => {
+        const disposable = resolver.subscribe();
+        return (): void => {
+            disposable.dispose();
+        };
+    }, [resolver, idfragment, environment]);
+
     resolver.resolve(environment, idfragment, fragment, fragmentRef);
 
     resolver.checkAndSuspense(suspense);

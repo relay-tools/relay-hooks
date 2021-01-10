@@ -1,56 +1,77 @@
+import * as areEqual from 'fbjs/lib/areEqual';
 import {
     Disposable,
     CacheConfig,
     IEnvironment,
     Snapshot,
-    __internal,
     OperationType,
     OperationDescriptor,
-    Observer,
+    GraphQLTaggedNode,
+    Variables,
 } from 'relay-runtime';
-import { FetchPolicy, RenderProps, QueryOptions } from './RelayHooksType';
-import { createOperation, isNetworkPolicy, isStorePolicy } from './Utils';
-
-const { fetchQuery } = __internal;
+import { Fetcher, fetchResolver } from './FetchResolver';
+import { FetchPolicy, RenderProps, QueryOptions, Options } from './RelayHooksTypes';
+import { createOperation } from './Utils';
 
 const defaultPolicy = 'store-or-network';
 
 const cache: Map<string, QueryFetcher<any>> = new Map();
 
 export function getOrCreateQueryFetcher<TOperationType extends OperationType>(
-    query: OperationDescriptor | null,
-    forceUpdate: any,
+    useLazy: boolean,
+    gqlQuery: GraphQLTaggedNode,
+    variables: TOperationType['variables'],
+    networkCacheConfig: CacheConfig,
 ): QueryFetcher<TOperationType> {
-    const suspense = !!query;
-    const queryFetcher =
-        suspense && cache.has(query.request.identifier)
-            ? cache.get(query.request.identifier)
-            : new QueryFetcher(suspense, suspense);
-    queryFetcher.setForceUpdate(forceUpdate);
+    const query = createOperation(gqlQuery, variables, networkCacheConfig);
+    const toGet = useLazy && cache.has(query.request.identifier);
+    const queryFetcher = toGet ? cache.get(query.request.identifier) : new QueryFetcher();
+    queryFetcher.setQuery(gqlQuery, variables, networkCacheConfig, query);
     return queryFetcher;
 }
 
-const DATA_RETENTION_TIMEOUT = 30 * 1000;
+const emptyforceUpdate = (): void => undefined;
 
 export class QueryFetcher<TOperationType extends OperationType = OperationType> {
     environment: IEnvironment;
     query: OperationDescriptor;
-    networkSubscription: Disposable;
+    fetcher: Fetcher;
     rootSubscription: Disposable;
-    error: Error | null;
     snapshot: Snapshot;
     fetchPolicy: FetchPolicy;
     fetchKey: string | number;
-    disposableRetain: Disposable;
-    forceUpdate: (_o: any) => void;
-    suspense: boolean;
-    useLazy: boolean;
-    releaseQueryTimeout;
+    variables: Variables;
+    cacheConfig: Variables;
+    gqlQuery: GraphQLTaggedNode;
+    options: QueryOptions;
+    forceUpdate = emptyforceUpdate;
+    result: RenderProps<TOperationType> = null;
 
-    constructor(suspense = false, useLazy = false) {
-        this.suspense = suspense;
-        this.useLazy = suspense && useLazy;
-        this.setForceUpdate(() => undefined);
+    constructor() {
+        this.result = {
+            retry: this.retry,
+            error: null,
+            data: null,
+            isLoading: false,
+        };
+        this.fetcher = fetchResolver({
+            disposeTemporary: () => {
+                this.dispose();
+                this.query && cache.delete(this.query.request.identifier);
+            },
+        });
+    }
+
+    setQuery(
+        gqlQuery: GraphQLTaggedNode,
+        variables: TOperationType['variables'],
+        networkCacheConfig: CacheConfig,
+        query: OperationDescriptor,
+    ): void {
+        this.gqlQuery = gqlQuery;
+        this.variables = variables;
+        this.query = query;
+        this.cacheConfig = networkCacheConfig;
     }
 
     setForceUpdate(forceUpdate): void {
@@ -58,106 +79,129 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
     }
 
     dispose(): void {
-        this.disposeRequest();
-        this.disposeRetain();
+        this.fetcher.dispose();
+        this.disposeSnapshot();
     }
 
-    disposeRetain(): void {
-        this.clearTemporaryRetain();
-        this.disposableRetain && this.disposableRetain.dispose();
-        this.query && cache.delete(this.query.request.identifier);
-    }
-
-    clearTemporaryRetain(): void {
-        clearTimeout(this.releaseQueryTimeout);
-        this.releaseQueryTimeout = null;
-    }
-
-    temporaryRetain(): void {
-        const localReleaseTemporaryRetain = (): void => {
-            this.dispose();
-        };
-        this.releaseQueryTimeout = setTimeout(localReleaseTemporaryRetain, DATA_RETENTION_TIMEOUT);
-    }
-
-    isDiffEnvQuery(environment: IEnvironment, query): boolean {
-        return (
-            environment !== this.environment ||
-            query.request.identifier !== this.query.request.identifier
-        );
-    }
-
-    lookupInStore(environment: IEnvironment, operation, fetchPolicy: FetchPolicy): Snapshot {
-        if (isStorePolicy(fetchPolicy)) {
-            const check = environment.check(operation);
-            if (check.status === 'available') {
-                return environment.lookup(operation.fragment);
-            }
+    disposeSnapshot(): void {
+        this.snapshot = null;
+        if (this.rootSubscription) {
+            this.rootSubscription.dispose();
+            this.rootSubscription = null;
         }
-        return null;
     }
 
-    execute(
+    retry = (cacheConfigOverride?: CacheConfig | null, options: Options = {}): void => {
+        const { fetchPolicy = 'network-only' } = options;
+        /* eslint-disable indent */
+        const query = cacheConfigOverride
+            ? createOperation(
+                  this.query.request.node,
+                  this.query.request.variables,
+                  cacheConfigOverride,
+              )
+            : this.query;
+        this.fetch(query, fetchPolicy, options);
+        this.resolveResult();
+        this.forceUpdate();
+    };
+
+    fetch(query: OperationDescriptor, fetchPolicy: FetchPolicy, options: Options): void {
+        this.disposeSnapshot();
+        const { onComplete } = options;
+        let fetchHasReturned = false;
+        const onNext = (_o: OperationDescriptor, snapshot: Snapshot): void => {
+            if (!this.snapshot) {
+                this.snapshot = snapshot;
+                this.subscribe(snapshot);
+                this.resolveResult();
+                if (fetchHasReturned) {
+                    this.forceUpdate();
+                }
+            }
+        };
+        const complete = (error: Error | null): void => {
+            this.resolveResult();
+            if (fetchHasReturned) {
+                this.forceUpdate();
+            }
+            onComplete && onComplete(error);
+        };
+        this.fetcher.fetch(this.environment, query, fetchPolicy, complete, onNext);
+        fetchHasReturned = true;
+    }
+
+    getQuery(gqlQuery, variables, networkCacheConfig): OperationDescriptor | null {
+        if (
+            gqlQuery != this.gqlQuery ||
+            networkCacheConfig != this.cacheConfig ||
+            variables != this.variables ||
+            !areEqual(variables, this.variables)
+        ) {
+            this.variables = variables;
+            this.gqlQuery = gqlQuery;
+            this.cacheConfig = networkCacheConfig;
+            return createOperation(gqlQuery, variables, networkCacheConfig);
+        }
+        return this.query;
+    }
+
+    resolveEnvironment(environment: IEnvironment): void {
+        this.resolve(environment, this.gqlQuery, this.variables, this.options);
+    }
+
+    resolve(
         environment: IEnvironment,
-        query: OperationDescriptor,
+        gqlQuery: GraphQLTaggedNode,
+        variables: Variables,
         options: QueryOptions,
-        retain: (environment, query) => Disposable = (environment, query): Disposable =>
-            environment.retain(query),
-    ): RenderProps<TOperationType> {
-        const { fetchPolicy = defaultPolicy, fetchKey, skip, fetchObserver } = options;
-        let storeSnapshot;
-        const retry = (
-            cacheConfigOverride?: CacheConfig | null,
-            fetchObserver?: Observer<Snapshot>,
-        ): void => {
-            this.disposeRequest();
-            this.fetch({
-                cacheConfigOverride,
-                observer: fetchObserver,
-            });
-        };
+    ): void {
+        const query = this.getQuery(gqlQuery, variables, options.networkCacheConfig);
+        const { fetchPolicy = defaultPolicy, fetchKey, skip } = options;
+        this.options = options;
         if (skip) {
-            return {
-                cached: false,
-                retry,
-                error: null,
-                props: undefined,
-            };
+            this.dispose();
+            return;
         }
-        this.clearTemporaryRetain();
-        const isDiffEnvQuery = this.isDiffEnvQuery(environment, query);
-        if (isDiffEnvQuery || fetchPolicy !== this.fetchPolicy || fetchKey !== this.fetchKey) {
-            if (isDiffEnvQuery) {
-                this.disposeRetain();
-                this.useLazy && cache.set(query.request.identifier, this);
-                this.disposableRetain = retain(environment, query);
-            }
+        const diffQuery = !this.query || query.request.identifier !== this.query.request.identifier;
+        if (
+            diffQuery ||
+            environment !== this.environment ||
+            fetchPolicy !== this.fetchPolicy ||
+            fetchKey !== this.fetchKey
+        ) {
             this.environment = environment;
             this.query = query;
             this.fetchPolicy = fetchPolicy;
             this.fetchKey = fetchKey;
-            this.disposeRequest();
-
-            storeSnapshot = this.lookupInStore(environment, this.query, fetchPolicy);
-            const isNetwork = isNetworkPolicy(fetchPolicy, storeSnapshot);
-            if (isNetwork) {
-                this.fetch({
-                    suspense: this.suspense && !storeSnapshot,
-                    observer: fetchObserver,
-                });
-            } else if (!!storeSnapshot) {
-                this.snapshot = storeSnapshot;
-                this.error = null;
-                this.subscribe(storeSnapshot);
-            }
+            this.fetch(this.query, fetchPolicy, options);
+            this.resolveResult();
         }
+    }
 
-        const resultSnapshot = storeSnapshot || this.snapshot;
-        return {
-            cached: !!storeSnapshot,
-            retry,
-            error: this.error,
-            props: resultSnapshot ? resultSnapshot.data : null,
+    checkAndSuspense(suspense?: boolean, useLazy?: boolean): Promise<any> | Error | null {
+        if (useLazy) {
+            this.setForceUpdate(emptyforceUpdate);
+            cache.set(this.query.request.identifier, this);
+        }
+        const result = this.fetcher.checkAndSuspense(suspense, useLazy);
+        if (useLazy) {
+            cache.delete(this.query.request.identifier);
+        }
+        return result;
+    }
+
+    getData(): RenderProps<TOperationType> {
+        return this.result;
+    }
+
+    resolveResult(): void {
+        const { error, isLoading } = this.fetcher.getData();
+        this.result = {
+            retry: this.retry,
+            error,
+            data: this.snapshot ? this.snapshot.data : null,
+            isLoading,
         };
     }
 
@@ -168,119 +212,10 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         this.rootSubscription = this.environment.subscribe(snapshot, (snapshot) => {
             // Read from this._fetchOptions in case onDataChange() was lazily added.
             this.snapshot = snapshot;
-            this.error = null;
-            this.forceUpdate(snapshot);
+            //this.error = null;
+
+            this.resolveResult();
+            this.forceUpdate();
         });
-    }
-
-    fetch({
-        suspense,
-        observer = {},
-        cacheConfigOverride,
-    }: {
-        suspense?: boolean;
-        observer?: Observer<Snapshot>;
-        cacheConfigOverride?: CacheConfig | null;
-    }): void {
-        /* eslint-disable indent */
-        const operation = cacheConfigOverride
-            ? createOperation(
-                  this.query.request.node,
-                  this.query.request.variables,
-                  cacheConfigOverride,
-              )
-            : this.query;
-        /* eslint-enable indent */
-        let fetchHasReturned = false;
-        let resolveNetworkPromise = (): void => {};
-        fetchQuery(this.environment, operation).subscribe({
-            start: (subscription) => {
-                this.networkSubscription = {
-                    dispose: (): void => subscription.unsubscribe(),
-                };
-                observer.start && observer.start(subscription);
-            },
-            next: () => {
-                this.error = null;
-                this._onQueryDataAvailable({
-                    notifyFirstResult: fetchHasReturned,
-                    suspense,
-                    observer,
-                });
-                resolveNetworkPromise();
-            },
-            error: (error) => {
-                this.error = error;
-                this.snapshot = null;
-                if (fetchHasReturned && !suspense) {
-                    this.forceUpdate(error);
-                }
-                resolveNetworkPromise();
-                this.networkSubscription = null;
-                observer.error && observer.error(error);
-            },
-            complete: () => {
-                this.networkSubscription = null;
-                observer.complete && observer.complete();
-            },
-            unsubscribe: (subscription) => {
-                if (this.useLazy && !this.rootSubscription && this.releaseQueryTimeout) {
-                    this.dispose();
-                }
-                observer.unsubscribe && observer.unsubscribe(subscription);
-            },
-        });
-        fetchHasReturned = true;
-        if (suspense) {
-            if (this.useLazy) {
-                this.setForceUpdate(() => undefined);
-                this.temporaryRetain();
-            }
-            throw new Promise((resolve) => {
-                resolveNetworkPromise = resolve;
-            });
-        }
-    }
-
-    disposeRequest(): void {
-        this.error = null;
-        this.snapshot = null;
-        if (this.networkSubscription) {
-            this.networkSubscription.dispose();
-            this.networkSubscription = null;
-        }
-        if (this.rootSubscription) {
-            this.rootSubscription.dispose();
-            this.rootSubscription = null;
-        }
-    }
-
-    _onQueryDataAvailable({
-        notifyFirstResult,
-        suspense,
-        observer,
-    }: {
-        notifyFirstResult: boolean;
-        suspense: boolean;
-        observer: Observer<Snapshot>;
-    }): void {
-        // `_onQueryDataAvailable` can be called synchronously the first time and can be called
-        // multiple times by network layers that support data subscriptions.
-        // Wait until the first payload to call `onDataChange` and subscribe for data updates.
-
-        if (this.snapshot) {
-            return;
-        }
-
-        this.snapshot = this.environment.lookup(this.query.fragment);
-
-        // Subscribe to changes in the data of the root fragment
-        this.subscribe(this.snapshot);
-
-        observer.next && observer.next(this.snapshot);
-
-        if (this.snapshot && notifyFirstResult && !suspense) {
-            this.forceUpdate(this.snapshot);
-        }
     }
 }

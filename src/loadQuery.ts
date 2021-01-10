@@ -1,50 +1,16 @@
-import * as areEqual from 'fbjs/lib/areEqual';
-import {
-    GraphQLTaggedNode,
-    OperationType,
-    IEnvironment,
-    isPromise,
-    OperationDescriptor,
-    Disposable,
-} from 'relay-runtime';
+import { GraphQLTaggedNode, OperationType, IEnvironment } from 'relay-runtime';
 import { QueryFetcher } from './QueryFetcher';
-import { RenderProps, QueryOptions, LoadQuery } from './RelayHooksType';
-import { createOperation, forceCache } from './Utils';
+import { RenderProps, QueryOptions, LoadQuery } from './RelayHooksTypes';
+import { forceCache } from './Utils';
 
 export const internalLoadQuery = <TOperationType extends OperationType = OperationType>(
     promise = false,
-    queryExecute = (
-        queryFetcher: QueryFetcher<TOperationType>,
-        environment: IEnvironment,
-        query: OperationDescriptor,
-        options: QueryOptions,
-        retain?: (environment, query) => Disposable,
-    ): RenderProps<TOperationType> => queryFetcher.execute(environment, query, options, retain),
 ): LoadQuery<TOperationType> => {
-    let data: RenderProps<TOperationType> | null | Promise<any> = null;
-    let listener = undefined;
-    let queryFetcher = new QueryFetcher<TOperationType>(true);
-
-    let prev = {
-        environment: null,
-        gqlQuery: null,
-        variables: null,
-        options: null,
-        query: null,
-    };
+    let queryFetcher = new QueryFetcher<TOperationType>();
 
     const dispose = (): void => {
         queryFetcher.dispose();
-        queryFetcher = new QueryFetcher<TOperationType>(true);
-        listener = undefined;
-        data = null;
-        prev = {
-            environment: null,
-            gqlQuery: null,
-            variables: null,
-            options: null,
-            query: null,
-        };
+        queryFetcher = new QueryFetcher<TOperationType>();
     };
 
     const next = (
@@ -53,55 +19,28 @@ export const internalLoadQuery = <TOperationType extends OperationType = Operati
         variables: TOperationType['variables'] = {},
         options: QueryOptions = {},
     ): Promise<void> => {
-        prev.environment = environment;
-        prev.options = options;
-        if (
-            !areEqual(variables, prev.variables) ||
-            gqlQuery != prev.gqlQuery ||
-            options.networkCacheConfig != prev.options.networkCacheConfig
-        ) {
-            const { networkCacheConfig = forceCache } = options;
-            prev.variables = variables;
-            prev.gqlQuery = gqlQuery;
-            prev.query = createOperation(gqlQuery, prev.variables, networkCacheConfig);
-        }
-        const execute = (): void => {
-            data = queryExecute(queryFetcher, prev.environment, prev.query, prev.options);
-            listener && listener(data);
-        };
-
-        queryFetcher.setForceUpdate(execute);
-        let result;
-        try {
-            execute();
-        } catch (e) {
-            result = e.then(execute);
-            if (promise) {
-                data = result;
-            } else {
-                execute();
-            }
-        }
-        return result ?? Promise.resolve();
+        options.networkCacheConfig = options.networkCacheConfig ?? forceCache;
+        queryFetcher.resolve(environment, gqlQuery, variables, options);
+        const toThrow = queryFetcher.checkAndSuspense();
+        return toThrow
+            ? toThrow instanceof Error
+                ? Promise.reject(toThrow)
+                : toThrow
+            : Promise.resolve();
     };
 
     const getValue = (
         environment?: IEnvironment,
     ): RenderProps<TOperationType> | null | Promise<any> => {
-        if (environment && environment != prev.environment) {
-            next(environment, prev.gqlQuery, prev.variables, prev.options);
-        }
-        if (isPromise(data)) {
-            throw data;
-        }
-
-        return data;
+        queryFetcher.resolveEnvironment(environment);
+        queryFetcher.checkAndSuspense(promise);
+        return queryFetcher.getData();
     };
 
-    const subscribe = (callback: (value) => any): (() => void) => {
-        listener = callback;
+    const subscribe = (callback: () => any): (() => void) => {
+        queryFetcher.setForceUpdate(callback);
         return (): void => {
-            listener = null;
+            queryFetcher.setForceUpdate(() => undefined);
         };
     };
     return {

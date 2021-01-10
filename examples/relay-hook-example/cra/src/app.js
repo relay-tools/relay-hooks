@@ -29,7 +29,7 @@ const modernEnvironment = new Environment({
 });
 
 const AppTodo = (propsApp) => {
-    const { props, error } = useQuery(
+    const { data, error } = useQuery(
         QueryApp,
         {},
         {
@@ -40,14 +40,14 @@ const AppTodo = (propsApp) => {
         await create('try', modernEnvironment).catch(console.error);
     }
 
-    console.log('renderer', props, propsApp);
-    if (props && props.entries) {
+    console.log('renderer', data, propsApp);
+    if (data && data.entries) {
         return (
             <React.Fragment>
                 <button onClick={submitEntry} className="refetch">
                     Add
                 </button>
-                <Entries entries={props.entries} />
+                <Entries entries={data.entries} />
             </React.Fragment>
         );
     } else if (error) {

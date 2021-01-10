@@ -26,29 +26,30 @@ export type Entries_entries$key = $ReadOnlyArray<{
 
 
 const node/*: ReaderFragment*/ = {
+  "argumentDefinitions": [],
   "kind": "Fragment",
-  "name": "Entries_entries",
-  "type": "Entry",
   "metadata": {
     "plural": true
   },
-  "argumentDefinitions": [],
+  "name": "Entries_entries",
   "selections": [
     {
-      "kind": "ScalarField",
       "alias": null,
-      "name": "id",
       "args": null,
+      "kind": "ScalarField",
+      "name": "id",
       "storageKey": null
     },
     {
-      "kind": "ScalarField",
       "alias": null,
-      "name": "text",
       "args": null,
+      "kind": "ScalarField",
+      "name": "text",
       "storageKey": null
     }
-  ]
+  ],
+  "type": "Entry",
+  "abstractKey": null
 };
 // prettier-ignore
 (node/*: any*/).hash = 'ccd643d090e21ec668dc0b2947383e70';

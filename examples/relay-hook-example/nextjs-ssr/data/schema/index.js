@@ -11,38 +11,38 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {GraphQLObjectType, GraphQLSchema} from 'graphql';
+import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 
-import {nodeField} from './nodes.js';
-import {UserQuery} from './queries/UserQuery';
-import {AddTodoMutation} from './mutations/AddTodoMutation';
-import {ChangeTodoStatusMutation} from './mutations/ChangeTodoStatusMutation';
-import {MarkAllTodosMutation} from './mutations/MarkAllTodosMutation';
-import {RemoveCompletedTodosMutation} from './mutations/RemoveCompletedTodosMutation';
-import {RemoveTodoMutation} from './mutations/RemoveTodoMutation';
-import {RenameTodoMutation} from './mutations/RenameTodoMutation';
+import { AddTodoMutation } from './mutations/AddTodoMutation';
+import { ChangeTodoStatusMutation } from './mutations/ChangeTodoStatusMutation';
+import { MarkAllTodosMutation } from './mutations/MarkAllTodosMutation';
+import { RemoveCompletedTodosMutation } from './mutations/RemoveCompletedTodosMutation';
+import { RemoveTodoMutation } from './mutations/RemoveTodoMutation';
+import { RenameTodoMutation } from './mutations/RenameTodoMutation';
+import { nodeField } from './nodes.js';
+import { UserQuery } from './queries/UserQuery';
 
 const Query = new GraphQLObjectType({
-  name: 'Query',
-  fields: {
-    user: UserQuery,
-    node: nodeField,
-  },
+    name: 'Query',
+    fields: {
+        user: UserQuery,
+        node: nodeField,
+    },
 });
 
 const Mutation = new GraphQLObjectType({
-  name: 'Mutation',
-  fields: {
-    addTodo: AddTodoMutation,
-    changeTodoStatus: ChangeTodoStatusMutation,
-    markAllTodos: MarkAllTodosMutation,
-    removeCompletedTodos: RemoveCompletedTodosMutation,
-    removeTodo: RemoveTodoMutation,
-    renameTodo: RenameTodoMutation,
-  },
+    name: 'Mutation',
+    fields: {
+        addTodo: AddTodoMutation,
+        changeTodoStatus: ChangeTodoStatusMutation,
+        markAllTodos: MarkAllTodosMutation,
+        removeCompletedTodos: RemoveCompletedTodosMutation,
+        removeTodo: RemoveTodoMutation,
+        renameTodo: RenameTodoMutation,
+    },
 });
 
 export const schema = new GraphQLSchema({
-  query: Query,
-  mutation: Mutation,
+    query: Query,
+    mutation: Mutation,
 });

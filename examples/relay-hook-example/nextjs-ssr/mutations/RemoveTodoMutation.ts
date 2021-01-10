@@ -11,47 +11,51 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {commitMutation, graphql} from 'relay-hooks';
+import { commitMutation, graphql } from 'relay-hooks';
+import { getUser } from './ReadInlineUser';
 
 const mutation = graphql`
-  mutation RemoveTodoMutation($input: RemoveTodoInput!) {
-    removeTodo(input: $input) {
-      deletedTodoId
-      user {
-        completedCount
-        totalCount
-      }
+    mutation RemoveTodoMutation($input: RemoveTodoInput!) {
+        removeTodo(input: $input) {
+            deletedTodoId
+            user {
+                completedCount
+                totalCount
+            }
+        }
     }
-  }
 `;
 
-function commit(environment: any, todo: any, user: any): any {
-  const input: any = {
-    id: todo.id,
-    userId: user.userId,
-  };
-  return commitMutation(environment, {
-    mutation,
-    variables: {
-      input,
-    },
-    configs: [
-      {
-        type: 'NODE_DELETE',
-        deletedIDFieldName: 'deletedTodoId',
-      },
-    ],
-    optimisticResponse: {
-      removeTodo: {
-        deletedTodoId: todo.id,
-        user: {
-          id: user.id,
-          completedCount: user.completedCount - (todo.complete ? 1 : 0),
-          totalCount: user.totalCount - 1,
+export function commit(environment: any, todo: any, userRef: any, onCompleted): any {
+    const user = getUser(userRef);
+    const input: any = {
+        id: todo.id,
+        userId: user.userId,
+    };
+    return commitMutation(environment, {
+        mutation,
+        onCompleted,
+        variables: {
+            input,
         },
-      },
-    },
-  });
+        configs: [
+            {
+                type: 'NODE_DELETE',
+                deletedIDFieldName: 'deletedTodoId',
+            },
+        ],
+        optimisticResponse: {
+            removeTodo: {
+                deletedTodoId: todo.id,
+                user: {
+                    id: user.id,
+                    completedCount: user.completedCount - (todo.complete ? 1 : 0),
+                    totalCount: user.totalCount - 1,
+                },
+            },
+        },
+    });
 }
-
-export default {commit};
+export const RemoveTodoMutation = {
+    commit,
+};

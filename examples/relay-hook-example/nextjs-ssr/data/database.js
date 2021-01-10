@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 // @flow
 /**
  * This file provided by Facebook is for non-commercial testing and evaluation
@@ -12,23 +13,23 @@
  */
 
 export class Todo {
-  id;
-  text;
-  complete;
+    id;
+    text;
+    complete;
 
-  constructor(id, text, complete) {
-    this.id = id;
-    this.text = text;
-    this.complete = complete;
-  }
+    constructor(id, text, complete) {
+        this.id = id;
+        this.text = text;
+        this.complete = complete;
+    }
 }
 
 export class User {
-  id;
+    id;
 
-  constructor(id) {
-    this.id = id;
-  }
+    constructor(id) {
+        this.id = id;
+    }
 }
 
 // Mock authenticated ID
@@ -42,119 +43,124 @@ usersById.set(USER_YOU_ID, new User(USER_YOU_ID));
 
 // Mock todo database table
 const todosById = new Map();
-const todoIdsByUser = new Map([[USER_ID, []], [USER_YOU_ID, []]]);
+const todoIdsByUser = new Map([
+    [USER_ID, []],
+    [USER_YOU_ID, []],
+]);
 
 // Seed initial data
-let nextTodoId = 0;
-addTodo(USER_ID, '0', 'Taste JavaScript', true);
-addTodo(USER_ID, '1', 'Buy a unicorn', false);
+addTodo(USER_ID, '0', 'It', false);
+addTodo(USER_ID, '1', 'Try', true);
+addTodo(USER_ID, '2', 'Buy a unicorn', false);
+addTodo(USER_ID, '3', 'Taste JavaScript', true);
+addTodo(USER_YOU_ID, '4', 'User', false);
+addTodo(USER_YOU_ID, '5', 'Change', true);
 
 function getTodoIdsForUser(id) {
-  return todoIdsByUser.get(id) || [];
+    return todoIdsByUser.get(id) || [];
 }
 
 export function addTodo(idUser, id, text, complete) {
-  const todo = new Todo(id, text, complete);
-  todosById.set(todo.id, todo);
+    const todo = new Todo(id, text, complete);
+    todosById.set(todo.id, todo);
 
-  const todoIdsForUser = getTodoIdsForUser(idUser);
-  todoIdsByUser.set(idUser, todoIdsForUser.concat(todo.id));
+    const todoIdsForUser = getTodoIdsForUser(idUser);
+    todoIdsByUser.set(idUser, todoIdsForUser.concat(todo.id));
 
-  return todo.id;
+    return todo.id;
 }
 
 export function changeTodoStatus(id, complete) {
-  const todo = getTodoOrThrow(id);
+    const todo = getTodoOrThrow(id);
 
-  // Replace with the modified complete value
-  todosById.set(id, new Todo(id, todo.text, complete));
+    // Replace with the modified complete value
+    todosById.set(id, new Todo(id, todo.text, complete));
 }
 
 // Private, for strongest typing, only export `getTodoOrThrow`
 function getTodo(id) {
-  return todosById.get(id);
+    return todosById.get(id);
 }
 
 export function getTodoOrThrow(id) {
-  const todo = getTodo(id);
+    const todo = getTodo(id);
 
-  if (!todo) {
-    throw new Error(`Invariant exception, Todo ${id} not found`);
-  }
+    if (!todo) {
+        throw new Error(`Invariant exception, Todo ${id} not found`);
+    }
 
-  return todo;
+    return todo;
 }
 
 export function getTodos(idUser, status = 'any') {
-  const todoIdsForUser = getTodoIdsForUser(idUser);
-  const todosForUser = todoIdsForUser.map(getTodoOrThrow);
+    const todoIdsForUser = getTodoIdsForUser(idUser);
+    const todosForUser = todoIdsForUser.map(getTodoOrThrow).reverse();
 
-  if (status === 'any') {
-    return todosForUser;
-  }
+    if (status === 'any') {
+        return todosForUser;
+    }
 
-  return todosForUser.filter(
-    todo => todo.complete === (status === 'completed'),
-  );
+    return todosForUser.filter((todo) => todo.complete === (status === 'completed'));
 }
 
 // Private, for strongest typing, only export `getUserOrThrow`
 function getUser(id) {
-  return usersById.get(id);
+    return usersById.get(id);
 }
 
 export function getUserOrThrow(id) {
-  const user = getUser(id);
+    const user = getUser(id);
 
-  if (!user) {
-    //throw new Error(`Invariant exception, User ${id} not found`);
-  }
+    if (!user) {
+        //throw new Error(`Invariant exception, User ${id} not found`);
+    }
 
-  return user;
+    return user;
 }
 
 export function markAllTodos(idUser, complete) {
-  const todosToChange = getTodos(idUser).filter(
-    todo => todo.complete !== complete,
-  );
+    const todosToChange = getTodos(idUser).filter((todo) => todo.complete !== complete);
 
-  todosToChange.forEach(todo => changeTodoStatus(todo.id, complete));
+    todosToChange.forEach((todo) => changeTodoStatus(todo.id, complete));
 
-  return todosToChange.map(todo => todo.id);
+    return todosToChange.map((todo) => todo.id);
 }
 
 export function removeTodo(id, idUser) {
-  const todoIdsForUser = getTodoIdsForUser(idUser);
+    const todoIdsForUser = getTodoIdsForUser(idUser);
 
-  // Remove from the users list
-  todoIdsByUser.set(idUser, todoIdsForUser.filter(todoId => todoId !== id));
+    // Remove from the users list
+    todoIdsByUser.set(
+        idUser,
+        todoIdsForUser.filter((todoId) => todoId !== id),
+    );
 
-  // And also from the total list of Todos
-  todosById.delete(id);
+    // And also from the total list of Todos
+    todosById.delete(id);
 }
 
 export function removeCompletedTodos(idUser) {
-  const todoIdsForUser = getTodoIdsForUser(idUser);
+    const todoIdsForUser = getTodoIdsForUser(idUser);
 
-  const todoIdsToRemove = getTodos(idUser)
-    .filter(todo => todo.complete)
-    .map(todo => todo.id);
+    const todoIdsToRemove = getTodos(idUser)
+        .filter((todo) => todo.complete)
+        .map((todo) => todo.id);
 
-  // Remove from the users list
-  todoIdsByUser.set(
-    idUser,
-    todoIdsForUser.filter(todoId => !todoIdsToRemove.includes(todoId)),
-  );
+    // Remove from the users list
+    todoIdsByUser.set(
+        idUser,
+        todoIdsForUser.filter((todoId) => !todoIdsToRemove.includes(todoId)),
+    );
 
-  // And also from the total list of Todos
-  todoIdsToRemove.forEach(id => todosById.delete(id));
+    // And also from the total list of Todos
+    todoIdsToRemove.forEach((id) => todosById.delete(id));
 
-  return todoIdsToRemove;
+    return todoIdsToRemove;
 }
 
 export function renameTodo(id, text) {
-  const todo = getTodoOrThrow(id);
+    const todo = getTodoOrThrow(id);
 
-  // Replace with the modified text value
-  todosById.set(id, new Todo(id, text, todo.complete));
+    // Replace with the modified text value
+    todosById.set(id, new Todo(id, text, todo.complete));
 }

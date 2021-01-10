@@ -11,53 +11,55 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {commitMutation, graphql} from 'relay-hooks';
+import { commitMutation, graphql } from 'relay-hooks';
+import { getUser } from './ReadInlineUser';
 
 const mutation = graphql`
-  mutation ChangeTodoStatusMutation($input: ChangeTodoStatusInput!) {
-    changeTodoStatus(input: $input) {
-      todo {
-        id
-        complete
-      }
-      user {
-        id
-        completedCount
-      }
+    mutation ChangeTodoStatusMutation($input: ChangeTodoStatusInput!) {
+        changeTodoStatus(input: $input) {
+            todo {
+                id
+                complete
+            }
+            user {
+                id
+                completedCount
+            }
+        }
     }
-  }
 `;
 
 function getOptimisticResponse(complete: boolean, todo: any, user: any): any {
-  return {
-    changeTodoStatus: {
-      todo: {
-        complete: complete,
+    return {
+        changeTodoStatus: {
+            todo: {
+                complete: complete,
+                id: todo.id,
+            },
+            user: {
+                id: user.id,
+                completedCount: complete ? user.completedCount + 1 : user.completedCount - 1,
+            },
+        },
+    };
+}
+
+export function commit(environment: any, complete: boolean, todo: any, userRef: any): void {
+    const user = getUser(userRef);
+    const input: any = {
+        complete,
+        userId: user.userId,
         id: todo.id,
-      },
-      user: {
-        id: user.id,
-        completedCount: complete
-          ? user.completedCount + 1
-          : user.completedCount - 1,
-      },
-    },
-  };
+    };
+    commitMutation(environment, {
+        mutation,
+        variables: {
+            input,
+        },
+        optimisticResponse: getOptimisticResponse(complete, todo, user),
+    });
 }
 
-function commit(environment: any, complete: boolean, todo: any, user: any) {
-  const input: any = {
-    complete,
-    userId: user.userId,
-    id: todo.id,
-  };
-  commitMutation(environment, {
-    mutation,
-    variables: {
-      input,
-    },
-    optimisticResponse: getOptimisticResponse(complete, todo, user),
-  });
-}
-
-export default {commit};
+export const ChangeTodoStatusMutation = {
+    commit,
+};

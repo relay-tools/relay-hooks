@@ -32,7 +32,7 @@ const options = {
 }
 
 const TodoApp = (props) => {
-    const [ user, refetch ] = useRefetchable(fragmentSpec, props.user);
+    const { data: user, refetch } = useRefetchable(fragmentSpec, props.user);
     const handlerRefetch = () => {
     const response = refetch({userId: 'me'}, options);
     //response.dispose(); 

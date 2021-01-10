@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 // @flow
 /* graphql-relay doesn't export types, and isn't in flow-typed.  This gets too messy */
-/* eslint flowtype/require-return-type: 'off' */
 /**
  * This file provided by Facebook is for non-commercial testing and evaluation
  * purposes only.  Facebook reserves all rights not expressly granted.
@@ -13,39 +13,33 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {fromGlobalId, mutationWithClientMutationId} from 'graphql-relay';
-import {GraphQLBoolean, GraphQLID, GraphQLNonNull} from 'graphql';
-import {GraphQLTodo, GraphQLUser} from '../nodes';
-import {
-  changeTodoStatus,
-  getTodoOrThrow,
-  getUserOrThrow,
-  Todo,
-  User,
-} from '../../database';
+import { GraphQLBoolean, GraphQLID, GraphQLNonNull } from 'graphql';
+import { mutationWithClientMutationId } from 'graphql-relay';
+import { changeTodoStatus, getTodoOrThrow, getUserOrThrow } from '../../database';
+import { GraphQLTodo, GraphQLUser } from '../nodes';
 
 const ChangeTodoStatusMutation = mutationWithClientMutationId({
-  name: 'ChangeTodoStatus',
-  inputFields: {
-    complete: {type: new GraphQLNonNull(GraphQLBoolean)},
-    id: {type: new GraphQLNonNull(GraphQLID)},
-    userId: {type: new GraphQLNonNull(GraphQLID)},
-  },
-  outputFields: {
-    todo: {
-      type: new GraphQLNonNull(GraphQLTodo),
-      resolve: ({id}) => getTodoOrThrow(id),
+    name: 'ChangeTodoStatus',
+    inputFields: {
+        complete: { type: new GraphQLNonNull(GraphQLBoolean) },
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        userId: { type: new GraphQLNonNull(GraphQLID) },
     },
-    user: {
-      type: new GraphQLNonNull(GraphQLUser),
-      resolve: ({userId}) => getUserOrThrow(userId),
+    outputFields: {
+        todo: {
+            type: new GraphQLNonNull(GraphQLTodo),
+            resolve: ({ id }) => getTodoOrThrow(id),
+        },
+        user: {
+            type: new GraphQLNonNull(GraphQLUser),
+            resolve: ({ userId }) => getUserOrThrow(userId),
+        },
     },
-  },
-  mutateAndGetPayload: ({id, complete, userId}) => {
-    changeTodoStatus(id, complete);
+    mutateAndGetPayload: ({ id, complete, userId }) => {
+        changeTodoStatus(id, complete);
 
-    return {id, userId};
-  },
+        return { id, userId };
+    },
 });
 
-export {ChangeTodoStatusMutation};
+export { ChangeTodoStatusMutation };

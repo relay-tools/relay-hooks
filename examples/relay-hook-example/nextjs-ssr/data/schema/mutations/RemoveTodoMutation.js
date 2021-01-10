@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 // @flow
 /* graphql-relay doesn't export types, and isn't in flow-typed.  This gets too messy */
-/* eslint flowtype/require-return-type: 'off' */
 /**
  * This file provided by Facebook is for non-commercial testing and evaluation
  * purposes only.  Facebook reserves all rights not expressly granted.
@@ -13,32 +13,32 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {mutationWithClientMutationId, fromGlobalId} from 'graphql-relay';
-import {GraphQLID, GraphQLNonNull} from 'graphql';
-import {GraphQLUser} from '../nodes';
-import {getUserOrThrow, removeTodo, User} from '../../database';
+import { GraphQLID, GraphQLNonNull } from 'graphql';
+import { mutationWithClientMutationId } from 'graphql-relay';
+import { getUserOrThrow, removeTodo } from '../../database';
+import { GraphQLUser } from '../nodes';
 
 const RemoveTodoMutation = mutationWithClientMutationId({
-  name: 'RemoveTodo',
-  inputFields: {
-    id: {type: new GraphQLNonNull(GraphQLID)},
-    userId: {type: new GraphQLNonNull(GraphQLID)},
-  },
-  outputFields: {
-    deletedTodoId: {
-      type: new GraphQLNonNull(GraphQLID),
-      resolve: ({id}) => id,
+    name: 'RemoveTodo',
+    inputFields: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        userId: { type: new GraphQLNonNull(GraphQLID) },
     },
-    user: {
-      type: new GraphQLNonNull(GraphQLUser),
-      resolve: ({userId}) => getUserOrThrow(userId),
+    outputFields: {
+        deletedTodoId: {
+            type: new GraphQLNonNull(GraphQLID),
+            resolve: ({ id }) => id,
+        },
+        user: {
+            type: new GraphQLNonNull(GraphQLUser),
+            resolve: ({ userId }) => getUserOrThrow(userId),
+        },
     },
-  },
-  mutateAndGetPayload: ({id, userId}) => {
-    removeTodo(id, userId);
+    mutateAndGetPayload: ({ id, userId }) => {
+        removeTodo(id, userId);
 
-    return {id, userId};
-  },
+        return { id, userId };
+    },
 });
 
-export {RemoveTodoMutation};
+export { RemoveTodoMutation };

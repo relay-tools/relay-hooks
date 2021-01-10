@@ -16,6 +16,8 @@ import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 import { useRefetchable, RelayEnvironmentProvider, useRelayEnvironment } from '../src';
 
+const forceCache = { force: true };
+
 function createHooks(component, options?: any) {
     const result = ReactTestRenderer.create(component, options);
     ReactTestRenderer.act(() => {
@@ -28,15 +30,22 @@ const ReactRelayRefetchContainer = {
     createContainer: (Component, spec, query) => (props) => {
         const { user, ...others } = props;
         const environment = useRelayEnvironment();
-        const [data, refetchHooks] = useRefetchable(spec, user);
+        const { data, refetch: refetchHooks, isLoading, error } = useRefetchable(spec, user) as any;
         const refetch = (refetchVariables, renderVariables, observer, options) => {
             return refetchHooks(refetchVariables, {
-                renderVariables,
-                observerOrCallback: observer,
-                refetchOptions: options,
+                onComplete: observer?.complete ?? observer,
+                fetchPolicy: options?.fetchPolicy,
             });
         };
-        return <Component user={data} {...others} relay={{ environment, refetch }} />;
+        return (
+            <Component
+                error={error}
+                isLoading={isLoading}
+                user={data}
+                {...others}
+                relay={{ environment, refetch }}
+            />
+        );
     },
 };
 
@@ -210,6 +219,8 @@ describe('useRefetchable', () => {
         expect(render.mock.calls[0][0]).toEqual({
             bar: 1,
             foo: 'foo',
+            isLoading: false,
+            error: null,
             relay: {
                 environment: expect.any(Object),
                 refetch: expect.any(Function),
@@ -229,6 +240,8 @@ describe('useRefetchable', () => {
         // Data & Variables are passed to component
         expect(render.mock.calls.length).toBe(1);
         expect(render.mock.calls[0][0]).toEqual({
+            isLoading: false,
+            error: null,
             relay: {
                 environment: expect.any(Object),
                 refetch: expect.any(Function),
@@ -263,6 +276,8 @@ describe('useRefetchable', () => {
                 id: '4',
                 name: 'Zuck',
             },
+            isLoading: false,
+            error: null,
             relay: {
                 environment: expect.any(Object),
                 refetch: expect.any(Function),
@@ -316,6 +331,8 @@ describe('useRefetchable', () => {
                 id: '4',
                 name: 'Mark',
             },
+            isLoading: false,
+            error: null,
             relay: {
                 environment: expect.any(Object),
                 refetch: expect.any(Function),
@@ -346,6 +363,8 @@ describe('useRefetchable', () => {
                 id: '842472',
                 name: 'Joe',
             },
+            isLoading: false,
+            error: null,
             relay: {
                 environment: expect.any(Object),
                 refetch: expect.any(Function),
@@ -394,6 +413,8 @@ describe('useRefetchable', () => {
                 id: '4',
                 // Name is excluded since value of cond is now false
             },
+            isLoading: false,
+            error: null,
             relay: {
                 environment: expect.any(Object),
                 refetch: expect.any(Function),
@@ -435,7 +456,9 @@ describe('useRefetchable', () => {
             id: '4',
         };
         refetch(refetchVariables, null, jest.fn());
-        expect(environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables)).toBe(true);
+        expect(
+            environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache),
+        ).toBe(true);
 
         environment.mock.resolve(UserFragmentRefetchQuery, {
             data: {
@@ -462,6 +485,8 @@ describe('useRefetchable', () => {
                 id: '4',
                 // Name is excluded since value of cond is now false
             },
+            isLoading: false,
+            error: null,
             relay: {
                 environment: expect.any(Object),
                 refetch: expect.any(Function),
@@ -654,9 +679,9 @@ describe('useRefetchable', () => {
                 id: '4',
             };
             refetch(refetchVariables, null, jest.fn());
-            expect(environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables)).toBe(
-                true,
-            );
+            expect(
+                environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache),
+            ).toBe(true);
             environment.mock.resolve(UserFragmentRefetchQuery, {
                 data: {
                     node: {
@@ -678,7 +703,9 @@ describe('useRefetchable', () => {
             };
             refetch(refetchVariables, null, jest.fn(), refetchOptions);
             expect(render.mock.calls.length).toBe(2);
-            expect(environment.mock.isLoading(UserQuery, refetchVariables)).toBe(false);
+            expect(
+                environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache),
+            ).toBe(false);
             expect(environment.execute).toBeCalledTimes(0);
         });
 
@@ -699,9 +726,10 @@ describe('useRefetchable', () => {
                 },
             });
             expect(callback.mock.calls.length).toBe(1);
-            expect(callback).toBeCalledWith(undefined);
+            expect(callback).toBeCalledWith(null);
         });
 
+        /* Now the callback is called only on success (complete) or error
         it('calls the callback when the fetch succeeds after every update', () => {
             const callback = jest.fn();
             variables = {
@@ -718,7 +746,7 @@ describe('useRefetchable', () => {
                 },
             });
             expect(callback.mock.calls.length).toBe(1);
-            expect(callback).toBeCalledWith(undefined);
+            expect(callback).toBeCalledWith();
 
             environment.mock.nextValue(UserFragmentRefetchQuery, {
                 data: {
@@ -729,12 +757,12 @@ describe('useRefetchable', () => {
                 },
             });
             expect(callback.mock.calls.length).toBe(2);
-            expect(callback).toBeCalledWith(undefined);
+            expect(callback).toBeCalledWith();
 
             environment.mock.complete(UserFragmentRefetchQuery);
             expect(callback.mock.calls.length).toBe(2);
         });
-
+        */
         it('calls the callback when the fetch fails', () => {
             expect.assertions(2);
             const callback = jest.fn();
@@ -749,6 +777,7 @@ describe('useRefetchable', () => {
             expect(callback).toBeCalledWith(error);
         });
 
+        /* now refetch set cacheConfig { force: true }
         it('calls the callback even if the response is cached', () => {
             const refetchVariables = {
                 cond: false,
@@ -767,6 +796,7 @@ describe('useRefetchable', () => {
             refetch(refetchVariables, null, callback);
             expect(callback).toHaveBeenCalled();
         });
+        */
 
         it('returns false for isLoading if the response comes from cache', () => {
             const refetchVariables = {
@@ -788,7 +818,7 @@ describe('useRefetchable', () => {
         });
 
         it('renders with the results of the new variables on success', () => {
-            expect.assertions(5);
+            expect.assertions(10);
             expect(render.mock.calls.length).toBe(1);
             expect(render.mock.calls[0][0].user.name).toBe('Zuck');
             variables = {
@@ -796,7 +826,9 @@ describe('useRefetchable', () => {
                 id: '4',
             };
             refetch(variables, null, jest.fn());
-            expect(render.mock.calls.length).toBe(1);
+            expect(render.mock.calls.length).toBe(2);
+            expect(render.mock.calls[1][0].isLoading).toBe(true);
+            expect(render.mock.calls[1][0].user.name).toBe('Zuck');
             environment.mock.resolve(UserFragmentRefetchQuery, {
                 data: {
                     node: {
@@ -806,22 +838,35 @@ describe('useRefetchable', () => {
                     },
                 },
             });
-            expect(render.mock.calls.length).toBe(2);
-            expect(render.mock.calls[1][0].user.name).toBe(undefined);
+            expect(render.mock.calls.length).toBe(4);
+            expect(render.mock.calls[2][0].isLoading).toBe(true);
+            expect(render.mock.calls[2][0].user.name).toBe(undefined);
+            expect(render.mock.calls[3][0].isLoading).toBe(false);
+            expect(render.mock.calls[3][0].user.name).toBe(undefined);
         });
 
         it('does not update variables on failure', () => {
-            expect.assertions(4);
+            expect.assertions(11);
             expect(render.mock.calls.length).toBe(1);
             expect(render.mock.calls[0][0].user.name).toBe('Zuck');
+
+            const callback = jest.fn();
             variables = {
                 cond: false,
                 id: '4',
             };
-            refetch(variables, null, jest.fn());
-            expect(render.mock.calls.length).toBe(1);
-            environment.mock.reject(UserFragmentRefetchQuery, new Error('oops'));
-            expect(render.mock.calls.length).toBe(1);
+            refetch(variables, null, callback);
+            expect(render.mock.calls.length).toBe(2);
+            expect(render.mock.calls[1][0].isLoading).toBe(true);
+            expect(render.mock.calls[1][0].user.name).toBe('Zuck');
+            const error = new Error('oops');
+            environment.mock.reject(UserFragmentRefetchQuery, error);
+            expect(render.mock.calls.length).toBe(3);
+            expect(render.mock.calls[2][0].error).toBe(error);
+            expect(render.mock.calls[2][0].isLoading).toBe(false);
+            expect(render.mock.calls[2][0].user.name).toBe('Zuck');
+            expect(callback.mock.calls.length).toBe(1);
+            expect(callback).toBeCalledWith(error);
         });
 
         it('continues the fetch if new props refer to the same records', () => {

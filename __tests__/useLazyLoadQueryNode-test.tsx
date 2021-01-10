@@ -89,7 +89,7 @@ describe('useLazyLoadQueryNode', () => {
         }
 
         const Renderer = (renderProps) => {
-            const { props } = useLazyLoadQueryNode(
+            const { data } = useLazyLoadQueryNode(
                 renderProps.gqlQuery || gqlQuery,
                 renderProps.variables,
                 /* $FlowFixMe(>=0.111.0) This comment suppresses an error found when
@@ -98,10 +98,10 @@ describe('useLazyLoadQueryNode', () => {
                 {
                     fetchPolicy: renderProps.fetchPolicy || defaultFetchPolicy,
                     skip: renderProps.skip,
-                    fetchObserver: renderProps.fetchObserver,
+                    onComplete: renderProps.onComplete,
                 },
             );
-            return renderFn(props);
+            return renderFn(data);
         };
 
         Container = (props) => {
@@ -159,7 +159,7 @@ describe('useLazyLoadQueryNode', () => {
         gqlQuery = generated.UserQuery;
         gqlNoNameQuery = generated.UserNoNameQuery;
         variables = { id: '1' };
-        query = createOperationDescriptor(gqlQuery, variables, { force: true});
+        query = createOperationDescriptor(gqlQuery, variables, { force: true });
         renderFn = jest.fn((result) =>
             result && result.node && result.node.name ? result.node.name : 'Empty',
         );
@@ -193,15 +193,10 @@ describe('useLazyLoadQueryNode', () => {
     });
 
     it('observe query', () => {
-        const observer = {
-            next: jest.fn(() => undefined),
-            error: jest.fn(() => undefined),
-            complete: jest.fn(() => undefined),
-            start: jest.fn(() => undefined),
-        };
+        const onComplete = jest.fn(() => undefined);
         const instance = render(
             environment,
-            <Container variables={variables} fetchObserver={observer} />,
+            <Container variables={variables} onComplete={onComplete} />,
         );
 
         expect(instance.toJSON()).toEqual('Fallback');
@@ -209,8 +204,7 @@ describe('useLazyLoadQueryNode', () => {
         expect(renderFn).not.toBeCalled();
         expect(environment.retain).toHaveBeenCalledTimes(1);
 
-        expect(observer.start).toBeCalled();
-        expect(observer.next).not.toBeCalled();
+        expect(onComplete).not.toBeCalled();
 
         environment.mock.resolve(gqlQuery, {
             data: {
@@ -225,20 +219,14 @@ describe('useLazyLoadQueryNode', () => {
         const data = environment.lookup(query.fragment).data;
         expectToBeRendered(renderFn, data);
 
-        expect(observer.next).toBeCalled();
-        expect(observer.complete).toBeCalled();
+        expect(onComplete).toBeCalled();
     });
 
     it('observe query error', () => {
-        const observer = {
-            next: jest.fn(() => undefined),
-            error: jest.fn(() => undefined),
-            complete: jest.fn(() => undefined),
-            start: jest.fn(() => undefined),
-        };
+        const onComplete = jest.fn(() => undefined);
         const instance = render(
             environment,
-            <Container variables={variables} fetchObserver={observer} />,
+            <Container variables={variables} onComplete={onComplete} />,
         );
 
         expect(instance.toJSON()).toEqual('Fallback');
@@ -246,16 +234,12 @@ describe('useLazyLoadQueryNode', () => {
         expect(renderFn).not.toBeCalled();
         expect(environment.retain).toHaveBeenCalledTimes(1);
 
-        expect(observer.start).toBeCalled();
-        expect(observer.next).not.toBeCalled();
-        expect(observer.error).not.toBeCalled();
+        expect(onComplete).not.toBeCalled();
 
         const error = new Error('fail');
         environment.mock.reject(gqlQuery, error);
 
-        expect(observer.next).not.toBeCalled();
-        expect(observer.complete).not.toBeCalled();
-        expect(observer.error).toBeCalled();
+        expect(onComplete).toBeCalledWith(error);
     });
 
     it('skip', () => {
@@ -492,7 +476,7 @@ describe('useLazyLoadQueryNode', () => {
         });
 
         // Assert data is released
-        expect(release).toBeCalledTimes(2);
+        expect(release).toBeCalledTimes(1); // relay 2
         // Assert request in flight is cancelled
         expect(environment.mock.isLoading(query.request.node, variables)).toEqual(false);
     });
@@ -559,7 +543,9 @@ describe('useLazyLoadQueryNode', () => {
             setProps({ gqlQuery: gqlNoNameQuery, variables });
         });
 
-        const queryNoNameQuery = createOperationDescriptor(gqlNoNameQuery, variables, { force: true });
+        const queryNoNameQuery = createOperationDescriptor(gqlNoNameQuery, variables, {
+            force: true,
+        });
         expect(instance.toJSON()).toEqual('Fallback');
         expectToHaveFetched(environment, queryNoNameQuery);
         expect(renderFn).not.toBeCalled();

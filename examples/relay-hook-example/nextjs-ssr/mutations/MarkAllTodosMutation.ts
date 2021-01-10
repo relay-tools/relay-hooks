@@ -11,8 +11,9 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {commitMutation, graphql} from 'relay-hooks';
-import {Disposable} from 'relay-runtime';
+import { commitMutation, graphql } from 'relay-hooks';
+import { Disposable } from 'relay-runtime';
+import { getUser } from './ReadInlineUser';
 /*
 import type {
   MarkAllTodosInput,
@@ -32,67 +33,64 @@ type Edge = $NonMaybeType<$ElementType<Edges, number>>;
 type Node = $NonMaybeType<$ElementType<Edge, 'node'>>;
 */
 const mutation = graphql`
-  mutation MarkAllTodosMutation($input: MarkAllTodosInput!) {
-    markAllTodos(input: $input) {
-      changedTodos {
-        id
-        complete
-      }
-      user {
-        id
-        completedCount
-      }
+    mutation MarkAllTodosMutation($input: MarkAllTodosInput!) {
+        markAllTodos(input: $input) {
+            changedTodos {
+                id
+                complete
+            }
+            user {
+                id
+                completedCount
+            }
+        }
     }
-  }
 `;
 
 function getOptimisticResponse(complete: boolean, todos: any, user: any): any {
-  // Relay returns Maybe types a lot of times in a connection that we need to cater for
-  const validNodes: ReadonlyArray<any> = todos.edges
-    ? todos.edges
-        .filter(Boolean)
-        .map((edge: any): any => edge.node)
-        .filter(Boolean)
-    : [];
+    // Relay returns Maybe types a lot of times in a connection that we need to cater for
+    /* eslint-disable indent */
+    const validNodes: ReadonlyArray<any> = todos.edges
+        ? todos.edges
+              .filter(Boolean)
+              .map((edge: any): any => edge.node)
+              .filter(Boolean)
+        : [];
+    /* eslint-enable indent */
 
-  const changedTodos: any = validNodes
-    .filter((node: any): boolean => node.complete !== complete)
-    .map(
-      (node: any): any => ({
-        complete: complete,
-        id: node.id,
-      }),
-    );
+    const changedTodos: any = validNodes
+        .filter((node: any): boolean => node.complete !== complete)
+        .map((node: any): any => ({
+            complete: complete,
+            id: node.id,
+        }));
 
-  return {
-    markAllTodos: {
-      changedTodos,
-      user: {
-        id: user.id,
-        completedCount: complete ? user.totalCount : 0,
-      },
-    },
-  };
+    return {
+        markAllTodos: {
+            changedTodos,
+            user: {
+                id: user.id,
+                completedCount: complete ? user.totalCount : 0,
+            },
+        },
+    };
 }
 
-function commit(
-  environment: any,
-  complete: boolean,
-  todos: any,
-  user: any,
-): Disposable {
-  const input: any = {
-    complete,
-    userId: user.userId,
-  };
+export function commit(environment: any, complete: boolean, todos: any, userRef: any): Disposable {
+    const user = getUser(userRef);
+    const input: any = {
+        complete,
+        userId: user.userId,
+    };
 
-  return commitMutation(environment, {
-    mutation,
-    variables: {
-      input,
-    },
-    optimisticResponse: getOptimisticResponse(complete, todos, user),
-  });
+    return commitMutation(environment, {
+        mutation,
+        variables: {
+            input,
+        },
+        optimisticResponse: getOptimisticResponse(complete, todos, user),
+    });
 }
-
-export default {commit};
+export const MarkAllTodosMutation = {
+    commit,
+};

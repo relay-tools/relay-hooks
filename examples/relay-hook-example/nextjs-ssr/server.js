@@ -14,32 +14,32 @@ require('es6-promise').polyfill();
 require('isomorphic-fetch');
 import express from 'express';
 import graphQLHTTP from 'express-graphql';
-import {schema} from './data/schema';
 import next from 'next';
+import { schema } from './data/schema';
 
-const app = next({dev: process.env.NODE_ENV !== 'production'});
+const app = next({ dev: process.env.NODE_ENV !== 'production' });
 const handle = app.getRequestHandler();
 
 const port = 3000;
 
 app.prepare().then(() => {
-  const server = express();
+    const server = express();
 
-  server.use(
-    '/graphql',
-    graphQLHTTP({
-      schema,
-      graphiql: false,
-      pretty: true,
-    }),
-  );
+    server.use(
+        '/graphql',
+        graphQLHTTP({
+            schema,
+            graphiql: false,
+            pretty: true,
+        }),
+    );
 
-  server.get('*', (req, res) => {
-    return handle(req, res);
-  });
+    server.get('*', (req, res) => {
+        return handle(req, res);
+    });
 
-  server.listen(port, err => {
-    if (err) throw err;
-    console.log(`> Ready on http://localhost:${port}`);
-  });
+    server.listen(port, (err) => {
+        if (err) throw err;
+        console.log(`> Ready on http://localhost:${port}`);
+    });
 });

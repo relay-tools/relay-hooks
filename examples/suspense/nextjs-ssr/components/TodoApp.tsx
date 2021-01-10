@@ -6,7 +6,6 @@ import TodoTextInput from './TodoTextInput';
 import styled from 'styled-components';
 import Header from './Header';
 import {
-  useRefetch,
   useRefetchable,
   useRelayEnvironment,
   graphql,
@@ -123,7 +122,7 @@ const AppTodo = (props: Props) => {
         <TodoList user={user} />
         {hasTodos && <TodoListFooter user={user} />}
         <StyledDivButton>
-          <StyledButton onClick={props.retry}>Retry</StyledButton>
+          <StyledButton onClick={() => props.retry()}>Retry</StyledButton>
         </StyledDivButton>
         <StyledDivButton>
           <StyledButton

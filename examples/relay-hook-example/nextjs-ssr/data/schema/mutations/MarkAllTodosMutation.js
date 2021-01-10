@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 // @flow
 /* graphql-relay doesn't export types, and isn't in flow-typed.  This gets too messy */
-/* eslint flowtype/require-return-type: 'off' */
 /**
  * This file provided by Facebook is for non-commercial testing and evaluation
  * purposes only.  Facebook reserves all rights not expressly granted.
@@ -13,40 +13,32 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {mutationWithClientMutationId} from 'graphql-relay';
-import {GraphQLBoolean, GraphQLID, GraphQLList, GraphQLNonNull} from 'graphql';
-import {GraphQLTodo, GraphQLUser} from '../nodes';
-
-import {
-  getTodoOrThrow,
-  getUserOrThrow,
-  markAllTodos,
-  Todo,
-  User,
-} from '../../database';
+import { GraphQLBoolean, GraphQLID, GraphQLList, GraphQLNonNull } from 'graphql';
+import { mutationWithClientMutationId } from 'graphql-relay';
+import { getTodoOrThrow, getUserOrThrow, markAllTodos } from '../../database';
+import { GraphQLTodo, GraphQLUser } from '../nodes';
 
 const MarkAllTodosMutation = mutationWithClientMutationId({
-  name: 'MarkAllTodos',
-  inputFields: {
-    complete: {type: new GraphQLNonNull(GraphQLBoolean)},
-    userId: {type: new GraphQLNonNull(GraphQLID)},
-  },
-  outputFields: {
-    changedTodos: {
-      type: new GraphQLList(new GraphQLNonNull(GraphQLTodo)),
-      resolve: ({changedTodoIds}) =>
-        changedTodoIds.map(todoId => getTodoOrThrow(todoId)),
+    name: 'MarkAllTodos',
+    inputFields: {
+        complete: { type: new GraphQLNonNull(GraphQLBoolean) },
+        userId: { type: new GraphQLNonNull(GraphQLID) },
     },
-    user: {
-      type: new GraphQLNonNull(GraphQLUser),
-      resolve: ({userId}) => getUserOrThrow(userId),
+    outputFields: {
+        changedTodos: {
+            type: new GraphQLList(new GraphQLNonNull(GraphQLTodo)),
+            resolve: ({ changedTodoIds }) => changedTodoIds.map((todoId) => getTodoOrThrow(todoId)),
+        },
+        user: {
+            type: new GraphQLNonNull(GraphQLUser),
+            resolve: ({ userId }) => getUserOrThrow(userId),
+        },
     },
-  },
-  mutateAndGetPayload: ({complete, userId}) => {
-    const changedTodoIds = markAllTodos(userId, complete);
+    mutateAndGetPayload: ({ complete, userId }) => {
+        const changedTodoIds = markAllTodos(userId, complete);
 
-    return {changedTodoIds, userId};
-  },
+        return { changedTodoIds, userId };
+    },
 });
 
-export {MarkAllTodosMutation};
+export { MarkAllTodosMutation };

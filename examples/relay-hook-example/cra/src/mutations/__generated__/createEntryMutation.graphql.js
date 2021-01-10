@@ -1,6 +1,5 @@
 /**
  * @flow
- * @relayHash 6f6fbd8d622292a31e9ccc1b3df4c68a
  */
 
 /* eslint-disable */
@@ -50,18 +49,14 @@ mutation createEntryMutation(
 const node/*: ConcreteRequest*/ = (function(){
 var v0 = [
   {
+    "defaultValue": null,
     "kind": "LocalArgument",
-    "name": "input",
-    "type": "CreateEntryInput",
-    "defaultValue": null
+    "name": "input"
   }
 ],
 v1 = [
   {
-    "kind": "LinkedField",
     "alias": null,
-    "name": "createEntry",
-    "storageKey": null,
     "args": [
       {
         "kind": "Variable",
@@ -70,65 +65,70 @@ v1 = [
       }
     ],
     "concreteType": "CreateEntryPayload",
+    "kind": "LinkedField",
+    "name": "createEntry",
     "plural": false,
     "selections": [
       {
-        "kind": "ScalarField",
         "alias": null,
-        "name": "clientMutationId",
         "args": null,
+        "kind": "ScalarField",
+        "name": "clientMutationId",
         "storageKey": null
       },
       {
-        "kind": "LinkedField",
         "alias": null,
-        "name": "entry",
-        "storageKey": null,
         "args": null,
         "concreteType": "Entry",
+        "kind": "LinkedField",
+        "name": "entry",
         "plural": false,
         "selections": [
           {
-            "kind": "ScalarField",
             "alias": null,
-            "name": "id",
             "args": null,
+            "kind": "ScalarField",
+            "name": "id",
             "storageKey": null
           },
           {
-            "kind": "ScalarField",
             "alias": null,
-            "name": "text",
             "args": null,
+            "kind": "ScalarField",
+            "name": "text",
             "storageKey": null
           }
-        ]
+        ],
+        "storageKey": null
       }
-    ]
+    ],
+    "storageKey": null
   }
 ];
 return {
-  "kind": "Request",
   "fragment": {
-    "kind": "Fragment",
-    "name": "createEntryMutation",
-    "type": "Mutation",
-    "metadata": null,
     "argumentDefinitions": (v0/*: any*/),
-    "selections": (v1/*: any*/)
+    "kind": "Fragment",
+    "metadata": null,
+    "name": "createEntryMutation",
+    "selections": (v1/*: any*/),
+    "type": "Mutation",
+    "abstractKey": null
   },
+  "kind": "Request",
   "operation": {
+    "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "createEntryMutation",
-    "argumentDefinitions": (v0/*: any*/),
     "selections": (v1/*: any*/)
   },
   "params": {
-    "operationKind": "mutation",
-    "name": "createEntryMutation",
+    "cacheID": "3cfd3445232200a70982ffe9d8bfae5d",
     "id": null,
-    "text": "mutation createEntryMutation(\n  $input: CreateEntryInput\n) {\n  createEntry(input: $input) {\n    clientMutationId\n    entry {\n      id\n      text\n    }\n  }\n}\n",
-    "metadata": {}
+    "metadata": {},
+    "name": "createEntryMutation",
+    "operationKind": "mutation",
+    "text": "mutation createEntryMutation(\n  $input: CreateEntryInput\n) {\n  createEntry(input: $input) {\n    clientMutationId\n    entry {\n      id\n      text\n    }\n  }\n}\n"
   }
 };
 })();

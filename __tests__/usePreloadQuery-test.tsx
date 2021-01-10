@@ -106,10 +106,10 @@ describe('usePreloadQuery', () => {
 
         it('suspends while the query is pending', () => {
             prefetched.next(environment, params, { id: '4' });
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                return data.props.node.name;
+                dataQuery = usePreloadedQuery(props.prefetched);
+                return dataQuery.data.node.name;
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
@@ -120,15 +120,15 @@ describe('usePreloadQuery', () => {
             );
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Fallback');
-            expect(data).toBe(undefined);
+            expect(dataQuery).toBe(undefined);
         });
 
         it('suspends while the query is pending (with default variables)', () => {
             prefetched.next(environment, params, {});
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                return data?.props?.node?.name ?? 'Error: should have suspended';
+                dataQuery = usePreloadedQuery(props.prefetched);
+                return dataQuery?.data?.node?.name ?? 'Error: should have suspended';
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
@@ -139,7 +139,7 @@ describe('usePreloadQuery', () => {
             );
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Fallback');
-            expect(data).toBe(undefined);
+            expect(dataQuery).toBe(undefined);
         });
 
         it('renders synchronously if the query has already completed', () => {
@@ -150,10 +150,10 @@ describe('usePreloadQuery', () => {
             dataSource.next(response);
             dataSource.complete();
 
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                return data.props.node.name;
+                dataQuery = usePreloadedQuery(props.prefetched);
+                return dataQuery.data.node.name;
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
@@ -165,7 +165,7 @@ describe('usePreloadQuery', () => {
             TestRenderer.act(() => jest.runAllImmediates());
 
             expect(renderer.toJSON()).toEqual('Zuck');
-            expect(data.props).toEqual({
+            expect(dataQuery.data).toEqual({
                 node: {
                     id: '4',
                     name: 'Zuck',
@@ -180,10 +180,10 @@ describe('usePreloadQuery', () => {
             const error = new Error('wtf');
             dataSource.error(error);
 
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                return data.props.node.name;
+                dataQuery = usePreloadedQuery(props.prefetched);
+                return dataQuery.data.node.name;
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
@@ -202,10 +202,10 @@ describe('usePreloadQuery', () => {
         it('updates asynchronously when the query completes', () => {
             prefetched.next(environment, params, { id: '4' });
 
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                return data.props.node.name;
+                dataQuery = usePreloadedQuery(props.prefetched);
+                return dataQuery.data.node.name;
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
@@ -217,13 +217,13 @@ describe('usePreloadQuery', () => {
             // Ensure that useEffect runs
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Fallback');
-            expect(data).toBe(undefined);
+            expect(dataQuery).toBe(undefined);
 
             dataSource.next(response);
             dataSource.complete();
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Zuck');
-            expect(data.props).toEqual({
+            expect(dataQuery.data).toEqual({
                 node: {
                     id: '4',
                     name: 'Zuck',
@@ -241,10 +241,10 @@ describe('usePreloadQuery', () => {
             );
             expect(fetch).toBeCalledTimes(1); // 2
 
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                return data.props.node.name;
+                dataQuery = usePreloadedQuery(props.prefetched);
+                return dataQuery.data.node.name;
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
@@ -256,13 +256,13 @@ describe('usePreloadQuery', () => {
             // Ensure that useEffect runs
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Fallback');
-            expect(data).toBe(undefined);
+            expect(dataQuery).toBe(undefined);
 
             dataSource.next(response);
             dataSource.complete();
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Zuck');
-            expect(data.props).toEqual({
+            expect(dataQuery.data).toEqual({
                 node: {
                     id: '4',
                     name: 'Zuck',
@@ -279,7 +279,7 @@ describe('usePreloadQuery', () => {
             dataSource.complete();
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Changed Name');
-            expect(data.props).toEqual({
+            expect(dataQuery.data).toEqual({
                 node: {
                     id: '4',
                     name: 'Changed Name',
@@ -292,10 +292,10 @@ describe('usePreloadQuery', () => {
             prefetched.next(environment, params, { id: '4' }, { fetchPolicy: 'store-or-network' });
             expect(fetch).toBeCalledTimes(1);
 
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                return data.props.node.name;
+                dataQuery = usePreloadedQuery(props.prefetched);
+                return dataQuery.data.node.name;
             }
 
             const newEnvironment = createMockEnvironment();
@@ -309,7 +309,7 @@ describe('usePreloadQuery', () => {
             // Ensure that useEffect runs
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Fallback');
-            expect(data).toBe(undefined);
+            expect(dataQuery).toBe(undefined);
 
             // There should be only one query in the newEnv
             expect(newEnvironment.mock.getAllOperations().length).toBe(1);
@@ -319,7 +319,7 @@ describe('usePreloadQuery', () => {
 
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Zuck');
-            expect(data.props).toEqual({
+            expect(dataQuery.data).toEqual({
                 node: {
                     id: '4',
                     name: 'Zuck',
@@ -338,10 +338,10 @@ describe('usePreloadQuery', () => {
 
             expect(fetch).toBeCalledTimes(1);
 
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                return data.props.node.name;
+                dataQuery = usePreloadedQuery(props.prefetched);
+                return dataQuery.data.node.name;
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
@@ -353,13 +353,13 @@ describe('usePreloadQuery', () => {
             // Ensure that useEffect runs
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Fallback');
-            expect(data).toBe(undefined);
+            expect(dataQuery).toBe(undefined);
 
             dataSource.next(response);
             dataSource.complete();
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Zuck');
-            expect(data.props).toEqual({
+            expect(dataQuery.data).toEqual({
                 node: {
                     id: '4',
                     name: 'Zuck',
@@ -376,7 +376,7 @@ describe('usePreloadQuery', () => {
             dataSource.complete();
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Zuck');
-            expect(data.props).toEqual({
+            expect(dataQuery.data).toEqual({
                 node: {
                     id: '4',
                     name: 'Zuck',
@@ -388,10 +388,10 @@ describe('usePreloadQuery', () => {
         it('updates asynchronously when the query errors', () => {
             prefetched.next(environment, params, { id: '4' });
 
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                return data.props.node.name;
+                dataQuery = usePreloadedQuery(props.prefetched);
+                return dataQuery.data.node.name;
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
@@ -405,7 +405,7 @@ describe('usePreloadQuery', () => {
             // Ensure that useEffect runs
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Fallback');
-            expect(data).toBe(undefined);
+            expect(dataQuery).toBe(undefined);
 
             const error = new Error('wtf');
             dataSource.error(error);
@@ -416,22 +416,22 @@ describe('usePreloadQuery', () => {
 
     describe('no suspense', () => {
         const loadingData = {
-            cached: false,
             error: null,
-            props: null,
-            retry: expect.any(Function), // added
+            data: null,
+            retry: expect.any(Function),
+            isLoading: true,
         };
         const prefetched = loadQuery();
 
         it('suspends while the query is pending', () => {
             prefetched.next(environment, params, { id: '4' });
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                if (data.props && data.props.node) {
-                    return data.props.node.name;
+                dataQuery = usePreloadedQuery(props.prefetched);
+                if (dataQuery.data && dataQuery.data.node) {
+                    return dataQuery.data.node.name;
                 }
-                return data.props;
+                return dataQuery.data;
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
@@ -440,18 +440,18 @@ describe('usePreloadQuery', () => {
             );
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual(null);
-            expect(data).toEqual(loadingData);
+            expect(dataQuery).toEqual(loadingData);
         });
 
         it('suspends while the query is pending (with default variables)', () => {
             prefetched.next(environment, params, {});
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                if (data.props && data.props.node) {
-                    return data.props.node.name;
+                dataQuery = usePreloadedQuery(props.prefetched);
+                if (dataQuery.data && dataQuery.data.node) {
+                    return dataQuery.data.node.name;
                 }
-                return data.props;
+                return dataQuery.data;
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
@@ -460,7 +460,7 @@ describe('usePreloadQuery', () => {
             );
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual(null);
-            expect(data).toEqual(loadingData);
+            expect(dataQuery).toEqual(loadingData);
             renderer.unmount();
         });
 
@@ -473,10 +473,10 @@ describe('usePreloadQuery', () => {
             dataSource.complete();
             jest.runAllTimers();
 
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                return data.props.node.name;
+                dataQuery = usePreloadedQuery(props.prefetched);
+                return dataQuery.data.node.name;
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
@@ -486,7 +486,7 @@ describe('usePreloadQuery', () => {
             TestRenderer.act(() => jest.runAllImmediates());
 
             expect(renderer.toJSON()).toEqual('Zuck');
-            expect(data.props).toEqual({
+            expect(dataQuery.data).toEqual({
                 node: {
                     id: '4',
                     name: 'Zuck',
@@ -501,16 +501,16 @@ describe('usePreloadQuery', () => {
             dataSource.error(error);
             jest.runAllTimers(); // relay-hooks for promise
 
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                if (data.error) {
+                dataQuery = usePreloadedQuery(props.prefetched);
+                if (dataQuery.error) {
                     return 'Error Boundary';
                 }
-                if (data.props && data.props.node) {
-                    return data.props.node.name;
+                if (dataQuery.data && dataQuery.data.node) {
+                    return dataQuery.data.node.name;
                 }
-                return data.props;
+                return dataQuery.data;
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
@@ -525,16 +525,16 @@ describe('usePreloadQuery', () => {
         it('updates asynchronously when the query completes', () => {
             prefetched.next(environment, params, { id: '4' });
 
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                if (data.error) {
+                dataQuery = usePreloadedQuery(props.prefetched);
+                if (dataQuery.error) {
                     return 'Error Boundary';
                 }
-                if (data.props && data.props.node) {
-                    return data.props.node.name;
+                if (dataQuery.data && dataQuery.data.node) {
+                    return dataQuery.data.node.name;
                 }
-                return data.props;
+                return dataQuery.data;
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
@@ -544,13 +544,13 @@ describe('usePreloadQuery', () => {
             // Ensure that useEffect runs
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual(null);
-            expect(data).toEqual(loadingData);
+            expect(dataQuery).toEqual(loadingData);
 
             dataSource.next(response);
             dataSource.complete();
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Zuck');
-            expect(data.props).toEqual({
+            expect(dataQuery.data).toEqual({
                 node: {
                     id: '4',
                     name: 'Zuck',
@@ -568,16 +568,16 @@ describe('usePreloadQuery', () => {
 
             expect(fetch).toBeCalledTimes(1); // 2
 
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                if (data.error) {
+                dataQuery = usePreloadedQuery(props.prefetched);
+                if (dataQuery.error) {
                     return 'Error Boundary';
                 }
-                if (data.props && data.props.node) {
-                    return data.props.node.name;
+                if (dataQuery.data && dataQuery.data.node) {
+                    return dataQuery.data.node.name;
                 }
-                return data.props;
+                return dataQuery.data;
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
@@ -587,13 +587,13 @@ describe('usePreloadQuery', () => {
             // Ensure that useEffect runs
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual(null);
-            expect(data).toEqual(loadingData);
+            expect(dataQuery).toEqual(loadingData);
 
             dataSource.next(response);
             dataSource.complete();
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Zuck');
-            expect(data.props).toEqual({
+            expect(dataQuery.data).toEqual({
                 node: {
                     id: '4',
                     name: 'Zuck',
@@ -610,7 +610,7 @@ describe('usePreloadQuery', () => {
             dataSource.complete();
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Changed Name');
-            expect(data.props).toEqual({
+            expect(dataQuery.data).toEqual({
                 node: {
                     id: '4',
                     name: 'Changed Name',
@@ -622,16 +622,16 @@ describe('usePreloadQuery', () => {
             prefetched.next(environment, params, { id: '4' }, { fetchPolicy: 'store-or-network' });
             expect(fetch).toBeCalledTimes(1);
 
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                if (data.error) {
+                dataQuery = usePreloadedQuery(props.prefetched);
+                if (dataQuery.error) {
                     return 'Error Boundary';
                 }
-                if (data.props && data.props.node) {
-                    return data.props.node.name;
+                if (dataQuery.data && dataQuery.data.node) {
+                    return dataQuery.data.node.name;
                 }
-                return data.props;
+                return dataQuery.data;
             }
 
             const newEnvironment = createMockEnvironment();
@@ -643,7 +643,7 @@ describe('usePreloadQuery', () => {
             // Ensure that useEffect runs
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual(null);
-            expect(data).toEqual(loadingData);
+            expect(dataQuery).toEqual(loadingData);
 
             // There should be only one query in the newEnv
             expect(newEnvironment.mock.getAllOperations().length).toBe(1);
@@ -653,7 +653,7 @@ describe('usePreloadQuery', () => {
 
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Zuck');
-            expect(data.props).toEqual({
+            expect(dataQuery.data).toEqual({
                 node: {
                     id: '4',
                     name: 'Zuck',
@@ -671,16 +671,16 @@ describe('usePreloadQuery', () => {
 
             expect(fetch).toBeCalledTimes(1);
 
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                if (data.error) {
+                dataQuery = usePreloadedQuery(props.prefetched);
+                if (dataQuery.error) {
                     return 'Error Boundary';
                 }
-                if (data.props && data.props.node) {
-                    return data.props.node.name;
+                if (dataQuery.data && dataQuery.data.node) {
+                    return dataQuery.data.node.name;
                 }
-                return data.props;
+                return dataQuery.data;
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
@@ -690,13 +690,13 @@ describe('usePreloadQuery', () => {
             // Ensure that useEffect runs
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual(null);
-            expect(data).toEqual(loadingData);
+            expect(dataQuery).toEqual(loadingData);
 
             dataSource.next(response);
             dataSource.complete();
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Zuck');
-            expect(data.props).toEqual({
+            expect(dataQuery.data).toEqual({
                 node: {
                     id: '4',
                     name: 'Zuck',
@@ -712,7 +712,7 @@ describe('usePreloadQuery', () => {
             dataSource.complete();
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Zuck');
-            expect(data.props).toEqual({
+            expect(dataQuery.data).toEqual({
                 node: {
                     id: '4',
                     name: 'Zuck',
@@ -723,16 +723,16 @@ describe('usePreloadQuery', () => {
         it('updates asynchronously when the query errors', () => {
             prefetched.next(environment, params, { id: '4' });
 
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                if (data.error) {
+                dataQuery = usePreloadedQuery(props.prefetched);
+                if (dataQuery.error) {
                     return 'Error Boundary';
                 }
-                if (data.props && data.props.node) {
-                    return data.props.node.name;
+                if (dataQuery.data && dataQuery.data.node) {
+                    return dataQuery.data.node.name;
                 }
-                return data.props;
+                return dataQuery.data;
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
@@ -742,7 +742,7 @@ describe('usePreloadQuery', () => {
             // Ensure that useEffect runs
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual(null);
-            expect(data).toEqual(loadingData);
+            expect(dataQuery).toEqual(loadingData);
 
             const error = new Error('wtf');
             dataSource.error(error);
@@ -753,32 +753,33 @@ describe('usePreloadQuery', () => {
         it('issue-115', () => {
             prefetched.next(environment, params, { id: '4' });
 
-            let data;
+            let dataQuery;
             function Component(props) {
-                data = usePreloadedQuery(props.prefetched);
-                if (data.error) {
+                dataQuery = usePreloadedQuery(props.prefetched);
+                if (dataQuery.error) {
                     return 'Error Boundary';
                 }
-                if (data.props && data.props.node) {
-                    return data.props.node.name;
+                if (dataQuery.data && dataQuery.data.node) {
+                    return dataQuery.data.node.name;
                 }
-                return data.props;
+                return dataQuery.data;
             }
             const renderer = TestRenderer.create(
                 <RelayEnvironmentProvider environment={environment}>
                     <Component prefetched={prefetched} />
                 </RelayEnvironmentProvider>,
             );
+
             // Ensure that useEffect runs
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual(null);
-            expect(data).toEqual(loadingData);
+            expect(dataQuery).toEqual(loadingData);
 
             dataSource.next(response);
             dataSource.complete();
             TestRenderer.act(() => jest.runAllImmediates());
             expect(renderer.toJSON()).toEqual('Zuck');
-            expect(data.props).toEqual({
+            expect(dataQuery.data).toEqual({
                 node: {
                     id: '4',
                     name: 'Zuck',
@@ -791,7 +792,7 @@ describe('usePreloadQuery', () => {
             dataSource.next(response);
             dataSource.complete();
             TestRenderer.act(() => jest.runAllImmediates());
-            expect((prefetched.getValue(environment) as any).props).toEqual({
+            expect((prefetched.getValue(environment) as any).data).toEqual({
                 node: {
                     id: '4',
                     name: 'Zuck',

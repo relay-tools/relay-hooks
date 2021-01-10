@@ -44,9 +44,9 @@ export function useOssFragment(
     }, [fragment, fragmentRef]);
 
     useEffect(() => {
-        const disposable = resolver.subscribe();
+        resolver.subscribe();
         return (): void => {
-            disposable.dispose();
+            resolver.unsubscribe();
         };
     }, [resolver, idfragment, environment]);
 

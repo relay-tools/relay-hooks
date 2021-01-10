@@ -152,7 +152,7 @@ export class FragmentResolver {
     }
 
     dispose(): void {
-        this._disposable && this._disposable.dispose();
+        this.unsubscribe();
         this.fetcherNext && this.fetcherNext.dispose();
         this.fetcherPrevious && this.fetcherPrevious.dispose();
         this._idfragmentrefetch = null;
@@ -247,7 +247,7 @@ export class FragmentResolver {
 
                 // $FlowExpectedError[prop-missing] Expando to annotate Promises.
                 (promise as any).displayName = 'Relay(' + parentQueryName + ')';
-                this._disposable && this._disposable.dispose();
+                this.unsubscribe();
                 this.refreshHooks = (): void => undefined;
                 throw promise;
             }
@@ -336,11 +336,14 @@ export class FragmentResolver {
         this.result = data;
     }
 
-    subscribe(): Disposable {
+    unsubscribe(): void {
+        this._disposable && this._disposable.dispose();
+    }
+
+    subscribe(): void {
         const environment = this._environment;
         const renderedSnapshot = this.resolverData.snapshot;
-
-        this._disposable && this._disposable.dispose();
+        this.unsubscribe();
         const dataSubscriptions = [];
         if (renderedSnapshot) {
             if (Array.isArray(renderedSnapshot)) {
@@ -368,10 +371,9 @@ export class FragmentResolver {
         this._disposable = {
             dispose: (): void => {
                 dataSubscriptions.map((s) => s.dispose());
-                this._disposable = null;
+                this._disposable = undefined;
             },
         };
-        return this._disposable;
     }
 
     refetch = (variables: Variables, options?: Options): Disposable => {

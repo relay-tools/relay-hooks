@@ -115,6 +115,7 @@ describe('ReactRelayRefetchContainer', () => {
         }
     }
     beforeEach(() => {
+        jest.runAllTimers();
         jest.resetModules();
 
         environment = createMockEnvironment();
@@ -370,6 +371,7 @@ describe('ReactRelayRefetchContainer', () => {
                 refetch: expect.any(Function),
             },
         });
+        jest.runAllTimers();
         // Container subscribes for updates on new props
         expect(environment.subscribe.mock.calls.length).toBe(1);
         expect(environment.subscribe.mock.calls[0][0]).toEqual({
@@ -419,6 +421,7 @@ describe('ReactRelayRefetchContainer', () => {
                 refetch: expect.any(Function),
             },
         });
+        jest.runAllTimers();
         // Container subscribes for updates on new props
         expect(environment.subscribe.mock.calls.length).toBe(1);
         expect(environment.subscribe.mock.calls[0][0]).toEqual({
@@ -489,6 +492,7 @@ describe('ReactRelayRefetchContainer', () => {
                 refetch: expect.any(Function),
             },
         });
+        jest.runAllTimers();
         // Container subscribes for updates on new props
         expect(environment.subscribe.mock.calls.length).toBe(1);
         expect(environment.subscribe.mock.calls[0][0]).toEqual({

@@ -180,10 +180,6 @@ const App = (
 
 [See useFragment.md](./useFragment.md)
 
-## useRefetch
-
-[See useRefetch.md](./useRefetch.md)
-
 ## useRefetchable
 
 [See useRefetchable.md](./useRefetchable.md)

@@ -13,3 +13,4 @@ __mocks__
 .prettierrc
 jest.config.js
 rollup.config.js
+.vscode

@@ -21,14 +21,15 @@
   },
   "scripts": {
     "clean": "rimraf lib",
-    "compile": "npm run clean && tsc && npm run rollup",
+    "compile": "npm run clean && tsc && npm run build:js && npm run rollup",
     "rollup": "rollup -c",
     "build": "npm run compile && npm run test",
     "test": "cross-env NODE_ENV=test jest --coverage",
     "format": "prettier --write \"src/**/*.{j,t}s*\"",
     "format:ci": "prettier --list-different \"src/**/*.{j,t}s*\"",
     "eslint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "build:js": "babel lib --out-dir lib --extensions \".js,.jsx\""
   },
   "dependencies": {
     "@restart/hooks": "^0.3.1",
@@ -39,9 +40,12 @@
     "relay-runtime": ">=10.1.0"
   },
   "devDependencies": {
+    "babel-preset-fbjs": "^3.3.0",
+    "@babel/cli": "^7.8.3",
     "@rollup/plugin-commonjs": "14.0.0",
     "@rollup/plugin-node-resolve": "^8.4.0",
     "@rollup/plugin-replace": "^2.3.3",
+    "@rollup/plugin-babel": "5.2.2",
     "@types/jest": "24.0.18",
     "@types/node": "13.9.3",
     "@types/react": "16.9.11",

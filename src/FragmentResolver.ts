@@ -51,7 +51,7 @@ function getFragmentResult(snapshot: SingularOrPluralSnapshot): any {
 }
 
 type FragmentResult = {
-    snapshot: SingularOrPluralSnapshot | null;
+    snapshot?: SingularOrPluralSnapshot | null;
     data: any;
     isMissingData?: boolean;
     owner?: any;
@@ -93,7 +93,7 @@ export class FragmentResolver {
     _idfragment: any;
     _idfragmentrefetch: any;
     resolverData: FragmentResult;
-    _disposable: Disposable = { dispose: () => {} };
+    _disposable: Disposable;
     _selector: ReaderSelector;
     refreshHooks: any;
     fetcherRefecth: Fetcher;
@@ -152,7 +152,7 @@ export class FragmentResolver {
     }
 
     dispose(): void {
-        this._disposable && this._disposable.dispose();
+        this.unsubscribe();
         this.fetcherNext && this.fetcherNext.dispose();
         this.fetcherPrevious && this.fetcherPrevious.dispose();
         this._idfragmentrefetch = null;
@@ -171,6 +171,7 @@ export class FragmentResolver {
         fragmentRef,
     ): void {
         if (
+            !this.resolverData ||
             this._environment !== environment ||
             (idfragment !== this._idfragment &&
                 (!this._idfragmentrefetch ||
@@ -179,7 +180,6 @@ export class FragmentResolver {
             this._fragment = fragment;
             this._fragmentRef = fragmentRef;
             this._idfragment = idfragment;
-            this.resolverData = null;
             this._selector = null;
             this.dispose();
             this._environment = environment;
@@ -190,16 +190,14 @@ export class FragmentResolver {
 
     lookup(fragment, fragmentRef): void {
         if (fragmentRef == null) {
-            this.resolverData = { data: null, snapshot: null };
-            this.resolveResult();
+            this.resolverData = { data: null };
             return;
         }
         const isPlural =
             fragment.metadata && fragment.metadata.plural && fragment.metadata.plural === true;
         if (isPlural) {
             if (fragmentRef.length === 0) {
-                this.resolverData = { data: [], snapshot: [] };
-                this.resolveResult();
+                this.resolverData = { data: [] };
                 return;
             }
         }
@@ -213,16 +211,11 @@ export class FragmentResolver {
                 : (this._selector as any).owner
             : null;
         this.resolverData.owner = owner;
-        this.subscribe();
+        //this.subscribe();
     }
 
     checkAndSuspense(suspense): void {
-        if (
-            suspense &&
-            this.resolverData != null &&
-            this.resolverData.isMissingData &&
-            this.resolverData.owner
-        ) {
+        if (suspense && this.resolverData.isMissingData && this.resolverData.owner) {
             const fragmentOwner = this.resolverData.owner;
             const networkPromise = _getAndSavePromiseForFragmentRequestInFlight(
                 fragmentOwner,
@@ -254,7 +247,7 @@ export class FragmentResolver {
 
                 // $FlowExpectedError[prop-missing] Expando to annotate Promises.
                 (promise as any).displayName = 'Relay(' + parentQueryName + ')';
-                this._disposable && this._disposable.dispose();
+                this.unsubscribe();
                 this.refreshHooks = (): void => undefined;
                 throw promise;
             }
@@ -287,7 +280,7 @@ export class FragmentResolver {
     }
 
     resolveResult(): any {
-        const data = this.resolverData ? this.resolverData.data : null;
+        const { data } = this.resolverData;
         if (this.refetchable || this.pagination) {
             const { isLoading, error } = this.fetcherRefecth.getData();
             const refetch = this.refetch;
@@ -343,41 +336,42 @@ export class FragmentResolver {
         this.result = data;
     }
 
+    unsubscribe(): void {
+        this._disposable && this._disposable.dispose();
+    }
+
     subscribe(): void {
         const environment = this._environment;
         const renderedSnapshot = this.resolverData.snapshot;
-
-        this._disposable && this._disposable.dispose();
-        if (!renderedSnapshot) {
-            this._disposable = { dispose: (): void => {} };
-        }
-
+        this.unsubscribe();
         const dataSubscriptions = [];
-
-        if (Array.isArray(renderedSnapshot)) {
-            renderedSnapshot.forEach((snapshot, idx) => {
+        if (renderedSnapshot) {
+            if (Array.isArray(renderedSnapshot)) {
+                renderedSnapshot.forEach((snapshot, idx) => {
+                    dataSubscriptions.push(
+                        environment.subscribe(snapshot, (latestSnapshot) => {
+                            this.resolverData.snapshot[idx] = latestSnapshot;
+                            this.resolverData.data[idx] = latestSnapshot.data;
+                            this.resolverData.isMissingData = false;
+                            this.refreshHooks();
+                        }),
+                    );
+                });
+            } else {
                 dataSubscriptions.push(
-                    environment.subscribe(snapshot, (latestSnapshot) => {
-                        this.resolverData.snapshot[idx] = latestSnapshot;
-                        this.resolverData.data[idx] = latestSnapshot.data;
+                    environment.subscribe(renderedSnapshot, (latestSnapshot) => {
+                        this.resolverData = getFragmentResult(latestSnapshot);
                         this.resolverData.isMissingData = false;
                         this.refreshHooks();
                     }),
                 );
-            });
-        } else {
-            dataSubscriptions.push(
-                environment.subscribe(renderedSnapshot, (latestSnapshot) => {
-                    this.resolverData = getFragmentResult(latestSnapshot);
-                    this.resolverData.isMissingData = false;
-                    this.refreshHooks();
-                }),
-            );
+            }
         }
 
         this._disposable = {
             dispose: (): void => {
                 dataSubscriptions.map((s) => s.dispose());
+                this._disposable = undefined;
             },
         };
     }
@@ -479,6 +473,7 @@ export class FragmentResolver {
                 this._fragmentRefRefetch = fragmentRef;
                 this._idfragmentrefetch = getFragmentIdentifier(this._fragment, fragmentRef);
                 this.lookup(this._fragment, fragmentRef);
+                this.subscribe();
                 /*if (!missData) {
                     this.subscribe();
                 }*/

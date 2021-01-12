@@ -43,6 +43,13 @@ export function useOssFragment(
         return getFragmentIdentifier(fragment, fragmentRef);
     }, [fragment, fragmentRef]);
 
+    useEffect(() => {
+        resolver.subscribe();
+        return (): void => {
+            resolver.unsubscribe();
+        };
+    }, [resolver, idfragment, environment]);
+
     resolver.resolve(environment, idfragment, fragment, fragmentRef);
 
     resolver.checkAndSuspense(suspense);

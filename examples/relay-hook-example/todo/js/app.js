@@ -111,7 +111,7 @@ const AppTodo = function(appProps) {
 const isServer = typeof window === 'undefined';
 const LayoutTodo = ({userId}) => {
   console.log('LayoutTodo', userId, isServer);
-  const {data, retry, error} = useQuery(
+  const {data, retry, error, isLoading} = useQuery(
     QueryApp,
     {userId},
     {
@@ -119,9 +119,9 @@ const LayoutTodo = ({userId}) => {
     },
   );
 
-  console.log('renderer', data);
-  if (data && data.user) {
-    return <TodoApp user={data.user} userId={userId} retry={retry} />;
+  if(isLoading) {
+    console.log('loading', isLoading, data);
+    return <div>loading</div>
   } else if (error) {
     return (
       <div>
@@ -132,8 +132,8 @@ const LayoutTodo = ({userId}) => {
       </div>
     );
   }
-  console.log('loading');
-  return <div>loading</div>;
+  console.log('renderer', data);
+  return <TodoApp user={data.user} userId={userId} retry={retry} />;
 };
 
 const App = isServer ? (

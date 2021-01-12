@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable import/no-default-export */
+import babel from '@rollup/plugin-babel'
 import commonjs from '@rollup/plugin-commonjs';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
 import sourceMaps from 'rollup-plugin-sourcemaps';
 import { terser } from 'rollup-plugin-terser';
 import typescript from 'rollup-plugin-typescript2';
-
 import pkg from './package.json';
 
 const makeExternalPredicate = (externalArr) => {
@@ -17,6 +17,8 @@ const makeExternalPredicate = (externalArr) => {
     const pattern = new RegExp(`^(${externalArr.join('|')})($|/)`);
     return (id) => pattern.test(id);
 };
+
+const extensions = ['.ts', '.tsx'];
 
 function createConfigInternal({ format, production }) {
     return {
@@ -43,7 +45,7 @@ function createConfigInternal({ format, production }) {
         ]),
         plugins: [
             nodeResolve({
-                extensions: ['.ts', '.tsx'],
+                extensions,
             }),
             typescript({
                 tsconfigOverride: {
@@ -61,6 +63,7 @@ function createConfigInternal({ format, production }) {
                 commonjs({
                     include: /\/node_modules\//,
                 }),
+            babel({ extensions, include: ['src/**/*'], babelHelpers: 'bundled' }),
             replace({
                 'import * as ': 'import ',
                 'process.env.NODE_ENV': JSON.stringify(production ? 'production' : 'development'),

@@ -27,8 +27,25 @@ export type MutationConfig<T extends MutationParameters> = Partial<
     onCompleted?(response: T['response']): void;
 };
 
+export type MutationConfigWithoutVariables<T extends MutationParameters> = Omit<
+    MutationConfig<T>,
+    'variables'
+>;
+
+export type MutationConfigWithVariables<T extends MutationParameters> = MutationConfig<T> & {
+    variables: T['variables'];
+};
+
 export type Mutate<T extends MutationParameters> = (
     config?: Partial<MutationConfig<T>>,
+) => Promise<T['response']>;
+
+export type MutateWithVariables<T extends MutationParameters> = (
+    config?: Partial<MutationConfig<T>> & { variables: T['variables'] },
+) => Promise<T['response']>;
+
+export type MutateWithoutVariables<T extends MutationParameters> = (
+    config?: Partial<Omit<MutationConfig<T>, 'variables'>>,
 ) => Promise<T['response']>;
 
 export type MutationProps<T extends MutationParameters> = MutationConfig<T> & {

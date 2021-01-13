@@ -4,7 +4,7 @@ You can use useRefetchable when you want to fetch and re-render a fragment with 
 
 ## Arguments:
 
-They are the same as [useFragment](./useFragment.md).
+They are the same as [useFragment](./useFragment.md#arguments).
 
 ## Return Value:
 

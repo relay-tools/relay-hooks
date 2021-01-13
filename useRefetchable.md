@@ -1,5 +1,13 @@
 # useRefetchable
 
+You can use useRefetchable when you want to fetch and re-render a fragment with different data:
+
+## Arguments:
+
+They are the same as [useFragment](./useFragment.md).
+
+## Return Value:
+
 ```ts
 import { useRefetchable, graphql } from 'relay-hooks';
 

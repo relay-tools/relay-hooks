@@ -47,6 +47,9 @@ function createConfigInternal({ format, production }) {
             nodeResolve({
                 extensions,
             }),
+            replace({
+                'import * as ': 'import ',
+            }),
             typescript({
                 tsconfigOverride: {
                     compilerOptions: {
@@ -65,7 +68,6 @@ function createConfigInternal({ format, production }) {
                 }),
             babel({ extensions, include: ['src/**/*'], babelHelpers: 'bundled' }),
             replace({
-                'import * as ': 'import ',
                 'process.env.NODE_ENV': JSON.stringify(production ? 'production' : 'development'),
             }),
             sourceMaps(),

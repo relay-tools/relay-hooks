@@ -64,19 +64,9 @@ const fragmentSpec = graphql`
     }
   `;
 
-const options = {
-    renderVariables: null,
-    observerOrCallback: () => { console.log('Refetch done') },
-    refetchOptions: {force: true},
-}
-
 const TodoApp = (props) => {
     const { data: user, refetch } = useRefetchable(fragmentSpec, props.user);
-    const handlerRefetch = () => {
-    const response = refetch({userId: 'me'}, options);
-    //response.dispose(); 
-
-  }
+    const handlerRefetch = React.useCallback( () => refetch({}), [refetch]);
 
     return (   
         <div>

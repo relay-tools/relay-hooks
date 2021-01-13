@@ -75,11 +75,7 @@ const options = {
 
 const TodoApp = (props) => {
     const { data: user, refetch } = useRefetchable(fragmentSpec, props.user);
-    const handlerRefetch = () => {
-    const response = refetch({userId: 'me'}, options);
-    //response.dispose(); 
-
-  }
+    const handlerRefetch = React.useCallback( () => refetch({}), [refetch]);
 
     return (   
         <div>

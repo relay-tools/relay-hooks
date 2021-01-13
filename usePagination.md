@@ -4,7 +4,7 @@ You can use `usePagination` to render a fragment that uses a `@connection` and p
 
 ## Arguments:
 
-They are the same as [useFragment](./useFragment.md).
+They are the same as [useFragment](./useFragment.md#arguments).
 
 ## Return Value:
 
@@ -46,20 +46,17 @@ Object containing the following properties:
             * However, only the variables that are intended to change for the refetch request need to be specified; any variables referenced by the fragment that are omitted from this input will fall back to using the value specified in the original parent query. So for example, to refetch the fragment with the exact same variables as it was originally fetched, you can call `refetch({})`.
             * Similarly, passing an `id` value for the `$id` variable is _*optional*_, unless the fragment wants to be refetched with a different `id`. When refetching a `@refetchable` fragment, Relay will already know the id of the rendered object.
         * `options`: *_[Optional]_* options object
-            * `fetchPolicy`: Determines if cached data should be used, and when to send a network request based on cached data that is available. See the [`useLazyLoadQuery`](#uselazyloadquery) section for full specification.
+            * `fetchPolicy`: Determines if cached data should be used, and when to send a network request based on cached data that is available. See the [`useQuery`](./README.md#useQuery) section for full specification.
             * `onComplete`: Function that will be called whenever the refetch request has completed, including any incremental data payloads.
     * Return value:
         * `disposable`: Object containing a `dispose` function. Calling `disposable.dispose()` will cancel the refetch request.
     * Behavior:
-        * Calling `refetch` with a new set of variables will fetch the fragment again ***with the newly provided variables***. Note that the variables you need to provide are only the ones referenced inside the fragment. In this example, it means fetching the translated body of the currently rendered Comment, by passing a new value to the `lang` variable.
+        * Calling `refetch` with a new set of variables will fetch the fragment again ***with the newly provided variables***. Note that the variables you need to provide are only the ones referenced inside the fragment. 
         * Calling `refetch` ***will not*** cause the component to suspend. Instead, the `isLoading` value will be set to true while the request is in flight
 
 #### Behavior
 
 * The component is automatically subscribed to updates to the fragment data: if the data for this particular `User` is updated anywhere in the app (e.g. via fetching new data, or mutating existing data), the component will automatically re-render with the latest updated data.
-* The component will suspend if any data for that specific fragment is missing, and the data is currently being fetched by a parent query.
-    * For more details on Suspense, see our [Loading States with Suspense](a-guided-tour-of-relay#loading-states-with-suspense) guide.
-* Note that pagination (`loadNext` or `loadPrevious`), ***will not*** cause the component to suspend.
 
 #### Differences with `PaginationContainer`
 

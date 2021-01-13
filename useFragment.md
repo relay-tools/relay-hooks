@@ -35,4 +35,14 @@ const TodoApp = (props) => {
         </div>
         );
 };
+```
   
+
+
+# useSuspenseFragment (with suspense, like relay-experimental)
+
+```ts
+import { useSuspenseFragment } from 'relay-hooks';
+```
+
+[See useFragment](https://relay.dev/docs/en/api-reference#usefragment)

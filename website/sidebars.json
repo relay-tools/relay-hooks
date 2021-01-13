@@ -8,7 +8,6 @@
             "use-refetchable",
             "use-pagination",
             "use-mutation",
-            "use-oss-fragment",
             "use-subscription",
             "use-preloaded-query"
         ]

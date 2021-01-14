@@ -1,8 +1,7 @@
-/*eslint-disable */
+import useMounted from '@restart/hooks/useMounted';
 import * as invariant from 'fbjs/lib/invariant';
 import * as React from 'react';
 import { Environment, MutationParameters, commitMutation } from 'relay-runtime';
-import useMounted from '@restart/hooks/useMounted';
 import {
     MutationNode,
     MutationConfig,
@@ -98,7 +97,7 @@ export function useMutation<T extends MutationParameters>(
                 commitMutation(resolvedEnvironment, {
                     ...mergedConfig,
                     mutation,
-                    variables: mergedConfig.variables!,
+                    variables: mergedConfig.variables,
                     onCompleted: (response, errors) => {
                         if (errors) {
                             // FIXME: This isn't right. onError expects a single error.

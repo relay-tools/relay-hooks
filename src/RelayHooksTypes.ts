@@ -3,7 +3,6 @@ import {
     OperationType,
     CacheConfig,
     GraphQLTaggedNode,
-    Environment,
     IEnvironment,
     MutationConfig as BaseMutationConfig,
     MutationParameters,
@@ -27,16 +26,22 @@ export type MutationConfig<T extends MutationParameters> = Partial<
     onCompleted?(response: T['response']): void;
 };
 
+export type MutationConfigWithoutVariables<T extends MutationParameters> = Omit<
+    MutationConfig<T>,
+    'variables'
+>;
+
+export type MutationConfigWithVariables<T extends MutationParameters> = MutationConfig<T> & {
+    variables: T['variables'];
+};
+
 export type Mutate<T extends MutationParameters> = (
     config?: Partial<MutationConfig<T>>,
 ) => Promise<T['response']>;
 
-export type MutationProps<T extends MutationParameters> = MutationConfig<T> & {
-    children: (mutate: Mutate<T>, state: MutationState<T>) => React.ReactNode;
-    mutation: MutationNode<T>;
-    /** if not provided, the context environment will be used. */
-    environment?: Environment;
-};
+export type MutateWithVariables<T extends MutationParameters> = (
+    config: Partial<MutationConfig<T>> & { variables: T['variables'] },
+) => Promise<T['response']>;
 
 export const NETWORK_ONLY = 'network-only';
 export const STORE_THEN_NETWORK = 'store-and-network';

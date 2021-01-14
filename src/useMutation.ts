@@ -6,13 +6,28 @@ import useMounted from '@restart/hooks/useMounted';
 import {
     MutationNode,
     MutationConfig,
+    MutationConfigWithoutVariables,
+    MutationConfigWithVariables,
     MutationState,
     Mutate,
-    MutationProps,
+    MutateWithVariables,
 } from './RelayHooksTypes';
 import { useRelayEnvironment } from './useRelayEnvironment';
+
 const { useCallback, useState } = React;
 
+export function useMutation<T extends MutationParameters>(
+    mutation: MutationNode<T>,
+    userConfig?: MutationConfigWithoutVariables<T>,
+    /** if not provided, the context environment will be used. */
+    environment?: Environment,
+): [MutateWithVariables<T>, MutationState<T>];
+export function useMutation<T extends MutationParameters>(
+    mutation: MutationNode<T>,
+    userConfig?: MutationConfigWithVariables<T>,
+    /** if not provided, the context environment will be used. */
+    environment?: Environment,
+): [Mutate<T>, MutationState<T>];
 export function useMutation<T extends MutationParameters>(
     mutation: MutationNode<T>,
     userConfig: MutationConfig<T> = {},

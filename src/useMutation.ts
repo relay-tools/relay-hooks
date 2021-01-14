@@ -11,7 +11,6 @@ import {
     MutationState,
     Mutate,
     MutateWithVariables,
-    MutateWithoutVariables,
 } from './RelayHooksTypes';
 import { useRelayEnvironment } from './useRelayEnvironment';
 
@@ -25,10 +24,10 @@ export function useMutation<T extends MutationParameters>(
 ): [MutateWithVariables<T>, MutationState<T>];
 export function useMutation<T extends MutationParameters>(
     mutation: MutationNode<T>,
-    userConfig?: MutationConfigWithVariables<T> ,
+    userConfig?: MutationConfigWithVariables<T>,
     /** if not provided, the context environment will be used. */
     environment?: Environment,
-): [MutateWithoutVariables<T>, MutationState<T>];
+): [Mutate<T>, MutationState<T>];
 export function useMutation<T extends MutationParameters>(
     mutation: MutationNode<T>,
     userConfig: MutationConfig<T> = {},

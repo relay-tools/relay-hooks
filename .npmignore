@@ -14,3 +14,4 @@ __mocks__
 jest.config.js
 rollup.config.js
 .vscode
+.babelrc.js

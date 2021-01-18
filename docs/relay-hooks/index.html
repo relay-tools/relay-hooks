@@ -4,7 +4,7 @@
             {"zIndex":100}
           )
         });
-        </script><script src="/relay-hooks/js/scrollSpy.js"></script><link rel="stylesheet" href="/relay-hooks/css/main.css"/><script src="/relay-hooks/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/relay-hooks/"><img class="logo" src="/relay-hooks/img/favicon.ico" alt="Morrys Repositories"/><h2 class="headerTitleWithLogo">Morrys Repositories</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive siteNavItemActive"><a href="/relay-hooks/docs/relay-hooks" target="_self">Docs</a></li><li class=""><a href="https://github.com/relay-tools/relay-hooks" target="_self">GitHub</a></li><li class=""><a target="_self"></a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Relay Hooks</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Relay Hooks</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/relay-hooks/docs/relay-hooks">Getting Started</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">API Reference</h3><ul class=""><li class="navListItem"><a class="navItem" href="/relay-hooks/docs/use-fragment">useFragment</a></li><li class="navListItem"><a class="navItem" href="/relay-hooks/docs/use-refetch">useRefetch</a></li><li class="navListItem"><a class="navItem" href="/relay-hooks/docs/use-refetchable">useRefetchable</a></li><li class="navListItem"><a class="navItem" href="/relay-hooks/docs/use-pagination">usePagination</a></li><li class="navListItem"><a class="navItem" href="/relay-hooks/docs/use-mutation">useMutation</a></li><li class="navListItem"><a class="navItem" href="/relay-hooks/docs/use-oss-fragment">useOssFragment</a></li><li class="navListItem"><a class="navItem" href="/relay-hooks/docs/use-subscription">useSubscription</a></li><li class="navListItem"><a class="navItem" href="/relay-hooks/docs/use-preloaded-query">usePreloadedQuery</a></li></ul></div></div></section></div><script>
+        </script><script src="/relay-hooks/js/scrollSpy.js"></script><link rel="stylesheet" href="/relay-hooks/css/main.css"/><script src="/relay-hooks/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/relay-hooks/"><img class="logo" src="/relay-hooks/img/favicon.ico" alt="Morrys Repositories"/><h2 class="headerTitleWithLogo">Morrys Repositories</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive siteNavItemActive"><a href="/relay-hooks/docs/relay-hooks" target="_self">Docs</a></li><li class=""><a href="https://github.com/relay-tools/relay-hooks" target="_self">GitHub</a></li><li class=""><a target="_self"></a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Relay Hooks</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Relay Hooks</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/relay-hooks/docs/relay-hooks">Getting Started</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">API Reference</h3><ul class=""><li class="navListItem"><a class="navItem" href="/relay-hooks/docs/use-fragment">useFragment</a></li><li class="navListItem"><a class="navItem" href="/relay-hooks/docs/use-refetchable">useRefetchable</a></li><li class="navListItem"><a class="navItem" href="/relay-hooks/docs/use-pagination">usePagination</a></li><li class="navListItem"><a class="navItem" href="/relay-hooks/docs/use-mutation">useMutation</a></li><li class="navListItem"><a class="navItem" href="/relay-hooks/docs/use-subscription">useSubscription</a></li><li class="navListItem"><a class="navItem" href="/relay-hooks/docs/use-preloaded-query">usePreloadedQuery</a></li></ul></div></div></section></div><script>
             var coll = document.getElementsByClassName('collapsible');
             var checkActiveCategory = true;
             for (var i = 0; i < coll.length; i++) {
@@ -80,17 +80,20 @@
 <li><p>current differences with upcoming Relay Hooks in react-relay</p>
 <ul>
 <li><strong>useLazyLoadQuery</strong>: returns a <em>single</em> data object with the query's data, and nothing else.</li>
-<li><strong>useFragment</strong>: not use suspense</li>
-<li><strong>usePagination</strong>: not use suspense</li>
-<li><strong>useRefetchable</strong>: not use suspense</li>
-<li><strong>useMutation</strong>: not use suspense</li>
-<li><strong>useSubscription</strong>: not use suspense</li>
+<li><strong>useFragment</strong>: in relay-hooks it is called useSuspenseFragment</li>
+</ul></li>
+<li><p>what's more in relay-hooks</p>
+<ul>
+<li><strong>useQuery</strong>: it is the same as <code>useLazyLoadQuery</code> but does not use suspense, it allows you to use hooks without having to migrate the application in concurrent mode and its return is the same as the QueryRenderer HOC</li>
+<li><strong>conditional useQuery &amp; useLazyLoadQuery</strong>: added <code>skip</code>: [Optional] If skip is true, the query will be skipped entirely</li>
+<li><strong>observe the execution of the query in the network in useQuery &amp; useLazyLoadQuery</strong>: added <code>onComplete</code>: [Optional] Function that will be called whenever the fetch request has completed</li>
 </ul></li>
 <li><p>what's more in relay-hooks</p>
 <ul>
 <li><strong>useQuery</strong>: it is the same as <code>useLazyLoadQuery</code> but does not use suspense, it allows you to use hooks without having to migrate the application in concurrent mode and its return is the same as the QueryRenderer HOC</li>
 <li><strong>useRefetch</strong>: it is the same as <code>useRefetchable</code>, allows you to migrate the Refetch Container without changing the fragment specifications</li>
 <li><strong>conditional useQuery &amp; useLazyLoadQuery</strong>: added <code>skip</code>: [Optional] If skip is true, the query will be skipped entirely</li>
+<li><strong>observe the execution of the query in the network in useQuery &amp; useLazyLoadQuery</strong>: added <code>fetchObserver</code>: [Optional] A fetchObserver can be passed to observe the execution of the query in the network</li>
 </ul></li>
 <li><p>why use relay-hooks?</p></li>
 </ul>
@@ -100,12 +103,14 @@
 <p>Since queries with <code>useQuery</code> no longer set context, we will expose a new <code>RelayEnvironmentProvider</code> component that takes an <code>environment</code> and sets it in context;
 variables will no longer be part of context.
 A <code>RelayEnvironmentProvider</code> should be rendered once at the root of the app, and multiple useQuery's can be rendered under this environment provider.</p>
-<pre><code class="hljs css language-ts">ReactDOM.render(
-    &lt;RelayEnvironmentProvider environment={modernEnvironment}&gt;
-      &lt;AppTodo/&gt;
-    &lt;/RelayEnvironmentProvider&gt;,
-    rootElement,
-  );
+<pre><code class="hljs css language-ts">import { RelayEnvironmentProvider } from 'relay-hooks';
+
+ReactDOM.render(
+  &lt;RelayEnvironmentProvider environment={modernEnvironment}&gt;
+    &lt;AppTodo/&gt;
+  &lt;/RelayEnvironmentProvider&gt;,
+  rootElement,
+);
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="usequery"></a><a href="#usequery" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>useQuery</h2>
 <p><code>useQuery</code> does not take an environment as an argument. Instead, it reads the environment set in the context; this also implies that it does not set any React context.
@@ -121,7 +126,8 @@ In addition to <code>query</code> (first argument) and <code>variables</code> (s
 <p><code>fetchKey</code>: [Optional] A fetchKey can be passed to force a refetch of the current query and variables when the component re-renders, even if the variables didn't change, or even if the component isn't remounted (similarly to how passing a different key to a React component will cause it to remount). If the fetchKey is different from the one used in the previous render, the current query and variables will be refetched.</p>
 <p><code>networkCacheConfig</code>: [Optional] Object containing cache config options for the network layer. Note the the network layer may contain an additional query response cache which will reuse network responses for identical queries. If you want to bypass this cache completely, pass {force: true} as the value for this option.</p>
 <p><code>skip</code>: [Optional] If skip is true, the query will be skipped entirely.</p>
-<pre><code class="hljs css language-ts">import {useQuery, graphql } from 'relay-hooks';
+<p><code>onComplete</code>: [Optional] Function that will be called whenever the fetch request has completed</p>
+<pre><code class="hljs css language-ts">import { useQuery, graphql } from 'relay-hooks';
 
 const query = graphql`
   query appQuery($userId: String) {
@@ -133,7 +139,7 @@ const query = graphql`
 
 const variables = {
   userId: 'me',
-}; 
+};
 
 const options = {
   fetchPolicy: 'store-or-network', //default
@@ -141,10 +147,10 @@ const options = {
 }
 
 const AppTodo = function (appProps)  {
-  const {props, error, retry, cached} = useQuery(query, variables, options);
+  const { data, error, retry, isLoading } = useQuery(query, variables, options);
 
-  if (props &amp;&amp; props.user) {
-    return &lt;TodoApp user={props.user} /&gt;;
+  if (data &amp;&amp; data.user) {
+    return &lt;TodoApp user={data.user} /&gt;;
   } else if (error) {
     return &lt;div&gt;{error.message}&lt;/div&gt;;
   }
@@ -155,7 +161,7 @@ const AppTodo = function (appProps)  {
 <h2><a class="anchor" aria-hidden="true" id="uselazyloadquery"></a><a href="#uselazyloadquery" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>useLazyLoadQuery</h2>
 <p>same to useQuery</p>
 <pre><code class="hljs css language-ts">import * as React from 'react';
-import {useQuery, graphql, RelayEnvironmentProvider } from 'relay-hooks';
+import { useQuery, graphql, RelayEnvironmentProvider } from 'relay-hooks';
 
 const query = graphql`
   query appQuery($userId: String) {
@@ -166,36 +172,35 @@ const query = graphql`
 `;
 
 class ErrorBoundary extends React.Component {
-    state = { error: null };
-    componentDidCatch(error) {
-        this.setState({ error });
+  state = { error: null };
+    
+  componentDidCatch(error) {
+    this.setState({ error });
+  }
+
+  render() {
+    const { children, fallback } = this.props;
+    const { error } = this.state;
+    if (error) {
+      return React.createElement(fallback, { error });
     }
-    render() {
-        const { children, fallback } = this.props;
-        const { error } = this.state;
-        if (error) {
-            return React.createElement(fallback, { error });
-        }
-        return children;
-    }
+    return children;
+  }
 }
 
 const variables = {
   userId: 'me',
-}; 
+};
 
 const options = {
   fetchPolicy: 'store-or-network', //default
   networkCacheConfig: undefined,
 }
 
-
 const AppTodo = function (appProps)  {
-  const {props, cached} = useLazyLoadQuery(query, variables, options);
-  return &lt;TodoApp user={props.user} /&gt;;
-
+  const { data } = useLazyLoadQuery(query, variables, options);
+  return &lt;TodoApp user={data.user} /&gt;;
 }
-
 
 const App = (
   &lt;RelayEnvironmentProvider environment={modernEnvironment}&gt;
@@ -207,7 +212,7 @@ const App = (
   &lt;/RelayEnvironmentProvider&gt;
 );
 </code></pre>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2020-4-4 by morrys</em></div><div class="docs-prevnext"><a class="docs-next button" href="/relay-hooks/docs/use-fragment"><span class="function-name-prevnext">useFragment</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#installation">Installation</a></li><li><a href="#contributing">Contributing</a><ul class="toc-headings"><li><a href="#relay-hooks-1">relay-hooks</a></li></ul></li><li><a href="#relayenvironmentprovider">RelayEnvironmentProvider</a></li><li><a href="#usequery">useQuery</a></li><li><a href="#uselazyloadquery">useLazyLoadQuery</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/relay-hooks/" class="nav-home"><img src="/relay-hooks/img/favicon.ico" alt="Morrys Repositories" width="66" height="58"/></a><div><h5>Docs</h5><a href="/relay-hooks/docs/en/relay-hooks.html">about relay-hooks</a></div><div><h5>Community</h5><a href="/relay-hooks/en/users.html">User Showcase</a></div><div><h5>More</h5><a href="https://github.com/morrys/wora">GitHub</a><a class="github-button" href="https://github.com/relay-tools/relay-hooks" data-icon="octicon-star" data-count-href="https://github.com/morrys/wora/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="https://twitter.com/m0rrys" class="twitter-follow-button">Follow @m0rrys</a></div></div></section><a href="https://opensource.facebook.com/" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="/relay-hooks/img/oss_logo.png" alt="Facebook Open Source" width="170" height="45"/></a><section class="copyright">Copyright © 2020 Lorenzo Di Giacomo</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2021-1-9 by morrys</em></div><div class="docs-prevnext"><a class="docs-next button" href="/relay-hooks/docs/use-fragment"><span class="function-name-prevnext">useFragment</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#installation">Installation</a></li><li><a href="#contributing">Contributing</a><ul class="toc-headings"><li><a href="#relay-hooks-1">relay-hooks</a></li></ul></li><li><a href="#relayenvironmentprovider">RelayEnvironmentProvider</a></li><li><a href="#usequery">useQuery</a></li><li><a href="#uselazyloadquery">useLazyLoadQuery</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/relay-hooks/" class="nav-home"><img src="/relay-hooks/img/favicon.ico" alt="Morrys Repositories" width="66" height="58"/></a><div><h5>Docs</h5><a href="/relay-hooks/docs/en/relay-hooks.html">about relay-hooks</a></div><div><h5>Community</h5><a href="/relay-hooks/en/users.html">User Showcase</a></div><div><h5>More</h5><a href="https://github.com/morrys/wora">GitHub</a><a class="github-button" href="https://github.com/relay-tools/relay-hooks" data-icon="octicon-star" data-count-href="https://github.com/morrys/wora/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="https://twitter.com/m0rrys" class="twitter-follow-button">Follow @m0rrys</a></div></div></section><a href="https://opensource.facebook.com/" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="/relay-hooks/img/oss_logo.png" alt="Facebook Open Source" width="170" height="45"/></a><section class="copyright">Copyright © 2021 Lorenzo Di Giacomo</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;

@@ -21,7 +21,7 @@
     "prop-types": "^15.7.2",
     "react": "0.0.0-experimental-7f28234f8",
     "react-dom": "0.0.0-experimental-7f28234f8",
-    "relay-hooks": "4.0.0-rc.4",
+    "relay-hooks": "4.0.0",
     "relay-runtime": "10.1.2",
     "styled-components": "4.4.0",
     "whatwg-fetch": "3.0.0"

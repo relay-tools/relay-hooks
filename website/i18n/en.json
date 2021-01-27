@@ -14,17 +14,11 @@
       "use-mutation": {
         "title": "useMutation"
       },
-      "use-oss-fragment": {
-        "title": "useOssFragment"
-      },
       "use-pagination": {
         "title": "usePagination"
       },
       "use-preloaded-query": {
         "title": "usePreloadedQuery"
-      },
-      "use-refetch": {
-        "title": "useRefetch"
       },
       "use-refetchable": {
         "title": "useRefetchable"

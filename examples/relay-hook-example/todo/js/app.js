@@ -136,13 +136,9 @@ const LayoutTodo = ({userId}) => {
   return <TodoApp user={data.user} userId={userId} retry={retry} />;
 };
 
-const App = isServer ? (
-  <div />
-) : (
+const App = (
   <RelayEnvironmentProvider environment={modernEnvironment}>
-    <React.Suspense fallback={<div>loading suspense</div>}>
       <AppTodo />
-    </React.Suspense>
   </RelayEnvironmentProvider>
 );
 

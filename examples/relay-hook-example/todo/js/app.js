@@ -109,6 +109,7 @@ const AppTodo = function(appProps) {
   );
 };
 const isServer = typeof window === 'undefined';
+const skip = isServer;
 const LayoutTodo = ({userId}) => {
   console.log('LayoutTodo', userId, isServer);
   const {data, retry, error, isLoading} = useQuery(
@@ -116,11 +117,12 @@ const LayoutTodo = ({userId}) => {
     {userId},
     {
       fetchPolicy: 'store-or-network',
+      skip
     },
   );
 
-  if(isLoading) {
-    console.log('loading', isLoading, data);
+  if(isLoading || skip) {
+    console.log('loading', isLoading, skip);
     return <div>loading</div>
   } else if (error) {
     return (

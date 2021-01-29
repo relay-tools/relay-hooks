@@ -3,19 +3,19 @@ import { GraphQLSubscriptionConfig, requestSubscription, OperationType } from 'r
 import { useRelayEnvironment } from './useRelayEnvironment';
 
 type SubscriptionConfig = {
-  skip?: boolean;
-}
+    skip?: boolean;
+};
 
 export function useSubscription<TSubscriptionPayload extends OperationType = OperationType>(
     config: GraphQLSubscriptionConfig<TSubscriptionPayload>,
-    opts?: SubscriptionConfig
+    opts?: SubscriptionConfig,
 ): void {
     const environment = useRelayEnvironment();
-    const skip = opts?.skip ?? false
+    const skip = opts && opts.skip;
 
     useEffect(() => {
         if (skip) {
-          return
+            return;
         }
         const { dispose } = requestSubscription(environment, config);
         return dispose;

@@ -10,6 +10,7 @@ import {
     VariablesOf,
     FragmentReference,
     RenderPolicy,
+    GraphQLSubscriptionConfig,
 } from 'relay-runtime';
 
 export type MutationState<T extends MutationParameters> = {
@@ -213,4 +214,18 @@ export interface ReturnTypePaginationSuspense<
     errorNext: Error | null;
     errorPrevious: Error | null;
     refetch: RefetchFnDynamic<TQuery, TKey>;
+}
+
+export type SubscriptionConfig = {
+    skip?: boolean;
+};
+
+export type SkipSubscriptionConfig = {
+    skip: true;
+};
+
+export interface SkipGraphQLSubscriptionConfig<TSubscription extends OperationType>
+    extends Omit<GraphQLSubscriptionConfig<TSubscription>, 'variables' | 'subscription'> {
+    subscription?: GraphQLSubscriptionConfig<TSubscription>['subscription'];
+    variables?: TSubscription['variables'];
 }

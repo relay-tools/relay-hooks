@@ -31,10 +31,6 @@ export type MutationConfigWithoutVariables<T extends MutationParameters> = Omit<
     'variables'
 >;
 
-export type MutationConfigWithVariables<T extends MutationParameters> = MutationConfig<T> & {
-    variables: T['variables'];
-};
-
 export type Mutate<T extends MutationParameters> = (
     config?: Partial<MutationConfig<T>>,
 ) => Promise<T['response']>;

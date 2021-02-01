@@ -6,7 +6,6 @@ import {
     MutationNode,
     MutationConfig,
     MutationConfigWithoutVariables,
-    MutationConfigWithVariables,
     MutationState,
     Mutate,
     MutateWithVariables,
@@ -23,7 +22,7 @@ export function useMutation<T extends MutationParameters>(
 ): [MutateWithVariables<T>, MutationState<T>];
 export function useMutation<T extends MutationParameters>(
     mutation: MutationNode<T>,
-    userConfig?: MutationConfigWithVariables<T>,
+    userConfig?: MutationConfig<T>,
     /** if not provided, the context environment will be used. */
     environment?: Environment,
 ): [Mutate<T>, MutationState<T>];

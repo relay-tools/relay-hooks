@@ -14,6 +14,7 @@
 import * as React from 'react';
 import { useMemo, useState } from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
+import { Environment } from 'relay-runtime';
 
 import { createMockEnvironment, generateAndCompile } from 'relay-test-utils-internal';
 import { RelayEnvironmentProvider } from '../src';
@@ -54,7 +55,9 @@ describe('useSubscription', () => {
 
     const { useSubscription } = require('../src');
 
-    const ContextProvider = ({ children }) => {
+    const ContextProvider = ({ children }: {
+        children: React.ReactNode
+    }) => {
         const [env, _setEnv] = useState(mockEnv);
         const relayContext = useMemo(() => ({ environment: env }), [env]);
 
@@ -74,10 +77,10 @@ describe('useSubscription', () => {
         jest.resetAllMocks();
     });
 
-    function MyComponent({ env }) {
-        function InnerComponent(): any {
-            useSubscription(config);
-            return 'Hello Relay!';
+    function MyComponent(props: { env: Environment, skip?: boolean; }): React.ReactElement {
+        function InnerComponent(): React.ReactElement {
+            useSubscription(config,  { skip: props.skip });
+            return <>Hello Relay!</>;
         }
         return (
             <ContextProvider>
@@ -87,9 +90,9 @@ describe('useSubscription', () => {
     }
 
     let componentInstance;
-    const renderComponent = () =>
+    const renderComponent = (props?: { skip: boolean; }) =>
         ReactTestRenderer.act(() => {
-            componentInstance = ReactTestRenderer.create(<MyComponent env={mockEnv} />);
+            componentInstance = ReactTestRenderer.create(<MyComponent env={mockEnv} skip={props?.skip || false} />);
         });
 
     it('should call requestSubscription when mounted', () => {
@@ -126,5 +129,17 @@ describe('useSubscription', () => {
 
         expect(dispose).toHaveBeenCalled();
         expect(requestSubscription).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not subscribe when skip parameter is set to true', () => {
+        renderComponent({ skip: true });
+        expect(requestSubscription).toHaveBeenCalledTimes(0);
+        expect(dispose).not.toHaveBeenCalled();
+    });
+
+    it("should subscribe when skip option is set to false", () => {
+        renderComponent({ skip: false });
+        expect(requestSubscription).toHaveBeenCalledTimes(1);
+        expect(dispose).not.toHaveBeenCalled();
     });
 });

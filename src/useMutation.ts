@@ -71,7 +71,7 @@ export function useMutation<T extends MutationParameters>(
 
             setState({
                 loading: true,
-                data: null,
+                data: optimisticResponse,
                 error: null,
             });
 

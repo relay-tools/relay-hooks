@@ -80,6 +80,8 @@ export function fetchResolver({
         disposable && disposable.dispose();
         disposeRequest();
         disposable = null;
+        env = null;
+        query = null;
     };
 
     const clearTemporaryRetain = (): void => {

@@ -46,6 +46,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
     options: QueryOptions;
     forceUpdate = emptyforceUpdate;
     result: RenderProps<TOperationType> = null;
+    skip?: boolean;
 
     constructor() {
         this.result = {
@@ -106,8 +107,18 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         this.forceUpdate();
     };
 
-    fetch(query: OperationDescriptor, fetchPolicy: FetchPolicy, options: Options): void {
+    fetch(
+        query: OperationDescriptor,
+        fetchPolicy: FetchPolicy,
+        options: Options,
+        skip?: boolean,
+    ): void {
         this.disposeSnapshot();
+        if (skip) {
+            this.fetcher.dispose();
+            return;
+        }
+        // eslint-disable-next-line @typescript-eslint/camelcase
         const { onComplete } = options;
         let fetchHasReturned = false;
         const onNext = (_o: OperationDescriptor, snapshot: Snapshot): void => {
@@ -159,22 +170,20 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         const query = this.getQuery(gqlQuery, variables, options.networkCacheConfig);
         const { fetchPolicy = defaultPolicy, fetchKey, skip } = options;
         this.options = options;
-        if (skip) {
-            this.dispose();
-            return;
-        }
         const diffQuery = !this.query || query.request.identifier !== this.query.request.identifier;
         if (
             diffQuery ||
             environment !== this.environment ||
             fetchPolicy !== this.fetchPolicy ||
-            fetchKey !== this.fetchKey
+            fetchKey !== this.fetchKey ||
+            skip !== this.skip
         ) {
             this.environment = environment;
             this.query = query;
+            this.skip = skip;
             this.fetchPolicy = fetchPolicy;
             this.fetchKey = fetchKey;
-            this.fetch(this.query, fetchPolicy, options);
+            this.fetch(query, fetchPolicy, options, skip);
             this.resolveResult();
         }
     }

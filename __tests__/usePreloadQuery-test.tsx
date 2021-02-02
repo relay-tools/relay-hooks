@@ -810,5 +810,32 @@ describe('usePreloadQuery', () => {
             TestRenderer.act(() => jest.runAllImmediates());
             expect(callback).not.toBeCalled();
         });
+
+        it('unsubscribe only if the callback function is still subscribed', () => {
+            const callback = jest.fn(() => {});
+            const dispose = prefetched.subscribe(callback);
+            const callbackNew = jest.fn(() => {});
+            // this unsubscribe the first subscription
+            const disposeNew = prefetched.subscribe(callbackNew);
+            dispose(); // do nothing
+            prefetched.next(environment, params, { id: '4' });
+            dataSource.next(response);
+            dataSource.complete();
+            TestRenderer.act(() => jest.runAllImmediates());
+            expect(callback).not.toBeCalled();
+            expect(callbackNew).toBeCalled();
+
+            callbackNew.mockClear();
+            callback.mockClear();
+
+            disposeNew();
+
+            prefetched.next(environment, params, { id: '4' });
+            dataSource.next(response);
+            dataSource.complete();
+            TestRenderer.act(() => jest.runAllImmediates());
+            expect(callback).not.toBeCalled();
+            expect(callbackNew).not.toBeCalled();
+        });
     });
 });

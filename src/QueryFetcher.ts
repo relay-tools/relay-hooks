@@ -75,6 +75,10 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         this.cacheConfig = networkCacheConfig;
     }
 
+    getForceUpdate(): () => void {
+        return this.forceUpdate;
+    }
+
     setForceUpdate(forceUpdate): void {
         this.forceUpdate = forceUpdate;
     }

@@ -96,7 +96,9 @@ export const internalLoadQuery = <TOperationType extends OperationType = Operati
     const subscribe = (callback: (value) => any): (() => void) => {
         listener = callback;
         return (): void => {
-            listener = null;
+            if (listener === callback) {
+                listener = null;
+            }
         };
     };
     return {

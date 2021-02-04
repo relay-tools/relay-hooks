@@ -100,6 +100,15 @@ The `mutationState` object has the following properties:
 - `data`: the response data for the mutation
 - `error`: any errors returned by the mutation
 
+## Optimistic Updates
+
+To make your UI more responsive you can use the Optimistic UI pattern. You can read more about Optimistic UI in the [Relay Docs](https://relay.dev/docs/en/mutations#optimistic-updates) or the [Apollo Docs](https://www.apollographql.com/docs/react/performance/optimistic-ui/).
+
+An Optimistic Response can be provided via the `optimisticResponse` parmater of the mutation options.
+
+How do you know whether the `data` parameter contains the Optimistic Response you provided, or the the response from the server? 
+The `data` property of the `useMutation` hook will contain the `optimisticResponse` when the request is in flight, i.e. when `loading` is `true`. When the response is received and `loading` is set to `false`, the data field contains the data sent by the server.
+
 ## Acknowledgements
 
 This library closely follows the mutation API in [React Apollo](https://www.apollographql.com/docs/react/).

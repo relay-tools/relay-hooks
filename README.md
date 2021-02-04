@@ -178,24 +178,24 @@ const App = (
 
 ## useFragment
 
-[See useFragment.md](./useFragment.md)
+[See useFragment.md](./docs/useFragment.md)
 
 ## useRefetchable
 
-[See useRefetchable.md](./useRefetchable.md)
+[See useRefetchable.md](./docs/useRefetchable.md)
 
 ## usePagination
 
-[See usePagination.md](./usePagination.md)
+[See usePagination.md](./docs/usePagination.md)
 
 ## useMutation
 
-[See useMutation.md](./useMutation.md)
+[See useMutation.md](./docs/useMutation.md)
 
 ## useSubscription
 
-[See useSubscription.md](./useSubscription.md)
+[See useSubscription.md](./docs/useSubscription.md)
 
 ## usePreloadedQuery
 
-[See usePreloadedQuery.md](./usePreloadedQuery.md)
+[See usePreloadedQuery.md](./docs/usePreloadedQuery.md)

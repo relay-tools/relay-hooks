@@ -171,6 +171,7 @@ export function fetchResolver({
                 next: () => {
                     const store = environment.lookup(operation.fragment);
                     promise = null;
+                    operation.request.cacheConfig?.poll && updateLoading(false);
                     resolveNetworkPromise();
                     onNext(operation, store);
                 },

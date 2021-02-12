@@ -24,7 +24,7 @@ function createConfigInternal({ format, production }) {
     return {
         input: 'src/index.ts',
         output: {
-            file: 'lib/' + format + '-relay-hooks' + (production ? '.min' : '') + '.js',
+            file: 'lib/' + format + '-relay-hooks' + (production ? '.min' : '') + (format === "es" ? ".mjs" : '.js'),
             format,
             name: 'relay-hooks',
             indent: false,

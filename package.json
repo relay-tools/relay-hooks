@@ -9,9 +9,9 @@
     "ssr"
   ],
   "main": "./lib/index.js",
-  "module": "./lib/es-relay-hooks.js",
+  "module": "./lib/es-relay-hooks.mjs",
   "exports": {
-    "import": "./lib/es-relay-hooks.js",
+    "import": "./lib/es-relay-hooks.mjs",
     "require": "./lib/index.js"
   },
   "license": "MIT",

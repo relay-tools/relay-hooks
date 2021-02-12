@@ -8,7 +8,12 @@
     "react",
     "ssr"
   ],
-  "main": "lib/index.js",
+  "main": "./lib/index.js",
+  "module": "./lib/es-relay-hooks.js",
+  "exports": {
+    "import": "./lib/es-relay-hooks.js",
+    "require": "./lib/index.js"
+  },
   "license": "MIT",
   "description": "Relay Hooks",
   "author": {

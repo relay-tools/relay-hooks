@@ -320,7 +320,7 @@ describe('unmount', () => {
 
     it('does not setState on complete after unmount', () => {
         render(environment, CommentCreateMutation);
-        commit({ variables });
+        ReactTestRenderer.act(() => commit({ variables }));
         ReactTestRenderer.act(() => instance.unmount());
 
         isInFlightFn.mockClear();

@@ -32,7 +32,6 @@
     "build:js": "babel lib --out-dir lib --extensions \".js,.jsx\""
   },
   "dependencies": {
-    "@restart/hooks": "^0.3.1",
     "fbjs": "^3.0.0"
   },
   "peerDependencies": {

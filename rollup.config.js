@@ -32,7 +32,6 @@ function createConfigInternal({ format, production }) {
                 'fbjs/lib/areEqual': 'areEqual',
                 'fbjs/lib/invariant': 'invariant',
                 'fbjs/lib/warning': 'warning',
-                '@restart/hooks/useMounted': 'useMounted',
                 react: 'React',
                 'relay-runtime': 'relayRuntime',
             },

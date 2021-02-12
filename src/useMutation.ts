@@ -1,4 +1,3 @@
-import useMounted from '@restart/hooks/useMounted';
 import * as invariant from 'fbjs/lib/invariant';
 import * as React from 'react';
 import { Environment, MutationParameters, commitMutation } from 'relay-runtime';
@@ -38,7 +37,13 @@ export function useMutation<T extends MutationParameters>(
         error: null,
     });
 
-    const isMounted = useMounted();
+    const isMountedRef = React.useRef(true);
+    React.useEffect(
+        () => () => {
+            isMountedRef.current = false;
+        },
+        [],
+    );
 
     const relayEnvironment = useRelayEnvironment();
     const resolvedEnvironment = environment || relayEnvironment;
@@ -69,7 +74,7 @@ export function useMutation<T extends MutationParameters>(
 
             invariant(mergedConfig.variables, 'you must specify variables');
 
-            if (isMounted()) {
+            if (isMountedRef.current) {
                 setState({
                     loading: true,
                     data: mergedConfig.optimisticResponse,
@@ -79,7 +84,7 @@ export function useMutation<T extends MutationParameters>(
 
             return new Promise((resolve, reject) => {
                 function handleError(error: any): void {
-                    if (isMounted()) {
+                    if (isMountedRef.current) {
                         setState({
                             loading: false,
                             data: null,
@@ -106,7 +111,7 @@ export function useMutation<T extends MutationParameters>(
                             return;
                         }
 
-                        if (isMounted()) {
+                        if (isMountedRef.current) {
                             setState({
                                 loading: false,
                                 data: response,
@@ -134,7 +139,6 @@ export function useMutation<T extends MutationParameters>(
             optimisticUpdater,
             optimisticResponse,
             updater,
-            isMounted,
         ],
     );
 

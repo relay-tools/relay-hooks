@@ -39,7 +39,7 @@ export function useMutation<T extends MutationParameters>(
 
     const isMountedRef = React.useRef(true);
     React.useEffect(
-        () => () => {
+        (): (() => void) => (): void => {
             isMountedRef.current = false;
         },
         [],

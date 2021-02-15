@@ -69,11 +69,13 @@ export function useMutation<T extends MutationParameters>(
 
             invariant(mergedConfig.variables, 'you must specify variables');
 
-            setState({
-                loading: true,
-                data: optimisticResponse,
-                error: null,
-            });
+            if (isMounted()) {
+                setState({
+                    loading: true,
+                    data: mergedConfig.optimisticResponse,
+                    error: null,
+                });
+            }
 
             return new Promise((resolve, reject) => {
                 function handleError(error: any): void {

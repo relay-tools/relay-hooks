@@ -42,7 +42,7 @@ After Relay's core team shared information about the the initial differences in 
 
 * why use relay-hooks?
 
-It is a stable library and none of its dependencies is experimental and it allows you to immediately use react hooks with relay-runtime and it is designed for easy migration to react-relay hooks.
+It is a stable library and none of its dependencies are experimental and it allows you to immediately use react hooks with relay-runtime and it is designed for easy migration to react-relay hooks.
 
 It is a light library and compatible with react-relay
 

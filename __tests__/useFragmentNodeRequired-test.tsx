@@ -30,7 +30,9 @@ import {
 } from 'relay-runtime';
 
 (RelayFeatureFlags as any).ENABLE_REQUIRED_DIRECTIVES = true;
-import { createMockEnvironment, generateAndCompile } from 'relay-test-utils-internal';
+import { createMockEnvironment } from 'relay-test-utils-internal';
+
+const { generateAndCompile } = require('./TestCompiler');
 
 //import * as Scheduler from 'scheduler';
 import { ReactRelayContext, useSuspenseFragment as useFragmentNodeOriginal } from '../src';

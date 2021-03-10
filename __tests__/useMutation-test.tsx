@@ -17,7 +17,9 @@ import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 
 import { createOperationDescriptor, PayloadData, PayloadError } from 'relay-runtime';
-import { createMockEnvironment, generateAndCompile } from 'relay-test-utils-internal';
+import { createMockEnvironment } from 'relay-test-utils-internal';
+
+const { generateAndCompile } = require('./TestCompiler');
 import { useMutation, RelayEnvironmentProvider } from '../src';
 
 const { useState, useMemo } = React;

@@ -56,11 +56,9 @@ const ReactRelayQueryRenderer = (props) => (
 );
 
 const { createReaderSelector, createOperationDescriptor } = require('relay-runtime');
-const {
-    createMockEnvironment,
-    generateAndCompile,
-    unwrapContainer,
-} = require('relay-test-utils-internal');
+const { createMockEnvironment } = require('relay-test-utils-internal');
+
+const { generateAndCompile } = require('./TestCompiler');
 
 describe('ReactRelayFragmentContainer', () => {
     let TestComponent;

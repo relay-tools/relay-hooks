@@ -14,12 +14,7 @@
 
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
-import {
-    usePagination,
-    RelayEnvironmentProvider,
-    useRelayEnvironment,
-    RefetchOptions,
-} from '../src';
+import { usePagination, RelayEnvironmentProvider, useRelayEnvironment } from '../src';
 import { forceCache } from '../src/Utils';
 
 function createHooks(component, options?: any) {
@@ -44,7 +39,7 @@ const ReactRelayPaginationContainer = {
             refetch: refetchConnectionHooks,
             errorNext,
         } = dataPag;
-        const loadMore = (count, callback: (error: Error) => void, options?: RefetchOptions) => {
+        const loadMore = (count, callback: (error: Error) => void, options?: any) => {
             // @ts-ignore
             return loadMoreHooks(count, {
                 onComplete: callback,
@@ -83,11 +78,9 @@ const {
     ConnectionHandler,
     ConnectionInterface,
 } = require('relay-runtime');
-const {
-    createMockEnvironment,
-    generateAndCompile,
-    unwrapContainer,
-} = require('relay-test-utils-internal');
+const { createMockEnvironment } = require('relay-test-utils-internal');
+
+const { generateAndCompile } = require('./TestCompiler');
 
 describe('ReactRelayPaginationContainer', () => {
     let TestComponent;

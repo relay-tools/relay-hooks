@@ -40,7 +40,9 @@ import {
     ROOT_ID,
 } from 'relay-runtime';
 import { ROOT_TYPE } from 'relay-runtime/lib/store/RelayStoreUtils';
-import { createMockEnvironment, generateAndCompile, simpleClone } from 'relay-test-utils-internal';
+import { createMockEnvironment } from 'relay-test-utils-internal';
+
+const { generateAndCompile } = require('./TestCompiler');
 /*
 function expectToBeRendered(renderFn, readyState) {
   // Ensure useEffect is called before other timers

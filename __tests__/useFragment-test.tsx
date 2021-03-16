@@ -156,7 +156,9 @@ beforeEach(() => {
     }));
     renderSpy = jest.fn();
 
-    ({ createMockEnvironment, generateAndCompile } = require('relay-test-utils-internal'));
+    ({ generateAndCompile } = require('./TestCompiler'));
+
+    ({ createMockEnvironment } = require('relay-test-utils-internal'));
 
     // Set up environment and base data
     environment = createMockEnvironment();

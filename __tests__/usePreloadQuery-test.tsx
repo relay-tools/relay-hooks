@@ -20,7 +20,9 @@ import * as React from 'react';
 import * as TestRenderer from 'react-test-renderer';
 
 import { Environment, Network, Observable, RecordSource, Store } from 'relay-runtime';
-import { createMockEnvironment, generateAndCompile } from 'relay-test-utils-internal';
+import { createMockEnvironment } from 'relay-test-utils-internal';
+
+const { generateAndCompile } = require('./TestCompiler');
 import { usePreloadedQuery, loadQuery, loadLazyQuery, RelayEnvironmentProvider } from '../src';
 
 const query = generateAndCompile(`

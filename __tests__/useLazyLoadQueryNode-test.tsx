@@ -15,6 +15,7 @@
 
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
+import { RecordSource, Store } from 'relay-runtime';
 
 import { useLazyLoadQuery as useLazyLoadQueryNode, RelayEnvironmentProvider } from '../src';
 
@@ -71,7 +72,9 @@ describe('useLazyLoadQueryNode', () => {
             isServer: false,
         }));*/
 
-        ({ createMockEnvironment, generateAndCompile } = require('relay-test-utils-internal'));
+        ({ generateAndCompile } = require('./TestCompiler'));
+
+        ({ createMockEnvironment } = require('relay-test-utils-internal'));
 
         class ErrorBoundary extends React.Component<any, any> {
             state = { error: null };
@@ -122,7 +125,9 @@ describe('useLazyLoadQueryNode', () => {
             );
         };
 
-        environment = createMockEnvironment();
+        environment = createMockEnvironment({
+            store: new Store(new RecordSource(), { gcReleaseBufferSize: 0 }),
+        });
         release = jest.fn();
         const originalRetain = environment.retain.bind(environment);
         // $FlowFixMe

@@ -177,7 +177,9 @@ describe('useRefetchableFragmentNode', () => {
         fetchPolicy = 'store-or-network';
         renderPolicy = 'partial';
 
-        ({ createMockEnvironment, generateAndCompile } = require('relay-test-utils-internal'));
+        ({ generateAndCompile } = require('./TestCompiler'));
+
+        ({ createMockEnvironment } = require('relay-test-utils-internal'));
 
         // Set up environment and base data
         environment = createMockEnvironment();
@@ -491,7 +493,9 @@ describe('useRefetchableFragmentNode', () => {
 
         beforeEach(() => {
             jest.resetModules();
-            ({ createMockEnvironment, generateAndCompile } = require('relay-test-utils-internal'));
+
+            ({ generateAndCompile } = require('./TestCompiler'));
+            ({ createMockEnvironment } = require('relay-test-utils-internal'));
 
             release = jest.fn();
             environment.retain.mockImplementation((...args) => {

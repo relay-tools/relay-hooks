@@ -27,7 +27,6 @@ jest.mock('fbjs/lib/warning', () => {
     return f;
 });
 
-
 let mockGetPromise = false;
 jest.doMock('relay-runtime', () => {
     const originalRuntime = jest.requireActual('relay-runtime');
@@ -159,7 +158,9 @@ beforeEach(() => {
     //(Scheduler as any).mockClear();
     renderSpy = jest.fn();
 
-    ({ createMockEnvironment, generateAndCompile } = require('relay-test-utils-internal'));
+    ({ generateAndCompile } = require('./TestCompiler'));
+
+    ({ createMockEnvironment } = require('relay-test-utils-internal'));
 
     // Set up environment and base data
     environment = createMockEnvironment();
@@ -1074,7 +1075,7 @@ it('should throw a promise if if data is missing for fragment and request is in 
         'getPromiseForActiveRequest',
     ).mockImplementationOnce(() => Promise.resolve());*/
     mockGetPromise = true;
-    
+
     const missingDataVariables = { ...singularVariables, id: '4' };
     const missingDataQuery = createOperationDescriptor(gqlSingularQuery, missingDataVariables);
     // Commit a payload with name and profile_picture are missing

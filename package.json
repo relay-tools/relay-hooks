@@ -1,6 +1,6 @@
 {
   "name": "relay-hooks",
-  "version": "4.1.1",
+  "version": "4.2.0",
   "keywords": [
     "graphql",
     "relay",
@@ -37,7 +37,7 @@
   },
   "peerDependencies": {
     "react": "^16.9.0 || ^17",
-    "relay-runtime": ">=10.1.0 || >=11.0.0"
+    "relay-runtime": "^10.1.0 || ^11.0.0"
   },
   "devDependencies": {
     "babel-preset-fbjs": "^3.3.0",
@@ -83,5 +83,8 @@
     "rollup-plugin-typescript2": "^0.27.1",
     "ts-jest": "24.1.0",
     "typescript": "3.8.3"
+  },
+  "funding": {
+    "url": "https://github.com/sponsors/morrys"
   }
 }

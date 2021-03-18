@@ -15,8 +15,8 @@
     "express-graphql": "^0.7.1",
     "graphql": "^14.5.8",
     "graphql-relay": "^0.6.0",
-    "isomorphic-unfetch": "3.0.0",
     "isomorphic-fetch": "^2.1.1",
+    "isomorphic-unfetch": "3.0.0",
     "next": "9.4.4",
     "prop-types": "^15.7.2",
     "react": "0.0.0-experimental-7f28234f8",
@@ -24,6 +24,7 @@
     "relay-hooks": "4.0.0",
     "relay-runtime": "10.1.2",
     "styled-components": "4.4.0",
+    "uuid": "^8.3.2",
     "whatwg-fetch": "3.0.0"
   },
   "devDependencies": {

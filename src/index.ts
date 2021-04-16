@@ -10,7 +10,7 @@ export { ReactRelayContext } from './ReactRelayContext';
 export { useQuery, useLazyLoadQuery } from './useQuery';
 export { loadQuery, loadLazyQuery } from './loadQuery';
 export { usePreloadedQuery } from './usePreloadedQuery';
-export { useFragment, useSuspenseFragment } from './useFragment';
+export { useFragment, useSuspenseFragment, useTransientFragment } from './useFragment';
 export { useMutation } from './useMutation';
 export { useSubscription } from './useSubscription';
 export { useOssFragment } from './useOssFragment';

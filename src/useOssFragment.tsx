@@ -1,5 +1,5 @@
 import * as warning from 'fbjs/lib/warning';
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useCallback } from 'react';
 import { GraphQLTaggedNode, getFragmentIdentifier, getFragment } from 'relay-runtime';
 import { FragmentResolver } from './FragmentResolver';
 import { FragmentNames } from './RelayHooksTypes';
@@ -11,6 +11,7 @@ export function useOssFragment(
     fragmentRef: any | null,
     suspense: boolean,
     name: FragmentNames,
+    subscribe?: (data: any) => void,
 ): any {
     const environment = useRelayEnvironment();
     const forceUpdate = useForceUpdate();
@@ -53,6 +54,23 @@ export function useOssFragment(
     resolver.resolve(environment, idfragment, fragment, fragmentRef);
 
     resolver.checkAndSuspense(suspense);
+
+    const next = useCallback(() => {
+        if (subscribe) {
+            const data = resolver.getData();
+            subscribe(data);
+        }
+    }, [subscribe, idfragment]);
+
+    useEffect(() => {
+        next();
+    }, [next]);
+
+    if (subscribe) {
+        resolver.setForceUpdate(next);
+        return;
+    }
+
     resolver.setForceUpdate(forceUpdate);
 
     const data = resolver.getData();

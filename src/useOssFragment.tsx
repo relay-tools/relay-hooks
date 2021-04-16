@@ -60,7 +60,7 @@ export function useOssFragment(
             const data = resolver.getData();
             subscribe(data);
         }
-    }, [subscribe, idfragment]);
+    }, [subscribe, resolver, idfragment]);
 
     useEffect(() => {
         next();

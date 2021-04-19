@@ -12,9 +12,13 @@
 /* eslint-disable */
 
 import * as React from 'react';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import * as TestRenderer from 'react-test-renderer';
-import { useFragment as useFragmentNodeOriginal, ReactRelayContext } from '../src';
+import {
+    useFragment as useFragmentNodeOriginal,
+    useTransientFragment,
+    ReactRelayContext,
+} from '../src';
 import {
     FRAGMENT_OWNER_KEY,
     FRAGMENTS_KEY,
@@ -95,6 +99,7 @@ let pluralVariables;
 let setEnvironment;
 let setSingularOwner;
 let renderSingularFragment;
+let subscribeSingularFragment;
 let renderPluralFragment;
 let forceSingularUpdate;
 let renderSpy;
@@ -258,6 +263,24 @@ beforeEach(() => {
         return <SingularRenderer user={userData} />;
     };
 
+    const SingularSubscribeContainer = (props) => {
+        const [owner, _setOwner] = useState(props.owner);
+        const [, _setCount] = useState(0);
+        const userRef = props.hasOwnProperty('userRef')
+            ? props.userRef
+            : {
+                  [ID_KEY]: owner.request.variables.id,
+                  [FRAGMENTS_KEY]: {
+                      UserFragment: {},
+                  },
+                  [FRAGMENT_OWNER_KEY]: owner.request,
+              };
+
+        setSingularOwner = _setOwner;
+        useTransientFragment(gqlSingularFragment, userRef, props.onData);
+        return null;
+    };
+
     const PluralContainer = (props) => {
         // We need a render a component to run a Hook
         const owner = props.owner;
@@ -307,6 +330,17 @@ beforeEach(() => {
                 </ContextProvider>
             </React.Suspense>,
             { unstable_isConcurrent: isConcurrent },
+        );
+    };
+
+    subscribeSingularFragment = (props) => {
+        return TestRenderer.create(
+            <React.Suspense fallback="Singular Fallback">
+                <ContextProvider>
+                    <SingularSubscribeContainer owner={singularQuery} {...props} />
+                </ContextProvider>
+            </React.Suspense>,
+            { unstable_isConcurrent: false },
         );
     };
 });
@@ -1345,3 +1379,96 @@ describe("disableStoreUpdates", () => {
   });
 });
 */
+
+it('should invoke singular subscribe handler without error when data is available', (done) => {
+    subscribeSingularFragment({
+        onData: (data) => {
+            expect(data).toEqual({
+                id: '1',
+                name: 'Alice',
+                profile_picture: null,
+                ...createFragmentRef('1', singularQuery),
+            });
+            done();
+        },
+    });
+    assertFragmentResults([]);
+});
+
+it('should invoke singular subscribe handler when fragment data changes again', (done) => {
+    let counter = 0;
+    subscribeSingularFragment({
+        onData: (data) => {
+            counter = counter + 1;
+            if (counter === 1) {
+                expect(data).toEqual({
+                    id: '1',
+                    name: 'Alice',
+                    profile_picture: null,
+                    ...createFragmentRef('1', singularQuery),
+                });
+            } else if (counter === 2) {
+                expect(data).toEqual({
+                    id: '1',
+                    // Assert that name is updated
+                    name: 'Alice in Wonderland',
+                    profile_picture: null,
+                    ...createFragmentRef('1', singularQuery),
+                });
+                done();
+            } else {
+                done.fail('More invocations that expected');
+            }
+        },
+    });
+    assertFragmentResults([]);
+    TestRenderer.act(() => {
+        environment.commitPayload(singularQuery, {
+            node: {
+                __typename: 'User',
+                id: '1',
+                // Update name
+                name: 'Alice in Wonderland',
+            },
+        });
+    });
+    assertFragmentResults([]);
+});
+
+it('should invoke singular subscribe handler when fragment params changes', (done) => {
+    let counter = 0;
+    const newOwner = createOperationDescriptor(gqlSingularQuery, { ...singularVariables, id: '2' });
+
+    subscribeSingularFragment({
+        onData: (data) => {
+            counter = counter + 1;
+
+            if (counter === 1) {
+                expect(data).toEqual({
+                    id: '1',
+                    name: 'Alice',
+                    profile_picture: null,
+                    ...createFragmentRef('1', singularQuery),
+                });
+            } else if (counter === 2) {
+                expect(data).toEqual({
+                    id: '2',
+                    // Assert that name is updated
+                    name: 'Bob',
+                    profile_picture: null,
+                    ...createFragmentRef('2', newOwner),
+                });
+                done();
+            } else {
+                done.fail('More invocations that expected');
+            }
+        },
+    });
+    assertFragmentResults([]);
+
+    TestRenderer.act(() => {
+        setSingularOwner(newOwner);
+    });
+
+    assertFragmentResults([]);
+});

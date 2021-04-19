@@ -35,3 +35,18 @@ ReturnTypeRefetchSuspenseNode<TQuery, TKey, KeyTypeData<TKey> | null> {
     const [data] = useOssFragment(fragmentInput, fragmentRef, true, REFETCHABLE_NAME);
     return data;
 }
+
+export function useTransientRefetchable<TQuery extends OperationType, TKey extends KeyType>(
+    fragmentInput: GraphQLTaggedNode,
+    fragmentRef: TKey,
+    callback: (data: ReturnTypeRefetchNode<TQuery, TKey, KeyTypeData<TKey>>) => void,
+): // tslint:disable-next-line no-unnecessary-generics
+void;
+export function useTransientRefetchable<TQuery extends OperationType, TKey extends KeyType>(
+    fragmentInput: GraphQLTaggedNode,
+    fragmentRef: TKey | null,
+    callback: (data: ReturnTypeRefetchNode<TQuery, TKey, KeyTypeData<TKey> | null>) => void,
+): // tslint:disable-next-line no-unnecessary-generics
+void {
+    useOssFragment(fragmentInput, fragmentRef, false, REFETCHABLE_NAME, callback);
+}

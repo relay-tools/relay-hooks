@@ -40,6 +40,7 @@ import TodoApp, { fragmentSpec } from './components/TodoApp';
 import TodoTextInput from './components/TodoTextInput';
 import type { appQueryResponse } from 'relay/appQuery.graphql';
 import QueryApp from './query/QueryApp';
+import ReactRelayQueryRendererContext from 'react-relay/lib/ReactRelayQueryRendererContext'
 /*
 async function fetchQuery(
   operation: RequestNode,
@@ -168,9 +169,14 @@ const LayoutTodo = ({ userId }) => {
   return <TodoApp user={data.user} userId={userId} retry={retry} />;
 };
 
+
 const App = (
   <RelayEnvironmentProvider environment={modernEnvironment}>
-    <AppTodo />
+    <ReactRelayQueryRendererContext.Provider value={{
+      rootIsQueryRenderer: true,
+    }}>
+      <AppTodo />
+    </ReactRelayQueryRendererContext.Provider>
   </RelayEnvironmentProvider>
 );
 

@@ -17,10 +17,10 @@ import MarkAllTodosMutation, {
 import Todo from './Todo';
 
 import React from 'react';
-import {createFragmentContainer, graphql, type RelayProp} from 'react-relay';
+import { createFragmentContainer, graphql, type RelayProp } from 'react-relay';
 import QueryApp from '../query/QueryApp';
-import type {TodoList_user} from 'relay/TodoList_user.graphql';
-import {useFragment, useMutation} from 'relay-hooks';
+import type { TodoList_user } from 'relay/TodoList_user.graphql';
+import { useFragment, useMutation } from 'relay-hooks';
 type Todos = $NonMaybeType<$ElementType<TodoList_user, 'todos'>>;
 type Edges = $NonMaybeType<$ElementType<Todos, 'edges'>>;
 type Edge = $NonMaybeType<$ElementType<Edges, number>>;
@@ -59,10 +59,10 @@ const fragmentSpecList = graphql`
 `;
 
 const TodoList = props => {
-  const {refetch} = props;
+  const { refetch, user } = props;
   //const { refetch } = props;
-  const user = useFragment(fragmentSpec, props.user);
-  const {todos, completedCount, totalCount, userId} = user;
+  //const user = useFragment(fragmentSpec, props.user);
+  const { todos, completedCount, totalCount, userId } = user;
   console.log('todos', todos);
 
   const edges = useFragment(fragmentSpecList, todos.edges);
@@ -92,9 +92,9 @@ const TodoList = props => {
 */
   const nodes: $ReadOnlyArray<Node> = edges
     ? edges
-        .filter(Boolean)
-        .map((edge: Edge) => edge.node)
-        .filter(Boolean)
+      .filter(Boolean)
+      .map((edge: Edge) => edge.node)
+      .filter(Boolean)
     : [];
   return (
     <section className="main">
@@ -118,30 +118,11 @@ const TodoList = props => {
     </section>
   );
 };
-export default TodoList;
+//export default TodoList;
 
-/*export default createFragmentContainer(TodoList, {
+export default createFragmentContainer(TodoList, {
   // This `list` fragment corresponds to the prop named `list` that is
   // expected to be populated with server data by the `<TodoList>` component.
-  user: graphql`
-    fragment TodoList_user on User {
-      todos(
-        first: 2147483647 # max GraphQLInt
-      ) @connection(key: "TodoList_todos") {
-        edges {
-          node {
-            id
-            complete
-            ...Todo_todo
-          }
-        }
-      }
-      id
-      userId
-      totalCount
-      completedCount
-      ...Todo_user
-    }
-  `,
+  user: fragmentSpec,
 });
-*/
+

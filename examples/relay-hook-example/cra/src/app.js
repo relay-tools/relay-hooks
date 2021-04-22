@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { useQuery, RelayEnvironmentProvider } from 'relay-hooks';
 import { Environment, Network, RecordSource, Store } from 'relay-runtime';
+import { QueryRenderer } from 'react-relay';
 
 import { create } from './mutations/create';
 
@@ -47,6 +48,18 @@ const AppTodo = (propsApp) => {
                 <button onClick={submitEntry} className="refetch">
                     Add
                 </button>
+                <QueryRenderer
+                    environment={modernEnvironment}
+                    query={QueryApp}
+                    variables={{}}
+                    render={({ props }) => {
+                        if (props && props.entries) {
+                            return <Entries entries={props.entries} />;
+                        }
+                        return <div>prova</div>
+                    }
+                    }
+                />
                 <Entries entries={data.entries} />
             </React.Fragment>
         );
@@ -58,9 +71,21 @@ const AppTodo = (propsApp) => {
 };
 
 const App = (
-    <RelayEnvironmentProvider environment={modernEnvironment}>
-        <AppTodo />
-    </RelayEnvironmentProvider>
+    <div>
+        <QueryRenderer
+            environment={modernEnvironment}
+            query={QueryApp}
+            variables={{}}
+            render={({ props }) => {
+                if (props && props.entries) {
+                    return <AppTodo />;
+                }
+                return <div>prova</div>
+            }
+            }
+        />
+
+    </div>
 );
 
 export default App;

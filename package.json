@@ -9,6 +9,8 @@
     "ssr"
   ],
   "main": "lib/index.js",
+  "module": "./lib/es/index.js",
+  "unpkg": "lib/umd-relay-hooks.min.js",
   "license": "MIT",
   "description": "Relay Hooks",
   "author": {
@@ -21,7 +23,7 @@
   },
   "scripts": {
     "clean": "rimraf lib",
-    "compile": "npm run clean && tsc && npm run build:js && npm run rollup",
+    "compile": "npm run clean && tsc && tsc --project tsconfig.esm.json && npm run build:js && npm run rollup",
     "rollup": "rollup -c",
     "build": "npm run compile && npm run test",
     "test": "cross-env NODE_ENV=test jest --coverage",
@@ -29,7 +31,7 @@
     "format:ci": "prettier --list-different \"src/**/*.{j,t}s*\"",
     "eslint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
     "prepublishOnly": "npm run build",
-    "build:js": "babel lib --out-dir lib --extensions \".js,.jsx\""
+    "build:js": "babel lib --out-dir lib --extensions \".js,.jsx\" && babel lib/es --out-dir lib/es --extensions \".js,.jsx\""
   },
   "dependencies": {
     "@restart/hooks": "^0.3.1",

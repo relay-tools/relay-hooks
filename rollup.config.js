@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable import/no-default-export */
-import babel from '@rollup/plugin-babel'
+import babel from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
@@ -24,7 +24,7 @@ function createConfigInternal({ format, production }) {
     return {
         input: 'src/index.ts',
         output: {
-            file: 'lib/' + format + '-relay-hooks' + (production ? '.min' : '') + '.js',
+            file: 'lib/' + format + '/relay-hooks' + (production ? '.min' : '') + '.js',
             format,
             name: 'relay-hooks',
             indent: false,
@@ -94,4 +94,4 @@ function createConfig(format) {
     ];
 }
 
-export default [...createConfig('cjs'), ...createConfig('es'), ...createConfig('umd')];
+export default [...createConfig('umd')];

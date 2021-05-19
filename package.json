@@ -10,7 +10,7 @@
   ],
   "main": "lib/index.js",
   "module": "./lib/es/index.js",
-  "unpkg": "lib/umd-relay-hooks.min.js",
+  "unpkg": "lib/umd/relay-hooks.min.js",
   "license": "MIT",
   "description": "Relay Hooks",
   "author": {

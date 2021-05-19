@@ -8,11 +8,14 @@
     "react",
     "ssr"
   ],
-  "main": "./lib/index.js",
+  "main": "./lib/cjs/cjs-relay-hooks.js",
   "module": "./lib/es-relay-hooks.mjs",
   "exports": {
-    "import": "./lib/es-relay-hooks.mjs",
-    "require": "./lib/index.js"
+    ".": {
+      "import": "./lib/es-relay-hooks.mjs",
+      "require": "./lib/cjs/cjs-relay-hooks.js"
+    },
+    "./package.json": "./package.json"
   },
   "license": "MIT",
   "description": "Relay Hooks",
@@ -26,7 +29,7 @@
   },
   "scripts": {
     "clean": "rimraf lib",
-    "compile": "npm run clean && tsc && npm run build:js && npm run rollup",
+    "compile": "npm run clean && tsc && tsc --project tsconfig.esm.json && npm run build:js && npm run rollup",
     "rollup": "rollup -c",
     "build": "npm run compile && npm run test",
     "test": "cross-env NODE_ENV=test jest --coverage",
@@ -34,7 +37,7 @@
     "format:ci": "prettier --list-different \"src/**/*.{j,t}s*\"",
     "eslint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
     "prepublishOnly": "npm run build",
-    "build:js": "babel lib --out-dir lib --extensions \".js,.jsx\""
+    "build:js": "babel lib/cjs --out-dir lib/cjs --extensions \".js,.jsx\""
   },
   "dependencies": {
     "fbjs": "^3.0.0"

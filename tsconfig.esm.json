@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-    "outDir": "lib/cjs",
+    "outDir": "lib",
     "rootDir": "src",
-    "module": "commonjs",
-    "target": "es5",
+    "module": "ESNext",
+    "target": "ES2020",
     "moduleResolution": "node",
     "noEmitOnError": true,
-    "declaration": false,
+    "declaration": true,
     "lib": ["dom", "es6", "esnext.asynciterable", "es2017.object"],
     "jsx": "react",
     "skipLibCheck": true

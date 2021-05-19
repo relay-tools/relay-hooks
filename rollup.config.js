@@ -8,6 +8,7 @@ import replace from '@rollup/plugin-replace';
 import sourceMaps from 'rollup-plugin-sourcemaps';
 import { terser } from 'rollup-plugin-terser';
 import typescript from 'rollup-plugin-typescript2';
+import { promises as fs } from "fs";
 import pkg from './package.json';
 
 const makeExternalPredicate = (externalArr) => {
@@ -24,7 +25,7 @@ function createConfigInternal({ format, production }) {
     return {
         input: 'src/index.ts',
         output: {
-            file: 'lib/' + format + '-relay-hooks' + (production ? '.min' : '') + (format === "es" ? ".mjs" : '.js'),
+            file: 'lib/' + (format === "cjs" ? "cjs/" : "") + format + '-relay-hooks' + (production ? '.min' : '') + '.js',
             format,
             name: 'relay-hooks',
             indent: false,
@@ -82,6 +83,28 @@ function createConfigInternal({ format, production }) {
                     toplevel: format === 'cjs',
                     warnings: true,
                 }),
+            format === "cjs" && {
+                name: "writePkgJSON",
+                writeBundle: async () => {
+                    await fs.writeFile(
+                        "lib/cjs/package.json",
+                        JSON.stringify({
+                            type: "commonjs",
+                        })
+                    );
+                }
+            },
+            format === "es" && {
+                name: "writePkgJSON",
+                writeBundle: async () => {
+                    await fs.writeFile(
+                        "lib/package.json",
+                        JSON.stringify({
+                            type: "module",
+                        })
+                    );
+                }
+            },
         ],
     };
 }

@@ -11,6 +11,7 @@ export function useOssFragment(
     fragmentRef: any | null,
     suspense: boolean,
     name: FragmentNames,
+    subscribeResolve?: (data: any) => void,
 ): any {
     const environment = useRelayEnvironment();
     const forceUpdate = useForceUpdate();
@@ -50,7 +51,13 @@ export function useOssFragment(
         };
     }, [resolver, idfragment, environment]);
 
+    resolver.subscribeResolve(subscribeResolve);
+
     resolver.resolve(environment, idfragment, fragment, fragmentRef);
+    if (subscribeResolve) {
+        resolver.setForceUpdate();
+        return;
+    }
 
     resolver.checkAndSuspense(suspense);
     resolver.setForceUpdate(forceUpdate);

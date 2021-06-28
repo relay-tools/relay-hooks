@@ -49,3 +49,46 @@ import { useSuspenseFragment } from 'relay-hooks';
 ```
 
 [See useFragment](https://relay.dev/docs/en/api-reference#usefragment)
+
+# useFragmentSubscription
+
+Instead of `useFragment` the `useFragmentSubscription` takes a callback that is always invoked with the latest fragment data. This can be useful when dealing with components where a re-render is expensive. 
+
+## Arguments:
+
+  * `fragment`: GraphQL fragment specified using a graphql template literal.
+  * `fragmentReference`: The fragment reference is an opaque Relay object that Relay uses to read the data for the fragment from the store; more specifically, it contains information about which particular object instance the data should be read from. 
+    * The type of the fragment reference can be imported from the generated Flow types, from the file `<fragment_name>.graphql.js`, and can be used to declare the type of your `Props`. The name of the fragment reference type will be: `<fragment_name>$key`. We use our [lint rule](https://github.com/relayjs/eslint-plugin-relay) to enforce that the type of the fragment reference prop is correctly declared.
+  * `onFragmentData`: A callback that will be invoked with the latest fragment data.
+
+## Return Value:
+
+  * `void`: This hook returns no value
+
+```ts
+import * as React from 'react';
+import { useFragmentSubscription, graphql } from 'relay-hooks';
+
+const fragmentSpec = graphql`
+    fragment TodoApp_user on User {
+      id
+      userId
+      totalCount
+    }
+  `;
+
+const TodoApp = (props) => {
+    const ref = React.useRef()
+    useFragmentSubscription(
+        fragmentSpec,
+        props.user,
+        React.useCallback((user) => {
+            ref.current.updateUserInformation(user);
+        }, [])
+    );
+    return (
+        <SomeExpensiveComponent ref={ref} />
+    );
+};
+```
+

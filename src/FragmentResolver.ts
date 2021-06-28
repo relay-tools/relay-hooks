@@ -104,6 +104,7 @@ export class FragmentResolver {
     refetchable = false;
     pagination = false;
     result: any;
+    _subscribeResolve;
 
     constructor(name: FragmentNames) {
         this.name = name;
@@ -123,11 +124,18 @@ export class FragmentResolver {
         }
     }
 
-    setForceUpdate(forceUpdate: () => void): void {
+    setForceUpdate(forceUpdate = (): void => undefined): void {
         this.refreshHooks = (): void => {
             this.resolveResult();
             forceUpdate();
         };
+    }
+
+    subscribeResolve(subscribeResolve: (data: any) => void): void {
+        if (this._subscribeResolve && this._subscribeResolve != subscribeResolve) {
+            subscribeResolve(this.getData());
+        }
+        this._subscribeResolve = subscribeResolve;
     }
 
     setUnmounted(): void {
@@ -285,6 +293,7 @@ export class FragmentResolver {
             const { isLoading, error } = this.fetcherRefecth.getData();
             const refetch = this.refetch;
             if (!this.pagination) {
+                // useRefetchable
                 if ('production' !== process.env.NODE_ENV) {
                     getRefetchMetadata(this._fragment, this.name);
                 }
@@ -294,46 +303,49 @@ export class FragmentResolver {
                     error,
                     refetch,
                 };
-                return;
-            }
-            const { connectionPathInFragmentData } = getPaginationMetadata(
-                this._fragment,
-                this.name,
-            );
+            } else {
+                // usePagination
+                const { connectionPathInFragmentData } = getPaginationMetadata(
+                    this._fragment,
+                    this.name,
+                );
 
-            const connection = getValueAtPath(data, connectionPathInFragmentData);
-            const { hasMore: hasNext } = getStateFromConnection(
-                'forward',
-                this._fragment,
-                connection,
-            );
-            const { hasMore: hasPrevious } = getStateFromConnection(
-                'backward',
-                this._fragment,
-                connection,
-            );
-            const { isLoading: isLoadingNext, error: errorNext } = this.fetcherNext.getData();
-            const {
-                isLoading: isLoadingPrevious,
-                error: errorPrevious,
-            } = this.fetcherPrevious.getData();
-            this.result = {
-                data,
-                hasNext,
-                isLoadingNext,
-                hasPrevious,
-                isLoadingPrevious,
-                isLoading,
-                errorNext,
-                errorPrevious,
-                error,
-                refetch,
-                loadNext: this.loadNext,
-                loadPrevious: this.loadPrevious,
-            };
-            return;
+                const connection = getValueAtPath(data, connectionPathInFragmentData);
+                const { hasMore: hasNext } = getStateFromConnection(
+                    'forward',
+                    this._fragment,
+                    connection,
+                );
+                const { hasMore: hasPrevious } = getStateFromConnection(
+                    'backward',
+                    this._fragment,
+                    connection,
+                );
+                const { isLoading: isLoadingNext, error: errorNext } = this.fetcherNext.getData();
+                const {
+                    isLoading: isLoadingPrevious,
+                    error: errorPrevious,
+                } = this.fetcherPrevious.getData();
+                this.result = {
+                    data,
+                    hasNext,
+                    isLoadingNext,
+                    hasPrevious,
+                    isLoadingPrevious,
+                    isLoading,
+                    errorNext,
+                    errorPrevious,
+                    error,
+                    refetch,
+                    loadNext: this.loadNext,
+                    loadPrevious: this.loadPrevious,
+                };
+            }
+        } else {
+            // useFragment
+            this.result = data;
         }
-        this.result = data;
+        this._subscribeResolve && this._subscribeResolve(this.result);
     }
 
     unsubscribe(): void {

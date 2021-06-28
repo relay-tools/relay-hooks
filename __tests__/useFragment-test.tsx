@@ -16,7 +16,7 @@ import { useMemo, useState } from 'react';
 import * as TestRenderer from 'react-test-renderer';
 import {
     useFragment as useFragmentNodeOriginal,
-    useTransientFragment,
+    useFragmentSubscription,
     ReactRelayContext,
 } from '../src';
 import {
@@ -277,7 +277,7 @@ beforeEach(() => {
               };
 
         setSingularOwner = _setOwner;
-        useTransientFragment(gqlSingularFragment, userRef, props.onData);
+        useFragmentSubscription(gqlSingularFragment, userRef, props.onData);
         return null;
     };
 

@@ -36,13 +36,13 @@ ReturnTypeRefetchSuspenseNode<TQuery, TKey, KeyTypeData<TKey> | null> {
     return data;
 }
 
-export function useTransientRefetchable<TQuery extends OperationType, TKey extends KeyType>(
+export function useRefetchableSubscription<TQuery extends OperationType, TKey extends KeyType>(
     fragmentInput: GraphQLTaggedNode,
     fragmentRef: TKey,
     callback: (data: ReturnTypeRefetchNode<TQuery, TKey, KeyTypeData<TKey>>) => void,
 ): // tslint:disable-next-line no-unnecessary-generics
 void;
-export function useTransientRefetchable<TQuery extends OperationType, TKey extends KeyType>(
+export function useRefetchableSubscription<TQuery extends OperationType, TKey extends KeyType>(
     fragmentInput: GraphQLTaggedNode,
     fragmentRef: TKey | null,
     callback: (data: ReturnTypeRefetchNode<TQuery, TKey, KeyTypeData<TKey> | null>) => void,

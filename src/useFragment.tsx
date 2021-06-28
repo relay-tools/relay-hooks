@@ -49,22 +49,22 @@ export function useSuspenseFragment<TKey extends ArrayKeyType>(
     return data;
 }
 
-export function useTransientFragment<TKey extends KeyType>(
+export function useFragmentSubscription<TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey,
     callback: (data: $Call<KeyReturnType<TKey>>) => void,
 ): void;
-export function useTransientFragment<TKey extends KeyType>(
+export function useFragmentSubscription<TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null,
     callback: (data: $Call<KeyReturnType<TKey>> | null) => void,
 ): void;
-export function useTransientFragment<TKey extends ArrayKeyType>(
+export function useFragmentSubscription<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey,
     callback: (data: ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>) => void,
 ): void;
-export function useTransientFragment<TKey extends ArrayKeyType>(
+export function useFragmentSubscription<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null,
     callback: (data: ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>) => void,

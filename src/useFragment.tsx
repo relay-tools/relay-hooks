@@ -48,3 +48,26 @@ export function useSuspenseFragment<TKey extends ArrayKeyType>(
     const [data] = useOssFragment(fragmentNode, fragmentRef, true, FRAGMENT_NAME);
     return data;
 }
+
+export function useFragmentSubscription<TKey extends KeyType>(
+    fragmentNode: GraphQLTaggedNode,
+    fragmentRef: TKey,
+    callback: (data: $Call<KeyReturnType<TKey>>) => void,
+): void;
+export function useFragmentSubscription<TKey extends KeyType>(
+    fragmentNode: GraphQLTaggedNode,
+    fragmentRef: TKey | null,
+    callback: (data: $Call<KeyReturnType<TKey>> | null) => void,
+): void;
+export function useFragmentSubscription<TKey extends ArrayKeyType>(
+    fragmentNode: GraphQLTaggedNode,
+    fragmentRef: TKey,
+    callback: (data: ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>) => void,
+): void;
+export function useFragmentSubscription<TKey extends ArrayKeyType>(
+    fragmentNode: GraphQLTaggedNode,
+    fragmentRef: TKey | null,
+    callback: (data: ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>) => void,
+): void {
+    useOssFragment(fragmentNode, fragmentRef, false, FRAGMENT_NAME, callback);
+}

@@ -1,16 +1,7 @@
 {
-    "compilerOptions": {
-      "outDir": "lib/es",
-      "rootDir": "src",
-      "module": "ESNext",
-      "target": "es5",
-      "moduleResolution": "node",
-      "noEmitOnError": true,
-      "declaration": true,
-      "lib": ["dom", "es6", "esnext.asynciterable", "es2017.object"],
-      "jsx": "react",
-      "skipLibCheck": true
-    },
-    "exclude": ["lib", "__tests__", "examples", "__mocks__", "coverage", "scripts"],
-    "compileOnSave": true
-  }
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "outDir": "./lib/es"
+  },
+}

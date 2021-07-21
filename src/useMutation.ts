@@ -1,4 +1,3 @@
-import useMounted from '@restart/hooks/useMounted';
 import * as invariant from 'fbjs/lib/invariant';
 import * as React from 'react';
 import { Environment, MutationParameters, commitMutation } from 'relay-runtime';
@@ -10,6 +9,7 @@ import {
     Mutate,
     MutateWithVariables,
 } from './RelayHooksTypes';
+import { useMounted } from './useMounted';
 import { useRelayEnvironment } from './useRelayEnvironment';
 
 const { useCallback, useState } = React;

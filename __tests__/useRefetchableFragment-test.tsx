@@ -158,13 +158,14 @@ describe('useRefetchableFragmentNode', () => {
         renderSpy.mockClear();
     }
 
-    function createFragmentRef(id, owner) {
+    function createFragmentRef(id, owner, __isWithinUnmatchedTypeRefinement = false) {
         return {
             [ID_KEY]: id,
             [FRAGMENTS_KEY]: {
                 NestedUserFragment: {},
             },
             [FRAGMENT_OWNER_KEY]: owner.request,
+            __isWithinUnmatchedTypeRefinement,
         };
     }
 

@@ -147,6 +147,7 @@ function createFragmentRef(id, owner) {
             NestedUserFragment: {},
         },
         [FRAGMENT_OWNER_KEY]: owner.request,
+        __isWithinUnmatchedTypeRefinement: false,
     };
 }
 
@@ -252,6 +253,7 @@ beforeEach(() => {
                       UserFragment: {},
                   },
                   [FRAGMENT_OWNER_KEY]: owner.request,
+                  __isWithinUnmatchedTypeRefinement: false,
               };
         /* eslint-enable indent */
         setSingularOwner = _setOwner;
@@ -273,6 +275,7 @@ beforeEach(() => {
                       UsersFragment: {},
                   },
                   [FRAGMENT_OWNER_KEY]: owner.request,
+                  __isWithinUnmatchedTypeRefinement: false,
               }));
         /* eslint-enable indent */
         const [usersData] = useFragmentNode(gqlPluralFragment, usersRef);

@@ -138,7 +138,6 @@ describe('usePaginationFragment', () => {
         const actualHasNext = actualResult.hasNext;
         const actualHasPrevious = actualResult.hasPrevious;
         const actualErrorNext = actualResult.errorNext;
-
         expect(actualData).toEqual(expected.data);
         expect(actualIsLoadingNext).toEqual(expected.isLoadingNext);
         expect(actualIsLoadingPrevious).toEqual(expected.isLoadingPrevious);
@@ -171,6 +170,7 @@ describe('usePaginationFragment', () => {
                 NestedUserFragment: {},
             },
             [FRAGMENT_OWNER_KEY]: owner.request,
+            __isWithinUnmatchedTypeRefinement: false,
         };
     }
 

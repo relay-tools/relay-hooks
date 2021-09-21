@@ -282,18 +282,18 @@ export class FragmentResolver {
             warning(
                 false,
                 'Relay: Tried reading fragment `%s` declared in ' +
-                '`%s`, but it has missing data and its parent query `%s` is not ' +
-                'being fetched.\n' +
-                'This might be fixed by by re-running the Relay Compiler. ' +
-                ' Otherwise, make sure of the following:\n' +
-                '* You are correctly fetching `%s` if you are using a ' +
-                '"store-only" `fetchPolicy`.\n' +
-                "* Other queries aren't accidentally fetching and overwriting " +
-                'the data for this fragment.\n' +
-                '* Any related mutations or subscriptions are fetching all of ' +
-                'the data for this fragment.\n' +
-                "* Any related store updaters aren't accidentally deleting " +
-                'data for this fragment.',
+                    '`%s`, but it has missing data and its parent query `%s` is not ' +
+                    'being fetched.\n' +
+                    'This might be fixed by by re-running the Relay Compiler. ' +
+                    ' Otherwise, make sure of the following:\n' +
+                    '* You are correctly fetching `%s` if you are using a ' +
+                    '"store-only" `fetchPolicy`.\n' +
+                    "* Other queries aren't accidentally fetching and overwriting " +
+                    'the data for this fragment.\n' +
+                    '* Any related mutations or subscriptions are fetching all of ' +
+                    'the data for this fragment.\n' +
+                    "* Any related store updaters aren't accidentally deleting " +
+                    'data for this fragment.',
                 this._fragment.name,
                 this.name,
                 parentQueryName,
@@ -413,23 +413,23 @@ export class FragmentResolver {
             warning(
                 false,
                 'Relay: Unexpected call to `refetch` on unmounted component for fragment ' +
-                '`%s` in `%s`. It looks like some instances of your component are ' +
-                'still trying to fetch data but they already unmounted. ' +
-                'Please make sure you clear all timers, intervals, ' +
-                'async calls, etc that may trigger a fetch.',
+                    '`%s` in `%s`. It looks like some instances of your component are ' +
+                    'still trying to fetch data but they already unmounted. ' +
+                    'Please make sure you clear all timers, intervals, ' +
+                    'async calls, etc that may trigger a fetch.',
                 this._fragment.name,
                 this.name,
             );
-            return { dispose: (): void => { } };
+            return { dispose: (): void => {} };
         }
         if (this._selector == null) {
             warning(
                 false,
                 'Relay: Unexpected call to `refetch` while using a null fragment ref ' +
-                'for fragment `%s` in `%s`. When calling `refetch`, we expect ' +
-                "initial fragment data to be non-null. Please make sure you're " +
-                'passing a valid fragment ref to `%s` before calling ' +
-                '`refetch`, or make sure you pass all required variables to `refetch`.',
+                    'for fragment `%s` in `%s`. When calling `refetch`, we expect ' +
+                    "initial fragment data to be non-null. Please make sure you're " +
+                    'passing a valid fragment ref to `%s` before calling ' +
+                    '`refetch`, or make sure you pass all required variables to `refetch`.',
                 this._fragment.name,
                 this.name,
                 this.name,
@@ -486,7 +486,7 @@ export class FragmentResolver {
                 warning(
                     false,
                     'Relay: Expected result to have a string  ' +
-                    '`%s` in order to refetch, got `%s`.',
+                        '`%s` in order to refetch, got `%s`.',
                     identifierField,
                     identifierValue,
                 );
@@ -553,41 +553,41 @@ export class FragmentResolver {
             warning(
                 false,
                 'Relay: Unexpected fetch on unmounted component for fragment ' +
-                '`%s` in `%s`. It looks like some instances of your component are ' +
-                'still trying to fetch data but they already unmounted. ' +
-                'Please make sure you clear all timers, intervals, ' +
-                'async calls, etc that may trigger a fetch.',
+                    '`%s` in `%s`. It looks like some instances of your component are ' +
+                    'still trying to fetch data but they already unmounted. ' +
+                    'Please make sure you clear all timers, intervals, ' +
+                    'async calls, etc that may trigger a fetch.',
                 this._fragment.name,
                 this.name,
             );
-            return { dispose: (): void => { } };
+            return { dispose: (): void => {} };
         }
         if (this._selector == null) {
             warning(
                 false,
                 'Relay: Unexpected fetch while using a null fragment ref ' +
-                'for fragment `%s` in `%s`. When fetching more items, we expect ' +
-                "initial fragment data to be non-null. Please make sure you're " +
-                'passing a valid fragment ref to `%s` before paginating.',
+                    'for fragment `%s` in `%s`. When fetching more items, we expect ' +
+                    "initial fragment data to be non-null. Please make sure you're " +
+                    'passing a valid fragment ref to `%s` before paginating.',
                 this._fragment.name,
                 this.name,
                 this.name,
             );
             onComplete(null);
-            return { dispose: (): void => { } };
+            return { dispose: (): void => {} };
         }
         const isRequestActive = (this._environment as any).isRequestActive(
             (this._selector as SingularReaderSelector).owner.identifier,
         );
         if (isRequestActive || fetcher.getData().isLoading === true || fragmentData == null) {
             onComplete(null);
-            return { dispose: (): void => { } };
+            return { dispose: (): void => {} };
         }
         invariant(
             this._selector != null && this._selector.kind !== 'PluralReaderSelector',
             'Relay: Expected to be able to find a non-plural fragment owner for ' +
-            "fragment `%s` when using `%s`. If you're seeing this, " +
-            'this is likely a bug in Relay.',
+                "fragment `%s` when using `%s`. If you're seeing this, " +
+                'this is likely a bug in Relay.',
             this._fragment.name,
             this.name,
         );
@@ -635,7 +635,7 @@ export class FragmentResolver {
                 warning(
                     false,
                     'Relay: Expected result to have a string  ' +
-                    '`%s` in order to refetch, got `%s`.',
+                        '`%s` in order to refetch, got `%s`.',
                     identifierField,
                     identifierValue,
                 );
@@ -643,7 +643,7 @@ export class FragmentResolver {
             paginationVariables.id = identifierValue;
         }
 
-        const onNext = (): void => { };
+        const onNext = (): void => {};
 
         const operation = createOperation(paginationRequest, paginationVariables, forceCache);
         return fetcher.fetch(

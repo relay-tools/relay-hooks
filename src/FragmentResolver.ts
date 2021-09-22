@@ -505,6 +505,7 @@ export class FragmentResolver {
             options?.fetchPolicy,
             options?.onComplete,
             onNext,
+            options?.onResponse,
             options?.UNSTABLE_renderPolicy,
         );
     };
@@ -632,6 +633,7 @@ export class FragmentResolver {
             undefined, //options?.fetchPolicy,
             onComplete,
             onNext,
+            options?.onResponse,
         );
     };
 }

@@ -11,6 +11,7 @@ import {
     FragmentReference,
     RenderPolicy,
     GraphQLSubscriptionConfig,
+    GraphQLResponse,
 } from 'relay-runtime';
 
 export type MutationState<T extends MutationParameters> = {
@@ -74,6 +75,7 @@ export type QueryOptions = {
     fetchKey?: string | number;
     networkCacheConfig?: CacheConfig;
     skip?: boolean;
+    onResponse?: (response: GraphQLResponse) => void;
     onComplete?: (_e: Error | null) => void;
     UNSTABLE_renderPolicy?: RenderPolicy;
 };
@@ -123,12 +125,14 @@ export type LoadQuery<
 
 export interface Options {
     fetchPolicy?: FetchPolicy;
+    onResponse?: (response: GraphQLResponse) => void;
     onComplete?: (arg: Error | null) => void;
     UNSTABLE_renderPolicy?: RenderPolicy;
 }
 
 export interface OptionsLoadMore<TQuery extends OperationType = OperationType> {
     //fetchPolicy?: FetchPolicy;
+    onResponse?: (response: GraphQLResponse) => void;
     onComplete?: (arg: Error | null) => void;
     UNSTABLE_extraVariables?: VariablesOf<TQuery>;
 }

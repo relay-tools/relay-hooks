@@ -82,6 +82,7 @@ const QueryRendererHook = (props) => {
         fetchKey,
         skip,
         onComplete,
+        onResponse,
     } = props;
     const relays = useQuery(query, variables, {
         networkCacheConfig: cacheConfig,
@@ -89,6 +90,7 @@ const QueryRendererHook = (props) => {
         fetchKey,
         skip,
         onComplete,
+        onResponse,
     });
 
     return <React.Fragment>{render(relays)}</React.Fragment>;
@@ -117,6 +119,21 @@ describe('ReactRelayQueryRenderer', () => {
                 name: 'Zuck',
             },
         },
+    };
+
+    const responseErrors = {
+        data: {
+            node: {
+                __typename: 'User',
+                id: '4',
+                name: 'Zuck',
+            },
+        },
+        errors: [
+            {
+                message: 'error',
+            },
+        ],
     };
 
     class PropsSetter extends React.Component<any, any> {
@@ -1969,5 +1986,43 @@ describe('ReactRelayQueryRenderer', () => {
             });
             expect(environment.execute.mock.calls.length).toBe(1);
         });
+    });
+
+    it('renders the query results and call onResponse', () => {
+        let response = null;
+        const onResponse = (res) => {
+            response = res;
+            console.log('onResponse test', res);
+        };
+        createHooks(
+            <ReactRelayQueryRenderer
+                environment={environment}
+                query={TestQuery}
+                render={render}
+                variables={variables}
+                onResponse={onResponse}
+            />,
+        );
+        expect.assertions(4);
+        render.mockClear();
+        environment.mock.resolve(TestQuery, responseErrors);
+        const owner = createOperationDescriptor(TestQuery, variables);
+        expectToBeRendered(render, {
+            error: null,
+            data: {
+                node: {
+                    id: '4',
+
+                    __fragments: {
+                        TestFragment: {},
+                    },
+
+                    __fragmentOwner: owner.request,
+                    __id: '4',
+                },
+            },
+            retry: expect.any(Function),
+        });
+        expect(response).toEqual(responseErrors);
     });
 });

@@ -1,6 +1,6 @@
 {
   "name": "relay-hooks",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "keywords": [
     "graphql",
     "relay",
@@ -23,7 +23,7 @@
   },
   "scripts": {
     "clean": "rimraf lib",
-    "compile": "npm run clean && tsc && tsc --project tsconfig.esm.json && npm run build:js && npm run rollup",
+    "compile": "npm run clean && tsc && tsc --project tsconfig.esm.json && npm run build:js && npm run build:replace && npm run rollup",
     "rollup": "rollup -c",
     "build": "npm run compile && npm run test",
     "test": "cross-env NODE_ENV=test jest --coverage",
@@ -31,7 +31,8 @@
     "format:ci": "prettier --list-different \"src/**/*.{j,t}s*\"",
     "eslint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
     "prepublishOnly": "npm run build",
-    "build:js": "babel lib --out-dir lib --extensions \".js,.jsx\" && babel lib/es --out-dir lib/es --extensions \".js,.jsx\""
+    "build:js": "babel lib --out-dir lib --extensions \".js,.jsx\" && babel lib/es --out-dir lib/es --extensions \".js,.jsx\"",
+    "build:replace": "replace-in-file --configFile=replace.config.js"
   },
   "dependencies": {
     "@restart/hooks": "^0.3.1",
@@ -58,6 +59,7 @@
     "@types/relay-runtime": "10.1.2",
     "@typescript-eslint/eslint-plugin": "2.25.0",
     "@typescript-eslint/parser": "2.25.0",
+    "replace-in-file": "6.2.0",
     "cross-env": "^7.0.2",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.10.1",

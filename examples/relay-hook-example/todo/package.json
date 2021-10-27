@@ -16,12 +16,12 @@
     "prop-types": "^15.7.2",
     "react": "^16.12.0",
     "react-dom": "^16.8.4",
-    "relay-runtime": "11.0.2",
-    "relay-hooks": "5.0.0",
+    "relay-runtime": "12.0.0",
+    "relay-hooks": "6.0.0",
     "whatwg-fetch": "3.0.0",
     "isomorphic-fetch": "2.2.1",
     "es6-promise": "4.2.8",
-    "react-relay": "11.0.2"
+    "react-relay": "^12.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.3.4",
@@ -34,7 +34,7 @@
     "@babel/runtime": "^7.3.4",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.5",
-    "babel-plugin-relay": "11.0.2",
+    "babel-plugin-relay": "12.0.0",
     "eslint": "^5.13.0",
     "eslint-config-fbjs": "^2.1.0",
     "eslint-config-prettier": "^4.0.0",
@@ -47,7 +47,7 @@
     "flow-bin": "^0.94.0",
     "flow-typed": "^2.5.1",
     "prettier": "^1.16.4",
-    "relay-compiler": "11.0.2",
+    "relay-compiler": "12.0.0",
     "webpack": "^5.56.1",
     "webpack-dev-server": "^3.2.1"
   },

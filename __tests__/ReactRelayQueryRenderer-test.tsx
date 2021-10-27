@@ -226,6 +226,7 @@ describe('ReactRelayQueryRenderer', () => {
                 data: {
                     node: {
                         id: '4',
+                        __isWithinUnmatchedTypeRefinement: false,
 
                         __fragments: {
                             TestFragment: {},
@@ -278,6 +279,7 @@ describe('ReactRelayQueryRenderer', () => {
                 data: {
                     node: {
                         id: '4',
+                        __isWithinUnmatchedTypeRefinement: false,
 
                         __fragments: {
                             TestFragment: {},
@@ -396,6 +398,7 @@ describe('ReactRelayQueryRenderer', () => {
                         data: {
                             node: {
                                 id: '4',
+                                __isWithinUnmatchedTypeRefinement: false,
 
                                 __fragments: {
                                     TestFragment: {},
@@ -421,6 +424,7 @@ describe('ReactRelayQueryRenderer', () => {
                         data: {
                             node: {
                                 id: '4',
+                                __isWithinUnmatchedTypeRefinement: false,
 
                                 __fragments: {
                                     TestFragment: {},
@@ -483,6 +487,7 @@ describe('ReactRelayQueryRenderer', () => {
                         data: {
                             node: {
                                 id: '4',
+                                __isWithinUnmatchedTypeRefinement: false,
 
                                 __fragments: {
                                     TestFragment: {},
@@ -508,6 +513,7 @@ describe('ReactRelayQueryRenderer', () => {
                         data: {
                             node: {
                                 id: '4',
+                                __isWithinUnmatchedTypeRefinement: false,
 
                                 __fragments: {
                                     TestFragment: {},
@@ -560,6 +566,7 @@ describe('ReactRelayQueryRenderer', () => {
                         data: {
                             node: {
                                 id: '4',
+                                __isWithinUnmatchedTypeRefinement: false,
 
                                 __fragments: {
                                     TestFragment: {},
@@ -619,6 +626,7 @@ describe('ReactRelayQueryRenderer', () => {
                         data: {
                             node: {
                                 id: '6',
+                                __isWithinUnmatchedTypeRefinement: false,
 
                                 __fragments: {
                                     TestFragment: {},
@@ -690,6 +698,7 @@ describe('ReactRelayQueryRenderer', () => {
                     data: {
                         node: {
                             id: '4',
+                            __isWithinUnmatchedTypeRefinement: false,
 
                             __fragments: {
                                 TestFragment: {},
@@ -726,6 +735,7 @@ describe('ReactRelayQueryRenderer', () => {
                     data: {
                         node: {
                             id: '4',
+                            __isWithinUnmatchedTypeRefinement: false,
 
                             __fragments: {
                                 TestFragment: {},
@@ -1223,6 +1233,7 @@ describe('ReactRelayQueryRenderer', () => {
                 data: {
                     node: {
                         id: '4',
+                        __isWithinUnmatchedTypeRefinement: false,
 
                         __fragments: {
                             TestFragment: {},
@@ -1276,6 +1287,7 @@ describe('ReactRelayQueryRenderer', () => {
                     data: {
                         node: {
                             id: '4',
+                            __isWithinUnmatchedTypeRefinement: false,
 
                             __fragments: {
                                 TestFragment: {},
@@ -1292,6 +1304,7 @@ describe('ReactRelayQueryRenderer', () => {
                     data: {
                         node: {
                             id: '4',
+                            __isWithinUnmatchedTypeRefinement: false,
 
                             __fragments: {
                                 TestFragment: {},
@@ -1344,7 +1357,7 @@ describe('ReactRelayQueryRenderer', () => {
                 data: {
                     node: {
                         id: '4',
-
+                        __isWithinUnmatchedTypeRefinement: false,
                         __fragments: {
                             TestFragment: {},
                         },

@@ -64,24 +64,43 @@ function isMissingData(snapshot: SingularOrPluralSnapshot): boolean {
     return snapshot.isMissingData;
 }
 
-function getPromiseForPendingOperationAffectingOwner(
-    environment: IEnvironment,
-    request: RequestDescriptor,
-): Promise<void> | null {
-    return environment.getOperationTracker().getPromiseForPendingOperationsAffectingOwner(request);
-}
-
 function _getAndSavePromiseForFragmentRequestInFlight(
+    fragmentNode: ReaderFragment,
     fragmentOwner: RequestDescriptor,
-    environment: IEnvironment,
+    env: IEnvironment,
 ): Promise<void> | null {
-    const networkPromise =
-        getPromiseForActiveRequest(environment, fragmentOwner) ??
-        getPromiseForPendingOperationAffectingOwner(environment, fragmentOwner);
+    let networkPromise = getPromiseForActiveRequest(env, fragmentOwner);
+    let pendingOperationName;
+
+    if (networkPromise != null) {
+        pendingOperationName = fragmentOwner.node.params.name;
+    } else {
+        const result = env.getOperationTracker().getPendingOperationsAffectingOwner(fragmentOwner);
+        const pendingOperations = result?.pendingOperations;
+        networkPromise = result?.promise ?? null;
+        pendingOperationName =
+            pendingOperations?.map((op) => op.node.params.name).join(',') ?? null;
+    }
 
     if (!networkPromise) {
         return null;
     }
+
+    if (pendingOperationName == null || pendingOperationName.length === 0) {
+        pendingOperationName = 'Unknown pending operation';
+    }
+
+    // When the Promise for the request resolves, we need to make sure to
+    // update the cache with the latest data available in the store before
+    // resolving the Promise
+
+    const fragmentName = fragmentNode.name;
+    const promiseDisplayName =
+        pendingOperationName === fragmentName
+            ? `Relay(${pendingOperationName})`
+            : `Relay(${pendingOperationName}:${fragmentName})`;
+
+    (networkPromise as any).displayName = promiseDisplayName;
     return networkPromise;
 }
 
@@ -226,6 +245,7 @@ export class FragmentResolver {
         if (suspense && this.resolverData.isMissingData && this.resolverData.owner) {
             const fragmentOwner = this.resolverData.owner;
             const networkPromise = _getAndSavePromiseForFragmentRequestInFlight(
+                this._fragment,
                 fragmentOwner,
                 this._environment,
             );

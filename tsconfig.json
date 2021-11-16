@@ -11,6 +11,6 @@
     "jsx": "react",
     "skipLibCheck": true
   },
-  "exclude": ["lib", "__tests__", "examples", "__mocks__", "coverage", "scripts"],
+  "exclude": ["lib", "relay-compiler-forms", "__tests__", "examples", "__mocks__", "coverage", "scripts"],
   "compileOnSave": true
 }

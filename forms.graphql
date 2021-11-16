@@ -1,0 +1,17 @@
+type Query {
+  form: EntryForm
+}
+
+type EntryForm {
+  isSubmitting: Boolean
+  isValidating: Boolean
+  entries: [Entry]
+}
+
+type Entry {
+  id: ID!
+  key: String!
+  value: String
+  check: String
+  error: String
+}

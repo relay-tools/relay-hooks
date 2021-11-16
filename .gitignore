@@ -7,3 +7,5 @@ yarn.lock
 package-lock.json
 !/package-lock.json
 .vscode
+yarn-error.log
+ignore-queries.json

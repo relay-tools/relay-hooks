@@ -16,3 +16,6 @@ rollup.config.js
 .vscode
 .babelrc.js
 tsconfig.esm.json
+relay-compiler-forms/
+forms.graphql
+ignore-queries.json

@@ -23,6 +23,7 @@
   },
   "scripts": {
     "clean": "rimraf lib",
+    "relay-compiler-forms": "relay-compiler --src ./relay-compiler-forms/ --schema ./forms.graphql --language typescript --artifactDirectory ./src/forms/relay --persist-output ./ignore-queries.json",
     "compile": "npm run clean && tsc && tsc --project tsconfig.esm.json && npm run build:js && npm run build:replace && npm run rollup",
     "rollup": "rollup -c",
     "build": "npm run compile && npm run test",
@@ -76,7 +77,9 @@
     "prettier": "1.19.1",
     "promise-polyfill": "6.1.0",
     "react": "16.11.0",
+    "react-dom": "16.11.0",
     "react-test-renderer": "16.11.0",
+    "relay-compiler-language-typescript": "12.0.0",
     "relay-runtime": "^12.0.0",
     "relay-test-utils": "^12.0.0",
     "relay-test-utils-internal": "^12.0.0",
@@ -86,7 +89,8 @@
     "rollup-plugin-terser": "^6.1.0",
     "rollup-plugin-typescript2": "^0.27.1",
     "ts-jest": "24.1.0",
-    "typescript": "3.8.3"
+    "typescript": "3.8.3",
+    "@testing-library/react": "10.0.4"
   },
   "funding": {
     "url": "https://github.com/sponsors/morrys"

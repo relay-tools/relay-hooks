@@ -11,7 +11,8 @@ import {
     RequestParameters,
     Variables,
 } from 'relay-runtime';
-import { RelayForm, useFormSubmit, useFormState, useFormSetValue } from '../src/forms';
+import { RelayEnvironmentProvider } from '../src';
+import { useFormSubmit, useFormState, useFormSetValue } from '../src/forms';
 
 async function fetchQuery(operation: RequestParameters, variables: Variables) {
     const response = await fetch('http://localhost:3000/graphql', {
@@ -49,12 +50,12 @@ export const Form: React.FC<Props> = ({ promise, jestOnSubmit }) => {
         [setState, jestOnSubmit],
     );
     return (
-        <RelayForm environment={environment}>
+        <RelayEnvironmentProvider environment={environment}>
             <FormInternal
                 onSubmit={promise ? (values) => Promise.resolve(submit(values)) : submit}
             />
             {state && <div data-testid={'submit-done'}>SUBMIT :)</div>}
-        </RelayForm>
+        </RelayEnvironmentProvider>
     );
 };
 

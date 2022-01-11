@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Snapshot, isPromise, IEnvironment } from 'relay-runtime';
+import { useRelayEnvironment } from '../useRelayEnvironment';
 import { queryFieldQueryResponse } from './relay/queryFieldQuery.graphql';
-import { useRelayEnvironment } from './RelayForm';
 import { FormSubmitOptions, FunctionOnSubmit, FormSubmitReturn } from './RelayFormsTypes';
 import {
     commitValidateEndRelay,
@@ -42,6 +42,12 @@ export const useFormSubmit = <ValueType extends object = object>({
     onSubmit,
 }: FormSubmitOptions<ValueType>): FormSubmitReturn => {
     const environment = useRelayEnvironment();
+
+    React.useEffect(() => {
+        const disposable = environment.retain(operationQueryForm);
+        return disposable.dispose;
+    }, [environment]);
+
     const ref = React.useRef({
         isSubmitting: false,
         isValidating: false,

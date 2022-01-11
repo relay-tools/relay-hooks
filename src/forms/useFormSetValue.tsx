@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Snapshot, getSingularSelector, isPromise } from 'relay-runtime';
+import { useRelayEnvironment } from '../useRelayEnvironment';
 import FragmentField, { queryFieldFragment$data } from './relay/queryFieldFragment.graphql';
-import { useRelayEnvironment } from './RelayForm';
 import { FormSetValueOptions, FormSetValueReturn } from './RelayFormsTypes';
 import { getFieldId, operationQueryForm, commitValue, commitErrorIntoRelay } from './Utils';
 

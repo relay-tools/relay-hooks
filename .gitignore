@@ -7,3 +7,4 @@ yarn.lock
 package-lock.json
 !/package-lock.json
 .vscode
+__tests__/__generated__/

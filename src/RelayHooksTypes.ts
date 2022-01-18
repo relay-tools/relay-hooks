@@ -84,7 +84,7 @@ export type $Call<Fn extends (...args: any[]) => any> = Fn extends (arg: any) =>
 
 export type KeyType<TData = unknown> = Readonly<{
     ' $data'?: TData;
-    ' $fragmentRefs': FragmentReference;
+    ' $fragmentSpreads': FragmentReference;
 }>;
 export type ArrayKeyType = ReadonlyArray<{ readonly ' $data'?: ReadonlyArray<unknown> } | null>;
 

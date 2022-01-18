@@ -13,9 +13,10 @@
 
 import { commitMutation, graphql } from 'relay-hooks';
 import { Disposable } from 'relay-runtime';
+import { RenameTodoMutation as RenameTodoMutationType } from '../__generated__/relay/RenameTodoMutation.graphql';
 
 const mutation = graphql`
-    mutation RenameTodoMutation($input: RenameTodoInput!) {
+    mutation RenameTodoMutation($input: RenameTodoInput!) @raw_response_type {
         renameTodo(input: $input) {
             todo {
                 id
@@ -42,7 +43,7 @@ export function commit(environment: any, text: string, todo: any): Disposable {
         id: todo.id,
     };
 
-    return commitMutation(environment, {
+    return commitMutation<RenameTodoMutationType>(environment, {
         mutation,
         variables: {
             input,

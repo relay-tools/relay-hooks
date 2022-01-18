@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { graphql, readInlineData } from 'relay-runtime';
 
-import { ReadInlineUser_user } from '../__generated__/relay/ReadInlineUser_user.graphql';
+import {
+    ReadInlineUser_user,
+    ReadInlineUser_user$key,
+} from '../__generated__/relay/ReadInlineUser_user.graphql';
 const fragmentNode = graphql`
     fragment ReadInlineUser_user on User @inline {
         id
@@ -12,6 +15,6 @@ const fragmentNode = graphql`
 `;
 
 // non-React function called from React
-export function getUser(userRef): ReadInlineUser_user {
-    return readInlineData<ReadInlineUser_user>(fragmentNode, userRef);
+export function getUser(userRef: ReadInlineUser_user$key): ReadInlineUser_user {
+    return readInlineData(fragmentNode, userRef);
 }

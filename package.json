@@ -23,10 +23,11 @@
   },
   "scripts": {
     "clean": "rimraf lib",
+    "relay-compile-test": "relay-compiler",
     "compile": "npm run clean && tsc && tsc --project tsconfig.esm.json && npm run build:js && npm run build:replace && npm run rollup",
     "rollup": "rollup -c",
     "build": "npm run compile && npm run test",
-    "test": "cross-env NODE_ENV=test jest --coverage",
+    "test": "npm run relay-compile-test && jest --clearCache && cross-env NODE_ENV=test jest --coverage -t \"releases its reference if unmounted after fetch completes\"",
     "format": "prettier --write \"src/**/*.{j,t}s*\"",
     "format:ci": "prettier --list-different \"src/**/*.{j,t}s*\"",
     "eslint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
@@ -34,13 +35,23 @@
     "build:js": "babel lib --out-dir lib --extensions \".js,.jsx\" && babel lib/es --out-dir lib/es --extensions \".js,.jsx\"",
     "build:replace": "replace-in-file --configFile=replace.config.js"
   },
+  "relay": {
+    "src": "./__tests__",
+    "schema": "./node_modules/relay-test-utils-internal/lib/testschema.graphql",
+    "excludes": [
+      "__generated__",
+      "node_modules"
+    ],
+    "language": "typescript",
+    "artifactDirectory": "./__tests__/__generated__/"
+  },
   "dependencies": {
     "@restart/hooks": "^0.3.1",
     "fbjs": "^3.0.0"
   },
   "peerDependencies": {
     "react": "^16.9.0 || ^17",
-    "relay-runtime": "^12.0.0"
+    "relay-runtime": "^13.0.1"
   },
   "devDependencies": {
     "babel-preset-fbjs": "^3.3.0",
@@ -56,7 +67,7 @@
     "@types/react": "16.9.11",
     "@types/react-dom": "16.9.4",
     "@types/react-test-renderer": "^17.0.0",
-    "@types/relay-runtime": "^12.0.0",
+    "@types/relay-runtime": "^13.0.0",
     "@typescript-eslint/eslint-plugin": "2.25.0",
     "@typescript-eslint/parser": "2.25.0",
     "replace-in-file": "6.2.0",
@@ -71,22 +82,24 @@
     "eslint-plugin-react": "7.19.0",
     "eslint-plugin-react-hooks": "3.0.0",
     "graphql": "^14.2.0",
-    "jest": "24.9.0",
+    "jest": "^26.0.0",
     "lerna": "^3.16.4",
     "prettier": "1.19.1",
     "promise-polyfill": "6.1.0",
     "react": "16.11.0",
     "react-test-renderer": "16.11.0",
-    "relay-runtime": "^12.0.0",
-    "relay-test-utils": "^12.0.0",
-    "relay-test-utils-internal": "^12.0.0",
+    "relay-compiler": "^13.0.1",
+    "relay-runtime": "^13.0.1",
+    "relay-test-utils": "^13.0.1",
+    "relay-test-utils-internal": "^13.0.1",
     "rimraf": "^2.5.4",
     "rollup": "^2.23.0",
     "rollup-plugin-sourcemaps": "0.6.2",
     "rollup-plugin-terser": "^6.1.0",
     "rollup-plugin-typescript2": "^0.27.1",
-    "ts-jest": "24.1.0",
-    "typescript": "3.8.3"
+    "ts-relay-plugin": "1.0.0",
+    "ts-jest": "^26.5.6",
+    "typescript": "4.5.4"
   },
   "funding": {
     "url": "https://github.com/sponsors/morrys"

@@ -8,6 +8,9 @@ module.exports = {
     globals: {
         __DEV__: true,
         'ts-jest': {
+            astTransformers: {
+                before: ['ts-relay-plugin'],
+            },
             diagnostics: {
                 warnOnly: true,
             },
@@ -19,7 +22,7 @@ module.exports = {
     testURL: 'http://localhost',
     testEnvironment: 'node',
 
-    testMatch: ['<rootDir>/__tests__/*-test.tsx'],
+    testMatch: ['<rootDir>/__tests__/*QueryRenderer-test.tsx'],
     testPathIgnorePatterns: [
         './node_modules/',
         '/node_modules/',

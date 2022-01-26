@@ -68,7 +68,7 @@ jest.mock('fbjs/lib/warning', () => {
 import * as React from 'react';
 const Scheduler = require('scheduler');
 
-import { OperationDescriptor, Variables } from 'relay-runtime';
+import { getFragment, getRequest, graphql, OperationDescriptor, Variables } from 'relay-runtime';
 const { useMemo, useState, useEffect } = React;
 import * as TestRenderer from 'react-test-renderer';
 import {
@@ -80,6 +80,7 @@ import {
 
 const invariant = require('fbjs/lib/invariant');
 const warning = require('fbjs/lib/warning');
+const areEqual = require('fbjs/lib/areEqual');
 
 const {
     FRAGMENT_OWNER_KEY,
@@ -112,7 +113,6 @@ describe('useRefetchableFragmentNode', () => {
     let fetchPolicy;
     let renderPolicy;
     let createMockEnvironment;
-    let generateAndCompile;
     let renderFragment;
     let renderSpy;
     let refetch;
@@ -158,11 +158,16 @@ describe('useRefetchableFragmentNode', () => {
         renderSpy.mockClear();
     }
 
-    function createFragmentRef(id, owner, __isWithinUnmatchedTypeRefinement = false) {
+    function createFragmentRef(
+        id,
+        owner,
+        __isWithinUnmatchedTypeRefinement = false,
+        fragmentName = 'useRefetchableFragmentTestNestedUserFragment',
+    ) {
         return {
             [ID_KEY]: id,
             [FRAGMENTS_KEY]: {
-                NestedUserFragment: {},
+                [fragmentName]: {},
             },
             [FRAGMENT_OWNER_KEY]: owner.request,
             __isWithinUnmatchedTypeRefinement,
@@ -178,89 +183,88 @@ describe('useRefetchableFragmentNode', () => {
         fetchPolicy = 'store-or-network';
         renderPolicy = 'partial';
 
-        ({ generateAndCompile } = require('./TestCompiler'));
-
         ({ createMockEnvironment } = require('relay-test-utils-internal'));
 
         // Set up environment and base data
         environment = createMockEnvironment();
-        const generated = generateAndCompile(
-            `
-        fragment NestedUserFragment on User {
-          username
-        }
-
-        fragment UserFragmentWithArgs on User
-        @refetchable(queryName: "UserFragmentWithArgsRefetchQuery")
-        @argumentDefinitions(scaleLocal: {type: "Float!"}) {
-          id
-          name
-          profile_picture(scale: $scaleLocal) {
-            uri
-          }
-          ...NestedUserFragment
-        }
-
-        fragment UserFragment on User
-        @refetchable(queryName: "UserFragmentRefetchQuery") {
-          id
-          name
-          profile_picture(scale: $scale) {
-            uri
-          }
-          ...NestedUserFragment
-        }
-
-        query UserQuery($id: ID!, $scale: Int!) {
-          node(id: $id) {
-            ...UserFragment
-          }
-        }
-
-        query UserQueryNestedFragment($id: ID!, $scale: Int!) {
-          node(id: $id) {
-            actor {
-              ...UserFragment
+        graphql`
+            fragment useRefetchableFragmentTestNestedUserFragment on User {
+                username
             }
-          }
-        }
-
-        query UserQueryWithArgs($id: ID!, $scale: Float!) {
-          node(id: $id) {
-            ...UserFragmentWithArgs @arguments(scaleLocal: $scale)
-          }
-        }
-
-        query UserQueryWithLiteralArgs($id: ID!) {
-          node(id: $id) {
-            ...UserFragmentWithArgs @arguments(scaleLocal: 16)
-          }
-        }
-    `,
-        );
+        `;
+        gqlFragmentWithArgs = getFragment(graphql`
+            fragment useRefetchableFragmentTestUserFragmentWithArgs on User
+                @refetchable(
+                    queryName: "useRefetchableFragmentTestUserFragmentWithArgsRefetchQuery"
+                )
+                @argumentDefinitions(scaleLocal: { type: "Float!" }) {
+                id
+                name
+                profile_picture(scale: $scaleLocal) {
+                    uri
+                }
+                ...useRefetchableFragmentTestNestedUserFragment
+            }
+        `);
+        gqlFragment = getFragment(graphql`
+            fragment useRefetchableFragmentTestUserFragment on User
+                @refetchable(queryName: "useRefetchableFragmentTestUserFragmentRefetchQuery") {
+                id
+                name
+                profile_picture(scale: $scale) {
+                    uri
+                }
+                ...useRefetchableFragmentTestNestedUserFragment
+            }
+        `);
+        gqlQuery = getRequest(graphql`
+            query useRefetchableFragmentTestUserQuery($id: ID!, $scale: Float!) {
+                node(id: $id) {
+                    ...useRefetchableFragmentTestUserFragment
+                }
+            }
+        `);
+        gqlQueryNestedFragment = getRequest(graphql`
+            query useRefetchableFragmentTestUserQueryNestedFragmentQuery($id: ID!, $scale: Float!) {
+                node(id: $id) {
+                    actor {
+                        ...useRefetchableFragmentTestUserFragment
+                    }
+                }
+            }
+        `);
+        gqlQueryWithArgs = getRequest(graphql`
+            query useRefetchableFragmentTestUserQueryWithArgsQuery($id: ID!, $scale: Float!) {
+                node(id: $id) {
+                    ...useRefetchableFragmentTestUserFragmentWithArgs @arguments(scaleLocal: $scale)
+                }
+            }
+        `);
+        gqlQueryWithLiteralArgs = getRequest(graphql`
+            query useRefetchableFragmentTestUserQueryWithLiteralArgsQuery($id: ID!) {
+                node(id: $id) {
+                    ...useRefetchableFragmentTestUserFragmentWithArgs @arguments(scaleLocal: 16)
+                }
+            }
+        `);
+        gqlRefetchQuery = require('./__generated__/useRefetchableFragmentTestUserFragmentRefetchQuery.graphql')
+            .default;
+        gqlRefetchQueryWithArgs = require('./__generated__/useRefetchableFragmentTestUserFragmentWithArgsRefetchQuery.graphql')
+            .default;
         variables = { id: '1', scale: 16 };
         variablesNestedFragment = { id: '<feedbackid>', scale: 16 };
-        gqlQuery = generated.UserQuery;
-        gqlQueryNestedFragment = generated.UserQueryNestedFragment;
-        gqlRefetchQuery = generated.UserFragmentRefetchQuery;
-        gqlQueryWithArgs = generated.UserQueryWithArgs;
-        gqlQueryWithLiteralArgs = generated.UserQueryWithLiteralArgs;
-        gqlRefetchQueryWithArgs = generated.UserFragmentWithArgsRefetchQuery;
-        gqlFragment = generated.UserFragment;
-        gqlFragmentWithArgs = generated.UserFragmentWithArgs;
+
         invariant(
-            gqlFragment.metadata?.refetch?.operation ===
-                '@@MODULE_START@@UserFragmentRefetchQuery.graphql@@MODULE_END@@',
+            areEqual(gqlFragment.metadata?.refetch?.operation.default, gqlRefetchQuery),
             'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
         );
         invariant(
-            gqlFragmentWithArgs.metadata?.refetch?.operation ===
-                '@@MODULE_START@@UserFragmentWithArgsRefetchQuery.graphql@@MODULE_END@@',
+            areEqual(
+                gqlFragmentWithArgs.metadata?.refetch?.operation.default,
+                gqlRefetchQueryWithArgs,
+            ),
             'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
         );
-        // Manually set the refetchable operation for the test.
-        gqlFragment.metadata.refetch.operation = gqlRefetchQuery;
-        gqlFragmentWithArgs.metadata.refetch.operation = gqlRefetchQueryWithArgs;
 
         query = createOperationDescriptor(gqlQuery, variables, { force: true });
         queryNestedFragment = createOperationDescriptor(
@@ -377,12 +381,12 @@ describe('useRefetchableFragmentNode', () => {
         it('should throw error if fragment is plural', () => {
             jest.spyOn(console, 'error').mockImplementationOnce(() => {});
 
-            const generated = generateAndCompile(`
-        fragment UserFragment on User @relay(plural: true) {
-          id
-        }
-      `);
-            const renderer = renderFragment({ fragment: generated.UserFragment });
+            const UserFragment = getFragment(graphql`
+                fragment useRefetchableFragmentTest4Fragment on User @relay(plural: true) {
+                    id
+                }
+            `);
+            const renderer = renderFragment({ fragment: UserFragment });
             expect(
                 renderer.toJSON().includes('Remove `@relay(plural: true)` from fragment'),
             ).toEqual(true);
@@ -391,12 +395,12 @@ describe('useRefetchableFragmentNode', () => {
         it('should throw error if fragment is missing @refetchable directive', () => {
             jest.spyOn(console, 'error').mockImplementationOnce(() => {});
 
-            const generated = generateAndCompile(`
-        fragment UserFragment on User {
-          id
-        }
-      `);
-            const renderer = renderFragment({ fragment: generated.UserFragment });
+            const UserFragment = getFragment(graphql`
+                fragment useRefetchableFragmentTest5Fragment on User {
+                    id
+                }
+            `);
+            const renderer = renderFragment({ fragment: UserFragment });
             expect(
                 renderer
                     .toJSON()
@@ -495,7 +499,6 @@ describe('useRefetchableFragmentNode', () => {
         beforeEach(() => {
             jest.resetModules();
 
-            ({ generateAndCompile } = require('./TestCompiler'));
             ({ createMockEnvironment } = require('relay-test-utils-internal'));
 
             release = jest.fn();
@@ -3105,31 +3108,30 @@ describe('useRefetchableFragmentNode', () => {
 
         describe('refetching @fetchable types', () => {
             beforeEach(() => {
-                const generated = generateAndCompile(
-                    `
-            fragment UserFragment on NonNodeStory
-            @refetchable(queryName: "UserFragmentRefetchQuery") {
-              actor { name }
-            }
+                gqlFragment = getFragment(graphql`
+                    fragment useRefetchableFragmentTest1Fragment on NonNodeStory
+                        @refetchable(queryName: "useRefetchableFragmentTest1FragmentRefetchQuery") {
+                        actor {
+                            name
+                        }
+                    }
+                `);
 
-            query UserQuery($id: ID!) {
-              nonNodeStory(id: $id) {
-                ...UserFragment
-              }
-            }
-          `,
-                );
+                gqlQuery = getRequest(graphql`
+                    query useRefetchableFragmentTest1Query($id: ID!) {
+                        nonNodeStory(id: $id) {
+                            ...useRefetchableFragmentTest1Fragment
+                        }
+                    }
+                `);
+
                 variables = { id: 'a' };
-                gqlQuery = generated.UserQuery;
-                gqlRefetchQuery = generated.UserFragmentRefetchQuery;
-                gqlFragment = generated.UserFragment;
+                gqlRefetchQuery = require('./__generated__/useRefetchableFragmentTest1FragmentRefetchQuery.graphql')
+                    .default;
                 invariant(
-                    gqlFragment.metadata?.refetch?.operation ===
-                        '@@MODULE_START@@UserFragmentRefetchQuery.graphql@@MODULE_END@@',
+                    areEqual(gqlFragment.metadata?.refetch?.operation.default, gqlRefetchQuery),
                     'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
                 );
-                // Manually set the refetchable operation for the test.
-                gqlFragment.metadata.refetch.operation = gqlRefetchQuery;
 
                 refetchQuery = createOperationDescriptor(gqlRefetchQuery, variables, {
                     force: true,
@@ -3347,40 +3349,36 @@ describe('useRefetchableFragmentNode', () => {
 
         describe('when id variable has a different variable name in original query', () => {
             beforeEach(() => {
-                const generated = generateAndCompile(
-                    `
-            fragment NestedUserFragment on User {
-              username
-            }
-
-            fragment UserFragment on User
-            @refetchable(queryName: "UserFragmentRefetchQuery") {
-              id
-              name
-              profile_picture(scale: $scale) {
-                uri
-              }
-              ...NestedUserFragment
-            }
-
-            query UserQuery($nodeID: ID!, $scale: Int!) {
-              node(id: $nodeID) {
-                ...UserFragment
-              }
-            }
-          `,
-                );
+                graphql`
+                    fragment useRefetchableFragmentTest2Fragment on User {
+                        username
+                    }
+                `;
+                gqlFragment = getFragment(graphql`
+                    fragment useRefetchableFragmentTest3Fragment on User
+                        @refetchable(queryName: "useRefetchableFragmentTest3FragmentRefetchQuery") {
+                        id
+                        name
+                        profile_picture(scale: $scale) {
+                            uri
+                        }
+                        ...useRefetchableFragmentTest2Fragment
+                    }
+                `);
+                gqlQuery = getRequest(graphql`
+                    query useRefetchableFragmentTest2Query($nodeID: ID!, $scale: Float!) {
+                        node(id: $nodeID) {
+                            ...useRefetchableFragmentTest3Fragment
+                        }
+                    }
+                `);
+                gqlRefetchQuery = require('./__generated__/useRefetchableFragmentTest3FragmentRefetchQuery.graphql')
+                    .default;
                 variables = { nodeID: '1', scale: 16 };
-                gqlQuery = generated.UserQuery;
-                gqlRefetchQuery = generated.UserFragmentRefetchQuery;
-                gqlFragment = generated.UserFragment;
                 invariant(
-                    gqlFragment.metadata?.refetch?.operation ===
-                        '@@MODULE_START@@UserFragmentRefetchQuery.graphql@@MODULE_END@@',
+                    areEqual(gqlFragment.metadata?.refetch?.operation.default, gqlRefetchQuery),
                     'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
                 );
-                // Manually set the refetchable operation for the test.
-                gqlFragment.metadata.refetch.operation = gqlRefetchQuery;
 
                 query = createOperationDescriptor(gqlQuery, variables, { force: true });
                 refetchQuery = createOperationDescriptor(gqlRefetchQuery, variables, {
@@ -3404,7 +3402,7 @@ describe('useRefetchableFragmentNode', () => {
                     id: '1',
                     name: 'Alice',
                     profile_picture: null,
-                    ...createFragmentRef('1', query),
+                    ...createFragmentRef('1', query, false, 'useRefetchableFragmentTest2Fragment'),
                 };
                 expectFragmentResults([
                     {
@@ -3454,7 +3452,12 @@ describe('useRefetchableFragmentNode', () => {
                     profile_picture: {
                         uri: 'scale16',
                     },
-                    ...createFragmentRef('4', refetchQuery),
+                    ...createFragmentRef(
+                        '4',
+                        refetchQuery,
+                        false,
+                        'useRefetchableFragmentTest2Fragment',
+                    ),
                 };
                 // expectFragmentResults([{ data: refetchedUser }, { data: refetchedUser }]); original relay
                 expectFragmentResults([{ data: refetchedUser }]);
@@ -3471,7 +3474,7 @@ describe('useRefetchableFragmentNode', () => {
                     id: '1',
                     name: 'Alice',
                     profile_picture: null,
-                    ...createFragmentRef('1', query),
+                    ...createFragmentRef('1', query, false, 'useRefetchableFragmentTest2Fragment'),
                 };
                 expectFragmentResults([
                     {
@@ -3521,7 +3524,12 @@ describe('useRefetchableFragmentNode', () => {
                     profile_picture: {
                         uri: 'scale32',
                     },
-                    ...createFragmentRef('1', refetchQuery),
+                    ...createFragmentRef(
+                        '1',
+                        refetchQuery,
+                        false,
+                        'useRefetchableFragmentTest2Fragment',
+                    ),
                 };
                 // expectFragmentResults([{ data: refetchedUser }, { data: refetchedUser }]); original relay
                 expectFragmentResults([{ data: refetchedUser }]);

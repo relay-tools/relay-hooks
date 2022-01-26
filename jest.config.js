@@ -22,7 +22,7 @@ module.exports = {
     testURL: 'http://localhost',
     testEnvironment: 'node',
 
-    testMatch: ['<rootDir>/__tests__/*QueryRenderer-test.tsx'],
+    testMatch: ['<rootDir>/__tests__/*-test.tsx'],
     testPathIgnorePatterns: [
         './node_modules/',
         '/node_modules/',

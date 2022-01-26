@@ -55,10 +55,8 @@ const ReactRelayQueryRenderer = (props) => (
     </RelayEnvironmentProvider>
 );
 
-const { createReaderSelector, createOperationDescriptor } = require('relay-runtime');
+const { createReaderSelector, createOperationDescriptor, graphql } = require('relay-runtime');
 const { createMockEnvironment } = require('relay-test-utils-internal');
-
-const { generateAndCompile } = require('./TestCompiler');
 
 describe('ReactRelayFragmentContainer', () => {
     let TestComponent;
@@ -118,29 +116,33 @@ describe('ReactRelayFragmentContainer', () => {
         jest.resetModules();
 
         environment = createMockEnvironment();
-        ({ UserFragment, UserQuery, UserQueryWithCond } = generateAndCompile(`
-      query UserQuery($id: ID!) {
-        node(id: $id) {
-          ...UserFragment
-        }
-      }
 
-      query UserQueryWithCond(
-        $id: ID!
-        $condGlobal: Boolean!
-      ) {
-        node(id: $id) {
-          ...UserFragment @arguments(cond: $condGlobal)
-        }
-      }
+        //({ UserFragment, UserQuery, UserQueryWithCond }
+        UserQuery = graphql`
+            query ReactRelayFragmentContainerTestUserQuery($id: ID!) {
+                node(id: $id) {
+                    ...ReactRelayFragmentContainerTestUserFragment
+                }
+            }
+        `;
 
-      fragment UserFragment on User @argumentDefinitions(
-        cond: {type: "Boolean!", defaultValue: true}
-      ) {
-        id
-        name @include(if: $cond)
-      }
-    `));
+        UserQueryWithCond = graphql`
+            query ReactRelayFragmentContainerTestUserWithCondQuery(
+                $id: ID!
+                $condGlobal: Boolean!
+            ) {
+                node(id: $id) {
+                    ...ReactRelayFragmentContainerTestUserFragment @arguments(cond: $condGlobal)
+                }
+            }
+        `;
+        UserFragment = graphql`
+            fragment ReactRelayFragmentContainerTestUserFragment on User
+                @argumentDefinitions(cond: { type: "Boolean!", defaultValue: true }) {
+                id
+                name @include(if: $cond)
+            }
+        `;
 
         render = jest.fn(() => <div />);
         spec = {
@@ -245,6 +247,7 @@ describe('ReactRelayFragmentContainer', () => {
                 name: 'Zuck',
             },
             isMissingData: false,
+            missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(UserFragment, '4', { cond: true }, ownerUser1.request),
@@ -328,6 +331,7 @@ describe('ReactRelayFragmentContainer', () => {
                 name: 'Joe',
             },
             isMissingData: false,
+            missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(
@@ -376,6 +380,7 @@ describe('ReactRelayFragmentContainer', () => {
                 // Name is excluded since value of cond is now false
             },
             isMissingData: false,
+            missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(

@@ -16,10 +16,9 @@
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 
-import { createOperationDescriptor, PayloadData, PayloadError } from 'relay-runtime';
+import { createOperationDescriptor, graphql, PayloadData, PayloadError } from 'relay-runtime';
 import { createMockEnvironment } from 'relay-test-utils-internal';
 
-const { generateAndCompile } = require('./TestCompiler');
 import { useMutation, RelayEnvironmentProvider } from '../src';
 
 const { useState, useMemo } = React;
@@ -86,22 +85,21 @@ beforeEach(() => {
     isInFlightFn = jest.fn();
     renderSpy = jest.fn();
 
-    ({ CommentCreateMutation } = generateAndCompile(`
-    mutation CommentCreateMutation(
-      $input: CommentCreateInput
-    ) {
-      commentCreate(input: $input) {
-        feedbackCommentEdge {
-          cursor
-          node {
-            id
-            body {
-              text
+    CommentCreateMutation = graphql`
+        mutation useMutationTestCommentCreateMutation($input: CommentCreateInput) {
+            commentCreate(input: $input) {
+                feedbackCommentEdge {
+                    cursor
+                    node {
+                        id
+                        body {
+                            text
+                        }
+                    }
+                }
             }
-          }
         }
-      }
-  }`));
+    `;
 
     function Renderer({ initialMutation, commitInRender }): any {
         const [mutation, setMutationFn] = useState(initialMutation);
@@ -254,22 +252,21 @@ describe('change useMutation input', () => {
 
     beforeEach(() => {
         newEnv = createMockEnvironment();
-        ({ CommentCreateMutation2 } = generateAndCompile(`
-      mutation CommentCreateMutation2(
-        $input: CommentCreateInput
-      ) {
-        commentCreate(input: $input) {
-          feedbackCommentEdge {
-            cursor
-            node {
-              id
-              body {
-                text
-              }
+        CommentCreateMutation2 = graphql`
+            mutation useMutationTestCommentCreate2Mutation($input: CommentCreateInput) {
+                commentCreate(input: $input) {
+                    feedbackCommentEdge {
+                        cursor
+                        node {
+                            id
+                            body {
+                                text
+                            }
+                        }
+                    }
+                }
             }
-          }
-        }
-    }`));
+        `;
     });
 
     it('can fetch from the new environment when the environment changes', () => {

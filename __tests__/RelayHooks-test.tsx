@@ -2,10 +2,8 @@
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 
-import { createOperationDescriptor } from 'relay-runtime';
+import { createOperationDescriptor, graphql } from 'relay-runtime';
 import { createMockEnvironment } from 'relay-test-utils-internal';
-
-const { generateAndCompile } = require('./TestCompiler');
 import {
     useOssFragment,
     RelayEnvironmentProvider,
@@ -83,46 +81,46 @@ describe('useMemo resolver functions', () => {
         jest.resetModules();
         renderSpy = jest.fn();
         environment = createMockEnvironment();
-        ({ UserFragment, UserQuery, UserFragmentRefetchQuery } = generateAndCompile(`
-
-        fragment UserFragment on User
-        @refetchable(queryName: "UserFragmentRefetchQuery")
-          @argumentDefinitions(
-            isViewerFriendLocal: {type: "Boolean", defaultValue: false}
-            orderby: {type: "[String]"}
-          ) {
-          id
-          friends(
-            after: $after,
-            first: $count,
-            orderby: $orderby,
-            isViewerFriend: $isViewerFriendLocal
-          ) @connection(key: "UserFragment_friends") {
-            edges {
-              node {
+        UserFragment = graphql`
+            fragment RelayHooksTestUserFragment on User
+                @refetchable(queryName: "RelayHooksTestUserFragmentRefetchQuery")
+                @argumentDefinitions(
+                    isViewerFriendLocal: { type: "Boolean", defaultValue: false }
+                    orderby: { type: "[String]" }
+                ) {
                 id
-              }
+                friends(
+                    after: $after
+                    first: $count
+                    orderby: $orderby
+                    isViewerFriend: $isViewerFriendLocal
+                ) @connection(key: "UserFragment_friends") {
+                    edges {
+                        node {
+                            id
+                        }
+                    }
+                }
             }
-          }
-        }
-
-        query UserQuery(
-            $after: ID
-            $count: Int!
-            $id: ID!
-            $orderby: [String]
-            $isViewerFriend: Boolean
-          ) {
-            node(id: $id) {
-              id
-              __typename
-              ...UserFragment @arguments(isViewerFriendLocal: $isViewerFriend, orderby: $orderby)
+        `;
+        UserQuery = graphql`
+            query RelayHooksTestUserQuery(
+                $after: ID
+                $count: Int!
+                $id: ID!
+                $orderby: [String]
+                $isViewerFriend: Boolean
+            ) {
+                node(id: $id) {
+                    id
+                    __typename
+                    ...RelayHooksTestUserFragment
+                        @arguments(isViewerFriendLocal: $isViewerFriend, orderby: $orderby)
+                }
             }
-          }
-    `));
+        `;
 
-        // Manually set the refetchable operation for the test.
-        UserFragment.metadata.refetch.operation = UserFragmentRefetchQuery;
+        UserFragmentRefetchQuery = UserFragment.metadata.refetch.operation.default;
 
         function ContextGetter({ refetch }) {
             const environment = useRelayEnvironment();

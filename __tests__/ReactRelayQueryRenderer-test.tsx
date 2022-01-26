@@ -102,7 +102,7 @@ const ReactRelayQueryRenderer = (props) => (
 
 describe('ReactRelayQueryRenderer', () => {
     let TestQuery;
-
+    let NextQuery;
     let cacheConfig;
     let environment;
     let render;
@@ -174,6 +174,16 @@ describe('ReactRelayQueryRenderer', () => {
                 node(id: $id) {
                     id
                     ...ReactRelayQueryRendererTestFragment
+                }
+            }
+        `;
+
+        NextQuery = graphql`
+            query ReactRelayQueryRendererTestNextQuery($id: ID!) {
+                node(id: $id) {
+                    ... on User {
+                        name
+                    }
                 }
             }
         `;
@@ -1109,16 +1119,6 @@ describe('ReactRelayQueryRenderer', () => {
                 environment.mockClear();
                 render.mockClear();
 
-                // Update with a different query
-                const NextQuery = graphql`
-                    query ReactRelayQueryRendererTestNextQuery($id: ID!) {
-                        node(id: $id) {
-                            ... on User {
-                                name
-                            }
-                        }
-                    }
-                `;
                 renderer.getInstance().setProps({
                     cacheConfig,
                     environment,
@@ -1381,21 +1381,10 @@ describe('ReactRelayQueryRenderer', () => {
         });
     });
     describe('when props change during a fetch', () => {
-        let NextQuery;
         let renderer;
         let nextProps;
 
         beforeEach(() => {
-            NextQuery = graphql`
-                query ReactRelayQueryRendererTestNext2Query($id: ID!) {
-                    node(id: $id) {
-                        ... on User {
-                            name
-                        }
-                    }
-                }
-            `;
-
             variables = { id: '4' };
             renderer = createHooks(
                 <PropsSetter>
@@ -1476,22 +1465,11 @@ describe('ReactRelayQueryRenderer', () => {
     });
 
     describe('when props change after a fetch fails', () => {
-        let NextQuery;
         let error;
         let renderer;
         let nextProps;
 
         beforeEach(() => {
-            NextQuery = graphql`
-                query ReactRelayQueryRendererTestNext3Query($id: ID!) {
-                    node(id: $id) {
-                        ... on User {
-                            name
-                        }
-                    }
-                }
-            `;
-
             variables = { id: '4' };
             renderer = createHooks(
                 <PropsSetter>
@@ -1552,21 +1530,10 @@ describe('ReactRelayQueryRenderer', () => {
     });
 
     describe('when props change after a fetch succeeds', () => {
-        let NextQuery;
         let renderer;
         let nextProps;
 
         beforeEach(() => {
-            NextQuery = graphql`
-                query ReactRelayQueryRendererTestNext4Query($id: ID!) {
-                    node(id: $id) {
-                        ... on User {
-                            name
-                        }
-                    }
-                }
-            `;
-
             renderer = createHooks(
                 <PropsSetter>
                     <ReactRelayQueryRenderer
@@ -1699,21 +1666,10 @@ describe('ReactRelayQueryRenderer', () => {
     });
 
     describe('multiple payloads', () => {
-        let NextQuery;
         let renderer;
         let nextProps;
 
         beforeEach(() => {
-            NextQuery = graphql`
-                query ReactRelayQueryRendererTest5NextQuery($id: ID!) {
-                    node(id: $id) {
-                        ... on User {
-                            name
-                        }
-                    }
-                }
-            `;
-
             renderer = createHooks(
                 <PropsSetter>
                     <ReactRelayQueryRenderer

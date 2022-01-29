@@ -52,7 +52,7 @@
   },
   "peerDependencies": {
     "react": "^16.9.0 || ^17",
-    "relay-runtime": "^13.0.1"
+    "relay-runtime": "^13.0.2"
   },
   "devDependencies": {
     "babel-preset-fbjs": "^3.3.0",
@@ -89,10 +89,10 @@
     "promise-polyfill": "6.1.0",
     "react": "16.11.0",
     "react-test-renderer": "16.11.0",
-    "relay-compiler": "^13.0.1",
-    "relay-runtime": "^13.0.1",
-    "relay-test-utils": "^13.0.1",
-    "relay-test-utils-internal": "^13.0.1",
+    "relay-compiler": "^13.0.2",
+    "relay-runtime": "^13.0.2",
+    "relay-test-utils": "^13.0.2",
+    "relay-test-utils-internal": "^13.0.2",
     "rimraf": "^2.5.4",
     "rollup": "^2.23.0",
     "rollup-plugin-sourcemaps": "0.6.2",

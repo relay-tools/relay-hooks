@@ -11,6 +11,7 @@ import {
     FragmentReference,
     RenderPolicy,
     GraphQLSubscriptionConfig,
+    GraphQLResponse,
 } from 'relay-runtime';
 
 export type MutationState<T extends MutationParameters> = {
@@ -74,6 +75,7 @@ export type QueryOptions = {
     fetchKey?: string | number;
     networkCacheConfig?: CacheConfig;
     skip?: boolean;
+    onResponse?: (response: GraphQLResponse) => void;
     onComplete?: (_e: Error | null) => void;
     UNSTABLE_renderPolicy?: RenderPolicy;
 };
@@ -84,7 +86,7 @@ export type $Call<Fn extends (...args: any[]) => any> = Fn extends (arg: any) =>
 
 export type KeyType<TData = unknown> = Readonly<{
     ' $data'?: TData;
-    ' $fragmentRefs': FragmentReference;
+    ' $fragmentSpreads': FragmentReference;
 }>;
 export type ArrayKeyType = ReadonlyArray<{ readonly ' $data'?: ReadonlyArray<unknown> } | null>;
 
@@ -123,12 +125,14 @@ export type LoadQuery<
 
 export interface Options {
     fetchPolicy?: FetchPolicy;
+    onResponse?: (response: GraphQLResponse) => void;
     onComplete?: (arg: Error | null) => void;
     UNSTABLE_renderPolicy?: RenderPolicy;
 }
 
 export interface OptionsLoadMore<TQuery extends OperationType = OperationType> {
     //fetchPolicy?: FetchPolicy;
+    onResponse?: (response: GraphQLResponse) => void;
     onComplete?: (arg: Error | null) => void;
     UNSTABLE_extraVariables?: VariablesOf<TQuery>;
 }
@@ -140,7 +144,8 @@ export interface OptionsLoadMore<TQuery extends OperationType = OperationType> {
 //    /non-null/.
 export type RefetchFnDynamic<
     TQuery extends OperationType,
-    TKey extends KeyType | null,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    Key extends KeyType | null,
     TOptions = Options
 > = RefetchInexactDynamicResponse<TQuery, TOptions> & RefetchExactDynamicResponse<TQuery, TOptions>;
 

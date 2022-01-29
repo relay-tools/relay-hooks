@@ -12,10 +12,11 @@
  */
 
 import { commitMutation, graphql } from 'relay-hooks';
+import { ChangeTodoStatusMutation as ChangeTodoStatusMutationType } from '../__generated__/relay/ChangeTodoStatusMutation.graphql';
 import { getUser } from './ReadInlineUser';
 
 const mutation = graphql`
-    mutation ChangeTodoStatusMutation($input: ChangeTodoStatusInput!) {
+    mutation ChangeTodoStatusMutation($input: ChangeTodoStatusInput!) @raw_response_type {
         changeTodoStatus(input: $input) {
             todo {
                 id
@@ -51,7 +52,7 @@ export function commit(environment: any, complete: boolean, todo: any, userRef: 
         userId: user.userId,
         id: todo.id,
     };
-    commitMutation(environment, {
+    commitMutation<ChangeTodoStatusMutationType>(environment, {
         mutation,
         variables: {
             input,

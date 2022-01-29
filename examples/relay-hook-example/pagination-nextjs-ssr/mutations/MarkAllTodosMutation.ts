@@ -13,6 +13,7 @@
 
 import { commitMutation, graphql } from 'relay-hooks';
 import { Disposable } from 'relay-runtime';
+import { MarkAllTodosMutation as MarkAllTodosMutationType } from '../__generated__/relay/MarkAllTodosMutation.graphql';
 import { getUser } from './ReadInlineUser';
 /*
 import type {
@@ -33,7 +34,7 @@ type Edge = $NonMaybeType<$ElementType<Edges, number>>;
 type Node = $NonMaybeType<$ElementType<Edge, 'node'>>;
 */
 const mutation = graphql`
-    mutation MarkAllTodosMutation($input: MarkAllTodosInput!) {
+    mutation MarkAllTodosMutation($input: MarkAllTodosInput!) @raw_response_type {
         markAllTodos(input: $input) {
             changedTodos {
                 id
@@ -83,7 +84,7 @@ export function commit(environment: any, complete: boolean, todos: any, userRef:
         userId: user.userId,
     };
 
-    return commitMutation(environment, {
+    return commitMutation<MarkAllTodosMutationType>(environment, {
         mutation,
         variables: {
             input,

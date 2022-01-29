@@ -49,10 +49,8 @@ const ReactRelayRefetchContainer = {
     },
 };
 
-const { createReaderSelector, createOperationDescriptor } = require('relay-runtime');
+const { createReaderSelector, createOperationDescriptor, graphql } = require('relay-runtime');
 const { createMockEnvironment } = require('relay-test-utils-internal');
-
-const { generateAndCompile } = require('./TestCompiler');
 
 describe('ReactRelayRefetchContainer', () => {
     let TestComponent;
@@ -117,40 +115,35 @@ describe('ReactRelayRefetchContainer', () => {
         jest.resetModules();
 
         environment = createMockEnvironment();
-        ({
+        /*({
             UserFragment,
             UserQuery,
             UserQueryWithCond,
             UserFragmentRefetchQuery,
-        } = generateAndCompile(`
-      query UserQuery(
-        $id: ID!
-      ) {
-        node(id: $id) {
-          ...UserFragment
-        }
-      }
-
-      query UserQueryWithCond(
-        $id: ID!
-        $condGlobal: Boolean!
-      ) {
-        node(id: $id) {
-          ...UserFragment @arguments(cond: $condGlobal)
-        }
-      }
-
-      
-      fragment UserFragment on User 
-      @refetchable(queryName: "UserFragmentRefetchQuery")
-      @argumentDefinitions(
-        cond: {type: "Boolean!", defaultValue: true}
-      ) {
-        id
-        name @include(if: $cond)
-      }
-    `));
-        UserFragment.metadata.refetch.operation = UserFragmentRefetchQuery;
+        } = */
+        UserQuery = graphql`
+            query ReactRelayRefetchContainerTestUserQuery($id: ID!) {
+                node(id: $id) {
+                    ...ReactRelayRefetchContainerTestUserFragment
+                }
+            }
+        `;
+        UserQueryWithCond = graphql`
+            query ReactRelayRefetchContainerTestUserWithCondQuery($id: ID!, $condGlobal: Boolean!) {
+                node(id: $id) {
+                    ...ReactRelayRefetchContainerTestUserFragment @arguments(cond: $condGlobal)
+                }
+            }
+        `;
+        UserFragment = graphql`
+            fragment ReactRelayRefetchContainerTestUserFragment on User
+                @refetchable(queryName: "ReactRelayRefetchContainerTestUserFragmentRefetchQuery")
+                @argumentDefinitions(cond: { type: "Boolean", defaultValue: true }) {
+                id
+                name @include(if: $cond)
+            }
+        `;
+        UserFragmentRefetchQuery = UserFragment.metadata.refetch.operation.default;
 
         function ContextGetter({ refetch }) {
             const environment = useRelayEnvironment();
@@ -292,6 +285,7 @@ describe('ReactRelayRefetchContainer', () => {
                 name: 'Zuck',
             },
             isMissingData: false,
+            missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(UserFragment, '4', { cond: true }, ownerUser1.request),
@@ -378,6 +372,7 @@ describe('ReactRelayRefetchContainer', () => {
                 name: 'Joe',
             },
             isMissingData: false,
+            missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(
@@ -428,6 +423,7 @@ describe('ReactRelayRefetchContainer', () => {
                 // Name is excluded since value of cond is now false
             },
             isMissingData: false,
+            missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(
@@ -499,6 +495,7 @@ describe('ReactRelayRefetchContainer', () => {
                 // Name is excluded since value of cond is now false
             },
             isMissingData: false,
+            missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(

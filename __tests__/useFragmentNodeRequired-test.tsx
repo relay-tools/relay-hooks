@@ -27,12 +27,11 @@ import {
     ID_KEY,
     createOperationDescriptor,
     RelayFeatureFlags,
+    graphql,
 } from 'relay-runtime';
 
 (RelayFeatureFlags as any).ENABLE_REQUIRED_DIRECTIVES = true;
 import { createMockEnvironment } from 'relay-test-utils-internal';
-
-const { generateAndCompile } = require('./TestCompiler');
 
 //import * as Scheduler from 'scheduler';
 import { ReactRelayContext, useSuspenseFragment as useFragmentNodeOriginal } from '../src';
@@ -57,21 +56,21 @@ beforeEach(() => {
 
     // Set up environment and base data
     environment = createMockEnvironment();
-    const generated = generateAndCompile(`
-    fragment UserFragment on User  {
-      id
-      name @required(action: NONE)
-    }
 
-    query UserQuery($id: ID!) {
-      node(id: $id) {
-        ...UserFragment
-      }
-    }
-  `);
     const singularVariables = { id: '1' };
-    const gqlSingularQuery = generated.UserQuery;
-    const gqlSingularFragment = generated.UserFragment;
+    const gqlSingularQuery = graphql`
+        query useFragmentNodeRequiredTestUserQuery($id: ID!) {
+            node(id: $id) {
+                ...useFragmentNodeRequiredTestUserFragment
+            }
+        }
+    `;
+    const gqlSingularFragment = graphql`
+        fragment useFragmentNodeRequiredTestUserFragment on User {
+            id
+            name @required(action: NONE)
+        }
+    `;
     singularQuery = createOperationDescriptor(gqlSingularQuery, singularVariables);
     environment.commitPayload(singularQuery, {
         node: {
@@ -94,7 +93,7 @@ beforeEach(() => {
         const userRef = {
             [ID_KEY]: singularQuery.request.variables.id,
             [FRAGMENTS_KEY]: {
-                UserFragment: {},
+                useFragmentNodeRequiredTestUserFragment: {},
             },
             [FRAGMENT_OWNER_KEY]: singularQuery.request,
         };

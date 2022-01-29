@@ -14,10 +14,9 @@
 import * as React from 'react';
 import { useMemo, useState } from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
-import { Environment } from 'relay-runtime';
+import { Environment, graphql } from 'relay-runtime';
 
 import { createMockEnvironment } from 'relay-test-utils-internal';
-const { generateAndCompile } = require('./TestCompiler');
 import { RelayEnvironmentProvider } from '../src';
 
 const dispose = jest.fn();
@@ -28,22 +27,22 @@ const requestSubscription = jest.fn((_passedEnv, _passedConfig) => ({
 const relayRuntime = require('relay-runtime');
 relayRuntime.requestSubscription = requestSubscription;
 
-const { CommentCreateSubscription } = generateAndCompile(`
-  subscription CommentCreateSubscription(
-    $input: CommentCreateSubscriptionInput
-  ) {
-    commentCreateSubscribe(input: $input) {
-      feedbackCommentEdge {
-        node {
-          id
-          body {
-            text
-          }
+const CommentCreateSubscription = graphql`
+    subscription useSubscriptionTestCommentCreateSubscription(
+        $input: CommentCreateSubscriptionInput
+    ) {
+        commentCreateSubscribe(input: $input) {
+            feedbackCommentEdge {
+                node {
+                    id
+                    body {
+                        text
+                    }
+                }
+            }
         }
-      }
     }
-  }
-`);
+`;
 
 let setEnvironment;
 

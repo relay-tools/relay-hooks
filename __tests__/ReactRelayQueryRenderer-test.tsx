@@ -1984,11 +1984,12 @@ describe('ReactRelayQueryRenderer', () => {
                     id: '4',
 
                     __fragments: {
-                        TestFragment: {},
+                        ReactRelayQueryRendererTestFragment: {},
                     },
 
                     __fragmentOwner: owner.request,
                     __id: '4',
+                    __isWithinUnmatchedTypeRefinement: false,
                 },
             },
             retry: expect.any(Function),

@@ -24,6 +24,7 @@ import {
     FRAGMENTS_KEY,
     ID_KEY,
     createOperationDescriptor,
+    graphql,
 } from 'relay-runtime';
 
 /**
@@ -139,13 +140,14 @@ function assertFragmentResults(expectedCalls) {
     renderSpy.mockClear();
 }
 
-function createFragmentRef(id, owner) {
+function createFragmentRef(id, owner, __isWithinUnmatchedTypeRefinement = false) {
     return {
         [ID_KEY]: id,
         [FRAGMENTS_KEY]: {
-            NestedUserFragment: {},
+            useFragmentTestNestedUserFragment: {},
         },
         [FRAGMENT_OWNER_KEY]: owner.request,
+        __isWithinUnmatchedTypeRefinement,
     };
 }
 
@@ -161,53 +163,52 @@ beforeEach(() => {
     }));
     renderSpy = jest.fn();
 
-    ({ generateAndCompile } = require('./TestCompiler'));
-
     ({ createMockEnvironment } = require('relay-test-utils-internal'));
 
     // Set up environment and base data
     environment = createMockEnvironment();
-    const generated = generateAndCompile(`
-    fragment NestedUserFragment on User {
-      username
-    }
-
-    fragment UserFragment on User  {
-      id
-      name
-      profile_picture(scale: $scale) {
-        uri
-      }
-      ...NestedUserFragment
-    }
-
-    fragment UsersFragment on User @relay(plural: true) {
-      id
-      name
-      profile_picture(scale: $scale) {
-        uri
-      }
-      ...NestedUserFragment
-    }
-
-    query UsersQuery($ids: [ID!]!, $scale: Int!) {
-      nodes(ids: $ids) {
-        ...UsersFragment
-      }
-    }
-
-    query UserQuery($id: ID!, $scale: Int!) {
-      node(id: $id) {
-        ...UserFragment
-      }
-    }
-  `);
     singularVariables = { id: '1', scale: 16 };
     pluralVariables = { ids: ['1', '2'], scale: 16 };
-    gqlSingularQuery = generated.UserQuery;
-    gqlSingularFragment = generated.UserFragment;
-    gqlPluralQuery = generated.UsersQuery;
-    gqlPluralFragment = generated.UsersFragment;
+    graphql`
+        fragment useFragmentTestNestedUserFragment on User {
+            username
+        }
+    `;
+
+    gqlSingularFragment = graphql`
+        fragment useFragmentTestUserFragment on User {
+            id
+            name
+            profile_picture(scale: $scale) {
+                uri
+            }
+            ...useFragmentTestNestedUserFragment
+        }
+    `;
+    gqlSingularQuery = graphql`
+        query useFragmentTestUserQuery($id: ID!, $scale: Float!) {
+            node(id: $id) {
+                ...useFragmentTestUserFragment
+            }
+        }
+    `;
+    gqlPluralFragment = graphql`
+        fragment useFragmentTestUsersFragment on User @relay(plural: true) {
+            id
+            name
+            profile_picture(scale: $scale) {
+                uri
+            }
+            ...useFragmentTestNestedUserFragment
+        }
+    `;
+    gqlPluralQuery = graphql`
+        query useFragmentTestUsersQuery($ids: [ID!]!, $scale: Float!) {
+            nodes(ids: $ids) {
+                ...useFragmentTestUsersFragment
+            }
+        }
+    `;
     singularQuery = createOperationDescriptor(gqlSingularQuery, singularVariables);
     pluralQuery = createOperationDescriptor(gqlPluralQuery, pluralVariables);
     environment.commitPayload(singularQuery, {
@@ -251,7 +252,7 @@ beforeEach(() => {
             : {
                   [ID_KEY]: owner.request.variables.id,
                   [FRAGMENTS_KEY]: {
-                      UserFragment: {},
+                      useFragmentTestUserFragment: {},
                   },
                   [FRAGMENT_OWNER_KEY]: owner.request,
               };
@@ -271,7 +272,7 @@ beforeEach(() => {
             : {
                   [ID_KEY]: owner.request.variables.id,
                   [FRAGMENTS_KEY]: {
-                      UserFragment: {},
+                      useFragmentTestUserFragment: {},
                   },
                   [FRAGMENT_OWNER_KEY]: owner.request,
               };
@@ -289,7 +290,7 @@ beforeEach(() => {
             : owner.request.variables.ids.map((id) => ({
                   [ID_KEY]: id,
                   [FRAGMENTS_KEY]: {
-                      UsersFragment: {},
+                      useFragmentTestUsersFragment: {},
                   },
                   [FRAGMENT_OWNER_KEY]: owner.request,
               }));

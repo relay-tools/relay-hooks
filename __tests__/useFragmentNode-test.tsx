@@ -58,6 +58,7 @@ const {
     ID_KEY,
     createOperationDescriptor,
     OperationDescriptor,
+    graphql,
 } = require('relay-runtime');
 
 const Scheduler = require('scheduler');
@@ -144,9 +145,10 @@ function createFragmentRef(id, owner) {
     return {
         [ID_KEY]: id,
         [FRAGMENTS_KEY]: {
-            NestedUserFragment: {},
+            useFragmentNodeTestNestedUserFragment: {},
         },
         [FRAGMENT_OWNER_KEY]: owner.request,
+        __isWithinUnmatchedTypeRefinement: false,
     };
 }
 
@@ -158,53 +160,52 @@ beforeEach(() => {
     //(Scheduler as any).mockClear();
     renderSpy = jest.fn();
 
-    ({ generateAndCompile } = require('./TestCompiler'));
-
     ({ createMockEnvironment } = require('relay-test-utils-internal'));
 
     // Set up environment and base data
     environment = createMockEnvironment();
-    const generated = generateAndCompile(`
-    fragment NestedUserFragment on User {
-      username
-    }
+    graphql`
+        fragment useFragmentNodeTestNestedUserFragment on User {
+            username
+        }
+    `;
 
-    fragment UserFragment on User  {
-      id
-      name
-      profile_picture(scale: $scale) {
-        uri
-      }
-      ...NestedUserFragment
-    }
-
-    fragment UsersFragment on User @relay(plural: true) {
-      id
-      name
-      profile_picture(scale: $scale) {
-        uri
-      }
-      ...NestedUserFragment
-    }
-
-    query UsersQuery($ids: [ID!]!, $scale: Int!) {
-      nodes(ids: $ids) {
-        ...UsersFragment
-      }
-    }
-
-    query UserQuery($id: ID!, $scale: Int!) {
-      node(id: $id) {
-        ...UserFragment
-      }
-    }
-  `);
+    gqlSingularFragment = graphql`
+        fragment useFragmentNodeTestUserFragment on User {
+            id
+            name
+            profile_picture(scale: $scale) {
+                uri
+            }
+            ...useFragmentNodeTestNestedUserFragment
+        }
+    `;
+    gqlSingularQuery = graphql`
+        query useFragmentNodeTestUserQuery($id: ID!, $scale: Float!) {
+            node(id: $id) {
+                ...useFragmentNodeTestUserFragment
+            }
+        }
+    `;
+    gqlPluralFragment = graphql`
+        fragment useFragmentNodeTestUsersFragment on User @relay(plural: true) {
+            id
+            name
+            profile_picture(scale: $scale) {
+                uri
+            }
+            ...useFragmentNodeTestNestedUserFragment
+        }
+    `;
+    gqlPluralQuery = graphql`
+        query useFragmentNodeTestUsersQuery($ids: [ID!]!, $scale: Float!) {
+            nodes(ids: $ids) {
+                ...useFragmentNodeTestUsersFragment
+            }
+        }
+    `;
     singularVariables = { id: '1', scale: 16 };
     pluralVariables = { ids: ['1', '2'], scale: 16 };
-    gqlSingularQuery = generated.UserQuery;
-    gqlSingularFragment = generated.UserFragment;
-    gqlPluralQuery = generated.UsersQuery;
-    gqlPluralFragment = generated.UsersFragment;
     singularQuery = createOperationDescriptor(gqlSingularQuery, singularVariables);
     pluralQuery = createOperationDescriptor(gqlPluralQuery, pluralVariables);
     environment.commitPayload(singularQuery, {
@@ -249,9 +250,10 @@ beforeEach(() => {
             : {
                   [ID_KEY]: owner.request.variables.id,
                   [FRAGMENTS_KEY]: {
-                      UserFragment: {},
+                      useFragmentNodeTestUserFragment: {},
                   },
                   [FRAGMENT_OWNER_KEY]: owner.request,
+                  __isWithinUnmatchedTypeRefinement: false,
               };
         /* eslint-enable indent */
         setSingularOwner = _setOwner;
@@ -270,9 +272,10 @@ beforeEach(() => {
             : owner.request.variables.ids.map((id) => ({
                   [ID_KEY]: id,
                   [FRAGMENTS_KEY]: {
-                      UsersFragment: {},
+                      useFragmentNodeTestUsersFragment: {},
                   },
                   [FRAGMENT_OWNER_KEY]: owner.request,
+                  __isWithinUnmatchedTypeRefinement: false,
               }));
         /* eslint-enable indent */
         const [usersData] = useFragmentNode(gqlPluralFragment, usersRef);
@@ -1183,7 +1186,12 @@ it('should warn if data is missing and there are no pending requests', () => {
                 'missing data and its parent query `%s` is not being fetched.',
         ),
     ).toEqual(true);
-    expect(warningArgs).toEqual(['UserFragment', 'useFragment', 'UserQuery', 'UserQuery']);
+    expect(warningArgs).toEqual([
+        'useFragmentNodeTestUserFragment',
+        'useFragment',
+        'useFragmentNodeTestUserQuery',
+        'useFragmentNodeTestUserQuery',
+    ]);
 
     // Assert render output with missing data
     assertFragmentResults([

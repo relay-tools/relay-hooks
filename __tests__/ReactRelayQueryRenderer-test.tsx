@@ -38,11 +38,11 @@ import {
     RecordSource,
     Store,
     ROOT_ID,
+    graphql,
 } from 'relay-runtime';
 import { ROOT_TYPE } from 'relay-runtime/lib/store/RelayStoreUtils';
 import { createMockEnvironment } from 'relay-test-utils-internal';
 
-const { generateAndCompile } = require('./TestCompiler');
 /*
 function expectToBeRendered(renderFn, readyState) {
   // Ensure useEffect is called before other timers
@@ -104,7 +104,7 @@ const ReactRelayQueryRenderer = (props) => (
 
 describe('ReactRelayQueryRenderer', () => {
     let TestQuery;
-
+    let NextQuery;
     let cacheConfig;
     let environment;
     let render;
@@ -186,19 +186,30 @@ describe('ReactRelayQueryRenderer', () => {
 
         environment = createMockEnvironment();
         store = environment.getStore();
-        ({ TestQuery } = generateAndCompile(`
-      query TestQuery($id: ID = "<default>") {
-        node(id: $id) {
-          id
-          ...TestFragment
-        }
-      }
+        TestQuery = graphql`
+            query ReactRelayQueryRendererTestQuery($id: ID = "<default>") {
+                node(id: $id) {
+                    id
+                    ...ReactRelayQueryRendererTestFragment
+                }
+            }
+        `;
 
-      fragment TestFragment on User {
-        name
-      }
-    `));
+        NextQuery = graphql`
+            query ReactRelayQueryRendererTestNextQuery($id: ID!) {
+                node(id: $id) {
+                    ... on User {
+                        name
+                    }
+                }
+            }
+        `;
 
+        graphql`
+            fragment ReactRelayQueryRendererTestFragment on User {
+                name
+            }
+        `;
         render = jest.fn(() => <div />);
         variables = { id: '4' };
     });
@@ -243,9 +254,10 @@ describe('ReactRelayQueryRenderer', () => {
                 data: {
                     node: {
                         id: '4',
+                        __isWithinUnmatchedTypeRefinement: false,
 
                         __fragments: {
-                            TestFragment: {},
+                            ReactRelayQueryRendererTestFragment: {},
                         },
 
                         __fragmentOwner: owner.request,
@@ -295,9 +307,10 @@ describe('ReactRelayQueryRenderer', () => {
                 data: {
                     node: {
                         id: '4',
+                        __isWithinUnmatchedTypeRefinement: false,
 
                         __fragments: {
-                            TestFragment: {},
+                            ReactRelayQueryRendererTestFragment: {},
                         },
 
                         __fragmentOwner: owner.request,
@@ -413,9 +426,10 @@ describe('ReactRelayQueryRenderer', () => {
                         data: {
                             node: {
                                 id: '4',
+                                __isWithinUnmatchedTypeRefinement: false,
 
                                 __fragments: {
-                                    TestFragment: {},
+                                    ReactRelayQueryRendererTestFragment: {},
                                 },
 
                                 __fragmentOwner: owner.request,
@@ -438,9 +452,10 @@ describe('ReactRelayQueryRenderer', () => {
                         data: {
                             node: {
                                 id: '4',
+                                __isWithinUnmatchedTypeRefinement: false,
 
                                 __fragments: {
-                                    TestFragment: {},
+                                    ReactRelayQueryRendererTestFragment: {},
                                 },
 
                                 __fragmentOwner: owner.request,
@@ -500,9 +515,10 @@ describe('ReactRelayQueryRenderer', () => {
                         data: {
                             node: {
                                 id: '4',
+                                __isWithinUnmatchedTypeRefinement: false,
 
                                 __fragments: {
-                                    TestFragment: {},
+                                    ReactRelayQueryRendererTestFragment: {},
                                 },
 
                                 __fragmentOwner: owner.request,
@@ -525,9 +541,10 @@ describe('ReactRelayQueryRenderer', () => {
                         data: {
                             node: {
                                 id: '4',
+                                __isWithinUnmatchedTypeRefinement: false,
 
                                 __fragments: {
-                                    TestFragment: {},
+                                    ReactRelayQueryRendererTestFragment: {},
                                 },
 
                                 __fragmentOwner: owner.request,
@@ -577,9 +594,10 @@ describe('ReactRelayQueryRenderer', () => {
                         data: {
                             node: {
                                 id: '4',
+                                __isWithinUnmatchedTypeRefinement: false,
 
                                 __fragments: {
-                                    TestFragment: {},
+                                    ReactRelayQueryRendererTestFragment: {},
                                 },
 
                                 __fragmentOwner: firstOwner.request,
@@ -636,9 +654,10 @@ describe('ReactRelayQueryRenderer', () => {
                         data: {
                             node: {
                                 id: '6',
+                                __isWithinUnmatchedTypeRefinement: false,
 
                                 __fragments: {
-                                    TestFragment: {},
+                                    ReactRelayQueryRendererTestFragment: {},
                                 },
 
                                 __fragmentOwner: thirdOwner.request,
@@ -707,9 +726,10 @@ describe('ReactRelayQueryRenderer', () => {
                     data: {
                         node: {
                             id: '4',
+                            __isWithinUnmatchedTypeRefinement: false,
 
                             __fragments: {
-                                TestFragment: {},
+                                ReactRelayQueryRendererTestFragment: {},
                             },
 
                             __fragmentOwner: owner.request,
@@ -743,9 +763,10 @@ describe('ReactRelayQueryRenderer', () => {
                     data: {
                         node: {
                             id: '4',
+                            __isWithinUnmatchedTypeRefinement: false,
 
                             __fragments: {
-                                TestFragment: {},
+                                ReactRelayQueryRendererTestFragment: {},
                             },
 
                             __fragmentOwner: owner.request,
@@ -921,7 +942,7 @@ describe('ReactRelayQueryRenderer', () => {
             node: {
               id: "<default>",
               __fragments: {
-                TestFragment: {}
+                ReactRelayQueryRendererTestFragment: {}
               },
               __fragmentOwner: owner.request,
               __id: "<default>"
@@ -1115,16 +1136,6 @@ describe('ReactRelayQueryRenderer', () => {
                 environment.mockClear();
                 render.mockClear();
 
-                // Update with a different query
-                const { NextQuery } = generateAndCompile(`
-      query NextQuery($id: ID!) {
-        node(id: $id) {
-          ... on User {
-            name
-          }
-        }
-      }
-    `);
                 renderer.getInstance().setProps({
                     cacheConfig,
                     environment,
@@ -1240,9 +1251,10 @@ describe('ReactRelayQueryRenderer', () => {
                 data: {
                     node: {
                         id: '4',
+                        __isWithinUnmatchedTypeRefinement: false,
 
                         __fragments: {
-                            TestFragment: {},
+                            ReactRelayQueryRendererTestFragment: {},
                         },
 
                         __fragmentOwner: owner.request,
@@ -1293,9 +1305,10 @@ describe('ReactRelayQueryRenderer', () => {
                     data: {
                         node: {
                             id: '4',
+                            __isWithinUnmatchedTypeRefinement: false,
 
                             __fragments: {
-                                TestFragment: {},
+                                ReactRelayQueryRendererTestFragment: {},
                             },
 
                             __fragmentOwner: owner.request,
@@ -1309,9 +1322,10 @@ describe('ReactRelayQueryRenderer', () => {
                     data: {
                         node: {
                             id: '4',
+                            __isWithinUnmatchedTypeRefinement: false,
 
                             __fragments: {
-                                TestFragment: {},
+                                ReactRelayQueryRendererTestFragment: {},
                             },
 
                             __fragmentOwner: owner.request,
@@ -1361,9 +1375,9 @@ describe('ReactRelayQueryRenderer', () => {
                 data: {
                     node: {
                         id: '4',
-
+                        __isWithinUnmatchedTypeRefinement: false,
                         __fragments: {
-                            TestFragment: {},
+                            ReactRelayQueryRendererTestFragment: {},
                         },
 
                         __fragmentOwner: owner.request,
@@ -1384,21 +1398,10 @@ describe('ReactRelayQueryRenderer', () => {
         });
     });
     describe('when props change during a fetch', () => {
-        let NextQuery;
         let renderer;
         let nextProps;
 
         beforeEach(() => {
-            ({ NextQuery } = generateAndCompile(`
-        query NextQuery($id: ID!) {
-          node(id: $id) {
-            ... on User {
-              name
-            }
-          }
-        }
-      `));
-
             variables = { id: '4' };
             renderer = createHooks(
                 <PropsSetter>
@@ -1479,22 +1482,11 @@ describe('ReactRelayQueryRenderer', () => {
     });
 
     describe('when props change after a fetch fails', () => {
-        let NextQuery;
         let error;
         let renderer;
         let nextProps;
 
         beforeEach(() => {
-            ({ NextQuery } = generateAndCompile(`
-        query NextQuery($id: ID!) {
-          node(id: $id) {
-            ... on User {
-              name
-            }
-          }
-        }
-      `));
-
             variables = { id: '4' };
             renderer = createHooks(
                 <PropsSetter>
@@ -1555,21 +1547,10 @@ describe('ReactRelayQueryRenderer', () => {
     });
 
     describe('when props change after a fetch succeeds', () => {
-        let NextQuery;
         let renderer;
         let nextProps;
 
         beforeEach(() => {
-            ({ NextQuery } = generateAndCompile(`
-        query NextQuery($id: ID!) {
-          node(id: $id) {
-            ... on User {
-              name
-            }
-          }
-        }
-      `));
-
             renderer = createHooks(
                 <PropsSetter>
                     <ReactRelayQueryRenderer
@@ -1702,21 +1683,10 @@ describe('ReactRelayQueryRenderer', () => {
     });
 
     describe('multiple payloads', () => {
-        let NextQuery;
         let renderer;
         let nextProps;
 
         beforeEach(() => {
-            ({ NextQuery } = generateAndCompile(`
-        query NextQuery($id: ID!) {
-          node(id: $id) {
-            ... on User {
-              name
-            }
-          }
-        }
-      `));
-
             renderer = createHooks(
                 <PropsSetter>
                     <ReactRelayQueryRenderer

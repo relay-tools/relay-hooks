@@ -15,7 +15,7 @@
 
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
-import { RecordSource, Store } from 'relay-runtime';
+import { graphql, RecordSource, Store } from 'relay-runtime';
 
 import { useLazyLoadQuery as useLazyLoadQueryNode, RelayEnvironmentProvider } from '../src';
 
@@ -59,7 +59,6 @@ describe('useLazyLoadQueryNode', () => {
     let render;
     let release;
     let createMockEnvironment;
-    let generateAndCompile;
     let query;
     let variables;
     let Container;
@@ -71,8 +70,6 @@ describe('useLazyLoadQueryNode', () => {
         /*jest.mock('../ExecutionEnvironment', () => ({
             isServer: false,
         }));*/
-
-        ({ generateAndCompile } = require('./TestCompiler'));
 
         ({ createMockEnvironment } = require('relay-test-utils-internal'));
 
@@ -141,28 +138,28 @@ describe('useLazyLoadQueryNode', () => {
             };
         });
 
-        const generated = generateAndCompile(`
-      fragment UserFragment on User {
-        name
-      }
-
-      query UserQuery($id: ID) {
-        node(id: $id) {
-          id
-          name
-          ...UserFragment
-        }
-      }
-
-      query UserNoNameQuery($id: ID) {
-        node(id: $id) {
-          id
-          ...UserFragment
-        }
-      }
-    `);
-        gqlQuery = generated.UserQuery;
-        gqlNoNameQuery = generated.UserNoNameQuery;
+        graphql`
+            fragment useLazyLoadQueryNodeTestUserFragment on User {
+                name
+            }
+        `;
+        gqlQuery = graphql`
+            query useLazyLoadQueryNodeTestUserQuery($id: ID) {
+                node(id: $id) {
+                    id
+                    name
+                    ...useLazyLoadQueryNodeTestUserFragment
+                }
+            }
+        `;
+        gqlNoNameQuery = graphql`
+            query useLazyLoadQueryNodeTestUserNoNameQuery($id: ID) {
+                node(id: $id) {
+                    id
+                    ...useLazyLoadQueryNodeTestUserFragment
+                }
+            }
+        `;
         variables = { id: '1' };
         query = createOperationDescriptor(gqlQuery, variables, { force: true });
         renderFn = jest.fn((result) =>

@@ -21,8 +21,8 @@
     "prop-types": "^15.7.2",
     "react": "0.0.0-experimental-7f28234f8",
     "react-dom": "0.0.0-experimental-7f28234f8",
-    "relay-hooks": "4.0.0",
-    "relay-runtime": "10.1.2",
+    "relay-hooks": "6.0.0",
+    "relay-runtime": "12.0.0",
     "styled-components": "4.4.0",
     "uuid": "^8.3.2",
     "whatwg-fetch": "3.0.0"
@@ -43,7 +43,7 @@
     "@zeit/next-typescript": "1.1.1",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.5",
-    "babel-plugin-relay": "^10.1.2",
+    "babel-plugin-relay": "12.0.0",
     "cross-env": "6.0.3",
     "eslint": "^5.13.0",
     "eslint-config-fbjs": "^2.1.0",
@@ -57,9 +57,9 @@
     "flow-bin": "^0.94.0",
     "flow-typed": "^2.5.1",
     "prettier": "^1.16.4",
-    "relay-compiler": "^10.1.2",
-    "relay-compiler-language-typescript": "13.0.2",
-    "typescript": "3.7.3"
+    "relay-compiler": "12.0.0",
+    "relay-compiler-language-typescript": "14.2.1",
+    "typescript": "4.4.4"
   },
   "prettier": {
     "singleQuote": true,

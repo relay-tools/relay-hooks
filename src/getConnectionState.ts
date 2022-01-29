@@ -1,6 +1,5 @@
 import * as invariant from 'fbjs/lib/invariant';
-import { ConnectionInterface, ReaderFragment } from 'relay-runtime';
-import { getValueAtPath } from './getValueAtPath';
+import { ConnectionInterface, ReaderFragment, getValueAtPath } from 'relay-runtime';
 
 export function getStateFromConnection(
     direction: string,

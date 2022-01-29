@@ -49,10 +49,8 @@ const ReactRelayRefetchContainer = {
     },
 };
 
-const { createReaderSelector, createOperationDescriptor } = require('relay-runtime');
+const { createReaderSelector, createOperationDescriptor, graphql } = require('relay-runtime');
 const { createMockEnvironment } = require('relay-test-utils-internal');
-
-const { generateAndCompile } = require('./TestCompiler');
 
 describe('useRefetchable', () => {
     let TestComponent;
@@ -117,48 +115,30 @@ describe('useRefetchable', () => {
         jest.resetModules();
 
         environment = createMockEnvironment();
-        ({
-            UserFragment,
-            UserQuery,
-            UserQueryWithCond,
-            UserFragmentRefetchQuery,
-        } = generateAndCompile(`
+        UserQuery = graphql`
+            query useRefetchableTestUserUserQuery($id: ID!) {
+                node(id: $id) {
+                    ...useRefetchableTestUserUserFragment
+                }
+            }
+        `;
+        UserQueryWithCond = graphql`
+            query useRefetchableTestUserWithCondQuery($id: ID!, $condGlobal: Boolean!) {
+                node(id: $id) {
+                    ...useRefetchableTestUserUserFragment @arguments(cond: $condGlobal)
+                }
+            }
+        `;
 
-      fragment UserFragment on User 
-      @refetchable(queryName: "UserFragmentRefetchQuery")
-      @argumentDefinitions(
-        cond: {type: "Boolean!", defaultValue: true}
-      ) {
-        id
-        name @include(if: $cond)
-      }
-
-
-      query UserQuery(
-        $id: ID!
-      ) {
-        node(id: $id) {
-          ...UserFragment
-        }
-      }
-
-      query UserQueryWithCond(
-        $id: ID!
-        $condGlobal: Boolean!
-      ) {
-        node(id: $id) {
-          ...UserFragment @arguments(cond: $condGlobal)
-        }
-      }
-    `));
-
-        /*invariant(
-      UserFragment.metadata.refetch.operation ===
-        '@@MODULE_START@@UserFragmentRefetchQuery.graphql@@MODULE_END@@',
-      'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
-    );*/
-        // Manually set the refetchable operation for the test.
-        UserFragment.metadata.refetch.operation = UserFragmentRefetchQuery;
+        UserFragment = graphql`
+            fragment useRefetchableTestUserUserFragment on User
+                @refetchable(queryName: "useRefetchableTestUserUserFragmentRefetchQuery")
+                @argumentDefinitions(cond: { type: "Boolean", defaultValue: true }) {
+                id
+                name @include(if: $cond)
+            }
+        `;
+        UserFragmentRefetchQuery = UserFragment.metadata.refetch.operation.default;
 
         function ContextGetter({ refetch }) {
             const environment = useRelayEnvironment();
@@ -290,6 +270,7 @@ describe('useRefetchable', () => {
                 name: 'Zuck',
             },
             isMissingData: false,
+            missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(UserFragment, '4', { cond: true }, ownerUser1.request),
@@ -378,6 +359,7 @@ describe('useRefetchable', () => {
                 name: 'Joe',
             },
             isMissingData: false,
+            missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(
@@ -429,6 +411,7 @@ describe('useRefetchable', () => {
                 // Name is excluded since value of cond is now false
             },
             isMissingData: false,
+            missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(
@@ -502,6 +485,7 @@ describe('useRefetchable', () => {
                 // Name is excluded since value of cond is now false
             },
             isMissingData: false,
+            missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(

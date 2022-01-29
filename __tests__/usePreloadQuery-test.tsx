@@ -19,22 +19,21 @@
 import * as React from 'react';
 import * as TestRenderer from 'react-test-renderer';
 
-import { Environment, Network, Observable, RecordSource, Store } from 'relay-runtime';
+import { Environment, graphql, Network, Observable, RecordSource, Store } from 'relay-runtime';
 import { createMockEnvironment } from 'relay-test-utils-internal';
 
-const { generateAndCompile } = require('./TestCompiler');
 import { usePreloadedQuery, loadQuery, loadLazyQuery, RelayEnvironmentProvider } from '../src';
 
-const query = generateAndCompile(`
-  query TestQuery($id: ID! = 4) {
-    node(id: $id) {
-      id
-      ... on User {
-        name
-      }
+const query = graphql`
+    query usePreloadQueryTestQuery($id: ID = 4) {
+        node(id: $id) {
+            id
+            ... on User {
+                name
+            }
+        }
     }
-  }
-`).TestQuery;
+`;
 const params = query;
 
 const response = {

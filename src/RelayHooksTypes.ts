@@ -84,7 +84,7 @@ export type $Call<Fn extends (...args: any[]) => any> = Fn extends (arg: any) =>
 
 export type KeyType<TData = unknown> = Readonly<{
     ' $data'?: TData;
-    ' $fragmentRefs': FragmentReference;
+    ' $fragmentSpreads': FragmentReference;
 }>;
 export type ArrayKeyType = ReadonlyArray<{ readonly ' $data'?: ReadonlyArray<unknown> } | null>;
 
@@ -140,7 +140,8 @@ export interface OptionsLoadMore<TQuery extends OperationType = OperationType> {
 //    /non-null/.
 export type RefetchFnDynamic<
     TQuery extends OperationType,
-    TKey extends KeyType | null,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    Key extends KeyType | null,
     TOptions = Options
 > = RefetchInexactDynamicResponse<TQuery, TOptions> & RefetchExactDynamicResponse<TQuery, TOptions>;
 

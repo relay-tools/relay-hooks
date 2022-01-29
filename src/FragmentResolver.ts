@@ -17,13 +17,13 @@ import {
     ReaderFragment,
     getDataIDsFromFragment,
     RequestDescriptor,
+    getPaginationMetadata,
+    getPaginationVariables,
+    getRefetchMetadata,
+    getValueAtPath,
 } from 'relay-runtime';
 import { Fetcher, fetchResolver } from './FetchResolver';
 import { getConnectionState, getStateFromConnection } from './getConnectionState';
-import { getPaginationMetadata } from './getPaginationMetadata';
-import { getPaginationVariables } from './getPaginationVariables';
-import { getRefetchMetadata } from './getRefetchMetadata';
-import { getValueAtPath } from './getValueAtPath';
 import {
     FragmentNames,
     Options,

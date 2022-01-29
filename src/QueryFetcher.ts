@@ -122,7 +122,8 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             this.fetcher.dispose();
             return;
         }
-        const { onComplete } = options;
+
+        const { onComplete, onResponse } = options;
         let fetchHasReturned = false;
         const onNext = (_o: OperationDescriptor, snapshot: Snapshot): void => {
             if (!this.snapshot) {
@@ -141,7 +142,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             }
             onComplete && onComplete(error);
         };
-        this.fetcher.fetch(this.environment, query, fetchPolicy, complete, onNext);
+        this.fetcher.fetch(this.environment, query, fetchPolicy, complete, onNext, onResponse);
         fetchHasReturned = true;
     }
 

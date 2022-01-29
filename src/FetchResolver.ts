@@ -7,6 +7,7 @@ import {
     IEnvironment,
     Snapshot,
     RenderPolicy,
+    GraphQLResponse,
 } from 'relay-runtime';
 import { isNetworkPolicy, isStorePolicy } from './Utils';
 const { fetchQuery } = __internal;
@@ -24,6 +25,7 @@ export type Fetcher = {
             fromStore?: boolean,
             onlyStore?: boolean,
         ) => void,
+        onResponse?: (response: GraphQLResponse | null) => void,
         renderPolicy?: RenderPolicy,
     ) => Disposable;
     getData: () => {
@@ -114,6 +116,7 @@ export function fetchResolver({
             fromStore?: boolean,
             onlyStore?: boolean,
         ) => void,
+        onResponse?: (response: GraphQLResponse | null) => void,
         renderPolicy?: RenderPolicy,
     ): Disposable => {
         if (env != environment || query.request.identifier !== operation.request.identifier) {
@@ -168,11 +171,12 @@ export function fetchResolver({
                     cleanup();
                     onComplete(e);
                 },
-                next: () => {
+                next: (response: GraphQLResponse) => {
                     const store = environment.lookup(operation.fragment);
                     promise = null;
                     operation.request.cacheConfig?.poll && updateLoading(false);
                     resolveNetworkPromise();
+                    onResponse && onResponse(response);
                     onNext(operation, store);
                 },
                 start: (subscription) => {

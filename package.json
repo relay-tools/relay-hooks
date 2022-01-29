@@ -23,7 +23,7 @@
   },
   "scripts": {
     "clean": "rimraf lib",
-    "relay-compiler-forms": "relay-compiler --src ./relay-compiler-forms/ --schema ./forms.graphql --language typescript --artifactDirectory ./src/forms/relay --persist-output ./ignore-queries.json",
+    "relay-compiler-forms": "relay-compiler -- ./relay-compiler-forms.json",
     "relay-compile-test": "relay-compiler",
     "compile": "npm run clean && tsc && tsc --project tsconfig.esm.json && npm run build:js && npm run build:replace && npm run rollup",
     "rollup": "rollup -c",

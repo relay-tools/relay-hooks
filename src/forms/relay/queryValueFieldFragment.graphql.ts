@@ -1,21 +1,26 @@
+/**
+ * @generated SignedSource<<e53bb7f2d49d05ea6e02b25f98f77fd2>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
+// @ts-nocheck
 
-import { ReaderFragment } from "relay-runtime";
+import { Fragment, ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type queryValueFieldFragment = {
-    readonly id: string;
-    readonly value: string | null;
-    readonly error: string | null;
-    readonly " $refType": "queryValueFieldFragment";
+export type queryValueFieldFragment$data = {
+  readonly id: string;
+  readonly value: string | null;
+  readonly error: string | null;
+  readonly " $fragmentType": "queryValueFieldFragment";
 };
-export type queryValueFieldFragment$data = queryValueFieldFragment;
+export type queryValueFieldFragment = queryValueFieldFragment$data;
 export type queryValueFieldFragment$key = {
-    readonly " $data"?: queryValueFieldFragment$data;
-    readonly " $fragmentRefs": FragmentRefs<"queryValueFieldFragment">;
+  readonly " $data"?: queryValueFieldFragment$data;
+  readonly " $fragmentSpreads": FragmentRefs<"queryValueFieldFragment">;
 };
-
-
 
 const node: ReaderFragment = {
   "argumentDefinitions": [],
@@ -48,5 +53,7 @@ const node: ReaderFragment = {
   "type": "Entry",
   "abstractKey": null
 };
-(node as any).hash = 'b63b485c6f0bf3d1d4f796302a2229d8';
+
+(node as any).hash = "b63b485c6f0bf3d1d4f796302a2229d8";
+
 export default node;

@@ -1,42 +1,33 @@
+/**
+ * @generated SignedSource<<b3f17c9f834237dae7caddb59ee68fa0>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
-/* @relayHash bcada931a45af33846035fd01b1513e8 */
+// @ts-nocheck
 
-import { ConcreteRequest } from "relay-runtime";
-export type queryErrorsFieldQueryVariables = {};
-export type queryErrorsFieldQueryResponse = {
-    readonly form: {
-        readonly isSubmitting: boolean | null;
-        readonly isValidating: boolean | null;
-        readonly entries: ReadonlyArray<{
-            readonly id: string;
-            readonly key: string;
-            readonly error: string | null;
-            readonly check: string | null;
-        } | null> | null;
-    } | null;
+import { ConcreteRequest, Query } from 'relay-runtime';
+export type queryErrorsFieldQuery$variables = {};
+export type queryErrorsFieldQueryVariables = queryErrorsFieldQuery$variables;
+export type queryErrorsFieldQuery$data = {
+  readonly form: {
+    readonly isSubmitting: boolean | null;
+    readonly isValidating: boolean | null;
+    readonly entries: ReadonlyArray<{
+      readonly id: string;
+      readonly key: string;
+      readonly error: string | null;
+      readonly check: string | null;
+    } | null> | null;
+  } | null;
 };
+export type queryErrorsFieldQueryResponse = queryErrorsFieldQuery$data;
 export type queryErrorsFieldQuery = {
-    readonly response: queryErrorsFieldQueryResponse;
-    readonly variables: queryErrorsFieldQueryVariables;
+  variables: queryErrorsFieldQueryVariables;
+  response: queryErrorsFieldQuery$data;
 };
-
-
-
-/*
-query queryErrorsFieldQuery {
-  form {
-    isSubmitting
-    isValidating
-    entries {
-      id
-      key
-      error
-      check
-    }
-  }
-}
-*/
 
 const node: ConcreteRequest = (function(){
 var v0 = [
@@ -123,13 +114,16 @@ return {
     "selections": (v0/*: any*/)
   },
   "params": {
-    "id": "bcada931a45af33846035fd01b1513e8",
+    "cacheID": "bcada931a45af33846035fd01b1513e8",
+    "id": null,
     "metadata": {},
     "name": "queryErrorsFieldQuery",
     "operationKind": "query",
-    "text": null
+    "text": "bcada931a45af33846035fd01b1513e8"
   }
 };
 })();
-(node as any).hash = '9f2fbcaf6e15ad88e2697391bda17a99';
+
+(node as any).hash = "9f2fbcaf6e15ad88e2697391bda17a99";
+
 export default node;

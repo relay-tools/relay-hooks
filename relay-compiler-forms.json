@@ -1,0 +1,10 @@
+{
+    "src": "./relay-compiler-forms/",
+    "schema": "./forms.graphql",
+    "excludes": [
+      "__generated__",
+      "node_modules"
+    ],
+    "language": "typescript",
+    "artifactDirectory": "./src/forms/relay"
+  }

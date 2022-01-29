@@ -122,7 +122,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             this.fetcher.dispose();
             return;
         }
-        // eslint-disable-next-line @typescript-eslint/camelcase
+
         const { onComplete, onResponse } = options;
         let fetchHasReturned = false;
         const onNext = (_o: OperationDescriptor, snapshot: Snapshot): void => {

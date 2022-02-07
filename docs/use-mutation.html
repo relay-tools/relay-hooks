@@ -64,9 +64,9 @@
 <p>useMutation has been integrated into relay-hooks thanks to the creators of the project <a href="https://github.com/relay-tools/react-relay-mutation">React Relay Mutation</a></p>
 <p>Higher-level <a href="https://facebook.github.io/react/">React</a> mutation API for <a href="http://facebook.github.io/relay/">Relay</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="usage"></a><a href="#usage" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Usage</h2>
-<p>This package provides a <code>useMutation</code> Hook and a <code>&lt;Mutation&gt;</code> component. These wrap up committing Relay mutations and keeping track of the mutation state.</p>
+<p>This package provides a <code>useMutation</code> Hook. These wrap up committing Relay mutations and keeping track of the mutation state.</p>
 <pre><code class="hljs css language-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
-<span class="hljs-keyword">import</span> { Mutation, useMutation } <span class="hljs-keyword">from</span> <span class="hljs-string">'relay-hooks'</span>;
+<span class="hljs-keyword">import</span> { useMutation } <span class="hljs-keyword">from</span> <span class="hljs-string">'relay-hooks'</span>;
 
 <span class="hljs-comment">/* ... */</span>
 
@@ -103,58 +103,32 @@
   );
 }
 
-function MyComponentWithComponent({ myValue }) {
-  return (
-    <span class="hljs-tag">&lt;<span class="hljs-name">Mutation</span>
-      <span class="hljs-attr">mutation</span>=<span class="hljs-string">{graphql</span>`
-        <span class="hljs-attr">mutation</span> <span class="hljs-attr">ExampleWithComponentMutation</span>($<span class="hljs-attr">input:</span> <span class="hljs-attr">MyMutationInput</span>) {
-          <span class="hljs-attr">myMutation</span>(<span class="hljs-attr">input:</span> $<span class="hljs-attr">input</span>) {
-            <span class="hljs-attr">value</span>
-          }
-        }
-      `}
-      <span class="hljs-attr">onCompleted</span>=<span class="hljs-string">{({</span> <span class="hljs-attr">myMutation</span> }) =&gt;</span> {
-        window.alert(`received ${myMutation.value}`);
-      }}
-    &gt;
-      {([mutate, { loading }]) =&gt;
-        loading ? (
-          <span class="hljs-tag">&lt;<span class="hljs-name">LoadingIndicator</span> /&gt;</span>
-        ) : (
-          <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
-            <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> {
-              mutate({
-                variables: {
-                  input: { value: myValue },
-                },
-              });
-            }}
-          &gt;
-            Run Mutation
-          <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
-        )
-      }
-    <span class="hljs-tag">&lt;/<span class="hljs-name">Mutation</span>&gt;</span>
-  );
-}
+The `useMutation` hook take a mutation node and optionally any mutation options valid for `commitMutation` in Relay, except that `onCompleted` only takes a single argument for the response, as errors there will be handled identically to request errors. The `useMutation` hook takes the mutation as its first argument, and the optional configuration object as its second argument. `variables` is optional.
+
+`useMutation` provide a tuple of a `mutate` callback and a `mutationState` object. This is the return value for `useMutation`
+
+The `mutate` callback optionally takes a configuration object as above. Any options specified here will override the options specified to `useMutation`. Additionally, if `variables` was not specified above, it must be specified here. The `mutate` callback returns a promise. This will resolve with the mutation response or reject with any error (except when an `onError` callback is specified, in which case it will resolve with no value on errors).
+
+The `mutationState` object has the following properties:
+
+- `loading`: a boolean indicating whether the mutation is currently pending
+- `data`: the response data for the mutation
+- `error`: any errors returned by the mutation
+
+## Optimistic Updates
+
+To make your UI more responsive you can use the Optimistic UI pattern. You can read more about Optimistic UI in the [Relay Docs](https://relay.dev/docs/en/mutations#optimistic-updates) or the [Apollo Docs](https://www.apollographql.com/docs/react/performance/optimistic-ui/).
+
+An Optimistic Response can be provided via the `optimisticResponse` paramater of the mutation options.
+
+How do you know whether the `data` parameter contains the Optimistic Response you provided, or the the response from the server? 
+The `data` property of the `useMutation` hook will contain the `optimisticResponse` when the request is in flight, i.e. when `loading` is `true`. When the response is received and `loading` is set to `false`, the data field contains the data sent by the server.
+
+## Acknowledgements
+
+This library closely follows the mutation API in [React Apollo](https://www.apollographql.com/docs/react/).
 </span></code></pre>
-<p>The <code>useMutation</code> hook and the <code>&lt;Mutation&gt;</code> component take a mutation node and optionally any mutation options valid for <code>commitMutation</code> in Relay, except that <code>onCompleted</code> only takes a single argument for the response, as errors there will be handled identically to request errors. The <code>useMutation</code> hook takes the mutation as its first argument, and the optional configuration object as its second argument. The <code>&lt;Mutation&gt;</code> component takes the mutation node as the <code>mutation</code> prop, and any other options as props by name. In both cases, <code>variables</code> is optional.</p>
-<p>Both <code>useMutation</code> and <code>&lt;Mutation&gt;</code> provide a tuple of a <code>mutate</code> callback and a <code>mutationState</code> object. This is the return value for <code>useMutation</code> and the argument passed into the function child for <code>&lt;Mutation&gt;</code>.</p>
-<p>The <code>mutate</code> callback optionally takes a configuration object as above. Any options specified here will override the options specified to <code>useMutation</code> or to <code>&lt;Mutation&gt;</code>. Additionally, if <code>variables</code> was not specified above, it must be specified here. The <code>mutate</code> callback returns a promise. This will resolve with the mutation response or reject with any error (except when an <code>onError</code> callback is specified, in which case it will resolve with no value on errors).</p>
-<p>The <code>mutationState</code> object has the following properties:</p>
-<ul>
-<li><code>loading</code>: a boolean indicating whether the mutation is currently pending</li>
-<li><code>data</code>: the response data for the mutation</li>
-<li><code>error</code>: any errors returned by the mutation</li>
-</ul>
-<h2><a class="anchor" aria-hidden="true" id="optimistic-updates"></a><a href="#optimistic-updates" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Optimistic Updates</h2>
-<p>To make your UI more responsive you can use the Optimistic UI pattern. You can read more about Optimistic UI in the <a href="https://relay.dev/docs/en/mutations#optimistic-updates">Relay Docs</a> or the <a href="https://www.apollographql.com/docs/react/performance/optimistic-ui/">Apollo Docs</a>.</p>
-<p>An Optimistic Response can be provided via the <code>optimisticResponse</code> paramater of the mutation options.</p>
-<p>How do you know whether the <code>data</code> parameter contains the Optimistic Response you provided, or the the response from the server?
-The <code>data</code> property of the <code>useMutation</code> hook will contain the <code>optimisticResponse</code> when the request is in flight, i.e. when <code>loading</code> is <code>true</code>. When the response is received and <code>loading</code> is set to <code>false</code>, the data field contains the data sent by the server.</p>
-<h2><a class="anchor" aria-hidden="true" id="acknowledgements"></a><a href="#acknowledgements" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Acknowledgements</h2>
-<p>This library closely follows the mutation API in <a href="https://www.apollographql.com/docs/react/">React Apollo</a>.</p>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2021-2-4 by Shreyas Sreenivas</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/relay-hooks/docs/use-pagination"><span class="arrow-prev">← </span><span class="function-name-prevnext">usePagination</span></a><a class="docs-next button" href="/relay-hooks/docs/use-subscription"><span class="function-name-prevnext">useSubscription</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#credit-usemutation">Credit useMutation</a></li><li><a href="#usage">Usage</a></li><li><a href="#optimistic-updates">Optimistic Updates</a></li><li><a href="#acknowledgements">Acknowledgements</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/relay-hooks/" class="nav-home"><img src="/relay-hooks/img/favicon.ico" alt="Morrys Repositories" width="66" height="58"/></a><div><h5>Docs</h5><a href="/relay-hooks/docs/en/relay-hooks.html">about relay-hooks</a></div><div><h5>Community</h5><a href="/relay-hooks/en/users.html">User Showcase</a></div><div><h5>More</h5><a href="https://github.com/morrys/wora">GitHub</a><a class="github-button" href="https://github.com/relay-tools/relay-hooks" data-icon="octicon-star" data-count-href="https://github.com/morrys/wora/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="https://twitter.com/m0rrys" class="twitter-follow-button">Follow @m0rrys</a></div></div></section><a href="https://opensource.facebook.com/" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="/relay-hooks/img/oss_logo.png" alt="Facebook Open Source" width="170" height="45"/></a><section class="copyright">Copyright © 2021 Lorenzo Di Giacomo</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 7/2/2022 by morrys</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/relay-hooks/docs/use-pagination"><span class="arrow-prev">← </span><span class="function-name-prevnext">usePagination</span></a><a class="docs-next button" href="/relay-hooks/docs/use-subscription"><span class="function-name-prevnext">useSubscription</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#credit-usemutation">Credit useMutation</a></li><li><a href="#usage">Usage</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/relay-hooks/" class="nav-home"><img src="/relay-hooks/img/favicon.ico" alt="Morrys Repositories" width="66" height="58"/></a><div><h5>Docs</h5><a href="/relay-hooks/docs/en/relay-hooks.html">about relay-hooks</a></div><div><h5>Community</h5><a href="/relay-hooks/en/users.html">User Showcase</a></div><div><h5>More</h5><a href="https://github.com/morrys/wora">GitHub</a><a class="github-button" href="https://github.com/relay-tools/relay-hooks" data-icon="octicon-star" data-count-href="https://github.com/morrys/wora/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="https://twitter.com/m0rrys" class="twitter-follow-button">Follow @m0rrys</a></div></div></section><a href="https://opensource.facebook.com/" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="/relay-hooks/img/oss_logo.png" alt="Facebook Open Source" width="170" height="45"/></a><section class="copyright">Copyright © 2022 Lorenzo Di Giacomo</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;

@@ -13,8 +13,9 @@ import {
 } from '../src';
 
 function createHooks(component, options?: any) {
-    const result = ReactTestRenderer.create(component, options);
+    let result;// = ReactTestRenderer.create(component, options);
     ReactTestRenderer.act(() => {
+        result= ReactTestRenderer.create(component, options);
         jest.runAllImmediates();
     });
     return result;

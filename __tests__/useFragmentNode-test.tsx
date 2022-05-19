@@ -65,6 +65,7 @@ const Scheduler = require('scheduler');
 
 //import * as Scheduler from 'scheduler';
 import { ReactRelayContext, useSuspenseFragment as useFragmentNodeOriginal } from '../src';
+import { act } from './internalAct';
 const warning = require('fbjs/lib/warning');
 
 function assertYieldsWereCleared(_scheduler) {
@@ -131,7 +132,7 @@ function useFragmentNode(fragmentNode, fragmentRef) {
 
 function assertFragmentResults(expectedCalls: ReadonlyArray<{ data: any; shouldUpdate: boolean }>) {
     // This ensures that useEffect runs
-    TestRenderer.act(() => jest.runAllImmediates());
+    act(() => jest.runAllImmediates());
     expect(renderSpy).toBeCalledTimes(expectedCalls.length);
     expectedCalls.forEach((expected, idx) => {
         const [actualData, actualShouldUpdate] = renderSpy.mock.calls[idx];
@@ -302,7 +303,8 @@ beforeEach(() => {
                 </ContextProvider>
             </React.Suspense>,
             // any[prop-missing] - error revealed when flow-typing ReactTestRenderer
-            { unstable_isConcurrent: isConcurrent },
+            { unstable_isConcurrent: isConcurrent, 
+                unstable_concurrentUpdatesByDefault: true, },
         );
     };
 
@@ -315,7 +317,8 @@ beforeEach(() => {
                 </ContextProvider>
             </React.Suspense>,
             // any[prop-missing] - error revealed when flow-typing ReactTestRenderer
-            { unstable_isConcurrent: isConcurrent },
+            { unstable_isConcurrent: isConcurrent, 
+                unstable_concurrentUpdatesByDefault: true, },
         );
     };
 });
@@ -407,7 +410,7 @@ it('should update when fragment data changes', () => {
         },
     ]);
 
-    TestRenderer.act(() => {
+    act(() => {
         environment.commitPayload(singularQuery, {
             node: {
                 __typename: 'User',
@@ -433,7 +436,7 @@ it('should update when fragment data changes', () => {
 
 it('should preserve object identity when fragment data changes', () => {
     renderSingularFragment();
-    TestRenderer.act(() => jest.runAllImmediates());
+    act(() => jest.runAllImmediates());
     expect(renderSpy).toBeCalledTimes(1);
     const prevData = renderSpy.mock.calls[0][0];
     expect(prevData).toEqual({
@@ -444,7 +447,7 @@ it('should preserve object identity when fragment data changes', () => {
     });
     renderSpy.mockClear();
 
-    TestRenderer.act(() => {
+    act(() => {
         environment.commitPayload(singularQuery, {
             node: {
                 __typename: 'User',
@@ -454,7 +457,7 @@ it('should preserve object identity when fragment data changes', () => {
             },
         });
     });
-    TestRenderer.act(() => jest.runAllImmediates());
+    act(() => jest.runAllImmediates());
     expect(renderSpy).toBeCalledTimes(1);
     const nextData = renderSpy.mock.calls[0][0];
     expect(nextData).toEqual({
@@ -1301,15 +1304,17 @@ it('should subscribe for updates to plural fragments even if there is missing da
     ]);
 
     // Commit a payload with updated name.
-    environment.commitPayload(missingDataQuery, {
-        nodes: [
-            {
-                __typename: 'User',
-                id: '4',
-                name: 'Mark',
-            },
-        ],
+    TestRenderer.act(() => {
+        environment.commitPayload(missingDataQuery, {
+            nodes: [
+                {
+                    __typename: 'User',
+                    id: '4',
+                    name: 'Mark',
+                },
+            ],
     });
+    })
 
     // Assert render output with updated data
     assertFragmentResults([

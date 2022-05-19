@@ -77,6 +77,7 @@ import {
     useRelayEnvironment,
     ReactRelayContext,
 } from '../src';
+import { act } from './internalAct';
 
 const invariant = require('fbjs/lib/invariant');
 const warning = require('fbjs/lib/warning');
@@ -152,7 +153,7 @@ describe('useRefetchableFragmentNode', () => {
 
     function expectFragmentResults(expectedCalls: ReadonlyArray<{ data: any }>) {
         // This ensures that useEffect runs
-        TestRenderer.act(() => jest.runAllImmediates());
+        act(() => jest.runAllImmediates());
         expect(renderSpy).toBeCalledTimes(expectedCalls.length);
         expectedCalls.forEach((expected, idx) => assertCall(expected, idx));
         renderSpy.mockClear();
@@ -445,7 +446,7 @@ describe('useRefetchableFragmentNode', () => {
                 },
             ]);
 
-            TestRenderer.act(() => {
+            act(() => {
                 environment.commitPayload(query, {
                     node: {
                         __typename: 'User',

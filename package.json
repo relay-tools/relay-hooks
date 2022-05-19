@@ -1,6 +1,6 @@
 {
   "name": "relay-hooks",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "keywords": [
     "graphql",
     "relay",
@@ -51,7 +51,7 @@
     "fbjs": "^3.0.0"
   },
   "peerDependencies": {
-    "react": "^16.9.0 || ^17",
+    "react": "^16.9.0 || ^17 || ^18",
     "relay-runtime": "^13.0.2"
   },
   "devDependencies": {
@@ -65,9 +65,9 @@
     "@types/fbjs": "^3.0.0",
     "@types/jest": "24.0.18",
     "@types/node": "13.9.3",
-    "@types/react": "16.9.11",
-    "@types/react-dom": "16.9.4",
-    "@types/react-test-renderer": "^17.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@types/react-test-renderer": "^18.0.0",
     "@types/relay-runtime": "^13.0.1",
     "@typescript-eslint/eslint-plugin": "5.10.0",
     "@typescript-eslint/parser": "5.10.0",
@@ -87,8 +87,8 @@
     "lerna": "^3.16.4",
     "prettier": "1.19.1",
     "promise-polyfill": "6.1.0",
-    "react": "16.11.0",
-    "react-test-renderer": "16.11.0",
+    "react": "^18.0.0",
+    "react-test-renderer": "^18.0.0",
     "relay-compiler": "^13.0.2",
     "relay-runtime": "^13.0.2",
     "relay-test-utils": "^13.0.2",

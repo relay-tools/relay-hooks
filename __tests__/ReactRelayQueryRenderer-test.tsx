@@ -10,7 +10,7 @@
 
 /* eslint-disable */
 
-jest.mock('scheduler', () => require('scheduler/unstable_mock'));
+jest.mock('scheduler', () => jest.requireActual('scheduler/unstable_mock'));
 
 import * as React from 'react';
 import * as Scheduler from 'scheduler';
@@ -350,22 +350,30 @@ describe('ReactRelayQueryRenderer', () => {
                             );
                         }
                     }
-                    const renderer = ReactTestRenderer.create(<Example />, {
-                        unstable_isConcurrent: true,
+                    let renderer;
+                    // https://github.com/facebook/react/issues/24392
+                    React.startTransition(() => {
+                        renderer = ReactTestRenderer.create(<Example />, {
+                            unstable_isConcurrent: true,
+                            unstable_concurrentUpdatesByDefault: true,
+                        });
                     });
-
+    
                     // Flush some of the changes, but don't commit
                     (Scheduler as any).unstable_flushNumberOfYields(2);
+
+                    
                     expect((Scheduler as any).unstable_clearYields()).toEqual(['A', 'B']);
                     expect(renderer.toJSON()).toEqual(null);
                     expect().loadingRendered();
                     expect(environment.execute.mock.calls.length).toBe(1);
                     render.mockClear();
-
                     // Interrupt with higher priority updates
                     renderer.unstable_flushSync(() => {
                         renderer.update(<Example />);
                     });
+
+                    
                     expect(environment.execute.mock.calls.length).toBe(1);
                     expect().loadingRendered();
                 });
@@ -412,8 +420,13 @@ describe('ReactRelayQueryRenderer', () => {
                             );
                         }
                     }
-                    const renderer = ReactTestRenderer.create(<Example />, {
-                        unstable_isConcurrent: true,
+                    let renderer;
+                    // https://github.com/facebook/react/issues/24392
+                    React.startTransition(() => {
+                        renderer = ReactTestRenderer.create(<Example />, {
+                            unstable_isConcurrent: true,
+                            unstable_concurrentUpdatesByDefault: true,
+                        });
                     });
                     const owner = createOperationDescriptor(TestQuery, variables);
 
@@ -501,8 +514,13 @@ describe('ReactRelayQueryRenderer', () => {
                             );
                         }
                     }
-                    const renderer = ReactTestRenderer.create(<Example />, {
-                        unstable_isConcurrent: true,
+                    let renderer;
+                    // https://github.com/facebook/react/issues/24392
+                    React.startTransition(() => {
+                        renderer = ReactTestRenderer.create(<Example />, {
+                            unstable_isConcurrent: true,
+                            unstable_concurrentUpdatesByDefault: true,
+                        });
                     });
                     const owner = createOperationDescriptor(TestQuery, variables);
 
@@ -1644,7 +1662,9 @@ describe('ReactRelayQueryRenderer', () => {
             expect(environment.retain.mock.calls.length).toBe(1);
             const dispose = environment.retain.mock.dispose;
             expect(dispose).not.toBeCalled();
-            renderer.unmount();
+            ReactTestRenderer.act(() => {
+                renderer.unmount();
+            });
             expect(dispose).toBeCalled();
         });
 
@@ -1662,7 +1682,9 @@ describe('ReactRelayQueryRenderer', () => {
             expect(environment.retain.mock.calls.length).toBe(1);
             const dispose = environment.retain.mock.dispose;
             expect(dispose).not.toBeCalled();
-            renderer.unmount();
+            ReactTestRenderer.act(() => {
+                renderer.unmount();
+            });
             expect(dispose).toBeCalled();
         });
 
@@ -1677,7 +1699,9 @@ describe('ReactRelayQueryRenderer', () => {
             );
             const subscription = environment.execute.mock.subscriptions[0];
             expect(subscription.closed).toBe(false);
-            renderer.unmount();
+            ReactTestRenderer.act(() => {
+                renderer.unmount();
+            });
             expect(subscription.closed).toBe(true);
         });
     });

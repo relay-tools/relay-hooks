@@ -6,14 +6,14 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
-    "babel-plugin-relay": "11.0.2",
+    "babel-plugin-relay": "13.1.1",
     "graphql": "^14.6.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
-    "relay-compiler": "^11.0.2",
-    "relay-hooks": "5.0.1",
-    "relay-runtime": "11.0.2"
+    "relay-compiler": "^13.1.1",
+    "relay-hooks": "7.0.0",
+    "relay-runtime": "13.1.1"
   }, 
   "devDependencies": {
     "apollo-server-express": "2.11.0"

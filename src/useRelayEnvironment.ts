@@ -5,6 +5,6 @@ import { ReactRelayContext } from './ReactRelayContext';
 export function useRelayEnvironment<
     TEnvironment extends IEnvironment = IEnvironment
 >(): TEnvironment {
-    const { environment } = React.useContext(ReactRelayContext);
-    return environment;
+    const context = React.useContext(ReactRelayContext);
+    return context.environment as TEnvironment;
 }

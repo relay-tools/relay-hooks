@@ -12,7 +12,7 @@
 
 import * as React from 'react';
 import { __internal } from 'relay-runtime';
-import {RelayContext} from 'relay-runtime/lib/store/RelayStoreTypes';
+import { RelayContext } from 'relay-runtime/lib/store/RelayStoreTypes';
 
 const { createRelayContext } = __internal as any;
 

@@ -1,5 +1,6 @@
 /**
- * @generated SignedSource<<b3f17c9f834237dae7caddb59ee68fa0>>
+ * @generated SignedSource<<314f1ee8f760d64499cd346f84a8cca6>>
+ * @relayHash bcada931a45af33846035fd01b1513e8
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -8,25 +9,25 @@
 /* eslint-disable */
 // @ts-nocheck
 
+// @relayRequestID bcada931a45af33846035fd01b1513e8
+
 import { ConcreteRequest, Query } from 'relay-runtime';
 export type queryErrorsFieldQuery$variables = {};
-export type queryErrorsFieldQueryVariables = queryErrorsFieldQuery$variables;
 export type queryErrorsFieldQuery$data = {
   readonly form: {
-    readonly isSubmitting: boolean | null;
-    readonly isValidating: boolean | null;
     readonly entries: ReadonlyArray<{
+      readonly check: string | null;
+      readonly error: string | null;
       readonly id: string;
       readonly key: string;
-      readonly error: string | null;
-      readonly check: string | null;
     } | null> | null;
+    readonly isSubmitting: boolean | null;
+    readonly isValidating: boolean | null;
   } | null;
 };
-export type queryErrorsFieldQueryResponse = queryErrorsFieldQuery$data;
 export type queryErrorsFieldQuery = {
-  variables: queryErrorsFieldQueryVariables;
   response: queryErrorsFieldQuery$data;
+  variables: queryErrorsFieldQuery$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -114,12 +115,11 @@ return {
     "selections": (v0/*: any*/)
   },
   "params": {
-    "cacheID": "bcada931a45af33846035fd01b1513e8",
-    "id": null,
+    "id": "bcada931a45af33846035fd01b1513e8",
     "metadata": {},
     "name": "queryErrorsFieldQuery",
     "operationKind": "query",
-    "text": "bcada931a45af33846035fd01b1513e8"
+    "text": null
   }
 };
 })();

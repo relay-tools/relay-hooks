@@ -6,5 +6,8 @@
       "node_modules"
     ],
     "language": "typescript",
-    "artifactDirectory": "./src/forms/relay"
+    "artifactDirectory": "./src/forms/relay",
+    "persistConfig": {
+      "file": "./ignore-queries.json"
+    }
   }

@@ -2,7 +2,7 @@ import * as areEqual from 'fbjs/lib/areEqual';
 import * as React from 'react';
 import { Snapshot } from 'relay-runtime';
 import { useRelayEnvironment } from '../useRelayEnvironment';
-import { queryErrorsFieldQueryResponse } from './relay/queryErrorsFieldQuery.graphql';
+import { queryErrorsFieldQuery$data } from './relay/queryErrorsFieldQuery.graphql';
 import { FormStateReturn } from './RelayFormsTypes';
 import { operationQueryErrorsForm } from './Utils';
 
@@ -20,7 +20,7 @@ export const useFormState = (): FormStateReturn => {
     React.useEffect(() => {
         const snapshot = environment.lookup(operationQueryErrorsForm.fragment);
         function checkError(s: Snapshot): void {
-            const data: queryErrorsFieldQueryResponse = (s as any).data;
+            const data: queryErrorsFieldQuery$data = (s as any).data;
             const entryErrors = data.form.entries.filter((value) => !!value.error);
             const entryValidated = data.form.entries.filter((value) => value.check === 'DONE');
             const errors = entryErrors.length > 0 ? entryErrors : undefined;

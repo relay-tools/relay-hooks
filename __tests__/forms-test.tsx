@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import * as React from 'react';
 import { Form, getFieldError, HAVE_ERRORS, validateEmail, validateFirstName } from './forms';
 jest.useRealTimers();
@@ -91,9 +91,7 @@ describe('relay-forms', () => {
         expect(getByTestId('errors').textContent).toBe('');
 
         fireEvent.click(getByTestId('button-submit'));
-        await Promise.resolve(); //await promise validation;
-
-        expect(queryByTestId('submit-done').textContent).toBe('SUBMIT :)');
+        await waitFor(() =>  expect(queryByTestId('submit-done').textContent).toBe('SUBMIT :)'))
         expect(validateEmail).toBeCalledTimes(3);
         expect(validateFirstName).toBeCalledTimes(1);
     });
@@ -108,9 +106,7 @@ describe('relay-forms', () => {
         expect(queryByTestId('submit-done')).toBeNull();
 
         fireEvent.click(getByTestId('button-submit'));
-        await Promise.resolve(); //await promise validation;
-
-        expect(queryByTestId('submit-done').textContent).toBe('SUBMIT :)');
+        await waitFor(() =>  expect(queryByTestId('submit-done').textContent).toBe('SUBMIT :)'));
     });
 
     test('submit promise', async () => {
@@ -123,9 +119,7 @@ describe('relay-forms', () => {
         expect(queryByTestId('submit-done')).toBeNull();
 
         fireEvent.click(getByTestId('button-submit'));
-        await Promise.resolve(); //await promise validation;
-
-        expect(queryByTestId('submit-done').textContent).toBe('SUBMIT :)');
+        await waitFor(() =>  expect(queryByTestId('submit-done').textContent).toBe('SUBMIT :)'))
     });
 
     test('show error in field only validate', async () => {
@@ -137,10 +131,9 @@ describe('relay-forms', () => {
         expect(queryByTestId('email-error')).toBeNull();
         expect(getByTestId('email-count').textContent).toBe('1');
         expect(getByTestId('lastName-count').textContent).toBe('1');
-        fireEvent.click(getByTestId('button-validate'));
-        await Promise.resolve(); //await promise validation;
+        fireEvent.click(getByTestId('button-validate'));;
+        await waitFor(() =>  expect(getByTestId('email-error').textContent).toBe(getFieldError('email', '123')))
 
-        expect(getByTestId('email-error').textContent).toBe(getFieldError('email', '123'));
         // refresh for isSubmitting
         expect(getByTestId('email-count').textContent).toBe('2');
         expect(getByTestId('lastName-count').textContent).toBe('1');
@@ -158,12 +151,12 @@ describe('relay-forms', () => {
         fireEvent.click(getByTestId('button-validate'));
         expect(getByTestId('isSubmitting').textContent).toBe('false');
         expect(getByTestId('isValidating').textContent).toBe('true');
-        await Promise.resolve(); //await promise validation;
-        expect(getByTestId('isValidating').textContent).toBe('false');
+        
+        await waitFor(() =>  expect(getByTestId('isValidating').textContent).toBe('false'))
 
         fireEvent.click(getByTestId('button-submit'));
 
-        expect(queryByTestId('submit-done').textContent).toBe('SUBMIT :)');
+        await waitFor(() =>  expect(queryByTestId('submit-done').textContent).toBe('SUBMIT :)'))
     });
 
     test('submit isSubmitting', async () => {
@@ -178,14 +171,14 @@ describe('relay-forms', () => {
         fireEvent.click(getByTestId('button-submit'));
         expect(getByTestId('isSubmitting').textContent).toBe('true');
         expect(getByTestId('isValidating').textContent).toBe('true');
-        await Promise.resolve(); //await promise validation;
-        expect(getByTestId('isValidating').textContent).toBe('false');
-        expect(getByTestId('isSubmitting').textContent).toBe('true');
+        await waitFor(() =>  { 
+            expect(getByTestId('isValidating').textContent).toBe('false');
+            expect(getByTestId('isSubmitting').textContent).toBe('true')
+        });
 
-        await Promise.resolve(); //await promise submit;
+        await waitFor(() =>  expect(queryByTestId('submit-done').textContent).toBe('SUBMIT :)'))
         expect(getByTestId('isSubmitting').textContent).toBe('false');
 
-        expect(queryByTestId('submit-done').textContent).toBe('SUBMIT :)');
     });
 
     test('show error in complex field', () => {
@@ -221,9 +214,7 @@ describe('relay-forms', () => {
         expect(queryByTestId('submit-done')).toBeNull();
 
         fireEvent.click(getByTestId('button-submit'));
-        await Promise.resolve(); //await promise validation;
-
-        expect(queryByTestId('submit-done').textContent).toBe('SUBMIT :)');
+        await waitFor(() =>  expect(queryByTestId('submit-done').textContent).toBe('SUBMIT :)'))
         expect(result).toEqual({
             firstName: 'lorenzo',
             lastName: 'di giacomo',

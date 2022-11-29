@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Snapshot, isPromise, IEnvironment } from 'relay-runtime';
 import { useRelayEnvironment } from '../useRelayEnvironment';
-import { queryFieldQueryResponse } from './relay/queryFieldQuery.graphql';
+import { queryFieldQuery$data } from './relay/queryFieldQuery.graphql';
 import { FormSubmitOptions, FunctionOnSubmit, FormSubmitReturn } from './RelayFormsTypes';
 import {
     commitValidateEndRelay,
@@ -16,7 +16,7 @@ function execute(
     dispose: () => void,
     onSubmit?: FunctionOnSubmit<object>,
 ): void {
-    const data: queryFieldQueryResponse = (snapshot as any).data;
+    const data: queryFieldQuery$data = (snapshot as any).data;
     const filtered = data.form.entries.filter((value) => value.check === 'DONE');
     if (filtered.length === data.form.entries.length) {
         const errors = data.form.entries.filter((value) => !!value.error);
@@ -57,7 +57,7 @@ export const useFormSubmit = <ValueType extends object = object>({
     const internalValidate = React.useCallback(
         (snapshot: Snapshot, isSubmitting) => {
             ref.current.isValidating = true;
-            const data: queryFieldQueryResponse = (snapshot as any).data;
+            const data: queryFieldQuery$data = (snapshot as any).data;
             const filtered = data.form.entries.filter((value) => value.check === 'INIT');
             commitValidateIntoRelay(filtered, isSubmitting, environment);
         },

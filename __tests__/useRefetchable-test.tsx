@@ -15,6 +15,7 @@
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 import { useRefetchable, RelayEnvironmentProvider, useRelayEnvironment } from '../src';
+import { act } from './internalAct';
 
 const forceCache = { force: true };
 
@@ -270,6 +271,8 @@ describe('useRefetchable', () => {
                 name: 'Zuck',
             },
             isMissingData: false,
+            missingLiveResolverFields: [],
+            relayResolverErrors: [],
             missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
@@ -359,6 +362,8 @@ describe('useRefetchable', () => {
                 name: 'Joe',
             },
             isMissingData: false,
+            missingLiveResolverFields: [],
+            relayResolverErrors: [],
             missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
@@ -412,6 +417,8 @@ describe('useRefetchable', () => {
             },
             isMissingData: false,
             missingClientEdges: null,
+            missingLiveResolverFields: [],
+            relayResolverErrors: [],
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(
@@ -485,6 +492,8 @@ describe('useRefetchable', () => {
                 // Name is excluded since value of cond is now false
             },
             isMissingData: false,
+            missingLiveResolverFields: [],
+            relayResolverErrors: [],
             missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
@@ -939,7 +948,9 @@ describe('useRefetchable', () => {
                     },
                 },
             });
-            instance.unmount();
+            ReactTestRenderer.act(() => {
+                instance.unmount();
+            })
             expect(references.length).toBe(1);
             expect(references[0].dispose).toBeCalled();
         });

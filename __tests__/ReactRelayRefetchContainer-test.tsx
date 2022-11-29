@@ -285,6 +285,8 @@ describe('ReactRelayRefetchContainer', () => {
                 name: 'Zuck',
             },
             isMissingData: false,
+            missingLiveResolverFields: [],
+            relayResolverErrors: [],
             missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
@@ -372,6 +374,8 @@ describe('ReactRelayRefetchContainer', () => {
                 name: 'Joe',
             },
             isMissingData: false,
+            missingLiveResolverFields: [],
+            relayResolverErrors: [],
             missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
@@ -423,6 +427,8 @@ describe('ReactRelayRefetchContainer', () => {
                 // Name is excluded since value of cond is now false
             },
             isMissingData: false,
+            missingLiveResolverFields: [],
+            relayResolverErrors: [],
             missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
@@ -495,6 +501,8 @@ describe('ReactRelayRefetchContainer', () => {
                 // Name is excluded since value of cond is now false
             },
             isMissingData: false,
+            missingLiveResolverFields: [],
+            relayResolverErrors: [],
             missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
@@ -951,7 +959,9 @@ describe('ReactRelayRefetchContainer', () => {
                     },
                 },
             });
-            instance.unmount();
+            ReactTestRenderer.act(() => {
+                instance.unmount();
+            });
             expect(references.length).toBe(1);
             expect(references[0].dispose).toBeCalled();
         });

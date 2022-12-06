@@ -3,7 +3,7 @@ import { Snapshot, getSingularSelector, isPromise } from 'relay-runtime';
 import { useRelayEnvironment } from '../useRelayEnvironment';
 import FragmentField, { queryFieldFragment$data } from './relay/queryFieldFragment.graphql';
 import { FormSetValueOptions, FormSetValueReturn } from './RelayFormsTypes';
-import { getFieldId, operationQueryForm, commitValue, commitErrorIntoRelay } from './Utils';
+import { getFieldId, operationQueryForm, commitValue, commitErrorIntoRelay, commitResetField } from './Utils';
 
 export function useFormSetValue<ValueType>({
     key,
@@ -31,6 +31,7 @@ export function useFormSetValue<ValueType>({
     );
 
     React.useEffect(() => {
+        //commitResetField(environment, key);
         setValue(initialValue);
         const fragment = FragmentField;
         const item = {
@@ -41,7 +42,7 @@ export function useFormSetValue<ValueType>({
         const selector = getSingularSelector(fragment, item);
         const snapshot = environment.lookup(selector);
 
-        const dispose = environment.subscribe(snapshot, (s: Snapshot) => {
+        const disposeSubscrition = environment.subscribe(snapshot, (s: Snapshot) => {
             const data: queryFieldFragment$data = (s as any).data;
             const isStart = data.check === 'START';
             ref.current.check = data.check;
@@ -53,6 +54,11 @@ export function useFormSetValue<ValueType>({
                 internalValidate(ref.current.value);
             }
         }).dispose;
+
+        const dispose = () => {
+            disposeSubscrition()
+            commitResetField(environment, key);
+        }
 
         function finalizeCheck(error): void {
             ref.current.isChecking = false;

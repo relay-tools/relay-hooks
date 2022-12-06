@@ -56,6 +56,17 @@ export const commitValidateEndRelay = (environment): void => {
     });
 };
 
+export const commitResetField = (environment, key): void => {
+    const id = getFieldId(key);
+    internalCommitLocalUpdate(environment, (store) => {
+        const localForm = store.get(PREFIX_LOCAL_FORM);
+        const entriesArray = localForm.getLinkedRecords('entries') || [];
+        const newEntries = entriesArray.filter((value) => value.getDataID() != id);
+        localForm.setLinkedRecords(newEntries, 'entries');
+        store.delete(id);
+    });
+};
+
 export const commitValue = (key, value, check, environment, validate): void => {
     const id = getFieldId(key);
     internalCommitLocalUpdate(environment, (store) => {

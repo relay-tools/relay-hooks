@@ -19,3 +19,6 @@ tsconfig.esm.json
 relay-compiler-forms/
 forms.graphql
 ignore-queries.json
+relay-compiler-forms.json
+replace.config.js
+.prettierignore

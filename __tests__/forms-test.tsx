@@ -35,8 +35,8 @@ describe('relay-forms', () => {
         expect(getByTestId('lastName-count').textContent).toBe('1');
     });
 
-    test('show error in field', () => {
-        const { queryByTestId, getByTestId } = render(<Form></Form>);
+    test('show error in field', async () => {
+        const { queryByTestId, getByTestId, unmount } = render(<Form></Form>);
         const input = getByTestId('email') as HTMLInputElement;
         expect(getByTestId('email-count').textContent).toBe('1');
         expect(getByTestId('lastName-count').textContent).toBe('1');
@@ -45,10 +45,12 @@ describe('relay-forms', () => {
         expect(getByTestId('email-count').textContent).toBe('1');
         expect(getByTestId('lastName-count').textContent).toBe('1');
         fireEvent.click(getByTestId('button-submit'));
-        expect(getByTestId('email-error').textContent).toBe(getFieldError('email', '123'));
+        await waitFor(() =>   expect(getByTestId('email-error').textContent).toBe(getFieldError('email', '123')))
+       
         // refresh for isSubmitting
         expect(getByTestId('email-count').textContent).toBe('2');
         expect(getByTestId('lastName-count').textContent).toBe('1');
+        
     });
 
     test('change error in field after submit', async () => {
@@ -181,7 +183,7 @@ describe('relay-forms', () => {
 
     });
 
-    test('show error in complex field', () => {
+    test('show error in complex field', async () => {
         const { queryByTestId, getByTestId } = render(<Form></Form>);
         const input = getByTestId('complex') as HTMLInputElement;
         expect(getByTestId('complex-count').textContent).toBe('1');
@@ -191,7 +193,7 @@ describe('relay-forms', () => {
         expect(getByTestId('complex-count').textContent).toBe('1');
         expect(getByTestId('lastName-count').textContent).toBe('1');
         fireEvent.click(getByTestId('button-submit'));
-        expect(getByTestId('complex-error').textContent).toBe(getFieldError('complex', '123'));
+        await waitFor(() =>  expect(getByTestId('complex-error').textContent).toBe(getFieldError('complex', '123')));
         // refresh for isSubmitting
         expect(getByTestId('complex-count').textContent).toBe('2');
         expect(getByTestId('lastName-count').textContent).toBe('1');

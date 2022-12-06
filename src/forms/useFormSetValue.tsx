@@ -3,7 +3,13 @@ import { Snapshot, getSingularSelector, isPromise } from 'relay-runtime';
 import { useRelayEnvironment } from '../useRelayEnvironment';
 import FragmentField, { queryFieldFragment$data } from './relay/queryFieldFragment.graphql';
 import { FormSetValueOptions, FormSetValueReturn } from './RelayFormsTypes';
-import { getFieldId, operationQueryForm, commitValue, commitErrorIntoRelay, commitResetField } from './Utils';
+import {
+    getFieldId,
+    operationQueryForm,
+    commitValue,
+    commitErrorIntoRelay,
+    commitResetField,
+} from './Utils';
 
 export function useFormSetValue<ValueType>({
     key,
@@ -56,9 +62,9 @@ export function useFormSetValue<ValueType>({
         }).dispose;
 
         const dispose = () => {
-            disposeSubscrition()
+            disposeSubscrition();
             commitResetField(environment, key);
-        }
+        };
 
         function finalizeCheck(error): void {
             ref.current.isChecking = false;

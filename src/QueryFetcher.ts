@@ -142,7 +142,15 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             }
             onComplete && onComplete(error);
         };
-        this.fetcher.fetch(this.environment, query, fetchPolicy, complete, onNext, onResponse);
+        this.fetcher.fetch(
+            this.environment,
+            query,
+            fetchPolicy,
+            complete,
+            onNext,
+            onResponse,
+            options.UNSTABLE_renderPolicy,
+        );
         fetchHasReturned = true;
     }
 

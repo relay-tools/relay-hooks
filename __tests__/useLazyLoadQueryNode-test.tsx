@@ -566,7 +566,8 @@ describe('useLazyLoadQueryNode', () => {
         expectToBeRendered(renderFn, data);
     });
 
-    it('partial rendering - does not suspend at the root if query does not have direct data dependencies', () => {
+    describe('partial rendering', () => {
+        it('does not suspend at the root if query does not have direct data dependencies', () => {
         const gqlFragment = graphql`
             fragment useLazyLoadQueryNodeTestRootFragment on Query {
                 node(id: $id) {
@@ -628,5 +629,6 @@ describe('useLazyLoadQueryNode', () => {
             },
         });
     });
+});
 });
 

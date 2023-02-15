@@ -17,7 +17,7 @@ import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 import { graphql, RecordSource, Store } from 'relay-runtime';
 
-import { useLazyLoadQuery as useLazyLoadQueryNode, RelayEnvironmentProvider } from '../src';
+import { useLazyLoadQuery as useLazyLoadQueryNode, RelayEnvironmentProvider, useSuspenseFragment, useLazyLoadQuery } from '../src';
 
 const { createOperationDescriptor } = require('relay-runtime');
 
@@ -565,4 +565,68 @@ describe('useLazyLoadQueryNode', () => {
         data = environment.lookup(queryNoNameQuery.fragment).data;
         expectToBeRendered(renderFn, data);
     });
+
+    it('partial rendering - does not suspend at the root if query does not have direct data dependencies', () => {
+        const gqlFragment = graphql`
+            fragment useLazyLoadQueryNodeTestRootFragment on Query {
+                node(id: $id) {
+                    id
+                    name
+                }
+            }
+        `;
+        const gqlOnlyFragmentsQuery = graphql`
+            query useLazyLoadQueryNodeTestOnlyFragmentsQuery($id: ID) {
+                ...useLazyLoadQueryNodeTestRootFragment
+            }
+        `;
+        const onlyFragsQuery = createOperationDescriptor(gqlOnlyFragmentsQuery, variables);
+
+        function FragmentComponent(props: { query: any }) {
+            const data: any = useSuspenseFragment(gqlFragment, props.query);
+            renderFn(data);
+            return null;
+        }
+
+        const Renderer = (props: { variables: { id: string } }) => {
+            const { data } = useLazyLoadQuery<any>(gqlOnlyFragmentsQuery, props.variables, {
+                //fetchObservable: __internal.fetchQuery(environment, _query),
+                fetchPolicy: 'store-or-network',
+                UNSTABLE_renderPolicy: 'partial',
+            });
+            return (
+                <React.Suspense fallback="Fallback around fragment">
+                    <FragmentComponent query={data} />
+                </React.Suspense>
+            );
+        };
+
+        const instance = render(environment, <Renderer variables={variables} />);
+
+        // Assert that we suspended at the fragment level and not at the root
+        expect(instance.toJSON()).toEqual('Fallback around fragment');
+        expectToHaveFetched(environment, onlyFragsQuery);
+        expect(renderFn).not.toBeCalled();
+        // $FlowFixMe[method-unbinding] added when improving typing for this parameters
+        expect(environment.retain).toHaveBeenCalledTimes(1);
+
+        environment.mock.resolve(gqlOnlyFragmentsQuery, {
+            data: {
+                node: {
+                    __typename: 'User',
+                    id: variables.id,
+                    name: 'Alice',
+                },
+            },
+        });
+
+        // $FlowFixMe[incompatible-call] Error found while enabling LTI on this file
+        expectToBeRendered(renderFn, {
+            node: {
+                id: variables.id,
+                name: 'Alice',
+            },
+        });
+    });
 });
+

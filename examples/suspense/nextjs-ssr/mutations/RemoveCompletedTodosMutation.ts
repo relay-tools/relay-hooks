@@ -12,96 +12,91 @@
  */
 
 import {
-  commitMutation,
-  graphql,
-  //RecordSourceSelectorProxy,
+    commitMutation,
+    graphql,
+    //RecordSourceSelectorProxy,
 } from 'relay-hooks';
 
 import {
-  ConnectionHandler,
-  Disposable,
-  IEnvironment,
-  RecordSourceSelectorProxy,
+    ConnectionHandler,
+    Disposable,
+    IEnvironment,
+    RecordSourceSelectorProxy,
 } from 'relay-runtime';
-import {TodoListFooter_user} from '../__generated__/relay/TodoListFooter_user.graphql';
-import {isNotNull} from '../components/TodoApp';
+import { TodoListFooter_user$data } from '../__generated__/relay/TodoListFooter_user.graphql';
+import { isNotNull } from '../components/TodoApp';
 
-type Todos = NonNullable<TodoListFooter_user['todos']>;
+type Todos = NonNullable<TodoListFooter_user$data['todos']>;
 type Edges = NonNullable<Todos['edges']>;
 type Edge = NonNullable<Edges[number]>;
 type Node = NonNullable<Edge['node']>;
 type NullableNode = Edge['node'];
 
 const mutation = graphql`
-  mutation RemoveCompletedTodosMutation($input: RemoveCompletedTodosInput!) {
-    removeCompletedTodos(input: $input) {
-      deletedTodoIds
-      user {
-        completedCount
-        totalCount
-      }
+    mutation RemoveCompletedTodosMutation($input: RemoveCompletedTodosInput!) {
+        removeCompletedTodos(input: $input) {
+            deletedTodoIds
+            user {
+                completedCount
+                totalCount
+            }
+        }
     }
-  }
 `;
 
 function sharedUpdater(
-  store: any,
-  user: TodoListFooter_user,
-  deletedIDs: ReadonlyArray<string>,
+    store: any,
+    user: TodoListFooter_user$data,
+    deletedIDs: ReadonlyArray<string>,
 ) {
-  const userProxy = store.get(user.id);
-  const conn = ConnectionHandler.getConnection(userProxy, 'TodoList_todos');
+    const userProxy = store.get(user.id);
+    const conn = ConnectionHandler.getConnection(userProxy, 'TodoList_todos');
 
-  // Purposefully type forEach as void, to toss the result of deleteNode
-  if (conn) {
-    deletedIDs.forEach(
-      (deletedID: string): void =>
-        ConnectionHandler.deleteNode(conn, deletedID),
-    );
-  }
+    // Purposefully type forEach as void, to toss the result of deleteNode
+    if (conn) {
+        deletedIDs.forEach((deletedID: string): void =>
+            ConnectionHandler.deleteNode(conn, deletedID),
+        );
+    }
 }
 
-function commit(
-  environment: IEnvironment,
-  todos: Todos,
-  user: TodoListFooter_user,
-) {
-  const input: any = {
-    userId: user.userId,
-  };
+function commit(environment: IEnvironment, todos: Todos, user: TodoListFooter_user$data) {
+    const input: any = {
+        userId: user.userId,
+    };
 
-  commitMutation(environment, {
-    mutation,
-    variables: {
-      input,
-    },
-    updater: (store: any) => {
-      const payload = store.getRootField('removeCompletedTodos');
-      const deletedIds = payload.getValue('deletedTodoIds');
+    commitMutation(environment, {
+        mutation,
+        variables: {
+            input,
+        },
+        updater: (store: any) => {
+            const payload = store.getRootField('removeCompletedTodos');
+            const deletedIds = payload.getValue('deletedTodoIds');
 
-      // $FlowFixMe `payload.getValue` returns mixed, not sure how to check refinement to $ReadOnlyArray<string>
-      sharedUpdater(store, user, deletedIds);
-    },
-    optimisticUpdater: (store: any) => {
-      // Relay returns Maybe types a lot of times in a connection that we need to cater for
-      const completedNodeIds: ReadonlyArray<string> = todos.edges
-        ? todos.edges
-            .filter(isNotNull)
-            .map((edge: Edge): NullableNode => edge.node)
-            .filter(isNotNull)
-            .filter((node: Node): boolean => node.complete)
-            .map((node: Node): string => node.id)
-        : [];
+            // $FlowFixMe `payload.getValue` returns mixed, not sure how to check refinement to $ReadOnlyArray<string>
+            sharedUpdater(store, user, deletedIds);
+        },
+        optimisticUpdater: (store: any) => {
+            // Relay returns Maybe types a lot of times in a connection that we need to cater for
+            const completedNodeIds: ReadonlyArray<string> = todos.edges
+                ? todos.edges
+                      .filter(isNotNull)
+                      .map((edge: Edge): NullableNode => edge.node)
+                      .filter(isNotNull)
+                      .filter((node: Node): boolean => node.complete)
+                      .map((node: Node): string => node.id)
+                : [];
 
-      const userRecord = store.get(user.id);
-      userRecord.setValue(
-        userRecord.getValue('totalCount') - completedNodeIds.length,
-        'totalCount',
-      );
-      userRecord.setValue(0, 'completedCount');
-      sharedUpdater(store, user, completedNodeIds);
-    },
-  });
+            const userRecord = store.get(user.id);
+            userRecord.setValue(
+                userRecord.getValue('totalCount') - completedNodeIds.length,
+                'totalCount',
+            );
+            userRecord.setValue(0, 'completedCount');
+            sharedUpdater(store, user, completedNodeIds);
+        },
+    });
 }
 
-export default {commit};
+export default { commit };

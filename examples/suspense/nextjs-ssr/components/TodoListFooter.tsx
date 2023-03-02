@@ -14,118 +14,118 @@
 import RemoveCompletedTodosMutation from '../mutations/RemoveCompletedTodosMutation';
 
 import React from 'react';
-import {graphql, useFragment, useRelayEnvironment} from 'relay-hooks';
-import styled, {css} from 'styled-components';
+import { graphql, useFragment, useRelayEnvironment } from 'relay-hooks';
+import styled, { css } from 'styled-components';
 import {
-  TodoListFooter_user$key,
-  TodoListFooter_user,
+    TodoListFooter_user$key,
+    TodoListFooter_user$data,
 } from '../__generated__/relay/TodoListFooter_user.graphql';
-import {isNotNull} from './TodoApp';
-type Todos = NonNullable<TodoListFooter_user['todos']>;
+import { isNotNull } from './TodoApp';
+type Todos = NonNullable<TodoListFooter_user$data['todos']>;
 type Edges = NonNullable<Todos['edges']>;
 type Edge = NonNullable<Edges[number]>;
 
 type Props = {
-  user: TodoListFooter_user$key;
+    user: TodoListFooter_user$key;
 };
 
 const StyledFooter = styled.footer`
-  color: #777;
-  padding: 10px 15px;
-  height: 20px;
-  text-align: center;
-  border-top: 1px solid #e6e6e6;
+    color: #777;
+    padding: 10px 15px;
+    height: 20px;
+    text-align: center;
+    border-top: 1px solid #e6e6e6;
 
-  &:before {
-    content: '';
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    height: 50px;
-    overflow: hidden;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2), 0 8px 0 -3px #f6f6f6,
-      0 9px 1px -3px rgba(0, 0, 0, 0.2), 0 16px 0 -6px #f6f6f6,
-      0 17px 2px -6px rgba(0, 0, 0, 0.2);
-  }
+    &:before {
+        content: '';
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 50px;
+        overflow: hidden;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2), 0 8px 0 -3px #f6f6f6,
+            0 9px 1px -3px rgba(0, 0, 0, 0.2), 0 16px 0 -6px #f6f6f6,
+            0 17px 2px -6px rgba(0, 0, 0, 0.2);
+    }
 `;
 
 const StyledSpan = styled.span`
-  float: left;
-  text-align: left;
+    float: left;
+    text-align: left;
 `;
 
 const StyledStrong = styled.strong`
-  font-weight: 300;
+    font-weight: 300;
 `;
 
 const StyledButton = styled.button`
-  float: right;
-  position: relative;
-  line-height: 20px;
-  text-decoration: none;
-  cursor: pointer;
+    float: right;
+    position: relative;
+    line-height: 20px;
+    text-decoration: none;
+    cursor: pointer;
 
-  &:hover {
-    text-decoration: underline;
-  }
+    &:hover {
+        text-decoration: underline;
+    }
 `;
 
 const fragmentSpec = graphql`
-  fragment TodoListFooter_user on User {
-    id
-    userId
-    completedCount
-    todos(
-      first: 2147483647 # max GraphQLInt
-    ) @connection(key: "TodoList_todos") {
-      edges {
-        node {
-          id
-          complete
+    fragment TodoListFooter_user on User {
+        id
+        userId
+        completedCount
+        todos(
+            first: 2147483647 # max GraphQLInt
+        ) @connection(key: "TodoList_todos") {
+            edges {
+                node {
+                    id
+                    complete
+                }
+            }
         }
-      }
+        totalCount
     }
-    totalCount
-  }
 `;
 const TodoListFooter = (props: Props) => {
-  const environment = useRelayEnvironment();
-  const user = useFragment(fragmentSpec, props.user);
-  const {todos, completedCount, totalCount} = user;
-  const completedEdges: ReadonlyArray<Edge> =
-    todos && todos.edges
-      ? todos.edges
-          .filter(isNotNull)
-          .filter((edge: Edge) => edge && edge.node && edge.node.complete)
-      : [];
+    const environment = useRelayEnvironment();
+    const user = useFragment(fragmentSpec, props.user);
+    const { todos, completedCount, totalCount } = user;
+    const completedEdges: ReadonlyArray<Edge> =
+        todos && todos.edges
+            ? todos.edges
+                  .filter(isNotNull)
+                  .filter((edge: Edge) => edge && edge.node && edge.node.complete)
+            : [];
 
-  const handleRemoveCompletedTodosClick = () => {
-    RemoveCompletedTodosMutation.commit(
-      environment,
-      {
-        edges: completedEdges,
-      },
-      user,
+    const handleRemoveCompletedTodosClick = () => {
+        RemoveCompletedTodosMutation.commit(
+            environment,
+            {
+                edges: completedEdges,
+            },
+            user,
+        );
+    };
+
+    const numRemainingTodos = totalCount - completedCount;
+
+    return (
+        <StyledFooter>
+            <StyledSpan>
+                <StyledStrong>{numRemainingTodos}</StyledStrong> item
+                {numRemainingTodos === 1 ? '' : 's'} left
+            </StyledSpan>
+
+            {completedCount > 0 && (
+                <StyledButton onClick={handleRemoveCompletedTodosClick}>
+                    Clear completed
+                </StyledButton>
+            )}
+        </StyledFooter>
     );
-  };
-
-  const numRemainingTodos = totalCount - completedCount;
-
-  return (
-    <StyledFooter>
-      <StyledSpan>
-        <StyledStrong>{numRemainingTodos}</StyledStrong> item
-        {numRemainingTodos === 1 ? '' : 's'} left
-      </StyledSpan>
-
-      {completedCount > 0 && (
-        <StyledButton onClick={handleRemoveCompletedTodosClick}>
-          Clear completed
-        </StyledButton>
-      )}
-    </StyledFooter>
-  );
 };
 
 export default TodoListFooter;

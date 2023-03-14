@@ -8,6 +8,7 @@ import {
     OperationDescriptor,
     GraphQLTaggedNode,
     Variables,
+    GraphQLResponse,
 } from 'relay-runtime';
 import { Fetcher, fetchResolver } from './FetchResolver';
 import { FetchPolicy, RenderProps, QueryOptions, Options } from './RelayHooksTypes';
@@ -125,12 +126,18 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
 
         const { onComplete, onResponse } = options;
         let fetchHasReturned = false;
-        const onNext = (_o: OperationDescriptor, snapshot: Snapshot): void => {
+        const onNext = (
+            _o: OperationDescriptor,
+            snapshot: Snapshot,
+            response: GraphQLResponse,
+        ): void => {
             if (!this.snapshot) {
                 this.snapshot = snapshot;
                 this.subscribe(snapshot);
                 this.resolveResult();
-                if (fetchHasReturned) {
+                const responses = Array.isArray(response) ? response : [response];
+                const isFinal = responses.some((x) => x != null && x.extensions?.is_final === true);
+                if (fetchHasReturned && !isFinal) {
                     this.forceUpdate();
                 }
             }

@@ -22,6 +22,7 @@ export type Fetcher = {
         onNext: (
             operation: OperationDescriptor,
             snapshot: Snapshot,
+            response?: GraphQLResponse,
             fromStore?: boolean,
             onlyStore?: boolean,
         ) => void,
@@ -113,6 +114,7 @@ export function fetchResolver({
         onNext: (
             operation: OperationDescriptor,
             snapshot: Snapshot,
+            response?: GraphQLResponse,
             fromStore?: boolean,
             onlyStore?: boolean,
         ) => void,
@@ -133,7 +135,7 @@ export function fetchResolver({
         const isNetwork = isNetworkPolicy(fetchPolicy, full);
         if (snapshot != null) {
             const onlyStore = !isNetwork;
-            onNext(operation, snapshot, true, onlyStore);
+            onNext(operation, snapshot, null, true, onlyStore);
             if (onlyStore) {
                 onComplete(null);
             }
@@ -177,7 +179,7 @@ export function fetchResolver({
                     operation.request.cacheConfig?.poll && updateLoading(false);
                     resolveNetworkPromise();
                     onResponse && onResponse(response);
-                    onNext(operation, store);
+                    onNext(operation, store, response);
                 },
                 start: (subscription) => {
                     refetchSubscription = subscription;

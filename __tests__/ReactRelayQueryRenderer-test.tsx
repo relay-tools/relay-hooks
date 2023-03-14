@@ -62,7 +62,7 @@ const loadingState = {
     retry: expect.any(Function),
     isLoading: true,
 };
-
+/*
 function expectToBeRendered(render, readyState) {
     const calls = render.mock.calls;
     // Ensure useEffect is called before other timers
@@ -71,7 +71,14 @@ function expectToBeRendered(render, readyState) {
     expect(calls[1][0]).toEqual({ ...readyState, isLoading: false });
     return { pass: true };
 }
-
+*/
+function expectToBeRendered(render, readyState) {
+    const calls = render.mock.calls;
+    // Ensure useEffect is called before other timers
+    expect(calls.length).toBe(1);
+    expect(calls[0][0]).toEqual({ ...readyState, isLoading: false });
+    return { pass: true };
+}
 const QueryRendererHook = (props) => {
     const {
         render,
@@ -119,6 +126,9 @@ describe('ReactRelayQueryRenderer', () => {
                 name: 'Zuck',
             },
         },
+        extensions: {
+            is_final: true,
+        },
     };
 
     const responseErrors = {
@@ -128,6 +138,9 @@ describe('ReactRelayQueryRenderer', () => {
                 id: '4',
                 name: 'Zuck',
             },
+        },
+        extensions: {
+            is_final: true,
         },
         errors: [
             {
@@ -358,11 +371,10 @@ describe('ReactRelayQueryRenderer', () => {
                             unstable_concurrentUpdatesByDefault: true,
                         });
                     });
-    
+
                     // Flush some of the changes, but don't commit
                     (Scheduler as any).unstable_flushNumberOfYields(2);
 
-                    
                     expect((Scheduler as any).unstable_clearYields()).toEqual(['A', 'B']);
                     expect(renderer.toJSON()).toEqual(null);
                     expect().loadingRendered();
@@ -373,7 +385,6 @@ describe('ReactRelayQueryRenderer', () => {
                         renderer.update(<Example />);
                     });
 
-                    
                     expect(environment.execute.mock.calls.length).toBe(1);
                     expect().loadingRendered();
                 });
@@ -647,6 +658,9 @@ describe('ReactRelayQueryRenderer', () => {
                                 name: 'Other',
                             },
                         },
+                        extensions: {
+                            is_final: true,
+                        },
                     };
                     const thirdRequest = pendingRequests[2];
                     const thirdOwner = thirdRequest.request.operation;
@@ -658,6 +672,9 @@ describe('ReactRelayQueryRenderer', () => {
                                 name: 'Third',
                             },
                         },
+                        extensions: {
+                            is_final: true,
+                        },
                     };
 
                     // Resolve the latest request first, and the earlier request last
@@ -665,8 +682,8 @@ describe('ReactRelayQueryRenderer', () => {
                     // request
                     thirdRequest.resolve(thirdResponse);
                     secondRequest.resolve(secondResponse);
-                    expect(render.mock.calls.length).toEqual(4);
-                    const lastRender = render.mock.calls[3][0];
+                    expect(render.mock.calls.length).toEqual(3);
+                    const lastRender = render.mock.calls[2][0];
                     expect(lastRender).toEqual({
                         error: null,
                         data: {
@@ -1250,7 +1267,7 @@ describe('ReactRelayQueryRenderer', () => {
         });
 
         it('refetch the query if `retry`', () => {
-            expect.assertions(7);
+            expect.assertions(6);
             render.mockClear();
             const error = new Error('network fails');
             environment.mock.reject(TestQuery, error);
@@ -1313,7 +1330,7 @@ describe('ReactRelayQueryRenderer', () => {
                     }
                 }
                 const renderer = createHooks(<Example />);
-                expect.assertions(7);
+                expect.assertions(5);
                 mockA.mockClear();
                 mockB.mockClear();
                 environment.mock.resolve(TestQuery, response);
@@ -1384,7 +1401,7 @@ describe('ReactRelayQueryRenderer', () => {
         });
 
         it('renders the query results', () => {
-            expect.assertions(3);
+            expect.assertions(2);
             render.mockClear();
             environment.mock.resolve(TestQuery, response);
             const owner = createOperationDescriptor(TestQuery, variables);
@@ -1848,7 +1865,7 @@ describe('ReactRelayQueryRenderer', () => {
             render.mockClear();
             environment.mock.resolve(TestQuery, response);
 
-            expect(render).toBeCalledTimes(2);
+            expect(render).toBeCalledTimes(1);
             const readyState = render.mock.calls[0][0];
             expect(readyState.retry).not.toBe(null);
             environment.mockClear();
@@ -1888,7 +1905,7 @@ describe('ReactRelayQueryRenderer', () => {
             render.mockClear();
             environment.mock.resolve(TestQuery, response);
 
-            expect(render).toBeCalledTimes(2);
+            expect(render).toBeCalledTimes(1);
             const readyState = render.mock.calls[0][0];
             expect(readyState.retry).not.toBe(null);
             environment.mockClear();
@@ -1916,7 +1933,7 @@ describe('ReactRelayQueryRenderer', () => {
             render.mockClear();
             environment.mock.resolve(TestQuery, response);
 
-            expect(render).toBeCalledTimes(2);
+            expect(render).toBeCalledTimes(1);
             const readyState = render.mock.calls[0][0];
             expect(readyState.retry).not.toBe(null);
             environment.mockClear();
@@ -1997,7 +2014,7 @@ describe('ReactRelayQueryRenderer', () => {
                 onResponse={onResponse}
             />,
         );
-        expect.assertions(4);
+        expect.assertions(3);
         render.mockClear();
         environment.mock.resolve(TestQuery, responseErrors);
         const owner = createOperationDescriptor(TestQuery, variables);

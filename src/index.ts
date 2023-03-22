@@ -15,11 +15,7 @@ export { useMutation } from './useMutation';
 export { useSubscription } from './useSubscription';
 export { useOssFragment } from './useOssFragment';
 export { usePagination, usePaginationFragment, usePaginationSubscription } from './usePagination';
-export {
-    useRefetchable,
-    useRefetchableFragment,
-    useRefetchableSubscription,
-} from './useRefetchable';
+export { useRefetchable, useRefetchableFragment, useRefetchableSubscription } from './useRefetchable';
 export { useRelayEnvironment } from './useRelayEnvironment';
 export { RelayEnvironmentProvider } from './RelayEnvironmentProvider';
 export * from './RelayHooksTypes';

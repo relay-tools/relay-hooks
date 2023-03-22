@@ -3,6 +3,7 @@
   "singleQuote": true,
   "trailingComma": "all",
   "arrowParens": "always",
-  "printWidth": 100,
-  "parser": "typescript"
+  "printWidth": 120,
+  "parser": "typescript",
+  "endOfLine": "auto"
 }

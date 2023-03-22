@@ -28,14 +28,9 @@ export type MutationConfig<T extends MutationParameters> = Partial<
     onCompleted?(response: T['response']): void;
 };
 
-export type MutationConfigWithoutVariables<T extends MutationParameters> = Omit<
-    MutationConfig<T>,
-    'variables'
->;
+export type MutationConfigWithoutVariables<T extends MutationParameters> = Omit<MutationConfig<T>, 'variables'>;
 
-export type Mutate<T extends MutationParameters> = (
-    config?: Partial<MutationConfig<T>>,
-) => Promise<T['response']>;
+export type Mutate<T extends MutationParameters> = (config?: Partial<MutationConfig<T>>) => Promise<T['response']>;
 
 export type MutateWithVariables<T extends MutationParameters> = (
     config: Partial<MutationConfig<T>> & { variables: T['variables'] },
@@ -52,11 +47,7 @@ export const FRAGMENT_NAME = 'useFragment';
 
 export type FragmentNames = typeof PAGINATION_NAME | typeof REFETCHABLE_NAME | typeof FRAGMENT_NAME;
 
-export type FetchPolicy =
-    | typeof STORE_ONLY
-    | typeof STORE_OR_NETWORK
-    | typeof STORE_THEN_NETWORK
-    | typeof NETWORK_ONLY;
+export type FetchPolicy = typeof STORE_ONLY | typeof STORE_OR_NETWORK | typeof STORE_THEN_NETWORK | typeof NETWORK_ONLY;
 
 export type ContainerResult = {
     data: { [key: string]: any };
@@ -80,9 +71,7 @@ export type QueryOptions = {
     UNSTABLE_renderPolicy?: RenderPolicy;
 };
 
-export type $Call<Fn extends (...args: any[]) => any> = Fn extends (arg: any) => infer RT
-    ? RT
-    : never;
+export type $Call<Fn extends (...args: any[]) => any> = Fn extends (arg: any) => infer RT ? RT : never;
 
 export type KeyType<TData = unknown> = Readonly<{
     ' $data'?: TData;
@@ -93,9 +82,7 @@ export type ArrayKeyType = ReadonlyArray<{ readonly ' $data'?: ReadonlyArray<unk
 export type KeyTypeData<TKey extends KeyType<TData>, TData = unknown> = Required<TKey>[' $data'];
 
 export type KeyReturnType<T extends KeyType> = (arg: T) => NonNullable<T[' $data']>;
-export type ArrayKeyReturnType<T extends ArrayKeyType> = (
-    arg: T,
-) => NonNullable<NonNullable<T[0]>[' $data']>[0];
+export type ArrayKeyReturnType<T extends ArrayKeyType> = (arg: T) => NonNullable<NonNullable<T[0]>[' $data']>[0];
 
 export type LoadMoreFn<TQuery extends OperationType = OperationType> = (
     count: number,
@@ -108,7 +95,7 @@ export const FORWARD = 'forward';
 
 export type LoadQuery<
     TOperationType extends OperationType = OperationType,
-    TEnvironment extends IEnvironment = IEnvironment
+    TEnvironment extends IEnvironment = IEnvironment,
 > = {
     next: (
         environment: TEnvironment,
@@ -146,7 +133,7 @@ export type RefetchFnDynamic<
     TQuery extends OperationType,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Key extends KeyType | null,
-    TOptions = Options
+    TOptions = Options,
 > = RefetchInexactDynamicResponse<TQuery, TOptions> & RefetchExactDynamicResponse<TQuery, TOptions>;
 
 export type RefetchInexact<TQuery extends OperationType, TOptions> = (
@@ -174,28 +161,21 @@ export type RefetchFnInexact<TQuery extends OperationType, TOptions = Options> =
     TOptions
 >;
 
-export interface ReturnTypeRefetchNode<
-    TQuery extends OperationType,
-    TKey extends KeyType | null,
-    TFragmentData
-> extends ReturnTypeRefetchSuspenseNode<TQuery, TKey, TFragmentData> {
+export interface ReturnTypeRefetchNode<TQuery extends OperationType, TKey extends KeyType | null, TFragmentData>
+    extends ReturnTypeRefetchSuspenseNode<TQuery, TKey, TFragmentData> {
     isLoading: boolean;
     error: Error | null;
 }
 
-export type ReturnTypeRefetchSuspenseNode<
-    TQuery extends OperationType,
-    TKey extends KeyType | null,
-    TFragmentData
-> = { data: TFragmentData; refetch: RefetchFnDynamic<TQuery, TKey> };
+export type ReturnTypeRefetchSuspenseNode<TQuery extends OperationType, TKey extends KeyType | null, TFragmentData> = {
+    data: TFragmentData;
+    refetch: RefetchFnDynamic<TQuery, TKey>;
+};
 
 // pagination
 
-export interface ReturnTypePagination<
-    TQuery extends OperationType,
-    TKey extends KeyType | null,
-    TFragmentData
-> extends ReturnTypePaginationSuspense<TQuery, TKey, TFragmentData> {
+export interface ReturnTypePagination<TQuery extends OperationType, TKey extends KeyType | null, TFragmentData>
+    extends ReturnTypePaginationSuspense<TQuery, TKey, TFragmentData> {
     isLoading: boolean;
     error: Error | null;
 }
@@ -203,7 +183,7 @@ export interface ReturnTypePagination<
 export interface ReturnTypePaginationSuspense<
     TQuery extends OperationType,
     TKey extends KeyType | null,
-    TFragmentData
+    TFragmentData,
 > {
     data: TFragmentData;
     loadNext: LoadMoreFn<TQuery>;

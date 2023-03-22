@@ -12,14 +12,7 @@ export function getStateFromConnection(
     if (connection == null) {
         return { cursor: null, hasMore: false };
     }
-    const {
-        EDGES,
-        PAGE_INFO,
-        HAS_NEXT_PAGE,
-        HAS_PREV_PAGE,
-        END_CURSOR,
-        START_CURSOR,
-    } = ConnectionInterface.get();
+    const { EDGES, PAGE_INFO, HAS_NEXT_PAGE, HAS_PREV_PAGE, END_CURSOR, START_CURSOR } = ConnectionInterface.get();
 
     invariant(
         typeof connection === 'object',
@@ -39,8 +32,7 @@ export function getStateFromConnection(
 
     invariant(
         Array.isArray(edges),
-        'Relay: Expected connection in fragment `%s` to have a plural `%s` field. ' +
-            'Instead got `%s`.',
+        'Relay: Expected connection in fragment `%s` to have a plural `%s` field. ' + 'Instead got `%s`.',
         fragmentNode.name,
         EDGES,
         edges,
@@ -53,12 +45,10 @@ export function getStateFromConnection(
         pageInfo,
     );
 
-    const cursor =
-        direction === 'forward' ? pageInfo[END_CURSOR] ?? null : pageInfo[START_CURSOR] ?? null;
+    const cursor = direction === 'forward' ? pageInfo[END_CURSOR] ?? null : pageInfo[START_CURSOR] ?? null;
     invariant(
         cursor === null || typeof cursor === 'string',
-        'Relay: Expected page info for connection in fragment `%s` to have a ' +
-            'valid `%s`. Instead got `%s`.',
+        'Relay: Expected page info for connection in fragment `%s` to have a ' + 'valid `%s`. Instead got `%s`.',
         fragmentNode.name,
         START_CURSOR,
         cursor,

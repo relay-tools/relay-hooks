@@ -12,11 +12,7 @@ import { STORE_OR_NETWORK, STORE_THEN_NETWORK, NETWORK_ONLY, FetchPolicy } from 
 export type ReactConnectionMetadata = ConnectionMetadata & { fragmentName: string };
 
 export const isNetworkPolicy = (policy: FetchPolicy, full: boolean): boolean => {
-    return (
-        policy === NETWORK_ONLY ||
-        policy === STORE_THEN_NETWORK ||
-        (policy === STORE_OR_NETWORK && !full)
-    );
+    return policy === NETWORK_ONLY || policy === STORE_THEN_NETWORK || (policy === STORE_OR_NETWORK && !full);
 };
 
 export const isStorePolicy = (policy: FetchPolicy): boolean => {

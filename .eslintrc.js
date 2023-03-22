@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 module.exports = {
     extends: [
         'plugin:@typescript-eslint/recommended', // Uses the recommended rules from the @typescript-eslint/eslint-plugin
@@ -34,7 +35,7 @@ module.exports = {
         'max-len': [
             2,
             {
-                code: 100,
+                code: 120,
                 ignorePattern: '^import [^,]+ from |^export | implements',
             },
         ],

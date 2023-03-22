@@ -19,12 +19,7 @@ export type Fetcher = {
         operation: OperationDescriptor,
         fetchPolicy: FetchPolicy | null | undefined,
         onComplete: (_e: Error | null) => void,
-        onNext: (
-            operation: OperationDescriptor,
-            snapshot: Snapshot,
-            fromStore?: boolean,
-            onlyStore?: boolean,
-        ) => void,
+        onNext: (operation: OperationDescriptor, snapshot: Snapshot, fromStore?: boolean, onlyStore?: boolean) => void,
         onResponse?: (response: GraphQLResponse | null) => void,
         renderPolicy?: RenderPolicy,
     ) => Disposable;
@@ -68,8 +63,7 @@ export function fetchResolver({
             const check = environment.check(operation);
             const queryStatus = check.status;
             const hasFullQuery = queryStatus === 'available';
-            const canPartialRender =
-                hasFullQuery || (renderPolicy === 'partial' && queryStatus !== 'stale');
+            const canPartialRender = hasFullQuery || (renderPolicy === 'partial' && queryStatus !== 'stale');
             if (canPartialRender) {
                 return { snapshot: environment.lookup(operation.fragment), full: hasFullQuery };
             }
@@ -110,12 +104,7 @@ export function fetchResolver({
         operation: OperationDescriptor,
         fetchPolicy: FetchPolicy = 'network-only',
         onComplete = (_e: Error | null): void => undefined,
-        onNext: (
-            operation: OperationDescriptor,
-            snapshot: Snapshot,
-            fromStore?: boolean,
-            onlyStore?: boolean,
-        ) => void,
+        onNext: (operation: OperationDescriptor, snapshot: Snapshot, fromStore?: boolean, onlyStore?: boolean) => void,
         onResponse?: (response: GraphQLResponse | null) => void,
         renderPolicy?: RenderPolicy,
     ): Disposable => {

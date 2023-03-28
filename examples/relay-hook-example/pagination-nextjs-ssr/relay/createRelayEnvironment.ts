@@ -25,9 +25,9 @@ function fetchQuery(operation, variables, _cacheConfig, _uploadables): Promise<a
             }),
         }).then((response) => {
             return response.json().then((result) => {
-                result.extensions = {
+                /*result.extensions = {
                     is_final: true,
-                };
+                };*/
                 return result;
             });
         }),

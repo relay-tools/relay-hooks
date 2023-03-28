@@ -25,16 +25,10 @@ export const internalLoadQuery = <TOperationType extends OperationType = Operati
         options.networkCacheConfig = options.networkCacheConfig ?? forceCache;
         queryFetcher.resolve(environment, gqlQuery, variables, options);
         const toThrow = queryFetcher.checkAndSuspense();
-        return toThrow
-            ? toThrow instanceof Error
-                ? Promise.reject(toThrow)
-                : toThrow
-            : Promise.resolve();
+        return toThrow ? (toThrow instanceof Error ? Promise.reject(toThrow) : toThrow) : Promise.resolve();
     };
 
-    const getValue = (
-        environment?: IEnvironment,
-    ): RenderProps<TOperationType> | null | Promise<any> => {
+    const getValue = (environment?: IEnvironment): RenderProps<TOperationType> | null | Promise<any> => {
         queryFetcher.resolveEnvironment(environment);
         queryFetcher.checkAndSuspense(promise);
         return queryFetcher.getData();
@@ -56,14 +50,10 @@ export const internalLoadQuery = <TOperationType extends OperationType = Operati
     };
 };
 
-export const loadLazyQuery = <
-    TOperationType extends OperationType = OperationType
->(): LoadQuery<TOperationType> => {
+export const loadLazyQuery = <TOperationType extends OperationType = OperationType>(): LoadQuery<TOperationType> => {
     return internalLoadQuery(true);
 };
 
-export const loadQuery = <
-    TOperationType extends OperationType = OperationType
->(): LoadQuery<TOperationType> => {
+export const loadQuery = <TOperationType extends OperationType = OperationType>(): LoadQuery<TOperationType> => {
     return internalLoadQuery(false);
 };

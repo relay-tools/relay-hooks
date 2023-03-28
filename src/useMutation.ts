@@ -42,16 +42,8 @@ export function useMutation<T extends MutationParameters>(
 
     const relayEnvironment = useRelayEnvironment();
     const resolvedEnvironment = environment || relayEnvironment;
-    const {
-        configs,
-        variables,
-        uploadables,
-        onCompleted,
-        onError,
-        optimisticUpdater,
-        optimisticResponse,
-        updater,
-    } = userConfig;
+    const { configs, variables, uploadables, onCompleted, onError, optimisticUpdater, optimisticResponse, updater } =
+        userConfig;
 
     const mutate: Mutate<T> = useCallback(
         (config) => {

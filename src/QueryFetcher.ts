@@ -101,23 +101,14 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         const { fetchPolicy = 'network-only' } = options;
         /* eslint-disable indent */
         const query = cacheConfigOverride
-            ? createOperation(
-                  this.query.request.node,
-                  this.query.request.variables,
-                  cacheConfigOverride,
-              )
+            ? createOperation(this.query.request.node, this.query.request.variables, cacheConfigOverride)
             : this.query;
         this.fetch(query, fetchPolicy, options);
         this.resolveResult();
         this.forceUpdate();
     };
 
-    fetch(
-        query: OperationDescriptor,
-        fetchPolicy: FetchPolicy,
-        options: Options,
-        skip?: boolean,
-    ): void {
+    fetch(query: OperationDescriptor, fetchPolicy: FetchPolicy, options: Options, skip?: boolean): void {
         this.disposeSnapshot();
         if (skip) {
             this.fetcher.dispose();
@@ -180,12 +171,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         this.resolve(environment, this.gqlQuery, this.variables, this.options);
     }
 
-    resolve(
-        environment: IEnvironment,
-        gqlQuery: GraphQLTaggedNode,
-        variables: Variables,
-        options: QueryOptions,
-    ): void {
+    resolve(environment: IEnvironment, gqlQuery: GraphQLTaggedNode, variables: Variables, options: QueryOptions): void {
         const query = this.getQuery(gqlQuery, variables, options.networkCacheConfig);
         const { fetchPolicy = defaultPolicy, fetchKey, skip } = options;
         this.options = options;

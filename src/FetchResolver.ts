@@ -69,8 +69,7 @@ export function fetchResolver({
             const check = environment.check(operation);
             const queryStatus = check.status;
             const hasFullQuery = queryStatus === 'available';
-            const canPartialRender =
-                hasFullQuery || (renderPolicy === 'partial' && queryStatus !== 'stale');
+            const canPartialRender = hasFullQuery || (renderPolicy === 'partial' && queryStatus !== 'stale');
             if (canPartialRender) {
                 return { snapshot: environment.lookup(operation.fragment), full: hasFullQuery };
             }

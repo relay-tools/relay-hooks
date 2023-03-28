@@ -1,10 +1,6 @@
 import { useEffect } from 'react';
 import { GraphQLSubscriptionConfig, requestSubscription, OperationType } from 'relay-runtime';
-import {
-    SkipGraphQLSubscriptionConfig,
-    SkipSubscriptionConfig,
-    SubscriptionConfig,
-} from './RelayHooksTypes';
+import { SkipGraphQLSubscriptionConfig, SkipSubscriptionConfig, SubscriptionConfig } from './RelayHooksTypes';
 import { useRelayEnvironment } from './useRelayEnvironment';
 
 export function useSubscription<TSubscriptionPayload extends OperationType = OperationType>(

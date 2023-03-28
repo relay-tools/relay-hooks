@@ -67,10 +67,7 @@ export function useOssFragment(
     if ('production' !== process.env.NODE_ENV) {
         if (
             fragmentRef != null &&
-            (data === undefined ||
-                (Array.isArray(data) &&
-                    data.length > 0 &&
-                    data.every((data) => data === undefined)))
+            (data === undefined || (Array.isArray(data) && data.length > 0 && data.every((data) => data === undefined)))
         ) {
             warning(
                 false,

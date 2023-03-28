@@ -24,13 +24,7 @@ import {
 } from 'relay-runtime';
 import { Fetcher, fetchResolver } from './FetchResolver';
 import { getConnectionState, getStateFromConnection } from './getConnectionState';
-import {
-    FragmentNames,
-    Options,
-    OptionsLoadMore,
-    PAGINATION_NAME,
-    REFETCHABLE_NAME,
-} from './RelayHooksTypes';
+import { FragmentNames, Options, OptionsLoadMore, PAGINATION_NAME, REFETCHABLE_NAME } from './RelayHooksTypes';
 import { createOperation, forceCache } from './Utils';
 const { getPromiseForActiveRequest } = __internal;
 
@@ -78,8 +72,7 @@ function _getAndSavePromiseForFragmentRequestInFlight(
         const result = env.getOperationTracker().getPendingOperationsAffectingOwner(fragmentOwner);
         const pendingOperations = result?.pendingOperations;
         networkPromise = result?.promise ?? null;
-        pendingOperationName =
-            pendingOperations?.map((op) => op.node.params.name).join(',') ?? null;
+        pendingOperationName = pendingOperations?.map((op) => op.node.params.name).join(',') ?? null;
     }
 
     if (!networkPromise) {
@@ -167,10 +160,7 @@ export class FragmentResolver {
             const nextIDs = getDataIDsFromFragment(this._fragment, fragmentRef);
             if (
                 !areEqual(prevIDs, nextIDs) ||
-                !areEqual(
-                    this.getFragmentVariables(fragmentRef),
-                    this.getFragmentVariables(prevFragment),
-                )
+                !areEqual(this.getFragmentVariables(fragmentRef), this.getFragmentVariables(prevFragment))
             ) {
                 return false;
             }
@@ -191,18 +181,12 @@ export class FragmentResolver {
         return getVariablesFromFragment(this._fragment, fRef);
     }
 
-    resolve(
-        environment: IEnvironment,
-        idfragment: string,
-        fragment: ReaderFragment,
-        fragmentRef,
-    ): void {
+    resolve(environment: IEnvironment, idfragment: string, fragment: ReaderFragment, fragmentRef): void {
         if (
             !this.resolverData ||
             this._environment !== environment ||
             (idfragment !== this._idfragment &&
-                (!this._idfragmentrefetch ||
-                    (this._idfragmentrefetch && idfragment !== this._idfragmentrefetch)))
+                (!this._idfragmentrefetch || (this._idfragmentrefetch && idfragment !== this._idfragmentrefetch)))
         ) {
             this._fragment = fragment;
             this._fragmentRef = fragmentRef;
@@ -220,8 +204,7 @@ export class FragmentResolver {
             this.resolverData = { data: null };
             return;
         }
-        const isPlural =
-            fragment.metadata && fragment.metadata.plural && fragment.metadata.plural === true;
+        const isPlural = fragment.metadata && fragment.metadata.plural && fragment.metadata.plural === true;
         if (isPlural) {
             if (fragmentRef.length === 0) {
                 this.resolverData = { data: [] };
@@ -325,27 +308,13 @@ export class FragmentResolver {
                 };
             } else {
                 // usePagination
-                const { connectionPathInFragmentData } = getPaginationMetadata(
-                    this._fragment,
-                    this.name,
-                );
+                const { connectionPathInFragmentData } = getPaginationMetadata(this._fragment, this.name);
 
                 const connection = getValueAtPath(data, connectionPathInFragmentData);
-                const { hasMore: hasNext } = getStateFromConnection(
-                    'forward',
-                    this._fragment,
-                    connection,
-                );
-                const { hasMore: hasPrevious } = getStateFromConnection(
-                    'backward',
-                    this._fragment,
-                    connection,
-                );
+                const { hasMore: hasNext } = getStateFromConnection('forward', this._fragment, connection);
+                const { hasMore: hasPrevious } = getStateFromConnection('backward', this._fragment, connection);
                 const { isLoading: isLoadingNext, error: errorNext } = this.fetcherNext.getData();
-                const {
-                    isLoading: isLoadingPrevious,
-                    error: errorPrevious,
-                } = this.fetcherPrevious.getData();
+                const { isLoading: isLoadingPrevious, error: errorPrevious } = this.fetcherPrevious.getData();
                 this.result = {
                     data,
                     hasNext,
@@ -436,11 +405,10 @@ export class FragmentResolver {
             );
         }
 
-        const {
-            fragmentRefPathInResponse,
-            identifierField,
-            refetchableRequest,
-        } = getRefetchMetadata(this._fragment, this.name);
+        const { fragmentRefPathInResponse, identifierField, refetchableRequest } = getRefetchMetadata(
+            this._fragment,
+            this.name,
+        );
         const fragmentData = this.getData().data;
         const identifierValue =
             identifierField != null && fragmentData != null && typeof fragmentData === 'object'
@@ -453,10 +421,8 @@ export class FragmentResolver {
             parentVariables = {};
             fragmentVariables = {};
         } else if (this._selector.kind === 'PluralReaderSelector') {
-            parentVariables =
-                (this._selector as PluralReaderSelector).selectors[0]?.owner.variables ?? {};
-            fragmentVariables =
-                (this._selector as PluralReaderSelector).selectors[0]?.variables ?? {};
+            parentVariables = (this._selector as PluralReaderSelector).selectors[0]?.owner.variables ?? {};
+            fragmentVariables = (this._selector as PluralReaderSelector).selectors[0]?.variables ?? {};
         } else {
             parentVariables = (this._selector as SingularReaderSelector).owner.variables;
             fragmentVariables = (this._selector as SingularReaderSelector).variables;
@@ -485,8 +451,7 @@ export class FragmentResolver {
             if (typeof identifierValue !== 'string') {
                 warning(
                     false,
-                    'Relay: Expected result to have a string  ' +
-                        '`%s` in order to refetch, got `%s`.',
+                    'Relay: Expected result to have a string  ' + '`%s` in order to refetch, got `%s`.',
                     identifierField,
                     identifierValue,
                 );
@@ -496,10 +461,7 @@ export class FragmentResolver {
 
         const onNext = (operation: OperationDescriptor, snapshot: Snapshot): void => {
             const fragmentRef = getValueAtPath(snapshot.data, fragmentRefPathInResponse);
-            const isEquals = this.isEqualsFragmentRef(
-                this._fragmentRefRefetch || this._fragmentRef,
-                fragmentRef,
-            );
+            const isEquals = this.isEqualsFragmentRef(this._fragmentRefRefetch || this._fragmentRef, fragmentRef);
             const missData = isMissingData(snapshot); //fromStore && isMissingData(snapshot);
             if (!isEquals || missData) {
                 this._fragmentRefRefetch = fragmentRef;
@@ -538,11 +500,7 @@ export class FragmentResolver {
         return this.loadMore('forward', count, options);
     };
 
-    loadMore = (
-        direction: 'backward' | 'forward',
-        count: number,
-        options?: OptionsLoadMore,
-    ): Disposable => {
+    loadMore = (direction: 'backward' | 'forward', count: number, options?: OptionsLoadMore): Disposable => {
         const onComplete = options?.onComplete ?? ((): void => undefined);
 
         const fragmentData = this.getData().data;
@@ -593,12 +551,8 @@ export class FragmentResolver {
             this.name,
         );
 
-        const {
-            paginationRequest,
-            paginationMetadata,
-            identifierField,
-            connectionPathInFragmentData,
-        } = getPaginationMetadata(this._fragment, this.name);
+        const { paginationRequest, paginationMetadata, identifierField, connectionPathInFragmentData } =
+            getPaginationMetadata(this._fragment, this.name);
         const identifierValue =
             identifierField != null && fragmentData != null && typeof fragmentData === 'object'
                 ? fragmentData[identifierField]
@@ -611,12 +565,7 @@ export class FragmentResolver {
             ...parentVariables,
             ...fragmentVariables,
         };
-        const { cursor } = getConnectionState(
-            direction,
-            this._fragment,
-            fragmentData,
-            connectionPathInFragmentData,
-        );
+        const { cursor } = getConnectionState(direction, this._fragment, fragmentData, connectionPathInFragmentData);
         const paginationVariables = getPaginationVariables(
             direction,
             count,
@@ -635,8 +584,7 @@ export class FragmentResolver {
             if (typeof identifierValue !== 'string') {
                 warning(
                     false,
-                    'Relay: Expected result to have a string  ' +
-                        '`%s` in order to refetch, got `%s`.',
+                    'Relay: Expected result to have a string  ' + '`%s` in order to refetch, got `%s`.',
                     identifierField,
                     identifierValue,
                 );

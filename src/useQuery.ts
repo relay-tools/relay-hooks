@@ -21,12 +21,7 @@ const useInternalQuery = <TOperationType extends OperationType = OperationType>(
     const ref = useRef<Reference<TOperationType>>();
     if (ref.current === null || ref.current === undefined) {
         ref.current = {
-            queryFetcher: getOrCreateQueryFetcher(
-                suspense,
-                gqlQuery,
-                variables,
-                options.networkCacheConfig,
-            ),
+            queryFetcher: getOrCreateQueryFetcher(suspense, gqlQuery, variables, options.networkCacheConfig),
         };
     }
 

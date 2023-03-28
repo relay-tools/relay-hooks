@@ -117,11 +117,7 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
 
         const { onComplete, onResponse } = options;
         let fetchHasReturned = false;
-        const onNext = (
-            _o: OperationDescriptor,
-            snapshot: Snapshot,
-            response: GraphQLResponse,
-        ): void => {
+        const onNext = (_o: OperationDescriptor, snapshot: Snapshot, response: GraphQLResponse): void => {
             if (!this.snapshot) {
                 this.snapshot = snapshot;
                 this.subscribe(snapshot);

@@ -31,11 +31,6 @@ app.prepare().then(() => {
             schema,
             graphiql: false,
             pretty: true,
-            extensions: () => {
-                return {
-                    is_final: true
-                }
-            }
         }),
     );
 

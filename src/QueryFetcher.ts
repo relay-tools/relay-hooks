@@ -117,14 +117,16 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
 
         const { onComplete, onResponse } = options;
         let fetchHasReturned = false;
-        const onNext = (_o: OperationDescriptor, snapshot: Snapshot, response: GraphQLResponse): void => {
+        const onNext = (operation: OperationDescriptor, snapshot: Snapshot, response: GraphQLResponse): void => {
             if (!this.snapshot) {
                 this.snapshot = snapshot;
                 this.subscribe(snapshot);
                 this.resolveResult();
                 const responses = Array.isArray(response) ? response : [response];
+                const cacheConfig = operation.request.cacheConfig;
+                const isQueryPolling = cacheConfig && cacheConfig.poll;
                 const isIncremental = responses.some((x) => x != null && x.hasNext === true);
-                if (fetchHasReturned && isIncremental) {
+                if (fetchHasReturned && (isQueryPolling || isIncremental)) {
                     this.forceUpdate();
                 }
             }

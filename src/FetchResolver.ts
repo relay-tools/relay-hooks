@@ -175,7 +175,8 @@ export function fetchResolver({
                 next: (response: GraphQLResponse) => {
                     const store = environment.lookup(operation.fragment);
                     promise = null;
-                    operation.request.cacheConfig?.poll && updateLoading(false);
+                    const cacheConfig = operation.request.cacheConfig;
+                    cacheConfig && cacheConfig.poll && updateLoading(false);
                     resolveNetworkPromise();
                     onResponse && onResponse(response);
                     onNext(operation, store, response);

@@ -126,9 +126,6 @@ describe('ReactRelayQueryRenderer', () => {
                 name: 'Zuck',
             },
         },
-        extensions: {
-            is_final: true,
-        },
     };
 
     const responseErrors = {
@@ -138,9 +135,6 @@ describe('ReactRelayQueryRenderer', () => {
                 id: '4',
                 name: 'Zuck',
             },
-        },
-        extensions: {
-            is_final: true,
         },
         errors: [
             {
@@ -658,9 +652,6 @@ describe('ReactRelayQueryRenderer', () => {
                                 name: 'Other',
                             },
                         },
-                        extensions: {
-                            is_final: true,
-                        },
                     };
                     const thirdRequest = pendingRequests[2];
                     const thirdOwner = thirdRequest.request.operation;
@@ -671,9 +662,6 @@ describe('ReactRelayQueryRenderer', () => {
                                 id: '6',
                                 name: 'Third',
                             },
-                        },
-                        extensions: {
-                            is_final: true,
                         },
                     };
 
@@ -1155,9 +1143,7 @@ describe('ReactRelayQueryRenderer', () => {
                     render,
                     variables,
                 });
-                expect(environment.mock.isLoading(TestQuery, expectedVariables, cacheConfig)).toBe(
-                    true,
-                );
+                expect(environment.mock.isLoading(TestQuery, expectedVariables, cacheConfig)).toBe(true);
                 expect().loadingRendered();
             });
 

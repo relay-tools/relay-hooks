@@ -123,8 +123,8 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
                 this.subscribe(snapshot);
                 this.resolveResult();
                 const responses = Array.isArray(response) ? response : [response];
-                const isFinal = responses.some((x) => x != null && x.extensions?.is_final === true);
-                if (fetchHasReturned && !isFinal) {
+                const isIncremental = responses.some((x) => x != null && x.hasNext === true);
+                if (fetchHasReturned && isIncremental) {
                     this.forceUpdate();
                 }
             }

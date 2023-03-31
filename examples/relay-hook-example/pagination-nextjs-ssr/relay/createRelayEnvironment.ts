@@ -23,14 +23,7 @@ function fetchQuery(operation, variables, _cacheConfig, _uploadables): Promise<a
                 query: operation.text, // GraphQL text from input
                 variables,
             }),
-        }).then((response) => {
-            return response.json().then((result) => {
-                /*result.extensions = {
-                    is_final: true,
-                };*/
-                return result;
-            });
-        }),
+        }).then((response) => response.json()),
     );
 }
 

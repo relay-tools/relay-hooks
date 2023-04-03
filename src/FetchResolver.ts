@@ -144,11 +144,10 @@ export function fetchResolver({
             };
 
             const complete = (error: Error = null) => {
-                const prevLoading = isLoading;
                 resolveNetworkPromise();
                 update(false, error);
                 cleanup();
-                onComplete(error, fetchHasReturned && (prevLoading || !!error));
+                onComplete(error, fetchHasReturned);
             };
 
             fetchQuery(environment, operation).subscribe({
@@ -162,12 +161,11 @@ export function fetchResolver({
                     promise = null;
                     const responses = Array.isArray(response) ? response : [response];
                     const cacheConfig = operation.request.cacheConfig;
-                    const isQueryPolling = cacheConfig && cacheConfig.poll;
+                    const isQueryPolling = cacheConfig && !!cacheConfig.poll;
                     const isIncremental = responses.some((x) => x != null && x.hasNext === true);
-                    update(isIncremental && !isQueryPolling);
                     resolveNetworkPromise();
                     onResponse && onResponse(response);
-                    onNext(operation, store, fetchHasReturned);
+                    onNext(operation, store, fetchHasReturned && (isIncremental || isQueryPolling));
                 },
                 start: (subscription) => {
                     refetchSubscription = subscription;

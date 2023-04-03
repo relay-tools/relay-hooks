@@ -1659,9 +1659,9 @@ describe('ReactRelayPaginationContainer', () => {
                     },
                 },
             });
-            expect(render.mock.calls.length).toBe(3);
-            expect(render.mock.calls[2][0].user.friends.edges.length).toBe(1);
-            expect(render.mock.calls[2][0].user.friends.edges[0].node.id).toBe('node:2');
+            expect(render.mock.calls.length).toBe(4);
+            expect(render.mock.calls[3][0].user.friends.edges.length).toBe(1);
+            expect(render.mock.calls[3][0].user.friends.edges[0].node.id).toBe('node:2');
         });
         /* removed
     it('renders with the results of the new variables after components received updated props (not related to the connection)', () => {

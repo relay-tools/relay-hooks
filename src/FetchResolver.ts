@@ -124,7 +124,7 @@ export function fetchResolver({
             const onlyStore = !isNetwork;
             onNext(operation, snapshot, fetchHasReturned);
             if (onlyStore) {
-                onComplete(null, isLoading);
+                onComplete(null, fetchHasReturned);
             }
         }
         // Cancel any previously running refetch.

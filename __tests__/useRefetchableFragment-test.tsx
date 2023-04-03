@@ -1999,10 +1999,10 @@ describe('useRefetchableFragmentNode', () => {
                             id: '1',
                             name: 'Alice',
                             profile_picture: null,
-                            ...createFragmentRef('1', refetchQuery),
+                            ...createFragmentRef('1', query),
                             //...createFragmentRef('1', refetchQuery), //original relay
                         };
-                        // expectFragmentResults([{ data: refetchedUser }, { data: refetchedUser }]); original relay
+                        expectFragmentResults([{ data: refetchedUser }]); //original relay
                     });
 
                     it('starts network request if refetch query is not fully cached and suspends if fragment has missing data', () => {
@@ -2126,10 +2126,10 @@ describe('useRefetchableFragmentNode', () => {
                             id: '1',
                             name: 'Alice',
                             profile_picture: null,
-                            ...createFragmentRef('1', refetchQuery),
+                            ...createFragmentRef('1', query),
                             //...createFragmentRef('1', refetchQuery), //original relay
                         };
-                        // expectFragmentResults([{ data: refetchedUser }, { data: refetchedUser }]); original relay
+                        expectFragmentResults([{ data: refetchedUser }]); //original relay
                     });
 
                     it('starts network request if refetch query is not fully cached and suspends if fragment has missing data', () => {
@@ -2676,10 +2676,10 @@ describe('useRefetchableFragmentNode', () => {
                         id: '1',
                         name: 'Alice',
                         profile_picture: null,
-                        ...createFragmentRef('1', refetchQuery),
+                        ...createFragmentRef('1', query),
                         //...createFragmentRef('1', refetchQuery), //original relay
                     };
-                    // expectFragmentResults([{ data: refetchedUser }, { data: refetchedUser }]); original relay
+                    expectFragmentResults([{ data: refetchingUser }]); // original relay
                 });
 
                 it("doesn't start network request if refetch query is not fully cached", () => {

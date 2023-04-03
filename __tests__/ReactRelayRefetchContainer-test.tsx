@@ -12,11 +12,7 @@
 /* eslint-disable */
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
-import {
-    useRefetchable as useRefetch,
-    RelayEnvironmentProvider,
-    useRelayEnvironment,
-} from '../src';
+import { useRefetchable as useRefetch, RelayEnvironmentProvider, useRelayEnvironment } from '../src';
 import { forceCache } from '../src/Utils';
 
 function createHooks(component) {
@@ -38,14 +34,7 @@ const ReactRelayRefetchContainer = {
                 fetchPolicy: options?.fetchPolicy,
             });
         };
-        return (
-            <Component
-                isLoading={isLoading}
-                user={data}
-                {...others}
-                relay={{ environment, refetch }}
-            />
-        );
+        return <Component isLoading={isLoading} user={data} {...others} relay={{ environment, refetch }} />;
     },
 };
 
@@ -137,8 +126,8 @@ describe('ReactRelayRefetchContainer', () => {
         `;
         UserFragment = graphql`
             fragment ReactRelayRefetchContainerTestUserFragment on User
-                @refetchable(queryName: "ReactRelayRefetchContainerTestUserFragmentRefetchQuery")
-                @argumentDefinitions(cond: { type: "Boolean", defaultValue: true }) {
+            @refetchable(queryName: "ReactRelayRefetchContainerTestUserFragmentRefetchQuery")
+            @argumentDefinitions(cond: { type: "Boolean", defaultValue: true }) {
                 id
                 name @include(if: $cond)
             }
@@ -379,12 +368,7 @@ describe('ReactRelayRefetchContainer', () => {
             missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
-            selector: createReaderSelector(
-                UserFragment,
-                '842472',
-                { cond: true },
-                ownerUser2.request,
-            ),
+            selector: createReaderSelector(UserFragment, '842472', { cond: true }, ownerUser2.request),
         });
     });
 
@@ -399,8 +383,7 @@ describe('ReactRelayRefetchContainer', () => {
         environment.lookup.mockClear();
         environment.subscribe.mockClear();
 
-        userPointer = environment.lookup(ownerUser1WithCondVar.fragment, ownerUser1WithCondVar).data
-            .node;
+        userPointer = environment.lookup(ownerUser1WithCondVar.fragment, ownerUser1WithCondVar).data.node;
         instance.getInstance().setProps({
             user: userPointer,
         });
@@ -432,12 +415,7 @@ describe('ReactRelayRefetchContainer', () => {
             missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
-            selector: createReaderSelector(
-                UserFragment,
-                '4',
-                { cond: false },
-                ownerUser1WithCondVar.request,
-            ),
+            selector: createReaderSelector(UserFragment, '4', { cond: false }, ownerUser1WithCondVar.request),
         });
     });
 
@@ -458,9 +436,7 @@ describe('ReactRelayRefetchContainer', () => {
             id: '4',
         };
         refetch(refetchVariables, null, jest.fn());
-        expect(
-            environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache),
-        ).toBe(true);
+        expect(environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache)).toBe(true);
         environment.mock.resolve(UserFragmentRefetchQuery, {
             data: {
                 node: {
@@ -473,8 +449,7 @@ describe('ReactRelayRefetchContainer', () => {
         environment.subscribe.mockClear();
 
         // Pass an updated user pointer that references different variables
-        userPointer = environment.lookup(ownerUser1WithCondVar.fragment, ownerUser1WithCondVar).data
-            .node;
+        userPointer = environment.lookup(ownerUser1WithCondVar.fragment, ownerUser1WithCondVar).data.node;
         instance.getInstance().setProps({
             user: userPointer,
         });
@@ -506,12 +481,7 @@ describe('ReactRelayRefetchContainer', () => {
             missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
-            selector: createReaderSelector(
-                UserFragment,
-                '4',
-                { cond: false },
-                ownerUser1WithCondVar.request,
-            ),
+            selector: createReaderSelector(UserFragment, '4', { cond: false }, ownerUser1WithCondVar.request),
         });
     });
 
@@ -683,9 +653,7 @@ describe('ReactRelayRefetchContainer', () => {
                 id: '4',
             };
             refetch(refetchVariables, null, jest.fn());
-            expect(
-                environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache),
-            ).toBe(true);
+            expect(environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache)).toBe(true);
             environment.mock.resolve(UserFragmentRefetchQuery, {
                 data: {
                     node: {
@@ -707,9 +675,7 @@ describe('ReactRelayRefetchContainer', () => {
             };
             refetch(refetchVariables, null, jest.fn(), refetchOptions);
             expect(render.mock.calls.length).toBe(2);
-            expect(
-                environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache),
-            ).toBe(false);
+            expect(environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache)).toBe(false);
             expect(environment.execute).toBeCalledTimes(0);
         });
 
@@ -819,13 +785,11 @@ describe('ReactRelayRefetchContainer', () => {
                 },
             });
             refetch(refetchVariables, null, jest.fn());
-            expect(
-                environment.mock.isLoading(UserFragmentRefetchQuery, fetchedVariables, forceCache),
-            ).toBe(false);
+            expect(environment.mock.isLoading(UserFragmentRefetchQuery, fetchedVariables, forceCache)).toBe(false);
         });
 
         it('renders with the results of the new variables on success', () => {
-            expect.assertions(10);
+            expect.assertions(8);
             expect(render.mock.calls.length).toBe(1);
             expect(render.mock.calls[0][0].user.name).toBe('Zuck');
             variables = {
@@ -845,11 +809,9 @@ describe('ReactRelayRefetchContainer', () => {
                     },
                 },
             });
-            expect(render.mock.calls.length).toBe(4);
-            expect(render.mock.calls[2][0].isLoading).toBe(true);
+            expect(render.mock.calls.length).toBe(3);
+            expect(render.mock.calls[2][0].isLoading).toBe(false);
             expect(render.mock.calls[2][0].user.name).toBe(undefined);
-            expect(render.mock.calls[3][0].isLoading).toBe(false);
-            expect(render.mock.calls[3][0].user.name).toBe(undefined);
         });
 
         it('does not update variables on failure', () => {

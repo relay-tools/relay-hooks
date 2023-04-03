@@ -65,13 +65,7 @@ import * as React from 'react';
 import { useMemo, useState } from 'react';
 import * as TestRenderer from 'react-test-renderer';
 import { getFragment, getRequest, graphql, OperationDescriptor, Variables } from 'relay-runtime';
-import {
-    ConnectionHandler,
-    FRAGMENT_OWNER_KEY,
-    FRAGMENTS_KEY,
-    ID_KEY,
-    createOperationDescriptor,
-} from 'relay-runtime';
+import { ConnectionHandler, FRAGMENT_OWNER_KEY, FRAGMENTS_KEY, ID_KEY, createOperationDescriptor } from 'relay-runtime';
 import { ReactRelayContext, usePaginationFragment as usePaginationFragmentOriginal } from '../src';
 const warning = require('fbjs/lib/warning');
 
@@ -195,12 +189,12 @@ describe('usePaginationFragment', () => {
         `;
         gqlFragment = getFragment(graphql`
             fragment usePaginationFragmentTestUserFragment on User
-                @refetchable(queryName: "usePaginationFragmentTestUserFragmentPaginationQuery")
-                @argumentDefinitions(
-                    isViewerFriendLocal: { type: "Boolean", defaultValue: false }
-                    orderby: { type: "[String]" }
-                    scale: { type: "Float" }
-                ) {
+            @refetchable(queryName: "usePaginationFragmentTestUserFragmentPaginationQuery")
+            @argumentDefinitions(
+                isViewerFriendLocal: { type: "Boolean", defaultValue: false }
+                orderby: { type: "[String]" }
+                scale: { type: "Float" }
+            ) {
                 id
                 name
                 friends(
@@ -224,14 +218,12 @@ describe('usePaginationFragment', () => {
         `);
         gqlFragmentWithStreaming = getFragment(graphql`
             fragment usePaginationFragmentTestUserFragmentWithStreaming on User
-                @refetchable(
-                    queryName: "usePaginationFragmentTestUserFragmentStreamingPaginationQuery"
-                )
-                @argumentDefinitions(
-                    isViewerFriendLocal: { type: "Boolean", defaultValue: false }
-                    orderby: { type: "[String]" }
-                    scale: { type: "Float" }
-                ) {
+            @refetchable(queryName: "usePaginationFragmentTestUserFragmentStreamingPaginationQuery")
+            @argumentDefinitions(
+                isViewerFriendLocal: { type: "Boolean", defaultValue: false }
+                orderby: { type: "[String]" }
+                scale: { type: "Float" }
+            ) {
                 id
                 name
                 friends(
@@ -318,8 +310,7 @@ describe('usePaginationFragment', () => {
                 $last: Int
             ) {
                 node(id: $id) {
-                    ...usePaginationFragmentTestUserFragment
-                        @arguments(isViewerFriendLocal: true, orderby: ["name"])
+                    ...usePaginationFragmentTestUserFragment @arguments(isViewerFriendLocal: true, orderby: ["name"])
                 }
             }
         `);
@@ -356,30 +347,25 @@ describe('usePaginationFragment', () => {
             id: '<feedbackid>',
         };
         // eslint-disable-next-line prettier/prettier
-        gqlPaginationQuery = require('./__generated__/usePaginationFragmentTestUserFragmentPaginationQuery.graphql')
-            .default;
+        gqlPaginationQuery =
+            require('./__generated__/usePaginationFragmentTestUserFragmentPaginationQuery.graphql').default;
         // eslint-disable-next-line prettier/prettier
-        gqlPaginationQueryWithStreaming = require('./__generated__/usePaginationFragmentTestUserFragmentStreamingPaginationQuery.graphql')
-            .default;
+        gqlPaginationQueryWithStreaming =
+            require('./__generated__/usePaginationFragmentTestUserFragmentStreamingPaginationQuery.graphql').default;
 
         invariant(
             areEqual(gqlFragment.metadata?.refetch?.operation.default, gqlPaginationQuery),
             'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
         );
         invariant(
-            areEqual(
-                gqlFragmentWithStreaming.metadata?.refetch?.operation.default,
-                gqlPaginationQueryWithStreaming,
-            ),
+            areEqual(gqlFragmentWithStreaming.metadata?.refetch?.operation.default, gqlPaginationQueryWithStreaming),
             'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
         );
 
         query = createOperationDescriptor(gqlQuery, variables, { force: true });
-        queryNestedFragment = createOperationDescriptor(
-            gqlQueryNestedFragment,
-            variablesNestedFragment,
-            { force: true },
-        );
+        queryNestedFragment = createOperationDescriptor(gqlQueryNestedFragment, variablesNestedFragment, {
+            force: true,
+        });
         queryWithoutID = createOperationDescriptor(gqlQueryWithoutID, variablesWithoutID, {
             force: true,
         });
@@ -481,9 +467,7 @@ describe('usePaginationFragment', () => {
             const [owner, _setOwner] = useState(props.owner);
             const [_, _setCount] = useState(0);
             const fragment = props.fragment ?? gqlFragment;
-            const nodeUserRef = useMemo(() => environment.lookup(owner.fragment).data?.node, [
-                owner,
-            ]);
+            const nodeUserRef = useMemo(() => environment.lookup(owner.fragment).data?.node, [owner]);
             const ownerOperationRef = useMemo(
                 () => ({
                     [ID_KEY]: owner.request.variables.id ?? owner.request.variables.nodeID,
@@ -494,9 +478,7 @@ describe('usePaginationFragment', () => {
                 }),
                 [owner, fragment.name],
             );
-            const userRef = props.hasOwnProperty('userRef')
-                ? props.userRef
-                : nodeUserRef ?? ownerOperationRef;
+            const userRef = props.hasOwnProperty('userRef') ? props.userRef : nodeUserRef ?? ownerOperationRef;
 
             setOwner = _setOwner;
 
@@ -510,26 +492,16 @@ describe('usePaginationFragment', () => {
 
             setEnvironment = _setEnv;
 
-            return (
-                <ReactRelayContext.Provider value={relayContext}>
-                    {children}
-                </ReactRelayContext.Provider>
-            );
+            return <ReactRelayContext.Provider value={relayContext}>{children}</ReactRelayContext.Provider>;
         };
 
-        renderFragment = (args?: {
-            isConcurrent?: boolean;
-            owner?: any;
-            userRef?: any;
-            fragment?: any;
-        }): any => {
+        renderFragment = (args?: { isConcurrent?: boolean; owner?: any; userRef?: any; fragment?: any }): any => {
             const { isConcurrent = false, ...props } = args ?? {};
             let renderer;
             TestRenderer.act(() => {
                 renderer = TestRenderer.create(
                     <ErrorBoundary
                         fallback={({ error }) => {
-                            console.log('error', error);
                             return `Error: ${error.message}`;
                         }}
                     >
@@ -589,9 +561,7 @@ describe('usePaginationFragment', () => {
                 }
             `);
             const renderer = renderFragment({ fragment: UserFragment });
-            expect(
-                renderer.toJSON().includes('Remove `@relay(plural: true)` from fragment'),
-            ).toEqual(true);
+            expect(renderer.toJSON().includes('Remove `@relay(plural: true)` from fragment')).toEqual(true);
         });
 
         it('should throw error if fragment is missing @refetchable directive', () => {
@@ -615,9 +585,7 @@ describe('usePaginationFragment', () => {
             });
             const renderer = renderFragment({ fragment: UserFragment, owner });
             expect(
-                renderer
-                    .toJSON()
-                    .includes('Did you forget to add a @refetchable directive to the fragment?'),
+                renderer.toJSON().includes('Did you forget to add a @refetchable directive to the fragment?'),
             ).toEqual(true);
         });
 
@@ -634,7 +602,7 @@ describe('usePaginationFragment', () => {
 
             const UserFragment = getFragment(graphql`
                 fragment usePaginationFragmentTest3UserFragment on User
-                    @refetchable(queryName: "usePaginationFragmentTest3UserFragmentRefetchQuery") {
+                @refetchable(queryName: "usePaginationFragmentTest3UserFragmentRefetchQuery") {
                     id
                 }
             `);
@@ -643,14 +611,10 @@ describe('usePaginationFragment', () => {
                 force: true,
             });
             const renderer = renderFragment({ fragment: UserFragment, owner });
-            console.log('renderer.toJSON()', renderer.toJSON());
-            console.log('UserFragment', UserFragment);
             expect(
                 renderer
                     .toJSON()
-                    .includes(
-                        'Did you forget to add a @connection directive to the connection field in the fragment?',
-                    ),
+                    .includes('Did you forget to add a @connection directive to the connection field in the fragment?'),
             ).toEqual(true);
         });
 
@@ -882,9 +846,7 @@ describe('usePaginationFragment', () => {
 
                 expect(warning).toHaveBeenCalledTimes(1);
                 expect(
-                    (warning as any).mock.calls[0][1].includes(
-                        'Relay: Unexpected fetch on unmounted component',
-                    ),
+                    (warning as any).mock.calls[0][1].includes('Relay: Unexpected fetch on unmounted component'),
                 ).toEqual(true);
                 expect(environment.execute).toHaveBeenCalledTimes(0);
             });
@@ -1606,8 +1568,7 @@ describe('usePaginationFragment', () => {
                 });
 
                 // Get fragment ref for user using nested fragment
-                const userRef = (environment.lookup(queryNestedFragment.fragment).data as any)?.node
-                    ?.actor;
+                const userRef = (environment.lookup(queryNestedFragment.fragment).data as any)?.node?.actor;
 
                 initialUser = {
                     id: '1',
@@ -3320,9 +3281,7 @@ describe('usePaginationFragment', () => {
 
                 // Assert query is tentatively retained while component is suspended
                 expect(environment.retain).toBeCalledTimes(1);
-                expect(environment.retain.mock.calls[0][0]).toEqual(
-                    expected.refetchQuery ?? paginationQuery,
-                );
+                expect(environment.retain.mock.calls[0][0]).toEqual(expected.refetchQuery ?? paginationQuery);
             }
 
             it('refetches new variables correctly when refetching new id', () => {
@@ -3419,13 +3378,6 @@ describe('usePaginationFragment', () => {
                     },
                 };
                 expectFragmentResults([
-                    {
-                        data: expectedUser,
-                        isLoadingNext: false,
-                        isLoadingPrevious: false,
-                        hasNext: true,
-                        hasPrevious: false,
-                    },
                     {
                         data: expectedUser,
                         isLoadingNext: false,
@@ -3542,13 +3494,6 @@ describe('usePaginationFragment', () => {
                         hasNext: true,
                         hasPrevious: false,
                     },
-                    {
-                        data: expectedUser,
-                        isLoadingNext: false,
-                        isLoadingPrevious: false,
-                        hasNext: true,
-                        hasPrevious: false,
-                    },
                 ]);
 
                 // Assert refetch query was retained
@@ -3591,8 +3536,7 @@ describe('usePaginationFragment', () => {
                 });
 
                 // Get fragment ref for user using nested fragment
-                const userRef = (environment.lookup(queryNestedFragment.fragment).data as any)?.node
-                    ?.actor;
+                const userRef = (environment.lookup(queryNestedFragment.fragment).data as any)?.node?.actor;
 
                 initialUser = {
                     id: '1',
@@ -3720,13 +3664,6 @@ describe('usePaginationFragment', () => {
                         hasNext: true,
                         hasPrevious: false,
                     },
-                    {
-                        data: expectedUser,
-                        isLoadingNext: false,
-                        isLoadingPrevious: false,
-                        hasNext: true,
-                        hasPrevious: false,
-                    },
                 ]);
 
                 // Assert refetch query was retained
@@ -3829,13 +3766,6 @@ describe('usePaginationFragment', () => {
                     },
                 };
                 expectFragmentResults([
-                    {
-                        data: expectedUser,
-                        isLoadingNext: false,
-                        isLoadingPrevious: false,
-                        hasNext: true,
-                        hasPrevious: false,
-                    },
                     {
                         data: expectedUser,
                         isLoadingNext: false,
@@ -3969,15 +3899,9 @@ describe('usePaginationFragment', () => {
 
                 gqlFragment = getFragment(graphql`
                     fragment usePaginationFragmentTestStoryFragment on NonNodeStory
-                        @argumentDefinitions(
-                            count: { type: "Int", defaultValue: 10 }
-                            cursor: { type: "ID" }
-                        )
-                        @refetchable(
-                            queryName: "usePaginationFragmentTestStoryFragmentRefetchQuery"
-                        ) {
-                        comments(first: $count, after: $cursor)
-                            @connection(key: "StoryFragment_comments") {
+                    @argumentDefinitions(count: { type: "Int", defaultValue: 10 }, cursor: { type: "ID" })
+                    @refetchable(queryName: "usePaginationFragmentTestStoryFragmentRefetchQuery") {
+                        comments(first: $count, after: $cursor) @connection(key: "StoryFragment_comments") {
                             edges {
                                 node {
                                     id
@@ -3986,8 +3910,8 @@ describe('usePaginationFragment', () => {
                         }
                     }
                 `);
-                gqlPaginationQuery = require('./__generated__/usePaginationFragmentTestStoryFragmentRefetchQuery.graphql')
-                    .default;
+                gqlPaginationQuery =
+                    require('./__generated__/usePaginationFragmentTestStoryFragmentRefetchQuery.graphql').default;
                 const fetchVariables = { id: 'a' };
                 //gqlRefetchQuery = generated.StoryFragmentRefetchQuery;
                 invariant(

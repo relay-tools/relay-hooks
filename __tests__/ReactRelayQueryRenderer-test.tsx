@@ -1989,7 +1989,6 @@ describe('ReactRelayQueryRenderer', () => {
         let response = null;
         const onResponse = (res) => {
             response = res;
-            console.log('onResponse test', res);
         };
         createHooks(
             <ReactRelayQueryRenderer

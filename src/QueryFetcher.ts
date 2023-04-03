@@ -8,7 +8,6 @@ import {
     OperationDescriptor,
     GraphQLTaggedNode,
     Variables,
-    GraphQLResponse,
 } from 'relay-runtime';
 import { Fetcher, fetchResolver } from './FetchResolver';
 import { FetchPolicy, RenderProps, QueryOptions, Options } from './RelayHooksTypes';
@@ -116,24 +115,19 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         }
 
         const { onComplete, onResponse } = options;
-        let fetchHasReturned = false;
-        const onNext = (operation: OperationDescriptor, snapshot: Snapshot, response: GraphQLResponse): void => {
+        const onNext = (operation: OperationDescriptor, snapshot: Snapshot, doUpdate: boolean): void => {
             if (!this.snapshot) {
                 this.snapshot = snapshot;
                 this.subscribe(snapshot);
                 this.resolveResult();
-                const responses = Array.isArray(response) ? response : [response];
-                const cacheConfig = operation.request.cacheConfig;
-                const isQueryPolling = cacheConfig && cacheConfig.poll;
-                const isIncremental = responses.some((x) => x != null && x.hasNext === true);
-                if (fetchHasReturned && (isQueryPolling || isIncremental)) {
+                if (doUpdate) {
                     this.forceUpdate();
                 }
             }
         };
-        const complete = (error: Error | null): void => {
+        const complete = (error: Error | null, doUpdate: boolean): void => {
             this.resolveResult();
-            if (fetchHasReturned) {
+            if (doUpdate) {
                 this.forceUpdate();
             }
             onComplete && onComplete(error);
@@ -147,7 +141,6 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             onResponse,
             options.UNSTABLE_renderPolicy,
         );
-        fetchHasReturned = true;
     }
 
     getQuery(gqlQuery, variables, networkCacheConfig): OperationDescriptor | null {

@@ -18,14 +18,8 @@ export type Fetcher = {
         environment: IEnvironment,
         operation: OperationDescriptor,
         fetchPolicy: FetchPolicy | null | undefined,
-        onComplete: (_e: Error | null) => void,
-        onNext: (
-            operation: OperationDescriptor,
-            snapshot: Snapshot,
-            response?: GraphQLResponse,
-            fromStore?: boolean,
-            onlyStore?: boolean,
-        ) => void,
+        onComplete: (_e: Error | null, doUpdate: boolean) => void,
+        onNext: (operation: OperationDescriptor, snapshot: Snapshot, doUpdate: boolean) => void,
         onResponse?: (response: GraphQLResponse | null) => void,
         renderPolicy?: RenderPolicy,
     ) => Disposable;
@@ -38,12 +32,10 @@ export type Fetcher = {
 };
 
 export function fetchResolver({
-    setLoading,
     doRetain = true,
     disposeTemporary,
 }: {
     doRetain?: boolean;
-    setLoading?: (loading: boolean) => void;
     disposeTemporary?: () => void;
 }): Fetcher {
     let _refetchSubscription: Subscription | null = null;
@@ -55,9 +47,9 @@ export function fetchResolver({
     let error: Error | null = null;
     let env;
 
-    const updateLoading = (loading: boolean): void => {
+    const update = (loading: boolean, e: Error = null): void => {
         isLoading = loading;
-        setLoading && setLoading(isLoading);
+        error = e;
     };
     const lookupInStore = (
         environment: IEnvironment,
@@ -103,23 +95,19 @@ export function fetchResolver({
     const disposeRequest = (): void => {
         _refetchSubscription && _refetchSubscription.unsubscribe();
         error = null;
+        isLoading = false;
     };
 
     const fetch = (
         environment: IEnvironment,
         operation: OperationDescriptor,
         fetchPolicy: FetchPolicy = 'network-only',
-        onComplete = (_e: Error | null): void => undefined,
-        onNext: (
-            operation: OperationDescriptor,
-            snapshot: Snapshot,
-            response?: GraphQLResponse,
-            fromStore?: boolean,
-            onlyStore?: boolean,
-        ) => void,
+        onComplete = (_e: Error | null, _u: boolean): void => undefined,
+        onNext: (operation: OperationDescriptor, snapshot: Snapshot, doUpdate: boolean) => void,
         onResponse?: (response: GraphQLResponse | null) => void,
         renderPolicy?: RenderPolicy,
     ): Disposable => {
+        let fetchHasReturned = false;
         if (env != environment || query.request.identifier !== operation.request.identifier) {
             dispose();
             if (doRetain) {
@@ -134,19 +122,19 @@ export function fetchResolver({
         const isNetwork = isNetworkPolicy(fetchPolicy, full);
         if (snapshot != null) {
             const onlyStore = !isNetwork;
-            onNext(operation, snapshot, null, true, onlyStore);
+            onNext(operation, snapshot, fetchHasReturned);
             if (onlyStore) {
-                onComplete(null);
+                onComplete(null, isLoading);
             }
         }
         // Cancel any previously running refetch.
         _refetchSubscription && _refetchSubscription.unsubscribe();
+        let refetchSubscription: Subscription;
         if (isNetwork) {
             let resolveNetworkPromise = (): void => {};
 
             // Declare refetchSubscription before assigning it in .start(), since
             // synchronous completion may call callbacks .subscribe() returns.
-            let refetchSubscription: Subscription;
             const cleanup = (): void => {
                 if (_refetchSubscription === refetchSubscription) {
                     _refetchSubscription = null;
@@ -155,36 +143,36 @@ export function fetchResolver({
                 promise = null;
             };
 
+            const complete = (error: Error = null) => {
+                const prevLoading = isLoading;
+                resolveNetworkPromise();
+                update(false, error);
+                cleanup();
+                onComplete(error, fetchHasReturned && (prevLoading || !!error));
+            };
+
             fetchQuery(environment, operation).subscribe({
                 unsubscribe: (): void => {
                     cleanup();
                 },
-                complete: (): void => {
-                    resolveNetworkPromise();
-                    updateLoading(false);
-                    cleanup();
-                    onComplete(null);
-                },
-                error: (e: Error): void => {
-                    error = e;
-                    resolveNetworkPromise();
-                    updateLoading(false);
-                    cleanup();
-                    onComplete(e);
-                },
+                complete,
+                error: (e: Error): void => complete(e),
                 next: (response: GraphQLResponse) => {
                     const store = environment.lookup(operation.fragment);
                     promise = null;
+                    const responses = Array.isArray(response) ? response : [response];
                     const cacheConfig = operation.request.cacheConfig;
-                    cacheConfig && cacheConfig.poll && updateLoading(false);
+                    const isQueryPolling = cacheConfig && cacheConfig.poll;
+                    const isIncremental = responses.some((x) => x != null && x.hasNext === true);
+                    update(isIncremental && !isQueryPolling);
                     resolveNetworkPromise();
                     onResponse && onResponse(response);
-                    onNext(operation, store, response);
+                    onNext(operation, store, fetchHasReturned);
                 },
                 start: (subscription) => {
                     refetchSubscription = subscription;
                     _refetchSubscription = refetchSubscription;
-                    updateLoading(true);
+                    update(true, null);
                 },
             });
             if (!snapshot) {
@@ -192,14 +180,12 @@ export function fetchResolver({
                     resolveNetworkPromise = resolve;
                 });
             }
-            return {
-                dispose: (): void => {
-                    refetchSubscription && refetchSubscription.unsubscribe();
-                },
-            };
         }
+        fetchHasReturned = true;
         return {
-            dispose: (): void => {},
+            dispose: (): void => {
+                refetchSubscription && refetchSubscription.unsubscribe();
+            },
         };
     };
 

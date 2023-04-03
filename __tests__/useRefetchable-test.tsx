@@ -39,13 +39,7 @@ const ReactRelayRefetchContainer = {
             });
         };
         return (
-            <Component
-                error={error}
-                isLoading={isLoading}
-                user={data}
-                {...others}
-                relay={{ environment, refetch }}
-            />
+            <Component error={error} isLoading={isLoading} user={data} {...others} relay={{ environment, refetch }} />
         );
     },
 };
@@ -133,8 +127,8 @@ describe('useRefetchable', () => {
 
         UserFragment = graphql`
             fragment useRefetchableTestUserUserFragment on User
-                @refetchable(queryName: "useRefetchableTestUserUserFragmentRefetchQuery")
-                @argumentDefinitions(cond: { type: "Boolean", defaultValue: true }) {
+            @refetchable(queryName: "useRefetchableTestUserUserFragmentRefetchQuery")
+            @argumentDefinitions(cond: { type: "Boolean", defaultValue: true }) {
                 id
                 name @include(if: $cond)
             }
@@ -154,11 +148,7 @@ describe('useRefetchable', () => {
         variables = {};
         TestComponent = render;
         TestComponent.displayName = 'TestComponent';
-        TestContainer = ReactRelayRefetchContainer.createContainer(
-            TestComponent,
-            UserFragment,
-            UserQuery,
-        );
+        TestContainer = ReactRelayRefetchContainer.createContainer(TestComponent, UserFragment, UserQuery);
 
         // Pre-populate the store with data
         ownerUser1 = createOperationDescriptor(UserQuery, { id: '4' });
@@ -367,12 +357,7 @@ describe('useRefetchable', () => {
             missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
-            selector: createReaderSelector(
-                UserFragment,
-                '842472',
-                { cond: true },
-                ownerUser2.request,
-            ),
+            selector: createReaderSelector(UserFragment, '842472', { cond: true }, ownerUser2.request),
         });
     });
 
@@ -387,8 +372,7 @@ describe('useRefetchable', () => {
         environment.lookup.mockClear();
         environment.subscribe.mockClear();
 
-        userPointer = environment.lookup(ownerUser1WithCondVar.fragment, ownerUser1WithCondVar).data
-            .node;
+        userPointer = environment.lookup(ownerUser1WithCondVar.fragment, ownerUser1WithCondVar).data.node;
         instance.getInstance().setProps({
             user: userPointer,
         });
@@ -421,12 +405,7 @@ describe('useRefetchable', () => {
             relayResolverErrors: [],
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
-            selector: createReaderSelector(
-                UserFragment,
-                '4',
-                { cond: false },
-                ownerUser1WithCondVar.request,
-            ),
+            selector: createReaderSelector(UserFragment, '4', { cond: false }, ownerUser1WithCondVar.request),
         });
     });
 
@@ -447,9 +426,7 @@ describe('useRefetchable', () => {
             id: '4',
         };
         refetch(refetchVariables, null, jest.fn());
-        expect(
-            environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache),
-        ).toBe(true);
+        expect(environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache)).toBe(true);
 
         environment.mock.resolve(UserFragmentRefetchQuery, {
             data: {
@@ -463,8 +440,7 @@ describe('useRefetchable', () => {
         environment.subscribe.mockClear();
 
         // Pass an updated user pointer that references different variables
-        userPointer = environment.lookup(ownerUser1WithCondVar.fragment, ownerUser1WithCondVar).data
-            .node;
+        userPointer = environment.lookup(ownerUser1WithCondVar.fragment, ownerUser1WithCondVar).data.node;
         instance.getInstance().setProps({
             user: userPointer,
         });
@@ -497,12 +473,7 @@ describe('useRefetchable', () => {
             missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
-            selector: createReaderSelector(
-                UserFragment,
-                '4',
-                { cond: false },
-                ownerUser1WithCondVar.request,
-            ),
+            selector: createReaderSelector(UserFragment, '4', { cond: false }, ownerUser1WithCondVar.request),
         });
     });
 
@@ -674,9 +645,7 @@ describe('useRefetchable', () => {
                 id: '4',
             };
             refetch(refetchVariables, null, jest.fn());
-            expect(
-                environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache),
-            ).toBe(true);
+            expect(environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache)).toBe(true);
             environment.mock.resolve(UserFragmentRefetchQuery, {
                 data: {
                     node: {
@@ -698,9 +667,7 @@ describe('useRefetchable', () => {
             };
             refetch(refetchVariables, null, jest.fn(), refetchOptions);
             expect(render.mock.calls.length).toBe(2);
-            expect(
-                environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache),
-            ).toBe(false);
+            expect(environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache)).toBe(false);
             expect(environment.execute).toBeCalledTimes(0);
         });
 
@@ -813,7 +780,7 @@ describe('useRefetchable', () => {
         });
 
         it('renders with the results of the new variables on success', () => {
-            expect.assertions(10);
+            expect.assertions(8);
             expect(render.mock.calls.length).toBe(1);
             expect(render.mock.calls[0][0].user.name).toBe('Zuck');
             variables = {
@@ -833,11 +800,9 @@ describe('useRefetchable', () => {
                     },
                 },
             });
-            expect(render.mock.calls.length).toBe(4);
-            expect(render.mock.calls[2][0].isLoading).toBe(true);
+            expect(render.mock.calls.length).toBe(3);
+            expect(render.mock.calls[2][0].isLoading).toBe(false);
             expect(render.mock.calls[2][0].user.name).toBe(undefined);
-            expect(render.mock.calls[3][0].isLoading).toBe(false);
-            expect(render.mock.calls[3][0].user.name).toBe(undefined);
         });
 
         it('does not update variables on failure', () => {
@@ -950,7 +915,7 @@ describe('useRefetchable', () => {
             });
             ReactTestRenderer.act(() => {
                 instance.unmount();
-            })
+            });
             expect(references.length).toBe(1);
             expect(references[0].dispose).toBeCalled();
         });

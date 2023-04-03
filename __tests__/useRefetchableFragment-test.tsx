@@ -83,12 +83,7 @@ const invariant = require('fbjs/lib/invariant');
 const warning = require('fbjs/lib/warning');
 const areEqual = require('fbjs/lib/areEqual');
 
-const {
-    FRAGMENT_OWNER_KEY,
-    FRAGMENTS_KEY,
-    ID_KEY,
-    createOperationDescriptor,
-} = require('relay-runtime');
+const { FRAGMENT_OWNER_KEY, FRAGMENTS_KEY, ID_KEY, createOperationDescriptor } = require('relay-runtime');
 
 describe('useRefetchableFragmentNode', () => {
     let environment;
@@ -136,10 +131,7 @@ describe('useRefetchableFragmentNode', () => {
     }
 
     function useRefetchableFragmentNode(fragmentNode, fragmentRef) {
-        const { data, refetch: refetchFunction } = useRefetchableFragmentNodeOriginal(
-            fragmentNode,
-            fragmentRef,
-        );
+        const { data, refetch: refetchFunction } = useRefetchableFragmentNodeOriginal(fragmentNode, fragmentRef);
         refetch = refetchFunction;
         renderSpy(data, refetch);
         return data;
@@ -195,10 +187,8 @@ describe('useRefetchableFragmentNode', () => {
         `;
         gqlFragmentWithArgs = getFragment(graphql`
             fragment useRefetchableFragmentTestUserFragmentWithArgs on User
-                @refetchable(
-                    queryName: "useRefetchableFragmentTestUserFragmentWithArgsRefetchQuery"
-                )
-                @argumentDefinitions(scaleLocal: { type: "Float!" }) {
+            @refetchable(queryName: "useRefetchableFragmentTestUserFragmentWithArgsRefetchQuery")
+            @argumentDefinitions(scaleLocal: { type: "Float!" }) {
                 id
                 name
                 profile_picture(scale: $scaleLocal) {
@@ -209,7 +199,7 @@ describe('useRefetchableFragmentNode', () => {
         `);
         gqlFragment = getFragment(graphql`
             fragment useRefetchableFragmentTestUserFragment on User
-                @refetchable(queryName: "useRefetchableFragmentTestUserFragmentRefetchQuery") {
+            @refetchable(queryName: "useRefetchableFragmentTestUserFragmentRefetchQuery") {
                 id
                 name
                 profile_picture(scale: $scale) {
@@ -248,10 +238,9 @@ describe('useRefetchableFragmentNode', () => {
                 }
             }
         `);
-        gqlRefetchQuery = require('./__generated__/useRefetchableFragmentTestUserFragmentRefetchQuery.graphql')
-            .default;
-        gqlRefetchQueryWithArgs = require('./__generated__/useRefetchableFragmentTestUserFragmentWithArgsRefetchQuery.graphql')
-            .default;
+        gqlRefetchQuery = require('./__generated__/useRefetchableFragmentTestUserFragmentRefetchQuery.graphql').default;
+        gqlRefetchQueryWithArgs =
+            require('./__generated__/useRefetchableFragmentTestUserFragmentWithArgsRefetchQuery.graphql').default;
         variables = { id: '1', scale: 16 };
         variablesNestedFragment = { id: '<feedbackid>', scale: 16 };
 
@@ -260,19 +249,14 @@ describe('useRefetchableFragmentNode', () => {
             'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
         );
         invariant(
-            areEqual(
-                gqlFragmentWithArgs.metadata?.refetch?.operation.default,
-                gqlRefetchQueryWithArgs,
-            ),
+            areEqual(gqlFragmentWithArgs.metadata?.refetch?.operation.default, gqlRefetchQueryWithArgs),
             'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
         );
 
         query = createOperationDescriptor(gqlQuery, variables, { force: true });
-        queryNestedFragment = createOperationDescriptor(
-            gqlQueryNestedFragment,
-            variablesNestedFragment,
-            { force: true },
-        );
+        queryNestedFragment = createOperationDescriptor(gqlQueryNestedFragment, variablesNestedFragment, {
+            force: true,
+        });
         refetchQuery = createOperationDescriptor(gqlRefetchQuery, variables, {
             force: true,
         });
@@ -332,11 +316,7 @@ describe('useRefetchableFragmentNode', () => {
 
             setEnvironment = _setEnv;
 
-            return (
-                <ReactRelayContext.Provider value={relayContext}>
-                    {children}
-                </ReactRelayContext.Provider>
-            );
+            return <ReactRelayContext.Provider value={relayContext}>{children}</ReactRelayContext.Provider>;
         };
 
         const Fallback = (): any => {
@@ -347,12 +327,7 @@ describe('useRefetchableFragmentNode', () => {
             return 'Fallback';
         };
 
-        renderFragment = (args?: {
-            isConcurrent?: boolean;
-            owner?: any;
-            userRef?: any;
-            fragment?: any;
-        }): any => {
+        renderFragment = (args?: { isConcurrent?: boolean; owner?: any; userRef?: any; fragment?: any }): any => {
             const { isConcurrent = false, ...props } = args ?? ({} as any);
             return TestRenderer.create(
                 <ErrorBoundary fallback={({ error }): any => `Error: ${error.message}`}>
@@ -388,9 +363,7 @@ describe('useRefetchableFragmentNode', () => {
                 }
             `);
             const renderer = renderFragment({ fragment: UserFragment });
-            expect(
-                renderer.toJSON().includes('Remove `@relay(plural: true)` from fragment'),
-            ).toEqual(true);
+            expect(renderer.toJSON().includes('Remove `@relay(plural: true)` from fragment')).toEqual(true);
         });
 
         it('should throw error if fragment is missing @refetchable directive', () => {
@@ -403,9 +376,7 @@ describe('useRefetchableFragmentNode', () => {
             `);
             const renderer = renderFragment({ fragment: UserFragment });
             expect(
-                renderer
-                    .toJSON()
-                    .includes('Did you forget to add a @refetchable directive to the fragment?'),
+                renderer.toJSON().includes('Did you forget to add a @refetchable directive to the fragment?'),
             ).toEqual(true);
         });
 
@@ -568,9 +539,7 @@ describe('useRefetchableFragmentNode', () => {
             expect(warning).toHaveBeenCalledTimes(1);
             expect(
                 // any[prop-missing]
-                warning.mock.calls[0][1].includes(
-                    'Relay: Unexpected call to `refetch` on unmounted component',
-                ),
+                warning.mock.calls[0][1].includes('Relay: Unexpected call to `refetch` on unmounted component'),
             ).toEqual(true);
             expect(environment.execute).toHaveBeenCalledTimes(0);
         });
@@ -816,8 +785,7 @@ describe('useRefetchableFragmentNode', () => {
             });
 
             // Get fragment ref for user using nested fragment
-            const userRef = (environment.lookup(queryNestedFragment.fragment).data as any)?.node
-                ?.actor;
+            const userRef = (environment.lookup(queryNestedFragment.fragment).data as any)?.node?.actor;
 
             const renderer = renderFragment({ owner: queryNestedFragment, userRef });
             const initialUser = {
@@ -907,11 +875,9 @@ describe('useRefetchableFragmentNode', () => {
                 id: '1',
                 scaleLocal: 32,
             };
-            refetchQueryWithArgs = createOperationDescriptor(
-                gqlRefetchQueryWithArgs,
-                refetchVariables,
-                { force: true },
-            );
+            refetchQueryWithArgs = createOperationDescriptor(gqlRefetchQueryWithArgs, refetchVariables, {
+                force: true,
+            });
             expectFragmentIsRefetching(renderer, {
                 refetchVariables,
                 refetchQuery: refetchQueryWithArgs,
@@ -977,11 +943,9 @@ describe('useRefetchableFragmentNode', () => {
                 id: '4',
                 scaleLocal: 16,
             };
-            refetchQueryWithArgs = createOperationDescriptor(
-                gqlRefetchQueryWithArgs,
-                refetchVariables,
-                { force: true },
-            );
+            refetchQueryWithArgs = createOperationDescriptor(gqlRefetchQueryWithArgs, refetchVariables, {
+                force: true,
+            });
             expectFragmentIsRefetching(renderer, {
                 refetchVariables,
                 refetchQuery: refetchQueryWithArgs,
@@ -2017,19 +1981,12 @@ describe('useRefetchableFragmentNode', () => {
                         renderFragment();
                         renderSpy.mockClear();
                         TestRenderer.act(() => {
-                            refetch(
-                                { id: '1' },
-                                { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy },
-                            );
+                            refetch({ id: '1' }, { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy });
                         });
 
                         // Assert request is not started
                         const refetchVariables = { ...variables };
-                        refetchQuery = createOperationDescriptor(
-                            gqlRefetchQuery,
-                            refetchVariables,
-                            { force: true },
-                        );
+                        refetchQuery = createOperationDescriptor(gqlRefetchQuery, refetchVariables, { force: true });
                         expectRequestIsInFlight({
                             inFlight: false,
                             requestCount: 0,
@@ -2042,7 +1999,7 @@ describe('useRefetchableFragmentNode', () => {
                             id: '1',
                             name: 'Alice',
                             profile_picture: null,
-                            ...createFragmentRef('1', query),
+                            ...createFragmentRef('1', refetchQuery),
                             //...createFragmentRef('1', refetchQuery), //original relay
                         };
                         // expectFragmentResults([{ data: refetchedUser }, { data: refetchedUser }]); original relay
@@ -2059,10 +2016,7 @@ describe('useRefetchableFragmentNode', () => {
                         expectFragmentResults([{ data: initialUser }]);
 
                         TestRenderer.act(() => {
-                            refetch(
-                                { id: '4' },
-                                { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy },
-                            );
+                            refetch({ id: '4' }, { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy });
                         });
 
                         // Assert that fragment is refetching with the right variables and
@@ -2071,11 +2025,7 @@ describe('useRefetchableFragmentNode', () => {
                             id: '4',
                             scale: 16,
                         };
-                        refetchQuery = createOperationDescriptor(
-                            gqlRefetchQuery,
-                            refetchVariables,
-                            { force: true },
-                        );
+                        refetchQuery = createOperationDescriptor(gqlRefetchQuery, refetchVariables, { force: true });
                         expectFragmentIsRefetching(renderer, {
                             refetchVariables,
                             refetchQuery,
@@ -2114,11 +2064,7 @@ describe('useRefetchableFragmentNode', () => {
                     it("starts network request if refetch query is not fully cached and doesn't suspend if fragment doesn't have missing data", () => {
                         // Cache user with missing username
                         const refetchVariables = { id: '4', scale: 16 };
-                        refetchQuery = createOperationDescriptor(
-                            gqlRefetchQuery,
-                            refetchVariables,
-                            { force: true },
-                        );
+                        refetchQuery = createOperationDescriptor(gqlRefetchQuery, refetchVariables, { force: true });
                         environment.commitPayload(refetchQuery, {
                             node: {
                                 __typename: 'User',
@@ -2131,10 +2077,7 @@ describe('useRefetchableFragmentNode', () => {
                         renderFragment();
                         renderSpy.mockClear();
                         TestRenderer.act(() => {
-                            refetch(
-                                { id: '4' },
-                                { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy },
-                            );
+                            refetch({ id: '4' }, { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy });
                         });
 
                         // Assert request is started
@@ -2165,19 +2108,12 @@ describe('useRefetchableFragmentNode', () => {
                         renderFragment();
                         renderSpy.mockClear();
                         TestRenderer.act(() => {
-                            refetch(
-                                { id: '1' },
-                                { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy },
-                            );
+                            refetch({ id: '1' }, { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy });
                         });
 
                         // Assert request is not started
                         const refetchVariables = { ...variables };
-                        refetchQuery = createOperationDescriptor(
-                            gqlRefetchQuery,
-                            refetchVariables,
-                            { force: true },
-                        );
+                        refetchQuery = createOperationDescriptor(gqlRefetchQuery, refetchVariables, { force: true });
                         expectRequestIsInFlight({
                             inFlight: false,
                             requestCount: 0,
@@ -2190,7 +2126,7 @@ describe('useRefetchableFragmentNode', () => {
                             id: '1',
                             name: 'Alice',
                             profile_picture: null,
-                            ...createFragmentRef('1', query),
+                            ...createFragmentRef('1', refetchQuery),
                             //...createFragmentRef('1', refetchQuery), //original relay
                         };
                         // expectFragmentResults([{ data: refetchedUser }, { data: refetchedUser }]); original relay
@@ -2207,10 +2143,7 @@ describe('useRefetchableFragmentNode', () => {
                         expectFragmentResults([{ data: initialUser }]);
 
                         TestRenderer.act(() => {
-                            refetch(
-                                { id: '4' },
-                                { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy },
-                            );
+                            refetch({ id: '4' }, { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy });
                         });
 
                         // Assert that fragment is refetching with the right variables and
@@ -2219,11 +2152,7 @@ describe('useRefetchableFragmentNode', () => {
                             id: '4',
                             scale: 16,
                         };
-                        refetchQuery = createOperationDescriptor(
-                            gqlRefetchQuery,
-                            refetchVariables,
-                            { force: true },
-                        );
+                        refetchQuery = createOperationDescriptor(gqlRefetchQuery, refetchVariables, { force: true });
                         expectFragmentIsRefetching(renderer, {
                             refetchVariables,
                             refetchQuery,
@@ -2262,11 +2191,7 @@ describe('useRefetchableFragmentNode', () => {
                     it("starts network request if refetch query is not fully cached and suspends even if fragment doesn't have missing data", () => {
                         // Cache user with missing username
                         const refetchVariables = { id: '4', scale: 16 };
-                        refetchQuery = createOperationDescriptor(
-                            gqlRefetchQuery,
-                            refetchVariables,
-                            { force: true },
-                        );
+                        refetchQuery = createOperationDescriptor(gqlRefetchQuery, refetchVariables, { force: true });
                         environment.commitPayload(refetchQuery, {
                             node: {
                                 __typename: 'User',
@@ -2286,10 +2211,7 @@ describe('useRefetchableFragmentNode', () => {
                         expectFragmentResults([{ data: initialUser }]);
 
                         TestRenderer.act(() => {
-                            refetch(
-                                { id: '4' },
-                                { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy },
-                            );
+                            refetch({ id: '4' }, { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy });
                         });
 
                         expectFragmentIsRefetching(renderer, {
@@ -2343,19 +2265,12 @@ describe('useRefetchableFragmentNode', () => {
                         renderFragment();
                         renderSpy.mockClear();
                         TestRenderer.act(() => {
-                            refetch(
-                                { id: '1' },
-                                { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy },
-                            );
+                            refetch({ id: '1' }, { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy });
                         });
 
                         // Assert request is not started
                         const refetchVariables = { ...variables };
-                        refetchQuery = createOperationDescriptor(
-                            gqlRefetchQuery,
-                            refetchVariables,
-                            { force: true },
-                        );
+                        refetchQuery = createOperationDescriptor(gqlRefetchQuery, refetchVariables, { force: true });
                         expectRequestIsInFlight({
                             inFlight: true,
                             requestCount: 1,
@@ -2386,10 +2301,7 @@ describe('useRefetchableFragmentNode', () => {
                         expectFragmentResults([{ data: initialUser }]);
 
                         TestRenderer.act(() => {
-                            refetch(
-                                { id: '4' },
-                                { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy },
-                            );
+                            refetch({ id: '4' }, { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy });
                         });
 
                         // Assert that fragment is refetching with the right variables and
@@ -2398,11 +2310,7 @@ describe('useRefetchableFragmentNode', () => {
                             id: '4',
                             scale: 16,
                         };
-                        refetchQuery = createOperationDescriptor(
-                            gqlRefetchQuery,
-                            refetchVariables,
-                            { force: true },
-                        );
+                        refetchQuery = createOperationDescriptor(gqlRefetchQuery, refetchVariables, { force: true });
                         expectFragmentIsRefetching(renderer, {
                             refetchVariables,
                             refetchQuery,
@@ -2440,11 +2348,7 @@ describe('useRefetchableFragmentNode', () => {
                     it("starts network request if refetch query is not fully cached and doesn't suspend if fragment doesn't have missing data", () => {
                         // Cache user with missing username
                         const refetchVariables = { id: '4', scale: 16 };
-                        refetchQuery = createOperationDescriptor(
-                            gqlRefetchQuery,
-                            refetchVariables,
-                            { force: true },
-                        );
+                        refetchQuery = createOperationDescriptor(gqlRefetchQuery, refetchVariables, { force: true });
                         environment.commitPayload(refetchQuery, {
                             node: {
                                 __typename: 'User',
@@ -2457,10 +2361,7 @@ describe('useRefetchableFragmentNode', () => {
                         renderFragment();
                         renderSpy.mockClear();
                         TestRenderer.act(() => {
-                            refetch(
-                                { id: '4' },
-                                { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy },
-                            );
+                            refetch({ id: '4' }, { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy });
                         });
 
                         // Assert request is started
@@ -2492,19 +2393,12 @@ describe('useRefetchableFragmentNode', () => {
                         renderFragment();
                         renderSpy.mockClear();
                         TestRenderer.act(() => {
-                            refetch(
-                                { id: '1' },
-                                { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy },
-                            );
+                            refetch({ id: '1' }, { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy });
                         });
 
                         // Assert request is not started
                         const refetchVariables = { ...variables };
-                        refetchQuery = createOperationDescriptor(
-                            gqlRefetchQuery,
-                            refetchVariables,
-                            { force: true },
-                        );
+                        refetchQuery = createOperationDescriptor(gqlRefetchQuery, refetchVariables, { force: true });
                         expectRequestIsInFlight({
                             inFlight: true,
                             requestCount: 1,
@@ -2535,10 +2429,7 @@ describe('useRefetchableFragmentNode', () => {
                         expectFragmentResults([{ data: initialUser }]);
 
                         TestRenderer.act(() => {
-                            refetch(
-                                { id: '4' },
-                                { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy },
-                            );
+                            refetch({ id: '4' }, { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy });
                         });
 
                         // Assert that fragment is refetching with the right variables and
@@ -2547,11 +2438,7 @@ describe('useRefetchableFragmentNode', () => {
                             id: '4',
                             scale: 16,
                         };
-                        refetchQuery = createOperationDescriptor(
-                            gqlRefetchQuery,
-                            refetchVariables,
-                            { force: true },
-                        );
+                        refetchQuery = createOperationDescriptor(gqlRefetchQuery, refetchVariables, { force: true });
                         expectFragmentIsRefetching(renderer, {
                             refetchVariables,
                             refetchQuery,
@@ -2590,11 +2477,7 @@ describe('useRefetchableFragmentNode', () => {
                     it("starts network request if refetch query is not fully cached and doesn't suspend if fragment doesn't have missing data", () => {
                         // Cache user with missing username
                         const refetchVariables = { id: '4', scale: 16 };
-                        refetchQuery = createOperationDescriptor(
-                            gqlRefetchQuery,
-                            refetchVariables,
-                            { force: true },
-                        );
+                        refetchQuery = createOperationDescriptor(gqlRefetchQuery, refetchVariables, { force: true });
                         environment.commitPayload(refetchQuery, {
                             node: {
                                 __typename: 'User',
@@ -2607,10 +2490,7 @@ describe('useRefetchableFragmentNode', () => {
                         const renderer = renderFragment();
                         renderSpy.mockClear();
                         TestRenderer.act(() => {
-                            refetch(
-                                { id: '4' },
-                                { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy },
-                            );
+                            refetch({ id: '4' }, { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy });
                         });
 
                         // Assert component suspended
@@ -2796,7 +2676,7 @@ describe('useRefetchableFragmentNode', () => {
                         id: '1',
                         name: 'Alice',
                         profile_picture: null,
-                        ...createFragmentRef('1', query),
+                        ...createFragmentRef('1', refetchQuery),
                         //...createFragmentRef('1', refetchQuery), //original relay
                     };
                     // expectFragmentResults([{ data: refetchedUser }, { data: refetchedUser }]); original relay
@@ -3064,10 +2944,7 @@ describe('useRefetchableFragmentNode', () => {
                 renderSpy.mockClear();
                 let disposable;
                 TestRenderer.act(() => {
-                    disposable = refetch(
-                        { id: '1' },
-                        { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy },
-                    );
+                    disposable = refetch({ id: '1' }, { fetchPolicy, UNSTABLE_renderPolicy: renderPolicy });
                 });
 
                 // Assert request is started
@@ -3111,7 +2988,7 @@ describe('useRefetchableFragmentNode', () => {
             beforeEach(() => {
                 gqlFragment = getFragment(graphql`
                     fragment useRefetchableFragmentTest1Fragment on NonNodeStory
-                        @refetchable(queryName: "useRefetchableFragmentTest1FragmentRefetchQuery") {
+                    @refetchable(queryName: "useRefetchableFragmentTest1FragmentRefetchQuery") {
                         actor {
                             name
                         }
@@ -3127,8 +3004,8 @@ describe('useRefetchableFragmentNode', () => {
                 `);
 
                 variables = { id: 'a' };
-                gqlRefetchQuery = require('./__generated__/useRefetchableFragmentTest1FragmentRefetchQuery.graphql')
-                    .default;
+                gqlRefetchQuery =
+                    require('./__generated__/useRefetchableFragmentTest1FragmentRefetchQuery.graphql').default;
                 invariant(
                     areEqual(gqlFragment.metadata?.refetch?.operation.default, gqlRefetchQuery),
                     'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
@@ -3357,7 +3234,7 @@ describe('useRefetchableFragmentNode', () => {
                 `;
                 gqlFragment = getFragment(graphql`
                     fragment useRefetchableFragmentTest3Fragment on User
-                        @refetchable(queryName: "useRefetchableFragmentTest3FragmentRefetchQuery") {
+                    @refetchable(queryName: "useRefetchableFragmentTest3FragmentRefetchQuery") {
                         id
                         name
                         profile_picture(scale: $scale) {
@@ -3373,8 +3250,8 @@ describe('useRefetchableFragmentNode', () => {
                         }
                     }
                 `);
-                gqlRefetchQuery = require('./__generated__/useRefetchableFragmentTest3FragmentRefetchQuery.graphql')
-                    .default;
+                gqlRefetchQuery =
+                    require('./__generated__/useRefetchableFragmentTest3FragmentRefetchQuery.graphql').default;
                 variables = { nodeID: '1', scale: 16 };
                 invariant(
                     areEqual(gqlFragment.metadata?.refetch?.operation.default, gqlRefetchQuery),
@@ -3453,12 +3330,7 @@ describe('useRefetchableFragmentNode', () => {
                     profile_picture: {
                         uri: 'scale16',
                     },
-                    ...createFragmentRef(
-                        '4',
-                        refetchQuery,
-                        false,
-                        'useRefetchableFragmentTest2Fragment',
-                    ),
+                    ...createFragmentRef('4', refetchQuery, false, 'useRefetchableFragmentTest2Fragment'),
                 };
                 // expectFragmentResults([{ data: refetchedUser }, { data: refetchedUser }]); original relay
                 expectFragmentResults([{ data: refetchedUser }]);
@@ -3525,12 +3397,7 @@ describe('useRefetchableFragmentNode', () => {
                     profile_picture: {
                         uri: 'scale32',
                     },
-                    ...createFragmentRef(
-                        '1',
-                        refetchQuery,
-                        false,
-                        'useRefetchableFragmentTest2Fragment',
-                    ),
+                    ...createFragmentRef('1', refetchQuery, false, 'useRefetchableFragmentTest2Fragment'),
                 };
                 // expectFragmentResults([{ data: refetchedUser }, { data: refetchedUser }]); original relay
                 expectFragmentResults([{ data: refetchedUser }]);

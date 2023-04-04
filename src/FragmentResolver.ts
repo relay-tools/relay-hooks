@@ -33,6 +33,10 @@ type SingularOrPluralSnapshot = Snapshot | Array<Snapshot>;
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function emptyVoid() {}
 
+function isFetchLoading(fetch: Fetcher) {
+    return fetch && fetch.getData().isLoading;
+}
+
 function lookupFragment(environment, selector): SingularOrPluralSnapshot {
     return selector.kind === 'PluralReaderSelector'
         ? selector.selectors.map((s) => environment.lookup(s))
@@ -355,7 +359,11 @@ export class FragmentResolver {
                             this.resolverData.snapshot[idx] = latestSnapshot;
                             this.resolverData.data[idx] = latestSnapshot.data;
                             this.resolverData.isMissingData = isMissingData(this.resolverData.snapshot);
-                            this.refreshHooks();
+                            const isLoading =
+                                isFetchLoading(this.fetcherRefecth) ||
+                                isFetchLoading(this.fetcherNext) ||
+                                isFetchLoading(this.fetcherPrevious);
+                            if (!isLoading) this.refreshHooks();
                         }),
                     );
                 });
@@ -363,7 +371,11 @@ export class FragmentResolver {
                 dataSubscriptions.push(
                     environment.subscribe(renderedSnapshot, (latestSnapshot) => {
                         this.resolverData = getFragmentResult(latestSnapshot);
-                        this.refreshHooks();
+                        const isLoading =
+                            isFetchLoading(this.fetcherRefecth) ||
+                            isFetchLoading(this.fetcherNext) ||
+                            isFetchLoading(this.fetcherPrevious);
+                        if (!isLoading) this.refreshHooks();
                     }),
                 );
             }

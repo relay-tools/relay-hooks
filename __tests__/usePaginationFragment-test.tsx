@@ -1237,14 +1237,14 @@ describe('usePaginationFragment', () => {
                     },
                 };
                 expectFragmentResults([
-                    {
+                    /*{
                         // First update has updated connection
                         data: expectedUser,
                         isLoadingNext: true,
                         isLoadingPrevious: false,
                         hasNext: true,
                         hasPrevious: false,
-                    },
+                    },*/
                     {
                         // Second update sets isLoading flag back to false
                         data: expectedUser,
@@ -1373,14 +1373,14 @@ describe('usePaginationFragment', () => {
                     },
                 };
                 expectFragmentResults([
-                    {
+                    /*{
                         // First update has updated connection
                         data: expectedUser,
                         isLoadingNext: true,
                         isLoadingPrevious: false,
                         hasNext: true,
                         hasPrevious: false,
-                    },
+                    },*/
                     {
                         // Second update sets isLoading flag back to false
                         data: expectedUser,
@@ -1512,14 +1512,14 @@ describe('usePaginationFragment', () => {
                     },
                 };
                 expectFragmentResults([
-                    {
+                    /*{
                         // First update has updated connection
                         data: expectedUser,
                         isLoadingNext: true,
                         isLoadingPrevious: false,
                         hasNext: true,
                         hasPrevious: false,
-                    },
+                    },*/
                     {
                         // Second update sets isLoading flag back to false
                         data: expectedUser,
@@ -1691,14 +1691,14 @@ describe('usePaginationFragment', () => {
                     },
                 };
                 expectFragmentResults([
-                    {
+                    /*{
                         // First update has updated connection
                         data: expectedUser,
                         isLoadingNext: true,
                         isLoadingPrevious: false,
                         hasNext: true,
                         hasPrevious: false,
-                    },
+                    },*/
                     {
                         // Second update sets isLoading flag back to false
                         data: expectedUser,
@@ -1878,14 +1878,14 @@ describe('usePaginationFragment', () => {
                     },
                 };
                 expectFragmentResults([
-                    {
+                    /*{
                         // First update has updated connection
                         data: expectedUser,
                         isLoadingNext: true,
                         isLoadingPrevious: false,
                         hasNext: true,
                         hasPrevious: false,
-                    },
+                    },*/
                     {
                         // Second update sets isLoading flag back to false
                         data: expectedUser,
@@ -2001,14 +2001,14 @@ describe('usePaginationFragment', () => {
                         },
                     };
                     expectFragmentResults([
-                        {
+                        /*{
                             // First update has updated connection
                             data: expectedUser,
                             isLoadingNext: true,
                             isLoadingPrevious: false,
                             hasNext: true,
                             hasPrevious: false,
-                        },
+                        },*/
                         {
                             // Second update sets isLoading flag back to false
                             data: expectedUser,
@@ -2123,14 +2123,14 @@ describe('usePaginationFragment', () => {
                         },
                     };
                     expectFragmentResults([
-                        {
+                        /*{
                             // First update has updated connection
                             data: expectedUser,
                             isLoadingNext: true,
                             isLoadingPrevious: false,
                             hasNext: true,
                             hasPrevious: false,
-                        },
+                        },*/
                         {
                             // Second update sets isLoading flag back to false
                             data: expectedUser,
@@ -3098,7 +3098,7 @@ describe('usePaginationFragment', () => {
                     },
                 };
                 expectFragmentResults([
-                    {
+                    /*{
                         // First update has updated connection
                         data: expectedUser,
                         isLoadingNext: true,
@@ -3106,7 +3106,7 @@ describe('usePaginationFragment', () => {
                         // Assert hasNext reflects server response
                         hasNext: true,
                         hasPrevious: false,
-                    },
+                    },*/
                     {
                         // Second update sets isLoading flag back to false
                         data: expectedUser,
@@ -3217,7 +3217,7 @@ describe('usePaginationFragment', () => {
                     },
                 };
                 expectFragmentResults([
-                    {
+                    /*{
                         // First update has updated connection
                         data: expectedUser,
                         isLoadingNext: true,
@@ -3225,7 +3225,7 @@ describe('usePaginationFragment', () => {
                         // Assert hasNext reflects server response
                         hasNext: false,
                         hasPrevious: false,
-                    },
+                    },*/
                     {
                         // Second update sets isLoading flag back to false
                         data: expectedUser,
@@ -3865,14 +3865,14 @@ describe('usePaginationFragment', () => {
                     },
                 };
                 expectFragmentResults([
-                    {
+                    /*{
                         // First update has updated connection
                         data: paginatedUser,
                         isLoadingNext: true,
                         isLoadingPrevious: false,
                         hasNext: true,
                         hasPrevious: false,
-                    },
+                    },*/
                     {
                         // Second update sets isLoading flag back to false
                         data: paginatedUser,
@@ -4039,14 +4039,14 @@ describe('usePaginationFragment', () => {
                     },
                 };
                 expectFragmentResults([
-                    {
+                    /*{
                         // First update has updated connection
                         data: expectedData,
                         isLoadingNext: true,
                         isLoadingPrevious: false,
                         hasNext: true,
                         hasPrevious: false,
-                    },
+                    },*/
                     {
                         // Second update sets isLoading flag back to false
                         data: expectedData,

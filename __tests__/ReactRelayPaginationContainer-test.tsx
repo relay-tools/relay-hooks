@@ -621,13 +621,11 @@ describe('ReactRelayPaginationContainer', () => {
                 },
             },
         });
-        expect(render.mock.calls.length).toBe(3);
+        expect(render.mock.calls.length).toBe(2);
         expect(render.mock.calls[0][0].user.friends.edges.length).toBe(1);
         expect(render.mock.calls[0][0].relay.isLoadingNext).toBe(true);
         expect(render.mock.calls[1][0].user.friends.edges.length).toBe(2);
-        expect(render.mock.calls[1][0].relay.isLoadingNext).toBe(true);
-        expect(render.mock.calls[2][0].user.friends.edges.length).toBe(2);
-        expect(render.mock.calls[2][0].relay.isLoadingNext).toBe(false);
+        expect(render.mock.calls[1][0].relay.isLoadingNext).toBe(false);
         render.mockClear();
         environment.subscribe.mockClear();
 
@@ -1156,14 +1154,12 @@ describe('ReactRelayPaginationContainer', () => {
                     },
                 },
             });
-            expect(render.mock.calls.length).toBe(3);
+            expect(render.mock.calls.length).toBe(2);
             expect(render.mock.calls[0][0].user.friends.edges.length).toBe(1);
             expect(render.mock.calls[0][0].relay.isLoadingNext).toBe(true);
             expect(render.mock.calls[1][0].user.friends.edges.length).toBe(2);
-            expect(render.mock.calls[1][0].relay.isLoadingNext).toBe(true);
-            expect(render.mock.calls[2][0].user.friends.edges.length).toBe(2);
-            expect(render.mock.calls[2][0].relay.isLoadingNext).toBe(false);
-            expect(render.mock.calls[2][0].relay.hasMore).toBe(true);
+            expect(render.mock.calls[1][0].relay.isLoadingNext).toBe(false);
+            expect(render.mock.calls[1][0].relay.hasMore).toBe(true);
         });
 
         it('updates after pagination (if no more results)', () => {
@@ -1204,14 +1200,12 @@ describe('ReactRelayPaginationContainer', () => {
                     },
                 },
             });
-            expect(render.mock.calls.length).toBe(3);
+            expect(render.mock.calls.length).toBe(2);
             expect(render.mock.calls[0][0].user.friends.edges.length).toBe(1);
             expect(render.mock.calls[0][0].relay.isLoadingNext).toBe(true);
             expect(render.mock.calls[1][0].user.friends.edges.length).toBe(2);
-            expect(render.mock.calls[1][0].relay.isLoadingNext).toBe(true);
-            expect(render.mock.calls[2][0].user.friends.edges.length).toBe(2);
-            expect(render.mock.calls[2][0].relay.isLoadingNext).toBe(false);
-            expect(render.mock.calls[2][0].relay.hasMore).toBe(false);
+            expect(render.mock.calls[1][0].relay.isLoadingNext).toBe(false);
+            expect(render.mock.calls[1][0].relay.hasMore).toBe(false);
         });
     });
 
@@ -1256,7 +1250,7 @@ describe('ReactRelayPaginationContainer', () => {
                     },
                 },
             });
-            expect(render.mock.calls[3][0].relay.isLoadingNext).toBe(false);
+            expect(render.mock.calls[2][0].relay.isLoadingNext).toBe(false);
         });
 
         /*
@@ -1455,8 +1449,8 @@ describe('ReactRelayPaginationContainer', () => {
                     },
                 },
             });
-            expect(render.mock.calls.length).toBe(4);
-            expect(render.mock.calls[3][0].user.friends.edges.length).toBe(2);
+            expect(render.mock.calls.length).toBe(3);
+            expect(render.mock.calls[2][0].user.friends.edges.length).toBe(2);
         });
 
         it('does not update variables on failure', () => {
@@ -1659,9 +1653,9 @@ describe('ReactRelayPaginationContainer', () => {
                     },
                 },
             });
-            expect(render.mock.calls.length).toBe(4);
-            expect(render.mock.calls[3][0].user.friends.edges.length).toBe(1);
-            expect(render.mock.calls[3][0].user.friends.edges[0].node.id).toBe('node:2');
+            expect(render.mock.calls.length).toBe(3);
+            expect(render.mock.calls[2][0].user.friends.edges.length).toBe(1);
+            expect(render.mock.calls[2][0].user.friends.edges[0].node.id).toBe('node:2');
         });
         /* removed
     it('renders with the results of the new variables after components received updated props (not related to the connection)', () => {

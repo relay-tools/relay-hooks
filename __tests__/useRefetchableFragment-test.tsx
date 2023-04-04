@@ -329,17 +329,22 @@ describe('useRefetchableFragmentNode', () => {
 
         renderFragment = (args?: { isConcurrent?: boolean; owner?: any; userRef?: any; fragment?: any }): any => {
             const { isConcurrent = false, ...props } = args ?? ({} as any);
-            return TestRenderer.create(
-                <ErrorBoundary fallback={({ error }): any => `Error: ${error.message}`}>
-                    <React.Suspense fallback={<Fallback />}>
-                        <ContextProvider>
-                            <Container owner={query} {...props} />
-                        </ContextProvider>
-                    </React.Suspense>
-                </ErrorBoundary>,
-                // any[prop-missing] - error revealed when flow-typing ReactTestRenderer
-                { unstable_isConcurrent: isConcurrent } as any,
-            );
+            let renderer;
+            TestRenderer.act(() => {
+                renderer = TestRenderer.create(
+                    <ErrorBoundary fallback={({ error }): any => `Error: ${error.message}`}>
+                        <React.Suspense fallback={<Fallback />}>
+                            <ContextProvider>
+                                <Container owner={query} {...props} />
+                            </ContextProvider>
+                        </React.Suspense>
+                    </ErrorBoundary>,
+                    // any[prop-missing] - error revealed when flow-typing ReactTestRenderer
+                    { unstable_isConcurrent: isConcurrent } as any,
+                );
+                jest.runAllImmediates();
+            });
+            return renderer;
         };
     });
 

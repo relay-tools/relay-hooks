@@ -14,22 +14,16 @@
 
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
-import {
-    useQuery,
-    useFragment,
-    RelayEnvironmentProvider,
-    useRelayEnvironment,
-    NETWORK_ONLY,
-} from '../src';
+import { useQuery, useFragment, RelayEnvironmentProvider, useRelayEnvironment, NETWORK_ONLY } from '../src';
 
 function createHooks(component, options?: any) {
-    const result = ReactTestRenderer.create(component, options);
+    let result;
     ReactTestRenderer.act(() => {
+        result = ReactTestRenderer.create(component, options);
         jest.runAllImmediates();
     });
     return result;
 }
-
 const ReactRelayFragmentContainer = {
     createContainer: (Component, spec) => (props) => {
         const { user, ...others } = props;
@@ -127,10 +121,7 @@ describe('ReactRelayFragmentContainer', () => {
         `;
 
         UserQueryWithCond = graphql`
-            query ReactRelayFragmentContainerTestUserWithCondQuery(
-                $id: ID!
-                $condGlobal: Boolean!
-            ) {
+            query ReactRelayFragmentContainerTestUserWithCondQuery($id: ID!, $condGlobal: Boolean!) {
                 node(id: $id) {
                     ...ReactRelayFragmentContainerTestUserFragment @arguments(cond: $condGlobal)
                 }
@@ -138,7 +129,7 @@ describe('ReactRelayFragmentContainer', () => {
         `;
         UserFragment = graphql`
             fragment ReactRelayFragmentContainerTestUserFragment on User
-                @argumentDefinitions(cond: { type: "Boolean!", defaultValue: true }) {
+            @argumentDefinitions(cond: { type: "Boolean!", defaultValue: true }) {
                 id
                 name @include(if: $cond)
             }
@@ -338,12 +329,7 @@ describe('ReactRelayFragmentContainer', () => {
             missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
-            selector: createReaderSelector(
-                UserFragment,
-                '842472',
-                { cond: true },
-                ownerUser2.request,
-            ),
+            selector: createReaderSelector(UserFragment, '842472', { cond: true }, ownerUser2.request),
         });
     });
 
@@ -358,8 +344,7 @@ describe('ReactRelayFragmentContainer', () => {
         environment.lookup.mockClear();
         environment.subscribe.mockClear();
 
-        userPointer = environment.lookup(ownerUser1WithCondVar.fragment, ownerUser1WithCondVar).data
-            .node;
+        userPointer = environment.lookup(ownerUser1WithCondVar.fragment, ownerUser1WithCondVar).data.node;
         instance.getInstance().setProps({
             user: userPointer,
         });
@@ -389,12 +374,7 @@ describe('ReactRelayFragmentContainer', () => {
             missingClientEdges: null,
             missingRequiredFields: null,
             seenRecords: expect.any(Object),
-            selector: createReaderSelector(
-                UserFragment,
-                '4',
-                { cond: false },
-                ownerUser1WithCondVar.request,
-            ),
+            selector: createReaderSelector(UserFragment, '4', { cond: false }, ownerUser1WithCondVar.request),
         });
     });
 

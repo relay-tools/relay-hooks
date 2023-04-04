@@ -15,9 +15,10 @@ import * as ReactTestRenderer from 'react-test-renderer';
 import { useRefetchable as useRefetch, RelayEnvironmentProvider, useRelayEnvironment } from '../src';
 import { forceCache } from '../src/Utils';
 
-function createHooks(component) {
-    const result = ReactTestRenderer.create(component);
+function createHooks(component, options?: any) {
+    let result;
     ReactTestRenderer.act(() => {
+        result = ReactTestRenderer.create(component, options);
         jest.runAllImmediates();
     });
     return result;

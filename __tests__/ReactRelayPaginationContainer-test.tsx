@@ -18,8 +18,9 @@ import { usePagination, RelayEnvironmentProvider, useRelayEnvironment } from '..
 import { forceCache } from '../src/Utils';
 
 function createHooks(component, options?: any) {
-    const result = ReactTestRenderer.create(component, options);
+    let result;
     ReactTestRenderer.act(() => {
+        result = ReactTestRenderer.create(component, options);
         jest.runAllImmediates();
     });
     return result;
@@ -1118,11 +1119,14 @@ describe('ReactRelayPaginationContainer', () => {
 
         it('updates after pagination (if more results)', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
-            ReactTestRenderer.create(
-                <ContextSetter environment={environment}>
-                    <TestContainer user={userPointer} />
-                </ContextSetter>,
-            );
+            ReactTestRenderer.act(() => {
+                ReactTestRenderer.create(
+                    <ContextSetter environment={environment}>
+                        <TestContainer user={userPointer} />
+                    </ContextSetter>,
+                );
+                jest.runAllImmediates();
+            });
             expect(render.mock.calls.length).toBe(1);
             expect(render.mock.calls[0][0].user.friends.edges.length).toBe(1);
 
@@ -1164,11 +1168,14 @@ describe('ReactRelayPaginationContainer', () => {
 
         it('updates after pagination (if no more results)', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
-            ReactTestRenderer.create(
-                <ContextSetter environment={environment}>
-                    <TestContainer user={userPointer} />
-                </ContextSetter>,
-            );
+            ReactTestRenderer.act(() => {
+                ReactTestRenderer.create(
+                    <ContextSetter environment={environment}>
+                        <TestContainer user={userPointer} />
+                    </ContextSetter>,
+                );
+                jest.runAllImmediates();
+            });
             expect(render.mock.calls.length).toBe(1);
             expect(render.mock.calls[0][0].user.friends.edges.length).toBe(1);
 

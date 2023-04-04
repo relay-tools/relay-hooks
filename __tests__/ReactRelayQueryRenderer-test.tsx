@@ -23,8 +23,9 @@ import * as ReactTestRenderer from 'react-test-renderer';
 //import readContext from "react-relay/lib/readContext";
 
 function createHooks(component, options?: any) {
-    const result = ReactTestRenderer.create(component, options);
+    let result;
     ReactTestRenderer.act(() => {
+        result = ReactTestRenderer.create(component, options);
         jest.runAllImmediates();
     });
     return result;
@@ -1990,6 +1991,7 @@ describe('ReactRelayQueryRenderer', () => {
         const onResponse = (res) => {
             response = res;
         };
+
         createHooks(
             <ReactRelayQueryRenderer
                 environment={environment}
@@ -1999,7 +2001,9 @@ describe('ReactRelayQueryRenderer', () => {
                 onResponse={onResponse}
             />,
         );
+
         expect.assertions(3);
+
         render.mockClear();
         environment.mock.resolve(TestQuery, responseErrors);
         const owner = createOperationDescriptor(TestQuery, variables);

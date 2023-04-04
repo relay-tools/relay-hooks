@@ -18,7 +18,8 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "module": "esnext",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "incremental": true
   },
   "exclude": [
     "node_modules",

@@ -157,12 +157,13 @@ export const TodoList = (props: Props): JSX.Element => {
     }, [todos]);
 
     const isLoading =
-        props.isLoading || refetchLoading || (paginated && (isLoadingPrevious || isLoadingNext));
+        props.isLoading || refetchLoading || ((paginated || scroll) && (isLoadingPrevious || isLoadingNext));
     const loadMore = useCallback(() => {
         // Don't fetch again if we're already loading the next page
         if (isLoading) {
             return;
         }
+        console.log("load")
         loadNext(1);
     }, [isLoading, loadNext]);
 
@@ -212,7 +213,7 @@ export const TodoList = (props: Props): JSX.Element => {
         },
         [environment, user, onCompleted],
     );
-
+    console.log("list render", scroll, hasNext, isLoading)
     return (
         <React.Fragment>
             <TodoTextInput edit onSave={handleTextInputSave} placeholder="What needs to be done?" />

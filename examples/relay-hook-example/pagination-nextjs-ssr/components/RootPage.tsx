@@ -53,6 +53,8 @@ const RootPage = ({ query, first }: any): JSX.Element => {
         fetchPolicy: STORE_OR_NETWORK,
     });
 
+    console.log("render", isLoading)
+
     return (
         <React.Fragment>
             <Header />

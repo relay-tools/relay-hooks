@@ -124,6 +124,7 @@ export class FragmentResolver {
     pagination = false;
     result: any;
     _subscribeResolve;
+    forceUpdate;
 
     constructor(name: FragmentNames) {
         this.name = name;
@@ -139,13 +140,15 @@ export class FragmentResolver {
             this.fetcherNext = fetchResolver({});
             this.fetcherPrevious = fetchResolver({});
         }
+        this.setForceUpdate();
+        this.refreshHooks = (): void => {
+            this.resolveResult();
+            this.forceUpdate();
+        };
     }
 
     setForceUpdate(forceUpdate = emptyVoid): void {
-        this.refreshHooks = (): void => {
-            this.resolveResult();
-            forceUpdate();
-        };
+        this.forceUpdate = forceUpdate;
     }
 
     subscribeResolve(subscribeResolve: (data: any) => void): void {

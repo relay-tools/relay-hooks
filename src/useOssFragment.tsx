@@ -55,7 +55,6 @@ export function useOssFragment(
 
     resolver.resolve(environment, idfragment, fragment, fragmentRef);
     if (subscribeResolve) {
-        resolver.setForceUpdate();
         return;
     }
 

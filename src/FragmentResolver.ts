@@ -489,8 +489,8 @@ export class FragmentResolver {
                 }*/
                 this.resolverData.isMissingData = missData;
                 this.resolverData.owner = operation.request;
-                if (doUpdate) this.refreshHooks();
             }
+            if (doUpdate) this.refreshHooks();
         };
         if (this.pagination) {
             this.fetcherNext.dispose();

@@ -163,6 +163,7 @@ export function fetchResolver({
                     const cacheConfig = operation.request.cacheConfig;
                     const isQueryPolling = cacheConfig && !!cacheConfig.poll;
                     const isIncremental = responses.some((x) => x != null && x.hasNext === true);
+                    isQueryPolling && update(false);
                     resolveNetworkPromise();
                     onResponse && onResponse(response);
                     onNext(operation, store, fetchHasReturned && (isIncremental || isQueryPolling));
@@ -170,7 +171,7 @@ export function fetchResolver({
                 start: (subscription) => {
                     refetchSubscription = subscription;
                     _refetchSubscription = refetchSubscription;
-                    update(true, null);
+                    update(true);
                 },
             });
             if (!snapshot) {

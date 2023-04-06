@@ -1,7 +1,7 @@
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { useRouter } from 'next/router';
 import React, { useMemo } from 'react';
-import { useQuery, STORE_OR_NETWORK } from 'relay-hooks';
+import { useQuery, STORE_OR_NETWORK, STORE_THEN_NETWORK } from 'relay-hooks';
 import styled from 'styled-components';
 import { TodoAppQuery } from '../__generated__/relay/TodoAppQuery.graphql';
 import { QUERY_APP, TodoApp } from '../components/TodoApp';

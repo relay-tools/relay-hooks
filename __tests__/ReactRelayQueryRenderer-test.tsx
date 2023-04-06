@@ -329,6 +329,50 @@ describe('ReactRelayQueryRenderer', () => {
             });
         });
 
+        it('observe query polling', () => {
+            const onComplete = jest.fn(() => undefined);
+            const newCacheConfig = {
+                ...cacheConfig,
+                poll: 1,
+            };
+            createHooks(
+                <PropsSetter>
+                    <ReactRelayQueryRenderer
+                        query={TestQuery}
+                        cacheConfig={newCacheConfig}
+                        environment={environment}
+                        render={render}
+                        variables={variables}
+                        onComplete={onComplete}
+                    />
+                </PropsSetter>,
+            );
+
+            expect(environment.execute.mock.calls.length).toBe(1);
+            expect(onComplete).not.toBeCalled();
+            render.mockClear();
+            environment.mock.resolve(TestQuery, response);
+            expect(onComplete).not.toBeCalled();
+            const owner = createOperationDescriptor(TestQuery, variables, newCacheConfig);
+            expectToBeRendered(render, {
+                error: null,
+                data: {
+                    node: {
+                        id: '4',
+                        __isWithinUnmatchedTypeRefinement: false,
+
+                        __fragments: {
+                            ReactRelayQueryRendererTestFragment: {},
+                        },
+
+                        __fragmentOwner: owner.request,
+                        __id: '4',
+                    },
+                },
+                retry: expect.any(Function),
+            });
+        });
+
         describe('when constructor fires multiple times', () => {
             describe('when store does not have snapshot and fetch does not return snapshot', () => {
                 it('fetches the query only once, renders loading state', () => {

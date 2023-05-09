@@ -122,7 +122,7 @@ export function fetchResolver({
         const isNetwork = isNetworkPolicy(fetchPolicy, full);
         if (snapshot != null) {
             const onlyStore = !isNetwork;
-            onNext(operation, snapshot, fetchHasReturned);
+            onNext(operation, snapshot, fetchHasReturned && !onlyStore);
             if (onlyStore) {
                 onComplete(null, fetchHasReturned);
             }
@@ -161,7 +161,7 @@ export function fetchResolver({
                     promise = null;
                     const responses = Array.isArray(response) ? response : [response];
                     const cacheConfig = operation.request.cacheConfig;
-                    const isQueryPolling = cacheConfig && !!cacheConfig.poll;
+                    const isQueryPolling = !!cacheConfig && !!cacheConfig.poll;
                     const isIncremental = responses.some((x) => x != null && x.hasNext === true);
                     isQueryPolling && update(false);
                     resolveNetworkPromise();

@@ -657,7 +657,7 @@ describe('useRefetchable', () => {
         });
 
         it('reads data from the store without sending a network request when data is available in store and using store-or-network', () => {
-            expect.assertions(3);
+            expect.assertions(4);
             const refetchVariables = {
                 cond: false,
                 id: '4',
@@ -665,6 +665,7 @@ describe('useRefetchable', () => {
             const refetchOptions = {
                 fetchPolicy: 'store-or-network',
             };
+            expect(render.mock.calls.length).toBe(1);
             refetch(refetchVariables, null, jest.fn(), refetchOptions);
             expect(render.mock.calls.length).toBe(2);
             expect(environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache)).toBe(false);

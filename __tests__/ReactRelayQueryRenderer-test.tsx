@@ -63,8 +63,8 @@ const loadingState = {
     retry: expect.any(Function),
     isLoading: true,
 };
-/*
-function expectToBeRendered(render, readyState) {
+
+function expectToBeRenderedStore(render, readyState) {
     const calls = render.mock.calls;
     // Ensure useEffect is called before other timers
     expect(calls.length).toBe(2);
@@ -72,12 +72,12 @@ function expectToBeRendered(render, readyState) {
     expect(calls[1][0]).toEqual({ ...readyState, isLoading: false });
     return { pass: true };
 }
-*/
-function expectToBeRendered(render, readyState) {
+
+function expectToBeRendered(render, readyState, isLoading = false) {
     const calls = render.mock.calls;
     // Ensure useEffect is called before other timers
     expect(calls.length).toBe(1);
-    expect(calls[0][0]).toEqual({ ...readyState, isLoading: false });
+    expect(calls[0][0]).toEqual({ ...readyState, isLoading });
     return { pass: true };
 }
 const QueryRendererHook = (props) => {
@@ -91,6 +91,7 @@ const QueryRendererHook = (props) => {
         skip,
         onComplete,
         onResponse,
+        UNSTABLE_renderPolicy,
     } = props;
     const relays = useQuery(query, variables, {
         networkCacheConfig: cacheConfig,
@@ -99,6 +100,7 @@ const QueryRendererHook = (props) => {
         skip,
         onComplete,
         onResponse,
+        UNSTABLE_renderPolicy,
     });
 
     return <React.Fragment>{render(relays)}</React.Fragment>;
@@ -113,6 +115,7 @@ const ReactRelayQueryRenderer = (props) => (
 describe('ReactRelayQueryRenderer', () => {
     let TestQuery;
     let NextQuery;
+    let CompleteTestQuery;
     let cacheConfig;
     let environment;
     let render;
@@ -125,6 +128,17 @@ describe('ReactRelayQueryRenderer', () => {
                 __typename: 'User',
                 id: '4',
                 name: 'Zuck',
+            },
+        },
+    };
+
+    const responseComplete = {
+        data: {
+            node: {
+                __typename: 'User',
+                id: '4',
+                name: 'Zuck',
+                username: 'Zuck',
             },
         },
     };
@@ -203,6 +217,17 @@ describe('ReactRelayQueryRenderer', () => {
             }
         `;
 
+        CompleteTestQuery = graphql`
+            query ReactRelayQueryRendererTestCompleteQuery($id: ID = "<default>") {
+                node(id: $id) {
+                    id
+                    username
+                    name
+                    ...ReactRelayQueryRendererTestFragment
+                }
+            }
+        `;
+
         NextQuery = graphql`
             query ReactRelayQueryRendererTestNextQuery($id: ID!) {
                 node(id: $id) {
@@ -228,6 +253,198 @@ describe('ReactRelayQueryRenderer', () => {
     });
 
     describe('when initialized', () => {
+        it('check store and network', () => {
+            environment.mockClear();
+            environment.commitUpdate((_store) => {
+                let root = _store.get(ROOT_ID);
+                if (!root) {
+                    root = _store.create(ROOT_ID, ROOT_TYPE);
+                }
+                const user = _store.create('4', 'User');
+                user.setValue('4', 'id');
+                user.setValue('Zuck', 'name');
+                user.setValue('Zuck', 'username');
+                root.setLinkedRecord(user, 'node', { id: '4' });
+            });
+            createHooks(
+                <ReactRelayQueryRenderer
+                    query={CompleteTestQuery}
+                    fetchPolicy="store-and-network"
+                    environment={environment}
+                    render={render}
+                    variables={variables}
+                    cacheConfig={cacheConfig}
+                />,
+            );
+
+            expect(environment.execute.mock.calls.length).toBe(1);
+            const owner = createOperationDescriptor(CompleteTestQuery, variables);
+            expectToBeRendered(
+                render,
+                {
+                    error: null,
+                    data: {
+                        node: {
+                            id: '4',
+                            name: 'Zuck',
+                            username: 'Zuck',
+                            __isWithinUnmatchedTypeRefinement: false,
+                            __id: '4',
+                            __fragments: {
+                                ReactRelayQueryRendererTestFragment: {},
+                            },
+                            __fragmentOwner: owner.request,
+                        },
+                    },
+                    retry: expect.any(Function),
+                },
+                true,
+            );
+            render.mockClear();
+            environment.mock.resolve(CompleteTestQuery, responseComplete);
+            expectToBeRendered(render, {
+                error: null,
+                data: {
+                    node: {
+                        id: '4',
+                        name: 'Zuck',
+                        username: 'Zuck',
+                        __isWithinUnmatchedTypeRefinement: false,
+                        __id: '4',
+                        __fragments: {
+                            ReactRelayQueryRendererTestFragment: {},
+                        },
+                        __fragmentOwner: owner.request,
+                    },
+                },
+                retry: expect.any(Function),
+            });
+        });
+
+        it('check store and network partial', () => {
+            environment.mockClear();
+            environment.commitUpdate((_store) => {
+                let root = _store.get(ROOT_ID);
+                if (!root) {
+                    root = _store.create(ROOT_ID, ROOT_TYPE);
+                }
+                const user = _store.create('4', 'User');
+                user.setValue('4', 'id');
+                user.setValue('Zuck', 'name');
+                root.setLinkedRecord(user, 'node', { id: '4' });
+            });
+            createHooks(
+                <ReactRelayQueryRenderer
+                    query={CompleteTestQuery}
+                    cacheConfig={cacheConfig}
+                    environment={environment}
+                    render={render}
+                    UNSTABLE_renderPolicy={'partial'}
+                    fetchPolicy={'store-and-network'}
+                    variables={variables}
+                />,
+            );
+
+            expect(environment.execute.mock.calls.length).toBe(1);
+            const owner = createOperationDescriptor(CompleteTestQuery, variables);
+            expectToBeRendered(
+                render,
+                {
+                    error: null,
+                    data: {
+                        node: {
+                            id: '4',
+                            name: 'Zuck',
+                            username: undefined,
+                            __isWithinUnmatchedTypeRefinement: false,
+                            __id: '4',
+                            __fragments: {
+                                ReactRelayQueryRendererTestFragment: {},
+                            },
+                            __fragmentOwner: owner.request,
+                        },
+                    },
+                    retry: expect.any(Function),
+                },
+                true,
+            );
+            render.mockClear();
+            environment.mock.resolve(CompleteTestQuery, responseComplete);
+            expectToBeRenderedStore(render, {
+                error: null,
+                data: {
+                    node: {
+                        id: '4',
+                        name: 'Zuck',
+                        username: 'Zuck',
+                        __isWithinUnmatchedTypeRefinement: false,
+                        __id: '4',
+                        __fragments: {
+                            ReactRelayQueryRendererTestFragment: {},
+                        },
+                        __fragmentOwner: owner.request,
+                    },
+                },
+                retry: expect.any(Function),
+            });
+        });
+        /*
+        it('observe query polling store and network', () => {
+            const onComplete = jest.fn(() => undefined);
+            const newCacheConfig = {
+                ...cacheConfig,
+                poll: 1,
+            };
+            environment.mockClear();
+            environment.commitUpdate((_store) => {
+                let root = _store.get(ROOT_ID);
+                if (!root) {
+                    root = _store.create(ROOT_ID, ROOT_TYPE);
+                }
+                const user = _store.create('4', 'User');
+                user.setValue('4', 'id');
+                user.setValue('Zuck', 'name');
+                root.setLinkedRecord(user, 'node', { id: '4' });
+            });
+            createHooks(
+                <PropsSetter>
+                    <ReactRelayQueryRenderer
+                        query={TestQuery}
+                        cacheConfig={newCacheConfig}
+                        fetchPolicy={'store-and-network'}
+                        environment={environment}
+                        render={render}
+                        variables={variables}
+                        onComplete={onComplete}
+                    />
+                </PropsSetter>,
+            );
+
+            expect(environment.execute.mock.calls.length).toBe(1);
+            expect(onComplete).not.toBeCalled();
+            render.mockClear();
+            environment.mock.resolve(TestQuery, response);
+            expect(onComplete).not.toBeCalled();
+            const owner = createOperationDescriptor(TestQuery, variables, newCacheConfig);
+            expectToBeRendered(render, {
+                error: null,
+                data: {
+                    node: {
+                        id: '4',
+                        __isWithinUnmatchedTypeRefinement: false,
+
+                        __fragments: {
+                            ReactRelayQueryRendererTestFragment: {},
+                        },
+
+                        __fragmentOwner: owner.request,
+                        __id: '4',
+                    },
+                },
+                retry: expect.any(Function),
+            });
+        });
+*/
         it('skip', () => {
             const renderer = createHooks(
                 <PropsSetter>

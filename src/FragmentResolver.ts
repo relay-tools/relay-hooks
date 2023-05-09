@@ -33,10 +33,6 @@ type SingularOrPluralSnapshot = Snapshot | Array<Snapshot>;
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function emptyVoid() {}
 
-function isFetchLoading(fetch: Fetcher) {
-    return fetch && fetch.getData().isLoading;
-}
-
 function lookupFragment(environment, selector): SingularOrPluralSnapshot {
     return selector.kind === 'PluralReaderSelector'
         ? selector.selectors.map((s) => environment.lookup(s))
@@ -362,11 +358,7 @@ export class FragmentResolver {
                             this.resolverData.snapshot[idx] = latestSnapshot;
                             this.resolverData.data[idx] = latestSnapshot.data;
                             this.resolverData.isMissingData = isMissingData(this.resolverData.snapshot);
-                            const isLoading =
-                                isFetchLoading(this.fetcherRefecth) ||
-                                isFetchLoading(this.fetcherNext) ||
-                                isFetchLoading(this.fetcherPrevious);
-                            if (!isLoading) this.refreshHooks();
+                            this.refreshHooks();
                         }),
                     );
                 });
@@ -374,11 +366,7 @@ export class FragmentResolver {
                 dataSubscriptions.push(
                     environment.subscribe(renderedSnapshot, (latestSnapshot) => {
                         this.resolverData = getFragmentResult(latestSnapshot);
-                        const isLoading =
-                            isFetchLoading(this.fetcherRefecth) ||
-                            isFetchLoading(this.fetcherNext) ||
-                            isFetchLoading(this.fetcherPrevious);
-                        if (!isLoading) this.refreshHooks();
+                        this.refreshHooks();
                     }),
                 );
             }
@@ -489,17 +477,15 @@ export class FragmentResolver {
                 }*/
                 this.resolverData.isMissingData = missData;
                 this.resolverData.owner = operation.request;
+                doUpdate && this.refreshHooks();
             }
-            if (doUpdate) this.refreshHooks();
         };
         if (this.pagination) {
             this.fetcherNext.dispose();
             this.fetcherPrevious.dispose();
         }
         const complete = (error, doUpdate) => {
-            if (doUpdate) {
-                this.refreshHooks();
-            }
+            doUpdate && this.refreshHooks();
             options.onComplete && options.onComplete(error);
         };
 
@@ -617,9 +603,6 @@ export class FragmentResolver {
             }
             paginationVariables.id = identifierValue;
         }
-        const onNext = (o, s, doUpdate): void => {
-            if (doUpdate) this.refreshHooks();
-        };
 
         const complete = (error, doUpdate) => {
             if (doUpdate) this.refreshHooks();
@@ -632,7 +615,7 @@ export class FragmentResolver {
             operation,
             undefined, //options?.fetchPolicy,
             complete,
-            onNext,
+            emptyVoid,
             options.onResponse,
         );
         this.refreshHooks();

@@ -13,7 +13,7 @@ function sleep(ms): Promise<any> {
 function fetchQuery(operation, variables, _cacheConfig, _uploadables): any {
     const endpoint = 'http://localhost:3000/graphql';
     return Observable.create((sink) => { 
-        sleep(500).then(() => fetch(endpoint, {
+        sleep(2000).then(() => fetch(endpoint, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',

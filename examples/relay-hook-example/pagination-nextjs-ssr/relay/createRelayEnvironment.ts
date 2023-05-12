@@ -1,5 +1,5 @@
 import fetch from 'isomorphic-unfetch';
-import { Store, Environment, RecordSource, DefaultHandlerProvider, Network } from 'relay-runtime';
+import { Store, Environment, RecordSource, DefaultHandlerProvider, Network, Observable } from 'relay-runtime';
 
 import { HandlerProvider } from 'relay-runtime/lib/handlers/RelayDefaultHandlerProvider';
 import { update } from './connection';
@@ -10,10 +10,10 @@ function sleep(ms): Promise<any> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function fetchQuery(operation, variables, _cacheConfig, _uploadables): Promise<any> {
+function fetchQuery(operation, variables, _cacheConfig, _uploadables): any {
     const endpoint = 'http://localhost:3000/graphql';
-    return sleep(500).then(() =>
-        fetch(endpoint, {
+    return Observable.create((sink) => { 
+        sleep(2000).then(() => fetch(endpoint, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -23,8 +23,16 @@ function fetchQuery(operation, variables, _cacheConfig, _uploadables): Promise<a
                 query: operation.text, // GraphQL text from input
                 variables,
             }),
-        }).then((response) => response.json()),
-    );
+        }).then(response => response.json())
+        .then(data => {
+          if (data.errors) {
+            sink.error(data.errors);
+            return
+          }
+          sink.next(data);
+          sink.complete();
+        }));
+    });
 }
 
 type InitProps = {

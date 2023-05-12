@@ -4,18 +4,12 @@ import * as ReactTestRenderer from 'react-test-renderer';
 
 import { createOperationDescriptor, graphql } from 'relay-runtime';
 import { createMockEnvironment } from 'relay-test-utils-internal';
-import {
-    useOssFragment,
-    RelayEnvironmentProvider,
-    useRelayEnvironment,
-    usePagination,
-    useRefetchable,
-} from '../src';
+import { useOssFragment, RelayEnvironmentProvider, useRelayEnvironment, usePagination, useRefetchable } from '../src';
 
 function createHooks(component, options?: any) {
-    let result;// = ReactTestRenderer.create(component, options);
+    let result;
     ReactTestRenderer.act(() => {
-        result= ReactTestRenderer.create(component, options);
+        result = ReactTestRenderer.create(component, options);
         jest.runAllImmediates();
     });
     return result;
@@ -84,18 +78,14 @@ describe('useMemo resolver functions', () => {
         environment = createMockEnvironment();
         UserFragment = graphql`
             fragment RelayHooksTestUserFragment on User
-                @refetchable(queryName: "RelayHooksTestUserFragmentRefetchQuery")
-                @argumentDefinitions(
-                    isViewerFriendLocal: { type: "Boolean", defaultValue: false }
-                    orderby: { type: "[String]" }
-                ) {
+            @refetchable(queryName: "RelayHooksTestUserFragmentRefetchQuery")
+            @argumentDefinitions(
+                isViewerFriendLocal: { type: "Boolean", defaultValue: false }
+                orderby: { type: "[String]" }
+            ) {
                 id
-                friends(
-                    after: $after
-                    first: $count
-                    orderby: $orderby
-                    isViewerFriend: $isViewerFriendLocal
-                ) @connection(key: "UserFragment_friends") {
+                friends(after: $after, first: $count, orderby: $orderby, isViewerFriend: $isViewerFriendLocal)
+                    @connection(key: "UserFragment_friends") {
                     edges {
                         node {
                             id
@@ -115,8 +105,7 @@ describe('useMemo resolver functions', () => {
                 node(id: $id) {
                     id
                     __typename
-                    ...RelayHooksTestUserFragment
-                        @arguments(isViewerFriendLocal: $isViewerFriend, orderby: $orderby)
+                    ...RelayHooksTestUserFragment @arguments(isViewerFriendLocal: $isViewerFriend, orderby: $orderby)
                 }
             }
         `;
@@ -174,20 +163,11 @@ describe('useMemo resolver functions', () => {
             };
 
             function useOssFragmentJest(fragmentNode, fragmentRef) {
-                const [data, refetchFunction] = useOssFragment(
-                    fragmentNode,
-                    fragmentRef,
-                    false,
-                    'useOssFragment',
-                );
+                const [data, refetchFunction] = useOssFragment(fragmentNode, fragmentRef, false, 'useOssFragment');
                 renderSpy(data, refetchFunction);
                 return [data, refetchFunction];
             }
-            TestContainer = ReactRelayContainer.createContainer(
-                TestComponent,
-                UserFragment,
-                UserQuery,
-            );
+            TestContainer = ReactRelayContainer.createContainer(TestComponent, UserFragment, UserQuery);
         });
         it('re-renders on subscription callbac', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
@@ -281,11 +261,7 @@ describe('useMemo resolver functions', () => {
                 renderSpy(data, refetch);
                 return [data, refetch];
             }
-            TestContainer = ReactRelayContainer.createContainer(
-                TestComponent,
-                UserFragment,
-                UserQuery,
-            );
+            TestContainer = ReactRelayContainer.createContainer(TestComponent, UserFragment, UserQuery);
         });
         it('re-renders on subscription callbac', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
@@ -379,11 +355,7 @@ describe('useMemo resolver functions', () => {
                 renderSpy(data, refetch);
                 return [data, refetch];
             }
-            TestContainer = ReactRelayContainer.createContainer(
-                TestComponent,
-                UserFragment,
-                UserQuery,
-            );
+            TestContainer = ReactRelayContainer.createContainer(TestComponent, UserFragment, UserQuery);
         });
         it('re-renders on subscription callbac', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;

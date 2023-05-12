@@ -115,22 +115,22 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
         }
 
         const { onComplete, onResponse } = options;
-        let fetchHasReturned = false;
-        const onNext = (_o: OperationDescriptor, snapshot: Snapshot): void => {
+        const resolveUpdate = (doUpdate) => {
+            this.resolveResult();
+            if (doUpdate) {
+                this.forceUpdate();
+            }
+        };
+        const onNext = (operation: OperationDescriptor, snapshot: Snapshot, doUpdate: boolean): void => {
             if (!this.snapshot) {
                 this.snapshot = snapshot;
                 this.subscribe(snapshot);
-                this.resolveResult();
-                if (fetchHasReturned) {
-                    this.forceUpdate();
-                }
+                resolveUpdate(doUpdate);
             }
         };
-        const complete = (error: Error | null): void => {
-            this.resolveResult();
-            if (fetchHasReturned) {
-                this.forceUpdate();
-            }
+        const complete = (error: Error | null, doUpdate: boolean): void => {
+            // doUpdate is False only if fetch is Sync
+            resolveUpdate(doUpdate);
             onComplete && onComplete(error);
         };
         this.fetcher.fetch(
@@ -142,7 +142,6 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             onResponse,
             options.UNSTABLE_renderPolicy,
         );
-        fetchHasReturned = true;
     }
 
     getQuery(gqlQuery, variables, networkCacheConfig): OperationDescriptor | null {
@@ -220,7 +219,6 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
             // Read from this._fetchOptions in case onDataChange() was lazily added.
             this.snapshot = snapshot;
             //this.error = null;
-
             this.resolveResult();
             this.forceUpdate();
         });

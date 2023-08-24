@@ -83,10 +83,17 @@ function fetchQuery(
         sink.next(data);
         sink.complete();
       });
-  })
+  });
 }
 
+const requiredFieldLogger = (fieldPath, fieldName) => {
+  console.error(
+    `Required field "${fieldName}" is null at path "${fieldPath}".`,
+  );
+};
+
 const modernEnvironment: Environment = new Environment({
+  requiredFieldLogger,
   network: Network.create(fetchQuery),
   store: new Store(new RecordSource()),
 });

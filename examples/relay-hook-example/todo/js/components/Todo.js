@@ -39,7 +39,7 @@ const fragmentSpecTodo = graphql`
   fragment Todo_todo on Todo {
     complete
     id
-    text
+    text @required(action: THROW)
   }
 `;
 const fragmentSpecUser = graphql`

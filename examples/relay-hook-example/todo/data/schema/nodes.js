@@ -65,7 +65,7 @@ const GraphQLTodo = new GraphQLObjectType({
     id: globalIdField('Todo'),
     text: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: (todo: Todo): string => todo.text,
+      resolve: (todo: Todo): string => null,
     },
     complete: {
       type: new GraphQLNonNull(GraphQLBoolean),

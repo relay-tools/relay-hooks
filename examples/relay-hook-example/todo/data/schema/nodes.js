@@ -64,7 +64,7 @@ const GraphQLTodo = new GraphQLObjectType({
   fields: {
     id: globalIdField('Todo'),
     text: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: GraphQLString,
       resolve: (todo: Todo): string => null,
     },
     complete: {

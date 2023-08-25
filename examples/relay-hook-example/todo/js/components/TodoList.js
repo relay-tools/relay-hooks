@@ -51,9 +51,7 @@ const fragmentSpec = graphql`
 const fragmentSpecList = graphql`
   fragment TodoList_edges on TodoEdge @relay(plural: true) {
     node {
-      complete
-      id
-      text
+      ...Todo_todo
     }
   }
 `;

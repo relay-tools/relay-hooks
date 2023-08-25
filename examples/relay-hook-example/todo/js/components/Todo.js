@@ -54,8 +54,8 @@ const fragmentSpecUser = graphql`
 const Todo = props => {
   const user = useFragment(fragmentSpecUser, props.user);
   console.log('props.todo', props.todo);
-  //const todo = useFragment(fragmentSpecTodo, props.todo);
-  const {todo} = props;
+  const todo = useFragment(fragmentSpecTodo, props.todo);
+  //const {todo} = props;
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   const [mutateChange] = useMutation(mutationChange);

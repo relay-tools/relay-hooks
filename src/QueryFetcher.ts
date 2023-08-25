@@ -8,6 +8,7 @@ import {
     OperationDescriptor,
     GraphQLTaggedNode,
     Variables,
+    handlePotentialSnapshotErrors,
 } from 'relay-runtime';
 import { Fetcher, fetchResolver } from './FetchResolver';
 import { FetchPolicy, RenderProps, QueryOptions, Options } from './RelayHooksTypes';
@@ -203,10 +204,18 @@ export class QueryFetcher<TOperationType extends OperationType = OperationType> 
 
     resolveResult(): void {
         const { error, isLoading } = this.fetcher.getData();
+        const snapshot: any = this.snapshot;
+        if (snapshot && snapshot.missingRequiredFields) {
+            handlePotentialSnapshotErrors(
+                this.environment,
+                snapshot.missingRequiredFields,
+                snapshot.relayResolverErrors,
+            );
+        }
         this.result = {
             retry: this.retry,
             error,
-            data: this.snapshot ? this.snapshot.data : null,
+            data: snapshot ? snapshot.data : null,
             isLoading,
         };
     }

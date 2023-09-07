@@ -21,6 +21,7 @@ import {
     getPaginationVariables,
     getRefetchMetadata,
     getValueAtPath,
+    handlePotentialSnapshotErrors,
 } from 'relay-runtime';
 import { Fetcher, fetchResolver } from './FetchResolver';
 import { getConnectionState, getStateFromConnection } from './getConnectionState';
@@ -338,6 +339,10 @@ export class FragmentResolver {
             // useFragment
             this.result = data;
         }
+        const snap = this.resolverData.snapshot;
+        if (snap) {
+            this._throwOrLogErrorsInSnapshot(snap);
+        }
         this._subscribeResolve && this._subscribeResolve(this.result);
     }
 
@@ -621,4 +626,22 @@ export class FragmentResolver {
         this.refreshHooks();
         return disposable;
     };
+
+    _throwOrLogErrorsInSnapshot(snapshot: any) {
+        if (Array.isArray(snapshot)) {
+            snapshot.forEach((s) => {
+                if (s.missingRequiredFields) {
+                    handlePotentialSnapshotErrors(this._environment, s.missingRequiredFields, s.relayResolverErrors);
+                }
+            });
+        } else {
+            if (snapshot.missingRequiredFields) {
+                handlePotentialSnapshotErrors(
+                    this._environment,
+                    snapshot.missingRequiredFields,
+                    snapshot.relayResolverErrors,
+                );
+            }
+        }
+    }
 }

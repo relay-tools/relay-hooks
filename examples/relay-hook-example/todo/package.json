@@ -17,7 +17,7 @@
     "react": "^16.12.0",
     "react-dom": "^16.8.4",
     "relay-runtime": "15.0.0",
-    "relay-hooks": "6.0.0",
+    "relay-hooks": "8.0.1",
     "whatwg-fetch": "3.0.0",
     "isomorphic-fetch": "2.2.1",
     "es6-promise": "4.2.8",

@@ -14,11 +14,11 @@ export function usePagination<TQuery extends OperationType, TKey extends KeyType
 ): ReturnTypePagination<TQuery, TKey, KeyTypeData<TKey>>;
 export function usePagination<TQuery extends OperationType, TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
+    fragmentRef: TKey | null | undefined,
 ): ReturnTypePagination<TQuery, TKey | null, KeyTypeData<TKey> | null>;
 export function usePagination<TQuery extends OperationType, TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
+    fragmentRef: TKey | null | undefined,
 ): ReturnTypePagination<TQuery, TKey | null, KeyTypeData<TKey> | null> {
     const [data] = useOssFragment(fragmentNode, fragmentRef, false, PAGINATION_NAME);
     return data;

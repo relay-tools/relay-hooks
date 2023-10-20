@@ -8,7 +8,7 @@ export function useFragment<TKey extends KeyType>(
 ): $Call<KeyReturnType<TKey>>;
 export function useFragment<TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
+    fragmentRef: TKey | null | undefined,
 ): $Call<KeyReturnType<TKey>> | null;
 export function useFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
@@ -16,7 +16,11 @@ export function useFragment<TKey extends ArrayKeyType>(
 ): ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>;
 export function useFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
+    fragmentRef: TKey | null | undefined,
+): ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>;
+export function useFragment<TKey extends ArrayKeyType>(
+    fragmentNode: GraphQLTaggedNode,
+    fragmentRef: TKey | null | undefined,
 ): ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> {
     const [data] = useOssFragment(fragmentNode, fragmentRef, false, FRAGMENT_NAME);
     return data;
@@ -33,6 +37,10 @@ export function useSuspenseFragment<TKey extends KeyType>(
 export function useSuspenseFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey,
+): ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>;
+export function useSuspenseFragment<TKey extends ArrayKeyType>(
+    fragmentNode: GraphQLTaggedNode,
+    fragmentRef: TKey | null,
 ): ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>;
 export function useSuspenseFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
@@ -55,6 +63,11 @@ export function useFragmentSubscription<TKey extends KeyType>(
 export function useFragmentSubscription<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey,
+    callback: (data: ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>) => void,
+): void;
+export function useFragmentSubscription<TKey extends ArrayKeyType>(
+    fragmentNode: GraphQLTaggedNode,
+    fragmentRef: TKey | null,
     callback: (data: ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>) => void,
 ): void;
 export function useFragmentSubscription<TKey extends ArrayKeyType>(

@@ -417,7 +417,7 @@ export class FragmentResolver {
         const { fragmentRefPathInResponse, identifierInfo, refetchableRequest } = getRefetchMetadata(
             this._fragment,
             name,
-        );
+        ) as any;
         const fragmentData = this.getData().data;
         const identifierValue =
             identifierInfo?.identifierField != null && fragmentData != null && typeof fragmentData === 'object'

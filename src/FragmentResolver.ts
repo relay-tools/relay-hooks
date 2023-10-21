@@ -414,14 +414,14 @@ export class FragmentResolver {
             );
         }
 
-        const { fragmentRefPathInResponse, identifierField, refetchableRequest } = getRefetchMetadata(
+        const { fragmentRefPathInResponse, identifierInfo, refetchableRequest } = getRefetchMetadata(
             this._fragment,
             name,
         );
         const fragmentData = this.getData().data;
         const identifierValue =
-            identifierField != null && fragmentData != null && typeof fragmentData === 'object'
-                ? fragmentData[identifierField]
+            identifierInfo?.identifierField != null && fragmentData != null && typeof fragmentData === 'object'
+                ? fragmentData[identifierInfo.identifierField]
                 : null;
 
         let parentVariables;
@@ -453,7 +453,7 @@ export class FragmentResolver {
             ...variables,
         };
 
-        if (identifierField != null && !variables.hasOwnProperty('id')) {
+        if (identifierInfo != null && !variables.hasOwnProperty('id')) {
             // @refetchable fragments are guaranteed to have an `id` selection
             // if the type is Node, implements Node, or is @fetchable. Double-check
             // that there actually is a value at runtime.
@@ -461,7 +461,7 @@ export class FragmentResolver {
                 warning(
                     false,
                     'Relay: Expected result to have a string  ' + '`%s` in order to refetch, got `%s`.',
-                    identifierField,
+                    identifierInfo,
                     identifierValue,
                 );
             }

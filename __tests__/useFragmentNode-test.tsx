@@ -44,10 +44,9 @@ jest.doMock('relay-runtime', () => {
         },
     };
 });
-jest.spyOn(
-    require('relay-runtime').__internal,
-    'getPromiseForActiveRequest',
-).mockImplementationOnce(() => Promise.resolve());
+jest.spyOn(require('relay-runtime').__internal, 'getPromiseForActiveRequest').mockImplementationOnce(() =>
+    Promise.resolve(),
+);
 
 import * as React from 'react';
 import { useMemo, useRef, useState } from 'react';
@@ -71,10 +70,7 @@ const warning = require('fbjs/lib/warning');
 function assertYieldsWereCleared(_scheduler) {
     const actualYields = (_scheduler as any).unstable_clearYields();
     if (actualYields.length !== 0) {
-        throw new Error(
-            'Log of yielded values is not empty. ' +
-                'Call expect(Scheduler).toHaveYielded(...) first.',
-        );
+        throw new Error('Log of yielded values is not empty. ' + 'Call expect(Scheduler).toHaveYielded(...) first.');
     }
 }
 
@@ -149,7 +145,6 @@ function createFragmentRef(id, owner) {
             useFragmentNodeTestNestedUserFragment: {},
         },
         [FRAGMENT_OWNER_KEY]: owner.request,
-        __isWithinUnmatchedTypeRefinement: false,
     };
 }
 
@@ -254,7 +249,6 @@ beforeEach(() => {
                       useFragmentNodeTestUserFragment: {},
                   },
                   [FRAGMENT_OWNER_KEY]: owner.request,
-                  __isWithinUnmatchedTypeRefinement: false,
               };
         /* eslint-enable indent */
         setSingularOwner = _setOwner;
@@ -276,7 +270,6 @@ beforeEach(() => {
                       useFragmentNodeTestUsersFragment: {},
                   },
                   [FRAGMENT_OWNER_KEY]: owner.request,
-                  __isWithinUnmatchedTypeRefinement: false,
               }));
         /* eslint-enable indent */
         const [usersData] = useFragmentNode(gqlPluralFragment, usersRef);
@@ -289,9 +282,7 @@ beforeEach(() => {
 
         setEnvironment = _setEnv;
 
-        return (
-            <ReactRelayContext.Provider value={relayContext}>{children}</ReactRelayContext.Provider>
-        );
+        return <ReactRelayContext.Provider value={relayContext}>{children}</ReactRelayContext.Provider>;
     };
 
     renderSingularFragment = (args?: { isConcurrent?: boolean; owner?: any; userRef?: any }) => {
@@ -303,8 +294,7 @@ beforeEach(() => {
                 </ContextProvider>
             </React.Suspense>,
             // any[prop-missing] - error revealed when flow-typing ReactTestRenderer
-            { unstable_isConcurrent: isConcurrent, 
-                unstable_concurrentUpdatesByDefault: true, },
+            { unstable_isConcurrent: isConcurrent, unstable_concurrentUpdatesByDefault: true },
         );
     };
 
@@ -317,8 +307,7 @@ beforeEach(() => {
                 </ContextProvider>
             </React.Suspense>,
             // any[prop-missing] - error revealed when flow-typing ReactTestRenderer
-            { unstable_isConcurrent: isConcurrent, 
-                unstable_concurrentUpdatesByDefault: true, },
+            { unstable_isConcurrent: isConcurrent, unstable_concurrentUpdatesByDefault: true },
         );
     };
 });
@@ -1110,9 +1099,7 @@ it('should warn if fragment reference is non-null but read-out data is null', ()
     // any[prop-missing]
     const [, warningMessage] = warning.mock.calls[1];
     expect(
-        warningMessage.startsWith(
-            'Relay: Expected to have been able to read non-null data for fragment `%s`',
-        ),
+        warningMessage.startsWith('Relay: Expected to have been able to read non-null data for fragment `%s`'),
     ).toEqual(true);
     // any[prop-missing]
     warning.mockClear();
@@ -1148,9 +1135,7 @@ it('should warn if plural fragment reference is non-null but read-out data is nu
     // any[prop-missing]
     const [, warningMessage] = warning.mock.calls[1];
     expect(
-        warningMessage.startsWith(
-            'Relay: Expected to have been able to read non-null data for fragment `%s`',
-        ),
+        warningMessage.startsWith('Relay: Expected to have been able to read non-null data for fragment `%s`'),
     ).toEqual(true);
     // any[prop-missing]
     warning.mockClear();
@@ -1313,8 +1298,8 @@ it('should subscribe for updates to plural fragments even if there is missing da
                     name: 'Mark',
                 },
             ],
+        });
     });
-    })
 
     // Assert render output with updated data
     assertFragmentResults([

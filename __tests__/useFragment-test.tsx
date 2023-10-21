@@ -14,18 +14,8 @@
 import * as React from 'react';
 import { useMemo, useState } from 'react';
 import * as TestRenderer from 'react-test-renderer';
-import {
-    useFragment as useFragmentNodeOriginal,
-    useFragmentSubscription,
-    ReactRelayContext,
-} from '../src';
-import {
-    FRAGMENT_OWNER_KEY,
-    FRAGMENTS_KEY,
-    ID_KEY,
-    createOperationDescriptor,
-    graphql,
-} from 'relay-runtime';
+import { useFragment as useFragmentNodeOriginal, useFragmentSubscription, ReactRelayContext } from '../src';
+import { FRAGMENT_OWNER_KEY, FRAGMENTS_KEY, ID_KEY, createOperationDescriptor, graphql } from 'relay-runtime';
 
 /**
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -57,10 +47,7 @@ const {
 function assertYieldsWereCleared(_scheduler) {
     const actualYields = _scheduler.unstable_clearYields();
     if (actualYields.length !== 0) {
-        throw new Error(
-            'Log of yielded values is not empty. ' +
-                'Call expect(Scheduler).toHaveYielded(...) first.',
-        );
+        throw new Error('Log of yielded values is not empty. ' + 'Call expect(Scheduler).toHaveYielded(...) first.');
     }
 }
 
@@ -147,7 +134,6 @@ function createFragmentRef(id, owner, __isWithinUnmatchedTypeRefinement = false)
             useFragmentTestNestedUserFragment: {},
         },
         [FRAGMENT_OWNER_KEY]: owner.request,
-        __isWithinUnmatchedTypeRefinement,
     };
 }
 
@@ -305,9 +291,7 @@ beforeEach(() => {
 
         setEnvironment = _setEnv;
 
-        return (
-            <ReactRelayContext.Provider value={relayContext}>{children}</ReactRelayContext.Provider>
-        );
+        return <ReactRelayContext.Provider value={relayContext}>{children}</ReactRelayContext.Provider>;
     };
 
     renderSingularFragment = (args) => {

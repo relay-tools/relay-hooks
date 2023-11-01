@@ -57,7 +57,19 @@ export function fetchResolver({
         fetchPolicy,
         renderPolicy: RenderPolicy,
     ): { snapshot: Snapshot | null; full: boolean } => {
-        if (isStorePolicy(fetchPolicy)) {
+         if (isStorePolicy(fetchPolicy)) {
+            const snapshot = environment.lookup(operation.fragment);
+            const isFullQueryCached = !snapshot.isMissingData;
+         
+            // Only when data is missing fields we run the data checker. Since we don't invalidate or expire items in cache we can safely opt out of data checking.
+            // When that data is fully cached, the cost of data checking is prohibitively expensive.
+            // TODO: Provide an option to opt into data checking 
+            if(isFullQueryCached) {
+                return {
+                snapshot,
+                full: true
+                };
+            }
             const check = environment.check(operation);
             const queryStatus = check.status;
             const hasFullQuery = queryStatus === 'available';

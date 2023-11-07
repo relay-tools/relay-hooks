@@ -15,7 +15,12 @@ export function useRefetchable<TQuery extends OperationType, TKey extends KeyTyp
 ReturnTypeRefetchNode<TQuery, TKey, KeyTypeData<TKey>>;
 export function useRefetchable<TQuery extends OperationType, TKey extends KeyType>(
     fragmentInput: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
+    fragmentRef: TKey | null | undefined,
+): // tslint:disable-next-line no-unnecessary-generics
+ReturnTypeRefetchNode<TQuery, TKey, KeyTypeData<TKey> | null>;
+export function useRefetchable<TQuery extends OperationType, TKey extends KeyType>(
+    fragmentInput: GraphQLTaggedNode,
+    fragmentRef: TKey | null | undefined,
 ): // tslint:disable-next-line no-unnecessary-generics
 ReturnTypeRefetchNode<TQuery, TKey, KeyTypeData<TKey> | null> {
     const [data] = useOssFragment(fragmentInput, fragmentRef, false, REFETCHABLE_NAME);
@@ -29,7 +34,12 @@ export function useRefetchableFragment<TQuery extends OperationType, TKey extend
 ReturnTypeRefetchSuspenseNode<TQuery, TKey, KeyTypeData<TKey>>;
 export function useRefetchableFragment<TQuery extends OperationType, TKey extends KeyType>(
     fragmentInput: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
+    fragmentRef: TKey | null | undefined,
+): // tslint:disable-next-line no-unnecessary-generics
+ReturnTypeRefetchSuspenseNode<TQuery, TKey, KeyTypeData<TKey> | null>;
+export function useRefetchableFragment<TQuery extends OperationType, TKey extends KeyType>(
+    fragmentInput: GraphQLTaggedNode,
+    fragmentRef: TKey | null | undefined,
 ): // tslint:disable-next-line no-unnecessary-generics
 ReturnTypeRefetchSuspenseNode<TQuery, TKey, KeyTypeData<TKey> | null> {
     const [data] = useOssFragment(fragmentInput, fragmentRef, true, REFETCHABLE_NAME);
@@ -44,7 +54,13 @@ export function useRefetchableSubscription<TQuery extends OperationType, TKey ex
 void;
 export function useRefetchableSubscription<TQuery extends OperationType, TKey extends KeyType>(
     fragmentInput: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
+    fragmentRef: TKey | null | undefined,
+    callback: (data: ReturnTypeRefetchNode<TQuery, TKey, KeyTypeData<TKey> | null>) => void,
+): // tslint:disable-next-line no-unnecessary-generics
+void;
+export function useRefetchableSubscription<TQuery extends OperationType, TKey extends KeyType>(
+    fragmentInput: GraphQLTaggedNode,
+    fragmentRef: TKey | null | undefined,
     callback: (data: ReturnTypeRefetchNode<TQuery, TKey, KeyTypeData<TKey> | null>) => void,
 ): // tslint:disable-next-line no-unnecessary-generics
 void {

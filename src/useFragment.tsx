@@ -32,7 +32,7 @@ export function useSuspenseFragment<TKey extends KeyType>(
 ): $Call<KeyReturnType<TKey>>;
 export function useSuspenseFragment<TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
+    fragmentRef: TKey | null | undefined,
 ): $Call<KeyReturnType<TKey>> | null;
 export function useSuspenseFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
@@ -40,11 +40,11 @@ export function useSuspenseFragment<TKey extends ArrayKeyType>(
 ): ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>;
 export function useSuspenseFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
+    fragmentRef: TKey | null | undefined,
 ): ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>;
 export function useSuspenseFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
+    fragmentRef: TKey | null | undefined,
 ): ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> {
     const [data] = useOssFragment(fragmentNode, fragmentRef, true, FRAGMENT_NAME);
     return data;
@@ -57,7 +57,7 @@ export function useFragmentSubscription<TKey extends KeyType>(
 ): void;
 export function useFragmentSubscription<TKey extends KeyType>(
     fragmentNode: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
+    fragmentRef: TKey | null | undefined,
     callback: (data: $Call<KeyReturnType<TKey>> | null) => void,
 ): void;
 export function useFragmentSubscription<TKey extends ArrayKeyType>(
@@ -67,12 +67,12 @@ export function useFragmentSubscription<TKey extends ArrayKeyType>(
 ): void;
 export function useFragmentSubscription<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
+    fragmentRef: TKey | null | undefined,
     callback: (data: ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>) => void,
 ): void;
 export function useFragmentSubscription<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
-    fragmentRef: TKey | null,
+    fragmentRef: TKey | null | undefined,
     callback: (data: ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>) => void,
 ): void {
     useOssFragment(fragmentNode, fragmentRef, false, FRAGMENT_NAME, callback);

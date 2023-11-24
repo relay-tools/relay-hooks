@@ -13,7 +13,7 @@
     "schema": "./data/schema.graphql",
     "language": "typescript",
     "artifactDirectory": "./__generated__/relay",
-    "excludes": ["__generated__", "node_modules", ".next"]
+    "excludes": ["__generated__/**", "node_modules/**", ".next/**"]
   },
   "dependencies": {
     "@material-ui/core": "4.11.2",

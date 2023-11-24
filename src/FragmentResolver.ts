@@ -452,8 +452,7 @@ export class FragmentResolver {
             ...fragmentVariables,
             ...variables,
         };
-
-        if (identifierInfo != null && !variables.hasOwnProperty('id')) {
+        if (identifierInfo != null && !variables.hasOwnProperty(identifierInfo.identifierQueryVariableName)) {
             // @refetchable fragments are guaranteed to have an `id` selection
             // if the type is Node, implements Node, or is @fetchable. Double-check
             // that there actually is a value at runtime.
@@ -465,7 +464,7 @@ export class FragmentResolver {
                     identifierValue,
                 );
             }
-            refetchVariables.id = identifierValue;
+            refetchVariables[identifierInfo.identifierQueryVariableName] = identifierValue;
         }
 
         const onNext = (operation: OperationDescriptor, snapshot: Snapshot, doUpdate: boolean): void => {
@@ -568,11 +567,14 @@ export class FragmentResolver {
             this.name,
         );
 
-        const { paginationRequest, paginationMetadata, identifierField, connectionPathInFragmentData } =
-            getPaginationMetadata(this._fragment, this.name);
+        const { paginationRequest, paginationMetadata, connectionPathInFragmentData } = getPaginationMetadata(
+            this._fragment,
+            this.name,
+        );
+        const { identifierInfo } = getRefetchMetadata(this._fragment, this._fragment.name) as any;
         const identifierValue =
-            identifierField != null && fragmentData != null && typeof fragmentData === 'object'
-                ? fragmentData[identifierField]
+            identifierInfo != null && fragmentData != null && typeof fragmentData === 'object'
+                ? fragmentData[identifierInfo.identifierField]
                 : null;
 
         const parentVariables = (this._selector as SingularReaderSelector).owner.variables;
@@ -594,7 +596,7 @@ export class FragmentResolver {
 
         // If the query needs an identifier value ('id' or similar) and one
         // was not explicitly provided, read it from the fragment data.
-        if (identifierField != null) {
+        if (identifierInfo != null) {
             // @refetchable fragments are guaranteed to have an `id` selection
             // if the type is Node, implements Node, or is @fetchable. Double-check
             // that there actually is a value at runtime.
@@ -602,11 +604,11 @@ export class FragmentResolver {
                 warning(
                     false,
                     'Relay: Expected result to have a string  ' + '`%s` in order to refetch, got `%s`.',
-                    identifierField,
+                    identifierInfo,
                     identifierValue,
                 );
             }
-            paginationVariables.id = identifierValue;
+            paginationVariables[identifierInfo.identifierQueryVariableName] = identifierValue;
         }
 
         const complete = (error, doUpdate) => {

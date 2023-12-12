@@ -14,7 +14,6 @@ import React, { useEffect, useRef, useState, SyntheticEvent, KeyboardEvent } fro
 import styled, { css } from 'styled-components';
 
 type Props = {
-    isEditing?: boolean;
     edit?: boolean;
     commitOnBlur?: boolean;
     initialValue?: string;
@@ -27,7 +26,7 @@ type Props = {
 const ENTER_KEY_CODE = 13;
 const ESC_KEY_CODE = 27;
 
-const cssInput = css`
+const cssInput = css<any>`
     ${(props): any =>
         props.placeholder &&
         css`

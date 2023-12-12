@@ -1,4 +1,3 @@
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { useRouter } from 'next/router';
 import React, { useMemo } from 'react';
 import { useQuery, STORE_OR_NETWORK, STORE_THEN_NETWORK } from 'relay-hooks';
@@ -38,6 +37,32 @@ const StyledSection = styled.section`
     min-height: 400px;
 `;
 
+const CircularProgress = styled.div`
+  border: 16px solid pink;
+  border-top: 16px deeppink solid;
+  border-radius: 50%;
+  height: 120px;
+  width: 120px;
+  animation: spin 2s linear infinite;
+  /* 
+  border: 16px solid #f3f3f3; 
+  border-top: 16px solid #3498db;
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite; */
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
 const RootPage = ({ query, first }: any): JSX.Element => {
     const router = useRouter();
     const userId = router.query && router.query.userId ? (router.query.userId as string) : 'me';
@@ -53,7 +78,7 @@ const RootPage = ({ query, first }: any): JSX.Element => {
         fetchPolicy: STORE_OR_NETWORK,
     });
 
-    console.log("render", isLoading)
+    console.log("render", isLoading, data)
 
     return (
         <React.Fragment>
@@ -70,11 +95,11 @@ const RootPage = ({ query, first }: any): JSX.Element => {
                     <div>{error.message}</div>
                 ) : (
                     <StyledDiv>
-                        <CircularProgress size={60} />
+                        <CircularProgress />
                     </StyledDiv>
                 )}
             </StyledSection>
-        </React.Fragment>
+            </React.Fragment>
     );
 };
 

@@ -3,7 +3,7 @@ import App from 'next/app';
 import Head from 'next/head';
 import React from 'react';
 import { RelayEnvironmentProvider } from 'relay-hooks';
-import { createGlobalStyle } from 'styled-components';
+import { createGlobalStyle, ThemeProvider } from 'styled-components';
 import { initEnvironment } from '../relay/createRelayEnvironment';
 const GlobalStyle = createGlobalStyle`
 
@@ -53,11 +53,16 @@ const GlobalStyle = createGlobalStyle`
   }
 
 `;
+const theme = {
+  colors: {
+    primary: 'blue',
+    secondary: 'green',
+  },
+}
 
 const isServer = typeof window === 'undefined';
-class CustomApp extends App {
-    render(): any {
-        const { Component, pageProps } = this.props;
+function CustomApp(props: any) {
+        const { Component, pageProps } = props;
         const { queryRecords: records } = pageProps;
         /* eslint-disable indent */
         const environment = isServer
@@ -67,16 +72,17 @@ class CustomApp extends App {
               });
         /* eslint-enable indent */
         return (
+          
             <React.Fragment>
+              
                 <GlobalStyle />
-                <Head>
-                    <title>Relay Hooks NextJS SSR</title>
-                </Head>
                 <RelayEnvironmentProvider environment={environment}>
-                    <Component {...pageProps} />
+                  <ThemeProvider theme={theme}>
+                      <Component {...pageProps} />
+                  </ThemeProvider>
                 </RelayEnvironmentProvider>
+                    
             </React.Fragment>
         );
     }
-}
 export default CustomApp;

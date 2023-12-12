@@ -12,15 +12,13 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import LinearProgress from '@material-ui/core/LinearProgress';
-import TablePagination from '@material-ui/core/TablePagination';
 import { useRouter } from 'next/router';
 import React, { useCallback, useState } from 'react';
 
 import InfiniteScroll from 'react-infinite-scroller';
 import { graphql, usePagination, useRelayEnvironment } from 'relay-hooks';
 import styled from 'styled-components';
-import { TodoList_user, TodoList_user$key } from '../__generated__/relay/TodoList_user.graphql';
+import { TodoList_user$data, TodoList_user$key } from '../__generated__/relay/TodoList_user.graphql';
 import { UserFragmentRefetchQuery } from '../__generated__/relay/UserFragmentRefetchQuery.graphql';
 import { AddTodoMutation } from '../mutations/AddTodoMutation';
 import { isPaginated, isScroll } from './Header';
@@ -28,7 +26,12 @@ import { Todo } from './Todo';
 import { isNotNull, StyledButton, StyledDivButton } from './TodoApp';
 import { TodoTextInput } from './TodoTextInput';
 import { Disposable } from 'relay-runtime';
-type Todos = NonNullable<TodoList_user['todos']>;
+/*import {
+    TablePagination,
+  } from '@mui/base/TablePagination';*/
+import { LinearProgress } from './LinearProgress';
+import { TablePagination } from './TablePagination';
+type Todos = NonNullable<TodoList_user$data['todos']>;
 type Edges = NonNullable<Todos['edges']>;
 type Edge = NonNullable<Edges[number]>;
 type Node = NonNullable<Edge['node']>;
@@ -52,15 +55,9 @@ const StyledList = styled.ul`
 
 const fragmentSpecs = graphql`
     fragment TodoList_user on User
-        @refetchable(queryName: "UserFragmentRefetchQuery")
-        @argumentDefinitions(
-            first: { type: Int }
-            after: { type: String }
-            last: { type: Int }
-            before: { type: String }
-        ) {
-        todos(first: $first, after: $after, before: $before, last: $last)
-            @connection(key: "TodoList_todos") {
+    @refetchable(queryName: "UserFragmentRefetchQuery")
+    @argumentDefinitions(first: { type: Int }, after: { type: String }, last: { type: Int }, before: { type: String }) {
+        todos(first: $first, after: $after, before: $before, last: $last) @connection(key: "TodoList_todos") {
             edges {
                 node {
                     id
@@ -84,13 +81,8 @@ const fragmentSpecs = graphql`
 
 const fragmentTableSpecs = graphql`
     fragment TodoListTable_user on User
-        @refetchable(queryName: "UserFragmentRefetchTableQuery")
-        @argumentDefinitions(
-            first: { type: Int }
-            after: { type: String }
-            last: { type: Int }
-            before: { type: String }
-        ) {
+    @refetchable(queryName: "UserFragmentRefetchTableQuery")
+    @argumentDefinitions(first: { type: Int }, after: { type: String }, last: { type: Int }, before: { type: String }) {
         todos(first: $first, after: $after, before: $before, last: $last)
             @connection(key: "TodoList_todos", handler: "connection_table") {
             edges {
@@ -137,6 +129,15 @@ export const TodoList = (props: Props): JSX.Element => {
     );
 
     const { todos, totalCount } = user || {};
+    const mount = React.useRef(true);
+    React.useEffect(() => {
+        mount.current = true;
+        console.log('mount list');
+        return () => {
+            mount.current = false;
+            console.log('dismout list');
+        };
+    }, []);
     const refresh = useCallback((): Disposable => {
         const onComplete = (): void => {
             setRowsPerPage(rowsPerPage);
@@ -158,17 +159,22 @@ export const TodoList = (props: Props): JSX.Element => {
 
     const isLoading =
         props.isLoading || refetchLoading || ((paginated || scroll) && (isLoadingPrevious || isLoadingNext));
+
+    console.log('loading', props.isLoading, refetchLoading, isLoadingPrevious, isLoadingNext);
     const loadMore = useCallback(() => {
         // Don't fetch again if we're already loading the next page
-        if (isLoading) {
+        if (isLoading || !mount.current) {
             return;
         }
-        console.log("load")
-        loadNext(1);
+        const disposable = loadNext(1);
+        return () => {
+            console.log('dissssss');
+            disposable.dispose();
+        };
     }, [isLoading, loadNext]);
 
     const handleChangePage = useCallback(
-        (_event, newPage) => {
+        (newPage) => {
             const previous = page < newPage;
             const refetch = previous ? loadNext : loadPrevious;
             refetch(rowsPerPage, {
@@ -179,8 +185,7 @@ export const TodoList = (props: Props): JSX.Element => {
     );
 
     const handleChangeRowsPerPage = useCallback(
-        (event) => {
-            const rowForPage = parseInt(event.target.value, 10);
+        (rowForPage) => {
             refetch(
                 {
                     first: rowForPage,
@@ -213,7 +218,7 @@ export const TodoList = (props: Props): JSX.Element => {
         },
         [environment, user, onCompleted],
     );
-    console.log("list render", scroll, hasNext, isLoading)
+    console.log('list render', scroll, hasNext, isLoading);
     return (
         <React.Fragment>
             <TodoTextInput edit onSave={handleTextInputSave} placeholder="What needs to be done?" />
@@ -232,13 +237,13 @@ export const TodoList = (props: Props): JSX.Element => {
 
             {paginated && (
                 <TablePagination
+                    slots={{ root: 'div' }}
                     rowsPerPageOptions={[2, 5, 10, 25]}
-                    component="div"
                     count={totalCount}
                     rowsPerPage={rowsPerPage}
                     page={page}
-                    onChangePage={handleChangePage}
-                    onChangeRowsPerPage={handleChangeRowsPerPage}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             )}
             <StyledDivButton>

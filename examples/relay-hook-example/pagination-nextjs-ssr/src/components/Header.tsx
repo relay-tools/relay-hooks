@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import React, { forwardRef } from 'react';
 import styled, { css } from 'styled-components';
 
-const StyledButton = styled.button`
+const StyledButton = styled.button<any>`
     margin: auto;
     padding: 10px;
     cursor: pointer;
@@ -51,7 +51,7 @@ export const Header = (): any => {
     return (
         <React.Fragment>
             <StyledDiv>
-                <Link
+                <Link passHref  legacyBehavior
                     href={{
                         pathname: '/',
                         query: router.query,
@@ -59,10 +59,10 @@ export const Header = (): any => {
                 >
                     <MyButton selected={isAll(router)}>ALL</MyButton>
                 </Link>
-                <Link href={{ pathname: '/paginated', query: router.query }}>
+                <Link passHref legacyBehavior href={{ pathname: '/paginated', query: router.query }}>
                     <MyButton selected={isPaginated(router)}>PAGINATED</MyButton>
                 </Link>
-                <Link href={{ pathname: '/scroll', query: router.query }}>
+                <Link passHref legacyBehavior href={{ pathname: '/scroll', query: router.query }}>
                     <MyButton selected={isScroll(router)}>SCROLL</MyButton>
                 </Link>
             </StyledDiv>

@@ -55,15 +55,9 @@ const StyledList = styled.ul`
 
 const fragmentSpecs = graphql`
     fragment TodoList_user on User
-        @refetchable(queryName: "UserFragmentRefetchQuery")
-        @argumentDefinitions(
-            first: { type: Int }
-            after: { type: String }
-            last: { type: Int }
-            before: { type: String }
-        ) {
-        todos(first: $first, after: $after, before: $before, last: $last)
-            @connection(key: "TodoList_todos") {
+    @refetchable(queryName: "UserFragmentRefetchQuery")
+    @argumentDefinitions(first: { type: Int }, after: { type: String }, last: { type: Int }, before: { type: String }) {
+        todos(first: $first, after: $after, before: $before, last: $last) @connection(key: "TodoList_todos") {
             edges {
                 node {
                     id
@@ -87,13 +81,8 @@ const fragmentSpecs = graphql`
 
 const fragmentTableSpecs = graphql`
     fragment TodoListTable_user on User
-        @refetchable(queryName: "UserFragmentRefetchTableQuery")
-        @argumentDefinitions(
-            first: { type: Int }
-            after: { type: String }
-            last: { type: Int }
-            before: { type: String }
-        ) {
+    @refetchable(queryName: "UserFragmentRefetchTableQuery")
+    @argumentDefinitions(first: { type: Int }, after: { type: String }, last: { type: Int }, before: { type: String }) {
         todos(first: $first, after: $after, before: $before, last: $last)
             @connection(key: "TodoList_todos", handler: "connection_table") {
             edges {
@@ -140,13 +129,15 @@ export const TodoList = (props: Props): JSX.Element => {
     );
 
     const { todos, totalCount } = user || {};
-
+    const mount = React.useRef(true);
     React.useEffect(() => {
-        console.log("mount list")
+        mount.current = true;
+        console.log('mount list');
         return () => {
-            console.log("dismout list")
-        }
-    }, [])
+            mount.current = false;
+            console.log('dismout list');
+        };
+    }, []);
     const refresh = useCallback((): Disposable => {
         const onComplete = (): void => {
             setRowsPerPage(rowsPerPage);
@@ -168,15 +159,18 @@ export const TodoList = (props: Props): JSX.Element => {
 
     const isLoading =
         props.isLoading || refetchLoading || ((paginated || scroll) && (isLoadingPrevious || isLoadingNext));
-    
-    console.log("loading", props.isLoading, refetchLoading, isLoadingPrevious, isLoadingNext)
+
+    console.log('loading', props.isLoading, refetchLoading, isLoadingPrevious, isLoadingNext);
     const loadMore = useCallback(() => {
         // Don't fetch again if we're already loading the next page
-        if (isLoading) {
+        if (isLoading || !mount.current) {
             return;
         }
-        console.log("load")
-        loadNext(1);
+        const disposable = loadNext(1);
+        return () => {
+            console.log('dissssss');
+            disposable.dispose();
+        };
     }, [isLoading, loadNext]);
 
     const handleChangePage = useCallback(
@@ -224,7 +218,7 @@ export const TodoList = (props: Props): JSX.Element => {
         },
         [environment, user, onCompleted],
     );
-    console.log("list render", scroll, hasNext, isLoading)
+    console.log('list render', scroll, hasNext, isLoading);
     return (
         <React.Fragment>
             <TodoTextInput edit onSave={handleTextInputSave} placeholder="What needs to be done?" />

@@ -15,7 +15,7 @@ function fetchQuery(operation, variables, _cacheConfig, _uploadables): any {
     const controller = new AbortController();
     let doAbort = true;
     const observer = Observable.create((sink) => {
-        sleep(2).then(() =>
+        sleep(2000).then(() =>
             fetch(endpoint, {
                 signal: controller.signal,
                 method: 'POST',

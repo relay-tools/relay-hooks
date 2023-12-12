@@ -1,18 +1,24 @@
-import { Reducer, useCallback, useEffect, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export function useForceUpdate(): () => void {
-    const [, forceUpdate] = useReducer<Reducer<number, void>>((x) => x + 1, 0);
-    const isMounted = useRef(false);
+    const [, forceUpdate] = useState([]);
+    const mountState = useRef({ mounted: false, pending: false });
     useEffect(() => {
-        isMounted.current = true;
+        mountState.current.mounted = true;
+        if (mountState.current.pending) {
+            mountState.current.pending = false;
+            forceUpdate([]);
+        }
         return () => {
-            isMounted.current = false;
+            mountState.current = { mounted: false, pending: false };
         };
     }, []);
     const update = useCallback(() => {
-        if (isMounted.current) {
-            forceUpdate();
+        if (mountState.current.mounted) {
+            forceUpdate([]);
+        } else {
+            mountState.current.pending = true;
         }
-    }, [isMounted, forceUpdate]);
+    }, [forceUpdate]);
     return update;
 }

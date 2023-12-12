@@ -17,11 +17,11 @@
 import React, { useState, SyntheticEvent } from 'react';
 import { useFragment, graphql, useRelayEnvironment } from 'relay-hooks';
 import styled, { css } from 'styled-components';
-import { Todo_todo$key } from '../__generated__/relay/Todo_todo.graphql';
 import { ChangeTodoStatusMutation } from '../mutations/ChangeTodoStatusMutation';
 import { RemoveTodoMutation } from '../mutations/RemoveTodoMutation';
 import { RenameTodoMutation } from '../mutations/RenameTodoMutation';
 import { TodoTextInput } from './TodoTextInput';
+import { Todo_todo$key } from '../__generated__/relay/Todo_todo.graphql';
 
 type Props = {
     todo: Todo_todo$key;
@@ -30,17 +30,17 @@ type Props = {
     onCompleted: () => void;
 };
 
-const DivView = styled.div`
-    display: ${(props) => (props.isEditing ? 'none' : 'flex')};
+const DivView = styled.div<{ $isEditing?: boolean; }>`
+    display: ${(props) => (props.$isEditing ? 'none' : 'flex')};
 `;
 
-const StyledLi = styled.li`
+const StyledLi = styled.li<{ $isEditing?: boolean; }>`
     position: relative;
     font-size: 24px;
     border-bottom: 1px solid #ededed;
     flex: 1;
     ${(props) =>
-        props.isEditing &&
+        props.$isEditing &&
         css`
             border-bottom: none;
             padding: 0;
@@ -97,14 +97,14 @@ const InputToggle = styled.input`
     }
 `;
 
-const StyledLabel = styled.label`
+const StyledLabel = styled.label<{ $completed?: boolean; }>`
     word-break: break-all;
     padding: 15px 0px 15px 15px;
     display: block;
     line-height: 1.2;
     transition: color 0.4s;
     ${(props) =>
-        props.completed &&
+        props.$completed &&
         css`
             color: #d9d9d9;
             text-decoration: line-through;
@@ -159,8 +159,8 @@ export const Todo = (props: Props) => {
     );
 
     return (
-        <StyledLi isEditing={isEditing}>
-            <DivView isEditing={isEditing}>
+        <StyledLi $isEditing={isEditing}>
+            <DivView $isEditing={isEditing}>
                 <InputToggle
                     checked={todo.complete}
                     onChange={handleCompleteChange}
@@ -168,7 +168,7 @@ export const Todo = (props: Props) => {
                     disabled={disabled}
                 />
 
-                <StyledLabel completed={todo.complete} onDoubleClick={handleLabelDoubleClick}>
+                <StyledLabel $completed={todo.complete} onDoubleClick={handleLabelDoubleClick}>
                     {todo.text}
                 </StyledLabel>
                 {!disabled && <ButtonDestroy onClick={removeTodo} />}
@@ -177,7 +177,6 @@ export const Todo = (props: Props) => {
             {isEditing && (
                 <TodoTextInput
                     edit
-                    isEditing={isEditing}
                     commitOnBlur={true}
                     initialValue={todo.text}
                     onCancel={handleTextInputCancel}

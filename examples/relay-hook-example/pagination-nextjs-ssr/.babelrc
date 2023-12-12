@@ -1,7 +1,7 @@
 {
   "presets": ["next/babel"],
   "plugins": [
-    ["relay", {"artifactDirectory": "./__generated__/relay/"}],
+    ["relay", {"artifactDirectory": "./src/__generated__/relay/"}],
     "@babel/plugin-transform-runtime",
     "@babel/plugin-proposal-class-properties",
     ["styled-components", {"ssr": true}]

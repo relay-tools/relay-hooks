@@ -16,18 +16,25 @@ export function useOssFragment(
     const environment = useRelayEnvironment();
     const forceUpdate = useForceUpdate();
     const ref = useRef<{ resolver: FragmentResolver }>(null);
-    if (ref.current === null || ref.current === undefined) {
+    const maybeHiddenOrFastRefresh = useRef(false);
+    if (ref.current === null || ref.current === undefined || maybeHiddenOrFastRefresh.current) {
         ref.current = {
             resolver: new FragmentResolver(name),
         };
+        maybeHiddenOrFastRefresh.current = false;
     }
 
     const { resolver } = ref.current;
 
     useEffect(() => {
+        if (maybeHiddenOrFastRefresh.current == true) {
+            forceUpdate();
+        }
         return (): void => {
             ref.current.resolver.setUnmounted();
+            maybeHiddenOrFastRefresh.current = true;
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {

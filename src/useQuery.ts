@@ -19,14 +19,23 @@ const useInternalQuery = <TOperationType extends OperationType = OperationType>(
     const environment = useRelayEnvironment();
     const forceUpdate = useForceUpdate();
     const ref = useRef<Reference<TOperationType>>();
-    if (ref.current === null || ref.current === undefined) {
+    const maybeHiddenOrFastRefresh = useRef(false);
+    if (ref.current === null || ref.current === undefined || maybeHiddenOrFastRefresh.current == true) {
         ref.current = {
             queryFetcher: getOrCreateQueryFetcher(suspense, gqlQuery, variables, options.networkCacheConfig),
         };
+        maybeHiddenOrFastRefresh.current = false;
     }
 
     useEffect(() => {
-        return (): void => ref.current.queryFetcher.dispose();
+        if (maybeHiddenOrFastRefresh.current == true) {
+            forceUpdate();
+        }
+        return (): void => {
+            ref.current.queryFetcher.dispose();
+            maybeHiddenOrFastRefresh.current = true;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const { queryFetcher } = ref.current;

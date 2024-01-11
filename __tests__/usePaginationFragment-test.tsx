@@ -166,7 +166,6 @@ describe('usePaginationFragment', () => {
                 usePaginationFragmentTestNestedUserFragment: {},
             },
             [FRAGMENT_OWNER_KEY]: owner.request,
-            __isWithinUnmatchedTypeRefinement: false,
         };
     }
 

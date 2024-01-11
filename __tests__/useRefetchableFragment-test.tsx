@@ -163,7 +163,6 @@ describe('useRefetchableFragmentNode', () => {
                 [fragmentName]: {},
             },
             [FRAGMENT_OWNER_KEY]: owner.request,
-            __isWithinUnmatchedTypeRefinement,
         };
     }
 

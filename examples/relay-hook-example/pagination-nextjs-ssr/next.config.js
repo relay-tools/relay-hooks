@@ -11,7 +11,7 @@ module.exports = {
     config.resolve.preferRelative = true;
     return config;
   },
-  reactStrictMode: false,
+  reactStrictMode: true,
   compiler: {
       styledComponents: true,
     relay: {

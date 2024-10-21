@@ -197,12 +197,10 @@ export interface ReturnTypePaginationSuspense<
     refetch: RefetchFnDynamic<TQuery, TKey>;
 }
 
-export type SubscriptionConfig = {
-    skip?: boolean;
-};
+export type SubscriptionConfig = Record<string, never>; // allows only empty object
 
 export type SkipSubscriptionConfig = {
-    skip: true;
+    skip: boolean;
 };
 
 export interface SkipGraphQLSubscriptionConfig<TSubscription extends OperationType>

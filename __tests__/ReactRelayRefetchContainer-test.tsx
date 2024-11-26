@@ -275,6 +275,7 @@ describe('ReactRelayRefetchContainer', () => {
                 name: 'Zuck',
             },
             isMissingData: false,
+            errorResponseFields: null,
             missingLiveResolverFields: [],
             relayResolverErrors: [],
             missingClientEdges: null,
@@ -364,6 +365,7 @@ describe('ReactRelayRefetchContainer', () => {
                 name: 'Joe',
             },
             isMissingData: false,
+            errorResponseFields: null,
             missingLiveResolverFields: [],
             relayResolverErrors: [],
             missingClientEdges: null,
@@ -411,6 +413,7 @@ describe('ReactRelayRefetchContainer', () => {
                 // Name is excluded since value of cond is now false
             },
             isMissingData: false,
+            errorResponseFields: null,
             missingLiveResolverFields: [],
             relayResolverErrors: [],
             missingClientEdges: null,
@@ -477,6 +480,7 @@ describe('ReactRelayRefetchContainer', () => {
                 // Name is excluded since value of cond is now false
             },
             isMissingData: false,
+            errorResponseFields: null,
             missingLiveResolverFields: [],
             relayResolverErrors: [],
             missingClientEdges: null,

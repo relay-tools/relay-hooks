@@ -261,6 +261,7 @@ describe('useRefetchable', () => {
                 name: 'Zuck',
             },
             isMissingData: false,
+            errorResponseFields: null,
             missingLiveResolverFields: [],
             relayResolverErrors: [],
             missingClientEdges: null,
@@ -352,6 +353,7 @@ describe('useRefetchable', () => {
                 name: 'Joe',
             },
             isMissingData: false,
+            errorResponseFields: null,
             missingLiveResolverFields: [],
             relayResolverErrors: [],
             missingClientEdges: null,
@@ -400,6 +402,7 @@ describe('useRefetchable', () => {
                 // Name is excluded since value of cond is now false
             },
             isMissingData: false,
+            errorResponseFields: null,
             missingClientEdges: null,
             missingLiveResolverFields: [],
             relayResolverErrors: [],
@@ -468,6 +471,7 @@ describe('useRefetchable', () => {
                 // Name is excluded since value of cond is now false
             },
             isMissingData: false,
+            errorResponseFields: null,
             missingLiveResolverFields: [],
             relayResolverErrors: [],
             missingClientEdges: null,

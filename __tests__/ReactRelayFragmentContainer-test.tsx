@@ -240,9 +240,7 @@ describe('ReactRelayFragmentContainer', () => {
             isMissingData: false,
             errorResponseFields: null,
             missingLiveResolverFields: [],
-            relayResolverErrors: [],
             missingClientEdges: null,
-            missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(UserFragment, '4', { cond: true }, ownerUser1.request),
         });
@@ -327,9 +325,7 @@ describe('ReactRelayFragmentContainer', () => {
             isMissingData: false,
             errorResponseFields: null,
             missingLiveResolverFields: [],
-            relayResolverErrors: [],
             missingClientEdges: null,
-            missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(UserFragment, '842472', { cond: true }, ownerUser2.request),
         });
@@ -373,9 +369,7 @@ describe('ReactRelayFragmentContainer', () => {
             isMissingData: false,
             errorResponseFields: null,
             missingLiveResolverFields: [],
-            relayResolverErrors: [],
             missingClientEdges: null,
-            missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(UserFragment, '4', { cond: false }, ownerUser1WithCondVar.request),
         });

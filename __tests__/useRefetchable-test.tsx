@@ -263,9 +263,7 @@ describe('useRefetchable', () => {
             isMissingData: false,
             errorResponseFields: null,
             missingLiveResolverFields: [],
-            relayResolverErrors: [],
             missingClientEdges: null,
-            missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(UserFragment, '4', { cond: true }, ownerUser1.request),
         });
@@ -355,9 +353,7 @@ describe('useRefetchable', () => {
             isMissingData: false,
             errorResponseFields: null,
             missingLiveResolverFields: [],
-            relayResolverErrors: [],
             missingClientEdges: null,
-            missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(UserFragment, '842472', { cond: true }, ownerUser2.request),
         });
@@ -403,10 +399,8 @@ describe('useRefetchable', () => {
             },
             isMissingData: false,
             errorResponseFields: null,
-            missingClientEdges: null,
             missingLiveResolverFields: [],
-            relayResolverErrors: [],
-            missingRequiredFields: null,
+            missingClientEdges: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(UserFragment, '4', { cond: false }, ownerUser1WithCondVar.request),
         });
@@ -473,9 +467,7 @@ describe('useRefetchable', () => {
             isMissingData: false,
             errorResponseFields: null,
             missingLiveResolverFields: [],
-            relayResolverErrors: [],
             missingClientEdges: null,
-            missingRequiredFields: null,
             seenRecords: expect.any(Object),
             selector: createReaderSelector(UserFragment, '4', { cond: false }, ownerUser1WithCondVar.request),
         });

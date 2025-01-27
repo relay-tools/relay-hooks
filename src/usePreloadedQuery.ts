@@ -5,7 +5,7 @@ import { useForceUpdate } from './useForceUpdate';
 import { useRelayEnvironment } from './useRelayEnvironment';
 
 export const usePreloadedQuery = <TOperationType extends OperationType = OperationType>(
-    loadQuery: LoadQuery,
+    loadQuery: LoadQuery<TOperationType>,
 ): RenderProps<TOperationType> => {
     const forceUpdate = useForceUpdate();
     const environment = useRelayEnvironment();

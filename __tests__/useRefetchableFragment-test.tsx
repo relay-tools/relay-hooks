@@ -244,11 +244,11 @@ describe('useRefetchableFragmentNode', () => {
         variablesNestedFragment = { id: '<feedbackid>', scale: 16 };
 
         invariant(
-            areEqual(gqlFragment.metadata?.refetch?.operation.default, gqlRefetchQuery),
+            areEqual(gqlFragment.metadata?.refetch?.operation, gqlRefetchQuery),
             'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
         );
         invariant(
-            areEqual(gqlFragmentWithArgs.metadata?.refetch?.operation.default, gqlRefetchQueryWithArgs),
+            areEqual(gqlFragmentWithArgs.metadata?.refetch?.operation, gqlRefetchQueryWithArgs),
             'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
         );
 
@@ -3011,7 +3011,7 @@ describe('useRefetchableFragmentNode', () => {
                 gqlRefetchQuery =
                     require('./__generated__/useRefetchableFragmentTest1FragmentRefetchQuery.graphql').default;
                 invariant(
-                    areEqual(gqlFragment.metadata?.refetch?.operation.default, gqlRefetchQuery),
+                    areEqual(gqlFragment.metadata?.refetch?.operation, gqlRefetchQuery),
                     'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
                 );
 
@@ -3258,7 +3258,7 @@ describe('useRefetchableFragmentNode', () => {
                     require('./__generated__/useRefetchableFragmentTest3FragmentRefetchQuery.graphql').default;
                 variables = { nodeID: '1', scale: 16 };
                 invariant(
-                    areEqual(gqlFragment.metadata?.refetch?.operation.default, gqlRefetchQuery),
+                    areEqual(gqlFragment.metadata?.refetch?.operation, gqlRefetchQuery),
                     'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
                 );
 

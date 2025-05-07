@@ -353,11 +353,11 @@ describe('usePaginationFragment', () => {
             require('./__generated__/usePaginationFragmentTestUserFragmentStreamingPaginationQuery.graphql').default;
 
         invariant(
-            areEqual(gqlFragment.metadata?.refetch?.operation.default, gqlPaginationQuery),
+            areEqual(gqlFragment.metadata?.refetch?.operation, gqlPaginationQuery),
             'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
         );
         invariant(
-            areEqual(gqlFragmentWithStreaming.metadata?.refetch?.operation.default, gqlPaginationQueryWithStreaming),
+            areEqual(gqlFragmentWithStreaming.metadata?.refetch?.operation, gqlPaginationQueryWithStreaming),
             'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
         );
 
@@ -3914,7 +3914,7 @@ describe('usePaginationFragment', () => {
                 const fetchVariables = { id: 'a' };
                 //gqlRefetchQuery = generated.StoryFragmentRefetchQuery;
                 invariant(
-                    areEqual(gqlFragment.metadata?.refetch?.operation.default, gqlPaginationQuery),
+                    areEqual(gqlFragment.metadata?.refetch?.operation, gqlPaginationQuery),
                     'useRefetchableFragment-test: Expected refetchable fragment metadata to contain operation.',
                 );
 

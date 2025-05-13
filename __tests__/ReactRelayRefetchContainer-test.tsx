@@ -133,7 +133,7 @@ describe('ReactRelayRefetchContainer', () => {
                 name @include(if: $cond)
             }
         `;
-        UserFragmentRefetchQuery = UserFragment.metadata.refetch.operation.default;
+        UserFragmentRefetchQuery = UserFragment.metadata.refetch.operation;
 
         function ContextGetter({ refetch }) {
             const environment = useRelayEnvironment();
@@ -275,7 +275,7 @@ describe('ReactRelayRefetchContainer', () => {
                 name: 'Zuck',
             },
             isMissingData: false,
-            errorResponseFields: null,
+            fieldErrors: null,
             missingLiveResolverFields: [],
             missingClientEdges: null,
             seenRecords: expect.any(Object),
@@ -363,7 +363,7 @@ describe('ReactRelayRefetchContainer', () => {
                 name: 'Joe',
             },
             isMissingData: false,
-            errorResponseFields: null,
+            fieldErrors: null,
             missingLiveResolverFields: [],
             missingClientEdges: null,
             seenRecords: expect.any(Object),
@@ -409,7 +409,7 @@ describe('ReactRelayRefetchContainer', () => {
                 // Name is excluded since value of cond is now false
             },
             isMissingData: false,
-            errorResponseFields: null,
+            fieldErrors: null,
             missingLiveResolverFields: [],
             missingClientEdges: null,
             seenRecords: expect.any(Object),
@@ -474,7 +474,7 @@ describe('ReactRelayRefetchContainer', () => {
                 // Name is excluded since value of cond is now false
             },
             isMissingData: false,
-            errorResponseFields: null,
+            fieldErrors: null,
             missingLiveResolverFields: [],
             missingClientEdges: null,
             seenRecords: expect.any(Object),

@@ -18,7 +18,7 @@ const useInternalQuery = <TOperationType extends OperationType = OperationType>(
 ): RenderProps<TOperationType> => {
     const environment = useRelayEnvironment();
     const forceUpdate = useForceUpdate();
-    const ref = useRef<Reference<TOperationType>>();
+    const ref = useRef<Reference<TOperationType>>(undefined);
     const maybeHiddenOrFastRefresh = useRef(false);
     if (ref.current === null || ref.current === undefined || maybeHiddenOrFastRefresh.current == true) {
         ref.current = {

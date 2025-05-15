@@ -159,7 +159,9 @@ beforeEach(() => {
     ({ createMockEnvironment } = require('relay-test-utils-internal'));
 
     // Set up environment and base data
-    environment = createMockEnvironment();
+    TestRenderer.act(() => {
+        environment = createMockEnvironment();
+    });
     graphql`
         fragment useFragmentNodeTestNestedUserFragment on User {
             username
@@ -287,28 +289,36 @@ beforeEach(() => {
 
     renderSingularFragment = (args?: { isConcurrent?: boolean; owner?: any; userRef?: any }) => {
         const { isConcurrent = false, ...props } = args ?? {};
-        return TestRenderer.create(
-            <React.Suspense fallback="Singular Fallback">
-                <ContextProvider>
-                    <SingularContainer owner={singularQuery} {...props} />
-                </ContextProvider>
-            </React.Suspense>,
-            // any[prop-missing] - error revealed when flow-typing ReactTestRenderer
-            { unstable_isConcurrent: isConcurrent, unstable_concurrentUpdatesByDefault: true },
-        );
+        let instance;
+        TestRenderer.act(() => {
+            instance = TestRenderer.create(
+                <React.Suspense fallback="Singular Fallback">
+                    <ContextProvider>
+                        <SingularContainer owner={singularQuery} {...props} />
+                    </ContextProvider>
+                </React.Suspense>,
+                // any[prop-missing] - error revealed when flow-typing ReactTestRenderer
+                { unstable_isConcurrent: isConcurrent, unstable_concurrentUpdatesByDefault: true },
+            );
+        });
+        return instance;
     };
 
     renderPluralFragment = (args?: { isConcurrent?: boolean; owner?: any; usersRef?: any }) => {
         const { isConcurrent = false, ...props } = args ?? {};
-        return TestRenderer.create(
-            <React.Suspense fallback="Plural Fallback">
-                <ContextProvider>
-                    <PluralContainer owner={pluralQuery} {...props} />
-                </ContextProvider>
-            </React.Suspense>,
-            // any[prop-missing] - error revealed when flow-typing ReactTestRenderer
-            { unstable_isConcurrent: isConcurrent, unstable_concurrentUpdatesByDefault: true },
-        );
+        let instance;
+        TestRenderer.act(() => {
+            instance = TestRenderer.create(
+                <React.Suspense fallback="Plural Fallback">
+                    <ContextProvider>
+                        <PluralContainer owner={pluralQuery} {...props} />
+                    </ContextProvider>
+                </React.Suspense>,
+                // any[prop-missing] - error revealed when flow-typing ReactTestRenderer
+                { unstable_isConcurrent: isConcurrent, unstable_concurrentUpdatesByDefault: true },
+            );
+        });
+        return instance;
     };
 });
 

@@ -15,6 +15,12 @@ function createHooks(component, options?: any) {
     return result;
 }
 
+function instanceAct(instance, props) {
+    ReactTestRenderer.act(() => {
+        instance.getInstance().setProps(props);
+    });
+}
+
 describe('useMemo resolver functions', () => {
     let TestComponent;
     let TestContainer;
@@ -169,7 +175,7 @@ describe('useMemo resolver functions', () => {
             }
             TestContainer = ReactRelayContainer.createContainer(TestComponent, UserFragment, UserQuery);
         });
-        it('re-renders on subscription callbac', () => {
+        it('re-renders on subscription callback', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
 
             createHooks(
@@ -182,15 +188,17 @@ describe('useMemo resolver functions', () => {
             renderSpy.mockClear();
             render.mockClear();
 
-            callback({
-                dataID: '4',
-                node: UserFragment,
-                variables: { cond: true },
-                data: {
-                    id: '4',
-                    name: 'Mark', // !== 'Zuck'
-                },
-                seenRecords: {},
+            ReactTestRenderer.act(() => {
+                callback({
+                    dataID: '4',
+                    node: UserFragment,
+                    variables: { cond: true },
+                    data: {
+                        id: '4',
+                        name: 'Mark', // !== 'Zuck'
+                    },
+                    seenRecords: {},
+                });
             });
             // Data & Variables are passed to component
             const after = renderSpy.mock.calls[0][1];
@@ -211,7 +219,7 @@ describe('useMemo resolver functions', () => {
             render.mockClear();
 
             userPointer = environment.lookup(ownerUser2.fragment, ownerUser2).data.node;
-            instance.getInstance().setProps({
+            instanceAct(instance, {
                 user: userPointer,
             });
             // Data & Variables are passed to component
@@ -263,7 +271,7 @@ describe('useMemo resolver functions', () => {
             }
             TestContainer = ReactRelayContainer.createContainer(TestComponent, UserFragment, UserQuery);
         });
-        it('re-renders on subscription callbac', () => {
+        it('re-renders on subscription callback', () => {
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
 
             createHooks(
@@ -276,15 +284,17 @@ describe('useMemo resolver functions', () => {
             renderSpy.mockClear();
             render.mockClear();
 
-            callback({
-                dataID: '4',
-                node: UserFragment,
-                variables: { cond: true },
-                data: {
-                    id: '4',
-                    name: 'Mark', // !== 'Zuck'
-                },
-                seenRecords: {},
+            ReactTestRenderer.act(() => {
+                callback({
+                    dataID: '4',
+                    node: UserFragment,
+                    variables: { cond: true },
+                    data: {
+                        id: '4',
+                        name: 'Mark', // !== 'Zuck'
+                    },
+                    seenRecords: {},
+                });
             });
             // Data & Variables are passed to component
             const after = renderSpy.mock.calls[0][1];
@@ -305,7 +315,7 @@ describe('useMemo resolver functions', () => {
             render.mockClear();
 
             userPointer = environment.lookup(ownerUser2.fragment, ownerUser2).data.node;
-            instance.getInstance().setProps({
+            instanceAct(instance, {
                 user: userPointer,
             });
             // Data & Variables are passed to component
@@ -369,16 +379,17 @@ describe('useMemo resolver functions', () => {
             const before = renderSpy.mock.calls[0][1];
             renderSpy.mockClear();
             render.mockClear();
-
-            callback({
-                dataID: '4',
-                node: UserFragment,
-                variables: { cond: true },
-                data: {
-                    id: '4',
-                    name: 'Mark', // !== 'Zuck'
-                },
-                seenRecords: {},
+            ReactTestRenderer.act(() => {
+                callback({
+                    dataID: '4',
+                    node: UserFragment,
+                    variables: { cond: true },
+                    data: {
+                        id: '4',
+                        name: 'Mark', // !== 'Zuck'
+                    },
+                    seenRecords: {},
+                });
             });
             // Data & Variables are passed to component
             const after = renderSpy.mock.calls[0][1];
@@ -399,7 +410,7 @@ describe('useMemo resolver functions', () => {
             render.mockClear();
 
             userPointer = environment.lookup(ownerUser2.fragment, ownerUser2).data.node;
-            instance.getInstance().setProps({
+            instanceAct(instance, {
                 user: userPointer,
             });
             // Data & Variables are passed to component

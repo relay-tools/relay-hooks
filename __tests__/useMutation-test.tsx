@@ -29,7 +29,6 @@ let setMutation;
 let commit;
 let isInFlightFn;
 let CommentCreateMutation;
-let instance;
 let renderSpy;
 
 const data = {
@@ -105,7 +104,11 @@ beforeEach(() => {
         const [mutation, setMutationFn] = useState(initialMutation);
         setMutation = setMutationFn;
         const [commitFn, { loading: isMutationInFlight, data, error }] = useMutation(mutation);
-        commit = commitFn;
+        //commit = commitFn;
+        commit = async (config: any) =>
+            await ReactTestRenderer.act(() => {
+                commitFn(config);
+            });
         if (commitInRender) {
             // `commitInRender` never changes in the test
             // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -128,39 +131,41 @@ beforeEach(() => {
         );
     }
 
-    render = function(env, mutation, commitInRender = false): any {
+    render = function (env, mutation, commitInRender = false): any {
+        let instance;
         ReactTestRenderer.act(() => {
             instance = ReactTestRenderer.create(
                 <Container environment={env} mutation={mutation} commitInRender={commitInRender} />,
             );
         });
+        return instance;
     };
 });
 
-it('returns correct in-flight state when the mutation is inflight and completes', () => {
-    render(environment, CommentCreateMutation);
+it('returns correct in-flight state when the mutation is inflight and completes', async () => {
+    await render(environment, CommentCreateMutation);
     expect(isInFlightFn).toBeCalledTimes(1);
     expect(isInFlightFn).toBeCalledWith(false);
 
     isInFlightFn.mockClear();
-    commit({ variables });
+    await commit({ variables });
     expect(isInFlightFn).toBeCalledTimes(1);
     expect(isInFlightFn).toBeCalledWith(true);
 
     isInFlightFn.mockClear();
     const operation = environment.executeMutation.mock.calls[0][0].operation;
-    ReactTestRenderer.act(() => environment.mock.resolve(operation, data));
+    await ReactTestRenderer.act(() => environment.mock.resolve(operation, data));
     expect(isInFlightFn).toBeCalledTimes(1);
     expect(isInFlightFn).toBeCalledWith(false);
 });
 
-it('returns correct in-flight state when commit called inside render', () => {
-    render(environment, CommentCreateMutation, true);
+it('returns correct in-flight state when commit called inside render', async () => {
+    await render(environment, CommentCreateMutation, true);
     expect(isInFlightFn).toBeCalledTimes(2);
     expect(isInFlightFn).toHaveBeenNthCalledWith(2, true);
     isInFlightFn.mockClear();
     const operation = environment.executeMutation.mock.calls[0][0].operation;
-    ReactTestRenderer.act(() => environment.mock.resolve(operation, data));
+    await ReactTestRenderer.act(() => environment.mock.resolve(operation, data));
     expect(isInFlightFn).toBeCalledTimes(1);
     expect(isInFlightFn).toHaveBeenCalledWith(false);
 });
@@ -288,9 +293,7 @@ describe('change useMutation input', () => {
         commit({ variables });
         const secondOperation = createOperationDescriptor(CommentCreateMutation2, variables);
         expect(environment.executeMutation).toBeCalledTimes(2);
-        expect(environment.executeMutation.mock.calls[1][0].operation.request).toEqual(
-            secondOperation.request,
-        );
+        expect(environment.executeMutation.mock.calls[1][0].operation.request).toEqual(secondOperation.request);
 
         isInFlightFn.mockClear();
         ReactTestRenderer.act(() => {
@@ -307,35 +310,35 @@ describe('unmount', () => {
         jest.spyOn(console, 'error').mockImplementationOnce(() => {});
     });
 
-    it('does not setState on commit after unmount', () => {
-        render(environment, CommentCreateMutation);
-        ReactTestRenderer.act(() => instance.unmount());
+    it('does not setState on commit after unmount', async () => {
+        const instance = await render(environment, CommentCreateMutation);
+        await ReactTestRenderer.act(() => instance.unmount());
 
         isInFlightFn.mockClear();
-        commit({ variables });
+        await commit({ variables });
         expect(isInFlightFn).toBeCalledTimes(0);
         expect(console.error).toBeCalledTimes(0);
     });
 
-    it('does not setState on complete after unmount', () => {
-        render(environment, CommentCreateMutation);
-        ReactTestRenderer.act(() => commit({ variables }));
-        ReactTestRenderer.act(() => instance.unmount());
+    it('does not setState on complete after unmount', async () => {
+        const instance = await render(environment, CommentCreateMutation);
+        await ReactTestRenderer.act(() => commit({ variables }));
+        await ReactTestRenderer.act(() => instance.unmount());
 
         isInFlightFn.mockClear();
         const operation = environment.executeMutation.mock.calls[0][0].operation;
-        ReactTestRenderer.act(() => environment.mock.resolve(operation, data));
+        await ReactTestRenderer.act(() => environment.mock.resolve(operation, data));
         expect(isInFlightFn).toBeCalledTimes(0);
         expect(console.error).toBeCalledTimes(0);
     });
 
-    it('does not dispose previous in-flight mutaiton ', () => {
+    it('does not dispose previous in-flight mutaiton ', async () => {
         const onCompleted = jest.fn();
-        render(environment, CommentCreateMutation);
+        const instance = await render(environment, CommentCreateMutation);
         commit({ variables, onCompleted });
-        ReactTestRenderer.act(() => instance.unmount());
+        await ReactTestRenderer.act(() => instance.unmount());
         const operation = environment.executeMutation.mock.calls[0][0].operation;
-        ReactTestRenderer.act(() => environment.mock.resolve(operation, data));
+        await ReactTestRenderer.act(() => environment.mock.resolve(operation, data));
         expect(onCompleted).toBeCalledTimes(1);
         expect(onCompleted).toBeCalledWith({
             commentCreate: {

@@ -24,6 +24,13 @@ function createHooks(component, options?: any) {
     });
     return result;
 }
+
+function instanceAct(instance, props) {
+    ReactTestRenderer.act(() => {
+        instance.getInstance().setProps(props);
+    });
+}
+
 const ReactRelayFragmentContainer = {
     createContainer: (Component, spec) => (props) => {
         const { user, ...others } = props;
@@ -259,15 +266,17 @@ describe('ReactRelayFragmentContainer', () => {
         environment.lookup.mockClear();
         environment.subscribe.mockClear();
 
-        callback({
-            dataID: '4',
-            node: UserFragment,
-            variables: { cond: true },
-            data: {
-                id: '4',
-                name: 'Mark', // !== 'Zuck'
-            },
-            seenRecords: {},
+        ReactTestRenderer.act(() => {
+            callback({
+                dataID: '4',
+                node: UserFragment,
+                variables: { cond: true },
+                data: {
+                    id: '4',
+                    name: 'Mark', // !== 'Zuck'
+                },
+                seenRecords: {},
+            });
         });
 
         // No need to resolve props or resubscribe
@@ -298,7 +307,8 @@ describe('ReactRelayFragmentContainer', () => {
         environment.subscribe.mockClear();
 
         userPointer = environment.lookup(ownerUser2.fragment, ownerUser2).data.node;
-        instance.getInstance().setProps({
+
+        instanceAct(instance, {
             user: userPointer,
         });
 
@@ -343,7 +353,7 @@ describe('ReactRelayFragmentContainer', () => {
         environment.subscribe.mockClear();
 
         userPointer = environment.lookup(ownerUser1WithCondVar.fragment, ownerUser1WithCondVar).data.node;
-        instance.getInstance().setProps({
+        instanceAct(instance, {
             user: userPointer,
         });
         jest.runAllTimers();
@@ -386,7 +396,7 @@ describe('ReactRelayFragmentContainer', () => {
         environment.lookup.mockClear();
         environment.subscribe.mockClear();
 
-        instance.getInstance().setProps({
+        instanceAct(instance, {
             user: userPointer,
         });
 
@@ -409,7 +419,7 @@ describe('ReactRelayFragmentContainer', () => {
     environment.lookup.mockClear();
     environment.subscribe.mockClear();
 
-    instance.getInstance().setProps({
+    instanceAct(instance, {
       fn,
       nil: null,
       scalar,
@@ -436,7 +446,7 @@ describe('ReactRelayFragmentContainer', () => {
         environment.subscribe.mockClear();
 
         const nextFn = () => null;
-        instance.getInstance().setProps({
+        instanceAct(instance, {
             fn: nextFn,
             scalar,
             user: userPointer,
@@ -465,7 +475,7 @@ describe('ReactRelayFragmentContainer', () => {
         environment.lookup.mockClear();
         environment.subscribe.mockClear();
 
-        instance.getInstance().setProps({
+        instanceAct(instance, {
             fn,
             scalar: 43,
             user: userPointer,
@@ -494,7 +504,7 @@ describe('ReactRelayFragmentContainer', () => {
 
         const nextArr = [];
         const nextObj = {};
-        instance.getInstance().setProps({
+        instanceAct(instance, {
             arr: nextArr,
             obj: nextObj,
             user: userPointer,

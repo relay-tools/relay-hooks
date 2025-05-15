@@ -13,7 +13,6 @@
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 
-//import * as ReactTestRenderer from '@testing-library/react';
 import { useRefetchable as useRefetch, RelayEnvironmentProvider, useRelayEnvironment } from '../src';
 import { forceCache } from '../src/Utils';
 

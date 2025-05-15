@@ -17,7 +17,12 @@ import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 import { graphql, RecordSource, Store } from 'relay-runtime';
 
-import { useLazyLoadQuery as useLazyLoadQueryNode, RelayEnvironmentProvider, useSuspenseFragment, useLazyLoadQuery } from '../src';
+import {
+    useLazyLoadQuery as useLazyLoadQueryNode,
+    RelayEnvironmentProvider,
+    useSuspenseFragment,
+    useLazyLoadQuery,
+} from '../src';
 
 const { createOperationDescriptor } = require('relay-runtime');
 
@@ -111,19 +116,23 @@ describe('useLazyLoadQueryNode', () => {
         };
 
         render = (env, children) => {
-            return ReactTestRenderer.create(
-                <RelayEnvironmentProvider environment={env}>
-                    <ErrorBoundary
-                        fallback={({ error }) => `Error: ${error.message + ': ' + error.stack}`}
-                    >
-                        <React.Suspense fallback="Fallback">{children}</React.Suspense>
-                    </ErrorBoundary>
-                </RelayEnvironmentProvider>,
-            );
+            let instance;
+            ReactTestRenderer.act(() => {
+                instance = ReactTestRenderer.create(
+                    <RelayEnvironmentProvider environment={env}>
+                        <ErrorBoundary fallback={({ error }) => `Error: ${error.message + ': ' + error.stack}`}>
+                            <React.Suspense fallback="Fallback">{children}</React.Suspense>
+                        </ErrorBoundary>
+                    </RelayEnvironmentProvider>,
+                );
+            });
+            return instance;
         };
 
-        environment = createMockEnvironment({
-            store: new Store(new RecordSource(), { gcReleaseBufferSize: 0 }),
+        ReactTestRenderer.act(() => {
+            environment = createMockEnvironment({
+                store: new Store(new RecordSource(), { gcReleaseBufferSize: 0 }),
+            });
         });
         release = jest.fn();
         const originalRetain = environment.retain.bind(environment);
@@ -162,9 +171,7 @@ describe('useLazyLoadQueryNode', () => {
         `;
         variables = { id: '1' };
         query = createOperationDescriptor(gqlQuery, variables, { force: true });
-        renderFn = jest.fn((result) =>
-            result && result.node && result.node.name ? result.node.name : 'Empty',
-        );
+        renderFn = jest.fn((result) => (result && result.node && result.node.name ? result.node.name : 'Empty'));
     });
 
     afterEach(() => {
@@ -196,10 +203,7 @@ describe('useLazyLoadQueryNode', () => {
 
     it('observe query', () => {
         const onComplete = jest.fn(() => undefined);
-        const instance = render(
-            environment,
-            <Container variables={variables} onComplete={onComplete} />,
-        );
+        const instance = render(environment, <Container variables={variables} onComplete={onComplete} />);
 
         expect(instance.toJSON()).toEqual('Fallback');
         expectToHaveFetched(environment, query);
@@ -226,10 +230,7 @@ describe('useLazyLoadQueryNode', () => {
 
     it('observe query error', () => {
         const onComplete = jest.fn(() => undefined);
-        const instance = render(
-            environment,
-            <Container variables={variables} onComplete={onComplete} />,
-        );
+        const instance = render(environment, <Container variables={variables} onComplete={onComplete} />);
 
         expect(instance.toJSON()).toEqual('Fallback');
         expectToHaveFetched(environment, query);
@@ -337,12 +338,7 @@ describe('useLazyLoadQueryNode', () => {
         // Trigger timeout and GC to clear all references
         ReactTestRenderer.act(() => jest.runAllTimers());
         // Verify GC has run
-        expect(
-            environment
-                .getStore()
-                .getSource()
-                .toJSON(),
-        ).toEqual({});
+        expect(environment.getStore().getSource().toJSON()).toEqual({});
 
         renderFn.mockClear();
         environment.retain.mockClear();
@@ -376,10 +372,7 @@ describe('useLazyLoadQueryNode', () => {
             },
         });
 
-        const instance = render(
-            environment,
-            <Container variables={{ id: 'first-render' }} fetchPolicy="store-only" />,
-        );
+        const instance = render(environment, <Container variables={{ id: 'first-render' }} fetchPolicy="store-only" />);
         expect(instance.toJSON()).toEqual('Bob');
         renderFn.mockClear();
 
@@ -449,10 +442,7 @@ describe('useLazyLoadQueryNode', () => {
             },
         });
 
-        const instance = render(
-            environment,
-            <Container variables={{ id: 'first-render' }} fetchPolicy="store-only" />,
-        );
+        const instance = render(environment, <Container variables={{ id: 'first-render' }} fetchPolicy="store-only" />);
 
         expect(instance.toJSON()).toEqual('Bob');
         renderFn.mockClear();
@@ -568,67 +558,66 @@ describe('useLazyLoadQueryNode', () => {
 
     describe('partial rendering', () => {
         it('does not suspend at the root if query does not have direct data dependencies', () => {
-        const gqlFragment = graphql`
-            fragment useLazyLoadQueryNodeTestRootFragment on Query {
-                node(id: $id) {
-                    id
-                    name
+            const gqlFragment = graphql`
+                fragment useLazyLoadQueryNodeTestRootFragment on Query {
+                    node(id: $id) {
+                        id
+                        name
+                    }
                 }
-            }
-        `;
-        const gqlOnlyFragmentsQuery = graphql`
-            query useLazyLoadQueryNodeTestOnlyFragmentsQuery($id: ID) {
-                ...useLazyLoadQueryNodeTestRootFragment
-            }
-        `;
-        const onlyFragsQuery = createOperationDescriptor(gqlOnlyFragmentsQuery, variables);
+            `;
+            const gqlOnlyFragmentsQuery = graphql`
+                query useLazyLoadQueryNodeTestOnlyFragmentsQuery($id: ID) {
+                    ...useLazyLoadQueryNodeTestRootFragment
+                }
+            `;
+            const onlyFragsQuery = createOperationDescriptor(gqlOnlyFragmentsQuery, variables);
 
-        function FragmentComponent(props: { query: any }) {
-            const data: any = useSuspenseFragment(gqlFragment, props.query);
-            renderFn(data);
-            return null;
-        }
+            function FragmentComponent(props: { query: any }) {
+                const data: any = useSuspenseFragment(gqlFragment, props.query);
+                renderFn(data);
+                return null;
+            }
 
-        const Renderer = (props: { variables: { id: string } }) => {
-            const { data } = useLazyLoadQuery<any>(gqlOnlyFragmentsQuery, props.variables, {
-                //fetchObservable: __internal.fetchQuery(environment, _query),
-                fetchPolicy: 'store-or-network',
-                UNSTABLE_renderPolicy: 'partial',
+            const Renderer = (props: { variables: { id: string } }) => {
+                const { data } = useLazyLoadQuery<any>(gqlOnlyFragmentsQuery, props.variables, {
+                    //fetchObservable: __internal.fetchQuery(environment, _query),
+                    fetchPolicy: 'store-or-network',
+                    UNSTABLE_renderPolicy: 'partial',
+                });
+                return (
+                    <React.Suspense fallback="Fallback around fragment">
+                        <FragmentComponent query={data} />
+                    </React.Suspense>
+                );
+            };
+
+            const instance = render(environment, <Renderer variables={variables} />);
+
+            // Assert that we suspended at the fragment level and not at the root
+            expect(instance.toJSON()).toEqual('Fallback around fragment');
+            expectToHaveFetched(environment, onlyFragsQuery);
+            expect(renderFn).not.toBeCalled();
+            // $FlowFixMe[method-unbinding] added when improving typing for this parameters
+            expect(environment.retain).toHaveBeenCalledTimes(1);
+
+            environment.mock.resolve(gqlOnlyFragmentsQuery, {
+                data: {
+                    node: {
+                        __typename: 'User',
+                        id: variables.id,
+                        name: 'Alice',
+                    },
+                },
             });
-            return (
-                <React.Suspense fallback="Fallback around fragment">
-                    <FragmentComponent query={data} />
-                </React.Suspense>
-            );
-        };
 
-        const instance = render(environment, <Renderer variables={variables} />);
-
-        // Assert that we suspended at the fragment level and not at the root
-        expect(instance.toJSON()).toEqual('Fallback around fragment');
-        expectToHaveFetched(environment, onlyFragsQuery);
-        expect(renderFn).not.toBeCalled();
-        // $FlowFixMe[method-unbinding] added when improving typing for this parameters
-        expect(environment.retain).toHaveBeenCalledTimes(1);
-
-        environment.mock.resolve(gqlOnlyFragmentsQuery, {
-            data: {
+            // $FlowFixMe[incompatible-call] Error found while enabling LTI on this file
+            expectToBeRendered(renderFn, {
                 node: {
-                    __typename: 'User',
                     id: variables.id,
                     name: 'Alice',
                 },
-            },
-        });
-
-        // $FlowFixMe[incompatible-call] Error found while enabling LTI on this file
-        expectToBeRendered(renderFn, {
-            node: {
-                id: variables.id,
-                name: 'Alice',
-            },
+            });
         });
     });
 });
-});
-

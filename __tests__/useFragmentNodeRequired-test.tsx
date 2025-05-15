@@ -55,7 +55,9 @@ beforeEach(() => {
     renderSpy = jest.fn();
 
     // Set up environment and base data
-    environment = createMockEnvironment();
+    TestRenderer.act(() => {
+        environment = createMockEnvironment();
+    });
 
     const singularVariables = { id: '1' };
     const gqlSingularQuery = graphql`
@@ -81,11 +83,7 @@ beforeEach(() => {
     });
 
     const ContextProvider = ({ children }) => {
-        return (
-            <ReactRelayContext.Provider value={{ environment }}>
-                {children}
-            </ReactRelayContext.Provider>
-        );
+        return <ReactRelayContext.Provider value={{ environment }}>{children}</ReactRelayContext.Provider>;
     };
 
     const SingularContainer = () => {
@@ -103,11 +101,15 @@ beforeEach(() => {
     };
 
     renderSingularFragment = () => {
-        return TestRenderer.create(
-            <ContextProvider>
-                <SingularContainer />
-            </ContextProvider>,
-        );
+        let instance;
+        TestRenderer.act(() => {
+            instance = TestRenderer.create(
+                <ContextProvider>
+                    <SingularContainer />
+                </ContextProvider>,
+            );
+        });
+        return instance;
     };
 });
 

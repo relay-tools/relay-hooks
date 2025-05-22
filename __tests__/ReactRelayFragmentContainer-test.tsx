@@ -15,21 +15,7 @@
 import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 import { useQuery, useFragment, RelayEnvironmentProvider, useRelayEnvironment, NETWORK_ONLY } from '../src';
-
-function createHooks(component, options?: any) {
-    let result;
-    ReactTestRenderer.act(() => {
-        result = ReactTestRenderer.create(component, options);
-        jest.runAllImmediates();
-    });
-    return result;
-}
-
-function instanceAct(instance, props) {
-    ReactTestRenderer.act(() => {
-        instance.getInstance().setProps(props);
-    });
-}
+import { createHooks, instanceAct } from './utils';
 
 const ReactRelayFragmentContainer = {
     createContainer: (Component, spec) => (props) => {

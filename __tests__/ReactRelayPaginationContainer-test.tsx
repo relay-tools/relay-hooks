@@ -16,28 +16,7 @@ import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 import { usePagination, RelayEnvironmentProvider, useRelayEnvironment } from '../src';
 import { forceCache } from '../src/Utils';
-
-function createHooks(component, options?: any) {
-    let result;
-    ReactTestRenderer.act(() => {
-        result = ReactTestRenderer.create(component, options);
-        jest.runAllImmediates();
-    });
-    return result;
-}
-
-function instanceAct(instance, props) {
-    ReactTestRenderer.act(() => {
-        instance.getInstance().setProps(props);
-    });
-}
-
-function envResolveAct(environment, query, response) {
-    ReactTestRenderer.act(() => {
-        environment.mock.resolve(query, response);
-        //jest.runAllImmediates();
-    });
-}
+import { createHooks, instanceAct, envResolveAct } from './utils';
 
 const ReactRelayPaginationContainer = {
     createContainer: (Component, spec, connectionConfigs) => (props: any) => {

@@ -20,29 +20,9 @@ import { useQuery, RelayEnvironmentProvider, NETWORK_ONLY } from '../src';
 
 import * as ReactTestRenderer from 'react-test-renderer';
 
+import { createHooks, instanceAct, envResolveAct } from './utils';
+
 //import readContext from "react-relay/lib/readContext";
-
-function createHooks(component, options?: any) {
-    let result;
-    ReactTestRenderer.act(() => {
-        result = ReactTestRenderer.create(component, options);
-        jest.runAllImmediates();
-    });
-    return result;
-}
-
-function envResolveAct(environment, query, response) {
-    ReactTestRenderer.act(() => {
-        environment.mock.resolve(query, response);
-        //jest.runAllImmediates();
-    });
-}
-
-function rendererActProp(renderer, props) {
-    ReactTestRenderer.act(() => {
-        renderer.getInstance().setProps(props);
-    });
-}
 
 import {
     createOperationDescriptor,
@@ -475,7 +455,7 @@ describe('ReactRelayQueryRenderer', () => {
             environment.mockClear();
             render.mockClear();
 
-            rendererActProp(renderer, {
+            instanceAct(renderer, {
                 environment,
                 query: TestQuery,
                 render,
@@ -900,13 +880,13 @@ describe('ReactRelayQueryRenderer', () => {
                     });
                     render.mockClear();
 
-                    rendererActProp(renderer, {
+                    instanceAct(renderer, {
                         variables: { id: '5' },
                     });
                     expect(environment.execute).toBeCalledTimes(2);
                     expect(pendingRequests.length).toEqual(2);
 
-                    rendererActProp(renderer, {
+                    instanceAct(renderer, {
                         variables: { id: '6' },
                     });
                     expect(environment.execute).toBeCalledTimes(3);
@@ -1154,7 +1134,7 @@ describe('ReactRelayQueryRenderer', () => {
         envResolveAct(environment, TestQuery, response);
         environment = createMockEnvironment();
         const previousContext = relayContext;
-        rendererActProp(renderer, {
+        instanceAct(renderer, {
           environment,
           query: TestQuery,
           render,
@@ -1180,7 +1160,7 @@ describe('ReactRelayQueryRenderer', () => {
         envResolveAct(environment, TestQuery, response);
         TestQuery = { ...TestQuery };
         const previousContext = relayContext;
-        rendererActProp(renderer, {
+        instanceAct(renderer, {
           environment,
           query: TestQuery,
           render,
@@ -1206,7 +1186,7 @@ describe('ReactRelayQueryRenderer', () => {
         envResolveAct(environment, TestQuery, response);
         variables = {};
         const previousContext = relayContext;
-        rendererActProp(renderer, {
+        instanceAct(renderer, {
           environment,
           query: TestQuery,
           render,
@@ -1260,7 +1240,7 @@ describe('ReactRelayQueryRenderer', () => {
         envResolveAct(environment, TestQuery, response);
         variables = simpleClone(variables);
         const previousContext = relayContext;
-        rendererActProp(renderer, {
+        instanceAct(renderer, {
           environment,
           query: TestQuery,
           render,
@@ -1295,7 +1275,7 @@ describe('ReactRelayQueryRenderer', () => {
                 render.mockClear();
 
                 // "update" with all === props
-                rendererActProp(renderer, {
+                instanceAct(renderer, {
                     environment,
                     query: TestQuery,
                     render,
@@ -1322,7 +1302,7 @@ describe('ReactRelayQueryRenderer', () => {
 
                 // Update with equivalent variables
                 variables = { foo: [1] };
-                rendererActProp(renderer, {
+                instanceAct(renderer, {
                     environment,
                     query: TestQuery,
                     render,
@@ -1339,7 +1319,7 @@ describe('ReactRelayQueryRenderer', () => {
 
                 // update with new render prop
                 render = jest.fn(() => <div />);
-                rendererActProp(renderer, {
+                instanceAct(renderer, {
                     environment,
                     query: TestQuery,
                     render,
@@ -1361,7 +1341,7 @@ describe('ReactRelayQueryRenderer', () => {
                 // Update with a different environment
                 environment.mockClear();
                 environment = createMockEnvironment();
-                rendererActProp(renderer, {
+                instanceAct(renderer, {
                     environment,
                     query: TestQuery,
                     render,
@@ -1383,7 +1363,7 @@ describe('ReactRelayQueryRenderer', () => {
 
                 // Update with different variables
                 variables = { id: 'beast' };
-                rendererActProp(renderer, {
+                instanceAct(renderer, {
                     environment,
                     query: TestQuery,
                     render,
@@ -1406,7 +1386,7 @@ describe('ReactRelayQueryRenderer', () => {
                 // Update with different variables
                 variables = {}; // no `id`
                 const expectedVariables = { id: '<default>' };
-                rendererActProp(renderer, {
+                instanceAct(renderer, {
                     environment,
                     query: TestQuery,
                     render,
@@ -1426,7 +1406,7 @@ describe('ReactRelayQueryRenderer', () => {
                 environment.mockClear();
                 render.mockClear();
 
-                rendererActProp(renderer, {
+                instanceAct(renderer, {
                     cacheConfig,
                     environment,
                     query: NextQuery,
@@ -1453,7 +1433,7 @@ describe('ReactRelayQueryRenderer', () => {
       render.mockClear();
 
       // Update with a null query
-      rendererActProp(renderer, {
+      instanceAct(renderer, {
         cacheConfig,
         environment,
         query: null,
@@ -1722,7 +1702,7 @@ describe('ReactRelayQueryRenderer', () => {
         it('cancels the pending fetch', () => {
             const subscription = environment.execute.mock.subscriptions[0];
             expect(subscription.closed).toBe(false);
-            rendererActProp(renderer, nextProps);
+            instanceAct(renderer, nextProps);
             expect(subscription.closed).toBe(true);
         });
 
@@ -1730,14 +1710,14 @@ describe('ReactRelayQueryRenderer', () => {
             envResolveAct(environment, TestQuery, response);
             const disposeHold = environment.retain.mock.dispose;
             expect(disposeHold).not.toBeCalled();
-            rendererActProp(renderer, nextProps);
+            instanceAct(renderer, nextProps);
             envResolveAct(environment, NextQuery, response);
             expect(disposeHold).toBeCalled();
         });
 
         it('retains the new selection', () => {
             environment.mockClear();
-            rendererActProp(renderer, nextProps);
+            instanceAct(renderer, nextProps);
             envResolveAct(environment, NextQuery, response);
             expect(environment.retain.mock.calls[0][0].root.dataID).toBe('client:root');
             expect(environment.retain.mock.calls[0][0].root.node).toBe(NextQuery.operation);
@@ -1746,7 +1726,7 @@ describe('ReactRelayQueryRenderer', () => {
 
         it('renders a pending state', () => {
             render.mockClear();
-            rendererActProp(renderer, nextProps);
+            instanceAct(renderer, nextProps);
             expect().loadingRendered();
         });
 
@@ -1761,7 +1741,7 @@ describe('ReactRelayQueryRenderer', () => {
       render.mockClear();
 
       // Update with a null query
-      rendererActProp(renderer, {
+      instanceAct(renderer, {
         cacheConfig,
         environment,
         query: null,
@@ -1809,14 +1789,14 @@ describe('ReactRelayQueryRenderer', () => {
 
         it('fetches the new query', () => {
             environment.mockClear();
-            rendererActProp(renderer, nextProps);
+            instanceAct(renderer, nextProps);
             expect(environment.mock.isLoading(NextQuery, variables, cacheConfig)).toBe(true);
         });
 
         it('retains the new selection', () => {
             expect.assertions(5);
             environment.mockClear();
-            rendererActProp(renderer, nextProps);
+            instanceAct(renderer, nextProps);
             envResolveAct(environment, NextQuery, {
                 data: {
                     node: null,
@@ -1830,14 +1810,14 @@ describe('ReactRelayQueryRenderer', () => {
         });
 
         it('renders the pending state', () => {
-            rendererActProp(renderer, nextProps);
+            instanceAct(renderer, nextProps);
             expect().loadingRendered();
         });
 
         it('publishes and notifies the store with changes', () => {
             expect.assertions(2);
             environment.mockClear();
-            rendererActProp(renderer, nextProps);
+            instanceAct(renderer, nextProps);
             envResolveAct(environment, NextQuery, response);
             expect(store.publish).toBeCalled();
             expect(store.notify).toBeCalled();
@@ -1880,13 +1860,13 @@ describe('ReactRelayQueryRenderer', () => {
         it('disposes the root fragment subscription', () => {
             const disposeUpdate = environment.subscribe.mock.dispose;
             expect(disposeUpdate).not.toBeCalled();
-            rendererActProp(renderer, nextProps);
+            instanceAct(renderer, nextProps);
             expect(disposeUpdate).toBeCalled();
         });
 
         it('fetches the new query', () => {
             environment.mockClear();
-            rendererActProp(renderer, nextProps);
+            instanceAct(renderer, nextProps);
             expect(environment.mock.isLoading(NextQuery, variables, cacheConfig)).toBe(true);
         });
 
@@ -1894,7 +1874,7 @@ describe('ReactRelayQueryRenderer', () => {
             expect.assertions(6);
             const prevDispose = environment.retain.mock.dispose;
             environment.mockClear();
-            rendererActProp(renderer, nextProps);
+            instanceAct(renderer, nextProps);
             envResolveAct(environment, NextQuery, {
                 data: {
                     node: null,
@@ -1910,14 +1890,14 @@ describe('ReactRelayQueryRenderer', () => {
 
         it('renders the pending and previous state', () => {
             environment.mockClear();
-            rendererActProp(renderer, nextProps);
+            instanceAct(renderer, nextProps);
             expect().loadingRendered();
         });
 
         it('publishes and notifies the store with changes', () => {
             expect.assertions(2);
             environment.mockClear();
-            rendererActProp(renderer, nextProps);
+            instanceAct(renderer, nextProps);
             envResolveAct(environment, NextQuery, response);
             expect(store.publish).toBeCalled();
             expect(store.notify).toBeCalled();
@@ -2016,7 +1996,7 @@ describe('ReactRelayQueryRenderer', () => {
       expect(disposeHold).not.toBeCalled();
       environment.mock.reject(TestQuery, new Error("fail"));
       expect(disposeHold).not.toBeCalled();
-      rendererActProp(renderer, nextProps);
+      instanceAct(renderer, nextProps);
       expect(disposeHold).not.toBeCalled();
       envResolveAct(environment, NextQuery, response);
       expect(disposeHold).toBeCalled();
@@ -2085,7 +2065,7 @@ describe('ReactRelayQueryRenderer', () => {
             envResolveAct(environment, TestQuery, response);
             environment.mockClear();
 
-            rendererActProp(renderer, {
+            instanceAct(renderer, {
                 cacheConfig,
                 environment,
                 query: TestQuery,
@@ -2235,7 +2215,7 @@ describe('ReactRelayQueryRenderer', () => {
             render.mockClear();
             environment.mockClear();
 
-            rendererActProp(renderer, {
+            instanceAct(renderer, {
                 environment,
                 query: TestQuery,
                 render,
@@ -2251,7 +2231,7 @@ describe('ReactRelayQueryRenderer', () => {
             environment.mockClear();
             render.mockClear();
 
-            rendererActProp(renderer, {
+            instanceAct(renderer, {
                 environment,
                 query: TestQuery,
                 render,

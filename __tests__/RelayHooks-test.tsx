@@ -5,21 +5,7 @@ import * as ReactTestRenderer from 'react-test-renderer';
 import { createOperationDescriptor, graphql } from 'relay-runtime';
 import { createMockEnvironment } from 'relay-test-utils-internal';
 import { useOssFragment, RelayEnvironmentProvider, useRelayEnvironment, usePagination, useRefetchable } from '../src';
-
-function createHooks(component, options?: any) {
-    let result;
-    ReactTestRenderer.act(() => {
-        result = ReactTestRenderer.create(component, options);
-        jest.runAllImmediates();
-    });
-    return result;
-}
-
-function instanceAct(instance, props) {
-    ReactTestRenderer.act(() => {
-        instance.getInstance().setProps(props);
-    });
-}
+import { createHooks, instanceAct } from './utils';
 
 describe('useMemo resolver functions', () => {
     let TestComponent;

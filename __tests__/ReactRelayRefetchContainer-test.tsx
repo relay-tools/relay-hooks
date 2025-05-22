@@ -16,20 +16,7 @@ import * as ReactTestRenderer from 'react-test-renderer';
 import { useRefetchable as useRefetch, RelayEnvironmentProvider, useRelayEnvironment } from '../src';
 import { forceCache } from '../src/Utils';
 
-function createHooks(component, options?: any) {
-    let result;
-    ReactTestRenderer.act(() => {
-        result = ReactTestRenderer.create(component, options);
-        //jest.runAllImmediates();
-    });
-    return result;
-}
-
-function instanceAct(instance, props) {
-    ReactTestRenderer.act(() => {
-        instance.getInstance().setProps(props);
-    });
-}
+import { createHooks, instanceAct } from './utils';
 
 const ReactRelayRefetchContainer = {
     createContainer: (Component, spec) => (props) => {

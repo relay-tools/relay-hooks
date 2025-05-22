@@ -51,7 +51,7 @@
     "fbjs": "^3.0.2"
   },
   "peerDependencies": {
-    "react": "^16.9.0 || ^17 || ^18",
+    "react": "^16.9.0 || ^17 || ^18 || ^19",
     "relay-runtime": "^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
   },
   "devDependencies": {

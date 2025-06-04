@@ -13,7 +13,7 @@ export function useSubscription<TSubscriptionPayload extends OperationType = Ope
 ): void;
 export function useSubscription<TSubscriptionPayload extends OperationType = OperationType>(
     config: GraphQLSubscriptionConfig<TSubscriptionPayload>,
-    opts?: SubscriptionConfig,
+    opts?: SubscriptionConfig | SkipSubscriptionConfig,
 ): void {
     const environment = useRelayEnvironment();
     const skip = opts && opts.skip;

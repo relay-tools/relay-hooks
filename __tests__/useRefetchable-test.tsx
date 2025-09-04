@@ -16,16 +16,9 @@ import * as React from 'react';
 import * as ReactTestRenderer from 'react-test-renderer';
 import { useRefetchable, RelayEnvironmentProvider, useRelayEnvironment } from '../src';
 import { act } from './internalAct';
+import { createHooks, instanceAct } from './utils';
 
 const forceCache = { force: true };
-
-function createHooks(component, options?: any) {
-    const result = ReactTestRenderer.create(component, options);
-    ReactTestRenderer.act(() => {
-        jest.runAllImmediates();
-    });
-    return result;
-}
 
 const ReactRelayRefetchContainer = {
     createContainer: (Component, spec, query) => (props) => {
@@ -281,16 +274,17 @@ describe('useRefetchable', () => {
         render.mockClear();
         environment.lookup.mockClear();
         environment.subscribe.mockClear();
-
-        callback({
-            dataID: '4',
-            node: UserFragment,
-            variables: { cond: true },
-            data: {
-                id: '4',
-                name: 'Mark', // !== 'Zuck'
-            },
-            seenRecords: {},
+        ReactTestRenderer.act(() => {
+            callback({
+                dataID: '4',
+                node: UserFragment,
+                variables: { cond: true },
+                data: {
+                    id: '4',
+                    name: 'Mark', // !== 'Zuck'
+                },
+                seenRecords: {},
+            });
         });
 
         // No need to resolve props or resubscribe
@@ -324,7 +318,7 @@ describe('useRefetchable', () => {
         environment.subscribe.mockClear();
 
         userPointer = environment.lookup(ownerUser2.fragment, ownerUser2).data.node;
-        instance.getInstance().setProps({
+        instanceAct(instance, {
             user: userPointer,
         });
 
@@ -371,7 +365,7 @@ describe('useRefetchable', () => {
         environment.subscribe.mockClear();
 
         userPointer = environment.lookup(ownerUser1WithCondVar.fragment, ownerUser1WithCondVar).data.node;
-        instance.getInstance().setProps({
+        instanceAct(instance, {
             user: userPointer,
         });
 
@@ -438,7 +432,7 @@ describe('useRefetchable', () => {
 
         // Pass an updated user pointer that references different variables
         userPointer = environment.lookup(ownerUser1WithCondVar.fragment, ownerUser1WithCondVar).data.node;
-        instance.getInstance().setProps({
+        instanceAct(instance, {
             user: userPointer,
         });
 
@@ -486,7 +480,7 @@ describe('useRefetchable', () => {
         environment.lookup.mockClear();
         environment.subscribe.mockClear();
 
-        instance.getInstance().setProps({
+        instanceAct(instance, {
             user: userPointer,
         });
 
@@ -509,7 +503,7 @@ describe('useRefetchable', () => {
         environment.lookup.mockClear();
         environment.subscribe.mockClear();
 
-        instance.getInstance().setProps({
+        instanceAct(instance, {
             fn,
             nil: null,
             scalar,
@@ -536,7 +530,7 @@ describe('useRefetchable', () => {
         environment.subscribe.mockClear();
 
         const nextFn = () => null;
-        instance.getInstance().setProps({
+        instanceAct(instance, {
             fn: nextFn,
             scalar,
             user: userPointer,
@@ -568,7 +562,7 @@ describe('useRefetchable', () => {
         environment.lookup.mockClear();
         environment.subscribe.mockClear();
 
-        instance.getInstance().setProps({
+        instanceAct(instance, {
             fn,
             scalar: 43,
             user: userPointer,
@@ -600,7 +594,7 @@ describe('useRefetchable', () => {
 
         const nextArr = [];
         const nextObj = {};
-        instance.getInstance().setProps({
+        instanceAct(instance, {
             arr: nextArr,
             obj: nextObj,
             user: userPointer,
@@ -662,7 +656,9 @@ describe('useRefetchable', () => {
                 fetchPolicy: 'store-or-network',
             };
             expect(render.mock.calls.length).toBe(1);
-            refetch(refetchVariables, null, jest.fn(), refetchOptions);
+            ReactTestRenderer.act(() => {
+                refetch(refetchVariables, null, jest.fn(), refetchOptions);
+            });
             expect(render.mock.calls.length).toBe(2);
             expect(environment.mock.isLoading(UserFragmentRefetchQuery, refetchVariables, forceCache)).toBe(false);
             expect(environment.execute).toBeCalledTimes(0);
@@ -784,18 +780,22 @@ describe('useRefetchable', () => {
                 cond: false,
                 id: '4',
             };
-            refetch(variables, null, jest.fn());
+            ReactTestRenderer.act(() => {
+                refetch(variables, null, jest.fn());
+            });
             expect(render.mock.calls.length).toBe(2);
             expect(render.mock.calls[1][0].isLoading).toBe(true);
             expect(render.mock.calls[1][0].user.name).toBe('Zuck');
-            environment.mock.resolve(UserFragmentRefetchQuery, {
-                data: {
-                    node: {
-                        id: '4',
-                        __typename: 'User',
-                        name: 'Zuck',
+            ReactTestRenderer.act(() => {
+                environment.mock.resolve(UserFragmentRefetchQuery, {
+                    data: {
+                        node: {
+                            id: '4',
+                            __typename: 'User',
+                            name: 'Zuck',
+                        },
                     },
-                },
+                });
             });
             expect(render.mock.calls.length).toBe(3);
             expect(render.mock.calls[2][0].isLoading).toBe(false);
@@ -812,12 +812,16 @@ describe('useRefetchable', () => {
                 cond: false,
                 id: '4',
             };
-            refetch(variables, null, callback);
+            ReactTestRenderer.act(() => {
+                refetch(variables, null, callback);
+            });
             expect(render.mock.calls.length).toBe(2);
             expect(render.mock.calls[1][0].isLoading).toBe(true);
             expect(render.mock.calls[1][0].user.name).toBe('Zuck');
             const error = new Error('oops');
-            environment.mock.reject(UserFragmentRefetchQuery, error);
+            ReactTestRenderer.act(() => {
+                environment.mock.reject(UserFragmentRefetchQuery, error);
+            });
             expect(render.mock.calls.length).toBe(3);
             expect(render.mock.calls[2][0].error).toBe(error);
             expect(render.mock.calls[2][0].isLoading).toBe(false);
@@ -834,7 +838,7 @@ describe('useRefetchable', () => {
             refetch(variables, null, jest.fn());
             const subscription = environment.execute.mock.subscriptions[0];
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
-            instance.getInstance().setProps({ user: userPointer });
+            instanceAct(instance, { user: userPointer });
             expect(subscription.closed).toBe(false);
         });
 
@@ -846,7 +850,7 @@ describe('useRefetchable', () => {
             refetch(variables, null, jest.fn());
             const subscription = environment.execute.mock.subscriptions[0];
             const userPointer = environment.lookup(ownerUser2.fragment, ownerUser2).data.node;
-            instance.getInstance().setProps({ user: userPointer });
+            instanceAct(instance, { user: userPointer });
             ReactTestRenderer.act(() => {
                 // added for execute useEffect retain
                 jest.runAllImmediates();
@@ -870,7 +874,7 @@ describe('useRefetchable', () => {
                 },
             });
             const userPointer = environment.lookup(ownerUser1.fragment, ownerUser1).data.node;
-            instance.getInstance().setProps({ user: userPointer });
+            instanceAct(instance, { user: userPointer });
             expect(references.length).toBe(1);
             expect(references[0].dispose).not.toBeCalled();
         });
@@ -890,7 +894,7 @@ describe('useRefetchable', () => {
                 },
             });
             const userPointer = environment.lookup(ownerUser2.fragment, ownerUser2).data.node;
-            instance.getInstance().setProps({ user: userPointer });
+            instanceAct(instance, { user: userPointer });
             expect(references.length).toBe(1);
             expect(references[0].dispose).toBeCalled();
         });

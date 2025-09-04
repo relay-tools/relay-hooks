@@ -70,6 +70,7 @@ const Scheduler = require('scheduler');
 
 import { getFragment, getRequest, graphql, OperationDescriptor, Variables } from 'relay-runtime';
 const { useMemo, useState, useEffect } = React;
+
 import * as TestRenderer from 'react-test-renderer';
 import {
     useRefetchableFragment as useRefetchableFragmentNodeOriginal,
@@ -320,7 +321,7 @@ describe('useRefetchableFragmentNode', () => {
 
         const Fallback = (): any => {
             useEffect(() => {
-                Scheduler.unstable_yieldValue('Fallback');
+                Scheduler.log('Fallback');
             });
 
             return 'Fallback';

@@ -44,8 +44,8 @@ const {
 } = require("relay-runtime");
 
 */
-function assertYieldsWereCleared(_scheduler) {
-    const actualYields = _scheduler.unstable_clearYields();
+function assertYieldsWereCleared(_scheduler: any) {
+    const actualYields = _scheduler.unstable_clearLog();
     if (actualYields.length !== 0) {
         throw new Error('Log of yielded values is not empty. ' + 'Call expect(Scheduler).toHaveYielded(...) first.');
     }
@@ -59,6 +59,13 @@ function expectSchedulerToFlushAndYield(expectedYields) {
         const actualYields = Scheduler.unstable_clearYields();
         expect(actualYields).toEqual(expectedYields);
     });
+}
+
+function flushScheduler() {
+    const Scheduler = require('scheduler');
+    assertYieldsWereCleared(Scheduler);
+    Scheduler.unstable_flushAllWithoutAsserting();
+    return Scheduler.unstable_clearLog();
 }
 
 function expectSchedulerToFlushAndYieldThrough(expectedYields) {
@@ -152,7 +159,10 @@ beforeEach(() => {
     ({ createMockEnvironment } = require('relay-test-utils-internal'));
 
     // Set up environment and base data
-    environment = createMockEnvironment();
+
+    TestRenderer.act(() => {
+        environment = createMockEnvironment();
+    });
     singularVariables = { id: '1', scale: 16 };
     pluralVariables = { ids: ['1', '2'], scale: 16 };
     graphql`
@@ -296,41 +306,54 @@ beforeEach(() => {
 
     renderSingularFragment = (args) => {
         const { isConcurrent = false, ...props } = args ? args : {};
-        return TestRenderer.create(
-            <React.Suspense fallback="Singular Fallback">
-                <ContextProvider>
-                    <SingularContainer owner={singularQuery} {...props} />
-                </ContextProvider>
-            </React.Suspense>,
-            { unstable_isConcurrent: isConcurrent },
-        );
+        let instance;
+        TestRenderer.act(() => {
+            instance = TestRenderer.create(
+                <React.Suspense fallback="Singular Fallback">
+                    <ContextProvider>
+                        <SingularContainer owner={singularQuery} {...props} />
+                    </ContextProvider>
+                </React.Suspense>,
+                { unstable_isConcurrent: isConcurrent },
+            );
+        });
+        return instance;
     };
 
     renderPluralFragment = (args) => {
         const { isConcurrent = false, ...props } = args ? args : {};
-        return TestRenderer.create(
-            <React.Suspense fallback="Plural Fallback">
-                <ContextProvider>
-                    <PluralContainer owner={pluralQuery} {...props} />
-                </ContextProvider>
-            </React.Suspense>,
-            { unstable_isConcurrent: isConcurrent },
-        );
+        let instance;
+        TestRenderer.act(() => {
+            instance = TestRenderer.create(
+                <React.Suspense fallback="Plural Fallback">
+                    <ContextProvider>
+                        <PluralContainer owner={pluralQuery} {...props} />
+                    </ContextProvider>
+                </React.Suspense>,
+                { unstable_isConcurrent: isConcurrent },
+            );
+        });
+        return instance;
     };
 
     subscribeSingularFragment = (props) => {
-        return TestRenderer.create(
-            <React.Suspense fallback="Singular Fallback">
-                <ContextProvider>
-                    <SingularSubscribeContainer owner={singularQuery} {...props} />
-                </ContextProvider>
-            </React.Suspense>,
-            { unstable_isConcurrent: false },
-        );
+        let instance;
+        TestRenderer.act(() => {
+            instance = TestRenderer.create(
+                <React.Suspense fallback="Singular Fallback">
+                    <ContextProvider>
+                        <SingularSubscribeContainer owner={singularQuery} {...props} />
+                    </ContextProvider>
+                </React.Suspense>,
+                { unstable_isConcurrent: false },
+            );
+        });
+        return instance;
     };
 });
 
 afterEach(() => {
+    flushScheduler();
     environment.mockClear();
     renderSpy.mockClear();
 });

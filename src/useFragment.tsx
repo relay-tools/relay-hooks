@@ -17,7 +17,7 @@ export function useFragment<TKey extends ArrayKeyType>(
 export function useFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null | undefined,
-): ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>;
+): ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null;
 export function useFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null | undefined,
@@ -41,7 +41,7 @@ export function useSuspenseFragment<TKey extends ArrayKeyType>(
 export function useSuspenseFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null | undefined,
-): ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>;
+): ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null;
 export function useSuspenseFragment<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null | undefined,
@@ -68,7 +68,7 @@ export function useFragmentSubscription<TKey extends ArrayKeyType>(
 export function useFragmentSubscription<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,
     fragmentRef: TKey | null | undefined,
-    callback: (data: ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>>) => void,
+    callback: (data: ReadonlyArray<$Call<ArrayKeyReturnType<TKey>>> | null) => void,
 ): void;
 export function useFragmentSubscription<TKey extends ArrayKeyType>(
     fragmentNode: GraphQLTaggedNode,

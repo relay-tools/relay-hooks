@@ -97,7 +97,9 @@ describe('useMemo resolver functions', () => {
                 node(id: $id) {
                     id
                     __typename
-                    ...RelayHooksTestUserFragment @arguments(isViewerFriendLocal: $isViewerFriend, orderby: $orderby)
+                    ...RelayHooksTestUserFragment
+                        @dangerously_unaliased_fixme
+                        @arguments(isViewerFriendLocal: $isViewerFriend, orderby: $orderby)
                 }
             }
         `;

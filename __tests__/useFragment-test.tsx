@@ -184,7 +184,7 @@ beforeEach(() => {
     gqlSingularQuery = graphql`
         query useFragmentTestUserQuery($id: ID!, $scale: Float!) {
             node(id: $id) {
-                ...useFragmentTestUserFragment
+                ...useFragmentTestUserFragment @dangerously_unaliased_fixme
             }
         }
     `;

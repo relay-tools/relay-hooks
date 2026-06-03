@@ -323,6 +323,7 @@ describe('usePaginationFragment', () => {
             ) {
                 node(id: $id) {
                     ...usePaginationFragmentTestUserFragment
+                        @dangerously_unaliased_fixme
                         @arguments(isViewerFriendLocal: $isViewerFriend, orderby: $orderby)
                 }
             }
@@ -340,6 +341,7 @@ describe('usePaginationFragment', () => {
                 node(id: $id) {
                     actor {
                         ...usePaginationFragmentTestUserFragment
+                            @dangerously_unaliased_fixme
                             @arguments(isViewerFriendLocal: $isViewerFriend, orderby: $orderby)
                     }
                 }
@@ -357,6 +359,7 @@ describe('usePaginationFragment', () => {
                 viewer {
                     actor {
                         ...usePaginationFragmentTestUserFragment
+                            @dangerously_unaliased_fixme
                             @arguments(isViewerFriendLocal: $isViewerFriend, orderby: $orderby)
                     }
                 }
@@ -371,7 +374,9 @@ describe('usePaginationFragment', () => {
                 $last: Int
             ) {
                 node(id: $id) {
-                    ...usePaginationFragmentTestUserFragment @arguments(isViewerFriendLocal: true, orderby: ["name"])
+                    ...usePaginationFragmentTestUserFragment
+                        @dangerously_unaliased_fixme
+                        @arguments(isViewerFriendLocal: true, orderby: ["name"])
                 }
             }
         `);
@@ -387,6 +392,7 @@ describe('usePaginationFragment', () => {
             ) {
                 node(id: $id) {
                     ...usePaginationFragmentTestUserFragmentWithStreaming
+                        @dangerously_unaliased_fixme
                         @arguments(isViewerFriendLocal: $isViewerFriend, orderby: $orderby)
                 }
             }
@@ -631,7 +637,7 @@ describe('usePaginationFragment', () => {
             const query = getRequest(graphql`
                 query usePaginationFragmentTest2UserConnectionQuery($id: ID!) {
                     node(id: $id) {
-                        ...usePaginationFragmentTest2UserFragment
+                        ...usePaginationFragmentTest2UserFragment @dangerously_unaliased_fixme
                     }
                 }
             `);
@@ -656,7 +662,7 @@ describe('usePaginationFragment', () => {
             const query = getRequest(graphql`
                 query usePaginationFragmentTest3UserConnectionQuery($id: ID!) {
                     node(id: $id) {
-                        ...usePaginationFragmentTest3UserFragment
+                        ...usePaginationFragmentTest3UserFragment @dangerously_unaliased_fixme
                     }
                 }
             `);

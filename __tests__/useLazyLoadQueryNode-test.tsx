@@ -157,7 +157,7 @@ describe('useLazyLoadQueryNode', () => {
                 node(id: $id) {
                     id
                     name
-                    ...useLazyLoadQueryNodeTestUserFragment
+                    ...useLazyLoadQueryNodeTestUserFragment @dangerously_unaliased_fixme
                 }
             }
         `;
@@ -165,7 +165,7 @@ describe('useLazyLoadQueryNode', () => {
             query useLazyLoadQueryNodeTestUserNoNameQuery($id: ID) {
                 node(id: $id) {
                     id
-                    ...useLazyLoadQueryNodeTestUserFragment
+                    ...useLazyLoadQueryNodeTestUserFragment @dangerously_unaliased_fixme
                 }
             }
         `;

@@ -211,7 +211,7 @@ describe('useRefetchableFragmentNode', () => {
         gqlQuery = getRequest(graphql`
             query useRefetchableFragmentTestUserQuery($id: ID!, $scale: Float!) {
                 node(id: $id) {
-                    ...useRefetchableFragmentTestUserFragment
+                    ...useRefetchableFragmentTestUserFragment @dangerously_unaliased_fixme
                 }
             }
         `);
@@ -219,7 +219,7 @@ describe('useRefetchableFragmentNode', () => {
             query useRefetchableFragmentTestUserQueryNestedFragmentQuery($id: ID!, $scale: Float!) {
                 node(id: $id) {
                     actor {
-                        ...useRefetchableFragmentTestUserFragment
+                        ...useRefetchableFragmentTestUserFragment @dangerously_unaliased_fixme
                     }
                 }
             }
@@ -227,14 +227,18 @@ describe('useRefetchableFragmentNode', () => {
         gqlQueryWithArgs = getRequest(graphql`
             query useRefetchableFragmentTestUserQueryWithArgsQuery($id: ID!, $scale: Float!) {
                 node(id: $id) {
-                    ...useRefetchableFragmentTestUserFragmentWithArgs @arguments(scaleLocal: $scale)
+                    ...useRefetchableFragmentTestUserFragmentWithArgs
+                        @dangerously_unaliased_fixme
+                        @arguments(scaleLocal: $scale)
                 }
             }
         `);
         gqlQueryWithLiteralArgs = getRequest(graphql`
             query useRefetchableFragmentTestUserQueryWithLiteralArgsQuery($id: ID!) {
                 node(id: $id) {
-                    ...useRefetchableFragmentTestUserFragmentWithArgs @arguments(scaleLocal: 16)
+                    ...useRefetchableFragmentTestUserFragmentWithArgs
+                        @dangerously_unaliased_fixme
+                        @arguments(scaleLocal: 16)
                 }
             }
         `);
@@ -3251,7 +3255,7 @@ describe('useRefetchableFragmentNode', () => {
                 gqlQuery = getRequest(graphql`
                     query useRefetchableFragmentTest2Query($nodeID: ID!, $scale: Float!) {
                         node(id: $nodeID) {
-                            ...useRefetchableFragmentTest3Fragment
+                            ...useRefetchableFragmentTest3Fragment @dangerously_unaliased_fixme
                         }
                     }
                 `);

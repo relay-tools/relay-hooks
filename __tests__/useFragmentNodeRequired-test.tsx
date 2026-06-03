@@ -63,7 +63,7 @@ beforeEach(() => {
     const gqlSingularQuery = graphql`
         query useFragmentNodeRequiredTestUserQuery($id: ID!) {
             node(id: $id) {
-                ...useFragmentNodeRequiredTestUserFragment
+                ...useFragmentNodeRequiredTestUserFragment @dangerously_unaliased_fixme
             }
         }
     `;

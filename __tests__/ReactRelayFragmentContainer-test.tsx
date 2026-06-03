@@ -108,7 +108,7 @@ describe('ReactRelayFragmentContainer', () => {
         UserQuery = graphql`
             query ReactRelayFragmentContainerTestUserQuery($id: ID!) {
                 node(id: $id) {
-                    ...ReactRelayFragmentContainerTestUserFragment
+                    ...ReactRelayFragmentContainerTestUserFragment @dangerously_unaliased_fixme
                 }
             }
         `;
@@ -116,7 +116,9 @@ describe('ReactRelayFragmentContainer', () => {
         UserQueryWithCond = graphql`
             query ReactRelayFragmentContainerTestUserWithCondQuery($id: ID!, $condGlobal: Boolean!) {
                 node(id: $id) {
-                    ...ReactRelayFragmentContainerTestUserFragment @arguments(cond: $condGlobal)
+                    ...ReactRelayFragmentContainerTestUserFragment
+                        @dangerously_unaliased_fixme
+                        @arguments(cond: $condGlobal)
                 }
             }
         `;

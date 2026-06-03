@@ -106,14 +106,14 @@ describe('useRefetchable', () => {
         UserQuery = graphql`
             query useRefetchableTestUserUserQuery($id: ID!) {
                 node(id: $id) {
-                    ...useRefetchableTestUserUserFragment
+                    ...useRefetchableTestUserUserFragment @dangerously_unaliased_fixme
                 }
             }
         `;
         UserQueryWithCond = graphql`
             query useRefetchableTestUserWithCondQuery($id: ID!, $condGlobal: Boolean!) {
                 node(id: $id) {
-                    ...useRefetchableTestUserUserFragment @arguments(cond: $condGlobal)
+                    ...useRefetchableTestUserUserFragment @dangerously_unaliased_fixme @arguments(cond: $condGlobal)
                 }
             }
         `;
